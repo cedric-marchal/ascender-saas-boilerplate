@@ -1,0 +1,85 @@
+import type { Metadata } from "next";
+import type { WebPage, WithContext } from "schema-dts";
+
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
+
+import { env } from "@/lib/env";
+
+import { ForgotPasswordForm } from "./_components/forgot-password-form";
+
+const APP_NAME = env.NEXT_PUBLIC_APP_NAME;
+const BASE_URL = env.NEXT_PUBLIC_BASE_URL;
+const DESCRIPTION = `Réinitialisez votre mot de passe ${APP_NAME}. Recevez un lien de réinitialisation par email.`;
+
+export const metadata: Metadata = {
+  title: "Mot de passe oublié",
+  description: DESCRIPTION,
+  alternates: {
+    canonical: "/mot-de-passe-oublie",
+  },
+  openGraph: {
+    title: `Mot de passe oublié | ${APP_NAME}`,
+    description: DESCRIPTION,
+    url: "/mot-de-passe-oublie",
+  },
+  twitter: {
+    title: `Mot de passe oublié | ${APP_NAME}`,
+    description: DESCRIPTION,
+  },
+  robots: {
+    index: false,
+    follow: true,
+  },
+};
+
+export default function ForgotPasswordPage() {
+  const webPageSchema: WithContext<WebPage> = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "@id": `${BASE_URL}/mot-de-passe-oublie/#webpage`,
+    name: `Mot de passe oublié | ${APP_NAME}`,
+    description: DESCRIPTION,
+    url: `${BASE_URL}/mot-de-passe-oublie`,
+    inLanguage: "fr-FR",
+    isPartOf: {
+      "@type": "WebSite",
+      "@id": `${BASE_URL}/#website`,
+    },
+  };
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(webPageSchema),
+        }}
+      />
+
+      <main className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
+        <div className="w-full max-w-sm space-y-6">
+          <header className="space-y-2 text-center">
+            <h1 className="text-2xl font-semibold tracking-tight">
+              Mot de passe oublié
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              Entrez votre adresse email pour recevoir un lien de
+              réinitialisation
+            </p>
+          </header>
+
+          <ForgotPasswordForm />
+
+          <Link
+            href="/connexion"
+            className="flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-foreground"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Retour à la connexion
+          </Link>
+        </div>
+      </main>
+    </>
+  );
+}
