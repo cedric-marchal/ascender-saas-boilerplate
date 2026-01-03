@@ -46,7 +46,7 @@ export default function HomePage() {
     url: BASE_URL,
     logo: {
       "@type": "ImageObject",
-      url: `${BASE_URL}/images/logos/sums-boilerplate-logo-dark.svg`,
+      url: `${BASE_URL}/images/logos/sums-saas-boilerplate-logo-dark.svg`,
     },
     // sameAs: ["https://twitter.com/...", "https://linkedin.com/..."],
   };
