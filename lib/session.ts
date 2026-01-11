@@ -1,4 +1,3 @@
-// lib/session.ts
 import "server-only";
 
 import { cache } from "react";
@@ -34,7 +33,7 @@ const requireSession = cache(async (): Promise<Session> => {
   }
 
   if (!session.user.emailVerified) {
-    return redirect("/verification-email");
+    return redirect("/dashboard/parametres");
   }
 
   return session;

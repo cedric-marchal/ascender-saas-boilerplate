@@ -43,20 +43,32 @@ class BadRequestError extends Error {
   }
 }
 
+class PayloadTooLargeError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "PayloadTooLargeError";
+  }
+}
+
+class UnprocessableEntityError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "UnprocessableEntityError";
+  }
+}
+
 function handleApiError(error: unknown): NextResponse {
-  // 400 Bad Request
   if (error instanceof ZodError) {
     return new NextResponse(
       JSON.stringify({
         success: false,
         type: "ValidationError",
-        message: error.message || "Validation error",
+        message: error.errors[0]?.message ?? "Validation error",
       }),
       { status: 400, headers: { "Content-Type": "application/json" } }
     );
   }
 
-  // 400 Bad Request
   if (error instanceof BadRequestError) {
     return new NextResponse(
       JSON.stringify({
@@ -68,7 +80,6 @@ function handleApiError(error: unknown): NextResponse {
     );
   }
 
-  // 401 Unauthorized
   if (error instanceof UnauthorizedError) {
     return new NextResponse(
       JSON.stringify({
@@ -80,7 +91,6 @@ function handleApiError(error: unknown): NextResponse {
     );
   }
 
-  // 403 Forbidden
   if (error instanceof ForbiddenError) {
     return new NextResponse(
       JSON.stringify({
@@ -92,7 +102,6 @@ function handleApiError(error: unknown): NextResponse {
     );
   }
 
-  // 404 Not Found
   if (error instanceof NotFoundError) {
     return new NextResponse(
       JSON.stringify({
@@ -104,7 +113,6 @@ function handleApiError(error: unknown): NextResponse {
     );
   }
 
-  // 409 Conflict
   if (error instanceof ConflictError) {
     return new NextResponse(
       JSON.stringify({
@@ -116,7 +124,28 @@ function handleApiError(error: unknown): NextResponse {
     );
   }
 
-  // 429 Too Many Requests
+  if (error instanceof PayloadTooLargeError) {
+    return new NextResponse(
+      JSON.stringify({
+        success: false,
+        type: "PayloadTooLargeError",
+        message: error.message,
+      }),
+      { status: 413, headers: { "Content-Type": "application/json" } }
+    );
+  }
+
+  if (error instanceof UnprocessableEntityError) {
+    return new NextResponse(
+      JSON.stringify({
+        success: false,
+        type: "UnprocessableEntityError",
+        message: error.message,
+      }),
+      { status: 422, headers: { "Content-Type": "application/json" } }
+    );
+  }
+
   if (error instanceof TooManyRequestsError) {
     return new NextResponse(
       JSON.stringify({
@@ -128,7 +157,6 @@ function handleApiError(error: unknown): NextResponse {
     );
   }
 
-  // 500 Server Error
   if (error instanceof Error) {
     return new NextResponse(
       JSON.stringify({
@@ -143,7 +171,6 @@ function handleApiError(error: unknown): NextResponse {
     );
   }
 
-  // 500 Server Error
   return new NextResponse(
     JSON.stringify({
       success: false,
@@ -161,5 +188,7 @@ export {
   ConflictError,
   TooManyRequestsError,
   BadRequestError,
+  PayloadTooLargeError,
+  UnprocessableEntityError,
   handleApiError,
 };

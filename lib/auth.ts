@@ -11,7 +11,9 @@ import { ResetPasswordEmail } from "@/components/emails/reset-password-email";
 import { PasswordChangedEmail } from "@/components/emails/password-changed-email";
 
 const APP_NAME = env.NEXT_PUBLIC_APP_NAME;
-const FROM_EMAIL = `${APP_NAME} <noreply@${env.RESEND_DOMAIN}>`;
+const FROM_EMAIL = "onboarding@resend.dev";
+
+// `${APP_NAME} <noreply@${env.RESEND_DOMAIN}>`
 
 const auth = betterAuth({
   database: prismaAdapter(prisma, {
@@ -25,8 +27,8 @@ const auth = betterAuth({
   },
   emailAndPassword: {
     enabled: true,
-    autoSignIn: false,
-    requireEmailVerification: true,
+    autoSignIn: true,
+    requireEmailVerification: false,
     sendResetPassword: async ({ user, url }) => {
       await resend.emails.send({
         from: FROM_EMAIL,
@@ -46,6 +48,7 @@ const auth = betterAuth({
   },
   emailVerification: {
     sendOnSignUp: true,
+    autoSignInAfterVerification: true,
     sendVerificationEmail: async ({ user, url }) => {
       await resend.emails.send({
         from: FROM_EMAIL,

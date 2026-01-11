@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 
 import { auth } from "@/lib/auth";
 import { requireSession } from "@/lib/session";
+import { SignOutButton } from "./_components/sign-out-button";
 
 export const metadata: Metadata = {
   title: "Dashboard",
@@ -23,6 +24,7 @@ export default async function DashboardPage() {
       <p className="mt-2 text-muted-foreground">
         Bienvenue, {session.user.name}
       </p>
+      <SignOutButton />
     </main>
   );
 }

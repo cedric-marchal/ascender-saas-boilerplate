@@ -20,8 +20,11 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { getSession } from "@/lib/session";
 
-function Header() {
+async function Header() {
+  const session = await getSession();
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur">
       <div className="container mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
@@ -56,12 +59,20 @@ function Header() {
         </nav>
 
         <div className="hidden items-center gap-2 md:flex">
-          <Button asChild variant="ghost">
-            <Link href="/connexion">Connexion</Link>
-          </Button>
-          <Button asChild>
-            <Link href="/inscription">Créer un compte</Link>
-          </Button>
+          {session ? (
+            <Button asChild variant="ghost">
+              <Link href="/dashboard">Dashboard</Link>
+            </Button>
+          ) : (
+            <>
+              <Button asChild variant="ghost">
+                <Link href="/connexion">Connexion</Link>
+              </Button>
+              <Button asChild>
+                <Link href="/inscription">Créer un compte</Link>
+              </Button>
+            </>
+          )}
         </div>
 
         <div className="flex items-center md:hidden">
@@ -124,28 +135,34 @@ function Header() {
                   <p className="text-[11px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
                     Compte
                   </p>
-                  <ul className="space-y-1.5 text-sm text-muted-foreground">
-                    <li>
-                      <SheetClose asChild>
-                        <Link
-                          href="/connexion"
-                          className="flex items-center justify-between rounded-md px-3 py-2 hover:bg-accent hover:text-accent-foreground"
-                        >
-                          <span>Connexion</span>
-                        </Link>
-                      </SheetClose>
-                    </li>
-                    <li>
-                      <SheetClose asChild>
-                        <Link
-                          href="/inscription"
-                          className="flex items-center justify-between rounded-md px-3 py-2 hover:bg-accent hover:text-accent-foreground"
-                        >
-                          <span>Inscription</span>
-                        </Link>
-                      </SheetClose>
-                    </li>
-                  </ul>
+                  {session ? (
+                    <Button asChild variant="ghost">
+                      <Link href="/dashboard">Dashboard</Link>
+                    </Button>
+                  ) : (
+                    <ul className="space-y-1.5 text-sm text-muted-foreground">
+                      <li>
+                        <SheetClose asChild>
+                          <Link
+                            href="/connexion"
+                            className="flex items-center justify-between rounded-md px-3 py-2 hover:bg-accent hover:text-accent-foreground"
+                          >
+                            <span>Connexion</span>
+                          </Link>
+                        </SheetClose>
+                      </li>
+                      <li>
+                        <SheetClose asChild>
+                          <Link
+                            href="/inscription"
+                            className="flex items-center justify-between rounded-md px-3 py-2 hover:bg-accent hover:text-accent-foreground"
+                          >
+                            <span>Inscription</span>
+                          </Link>
+                        </SheetClose>
+                      </li>
+                    </ul>
+                  )}
                 </div>
               </nav>
 
