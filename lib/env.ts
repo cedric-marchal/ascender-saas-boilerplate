@@ -4,21 +4,35 @@ import { z } from "zod";
 export const env = createEnv({
   server: {
     BETTER_AUTH_SECRET: z.string(),
-    DATABASE_URL: z.string(),
+    DATABASE_URL: z
+      .string()
+      .pipe(z.url({ message: "URL de base de données invalide" })),
     R2_ACCOUNT_ID: z.string().min(1),
     R2_ACCESS_KEY_ID: z.string().min(1),
     R2_SECRET_ACCESS_KEY: z.string().min(1),
     R2_BUCKET_NAME: z.string().min(1),
-    RESEND_API_KEY: z.string(),
-    RESEND_DOMAIN: z.string(),
-    STRIPE_SECRET_KEY: z.string(),
-    STRIPE_WEBHOOK_SECRET: z.string(),
+    RESEND_API_KEY: z.string().min(1),
+    RESEND_DOMAIN: z.string().min(1),
+    STRIPE_SECRET_KEY: z.string().min(1),
+    STRIPE_WEBHOOK_SECRET: z.string().min(1),
   },
   client: {
-    NEXT_PUBLIC_APP_NAME: z.string(),
-    NEXT_PUBLIC_BASE_URL: z.string(),
-    NEXT_PUBLIC_SUPPORT_EMAIL: z.string(),
-    NEXT_PUBLIC_VERCEL_MAX_UPLOAD_SIZE: z.coerce.number().default(4718592),
+    NEXT_PUBLIC_APP_NAME: z.string().min(1),
+    NEXT_PUBLIC_BASE_URL: z
+      .string()
+      .min(1)
+      .pipe(z.url({ message: "URL invalide" })),
+    NEXT_PUBLIC_SUPPORT_EMAIL: z
+      .string()
+      .pipe(z.email({ message: "Format d'email invalide" })),
+    NEXT_PUBLIC_VERCEL_MAX_UPLOAD_SIZE: z.coerce
+      .number({
+        message: "La taille maximale de fichier est de 4.5MB",
+      })
+      .default(4718592)
+      .pipe(
+        z.number({ message: "La taille maximale de fichier est de 4.5MB" })
+      ),
   },
   runtimeEnv: {
     BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET,

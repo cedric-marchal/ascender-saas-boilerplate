@@ -5,17 +5,19 @@ const SignUpSchema = z.object({
     .string()
     .min(1, "Le nom est requis")
     .max(100, "Le nom doit contenir moins de 100 caractères")
-    .transform((name) => name.trim()),
+    .trim(),
   email: z
     .string()
     .min(1, "L'email est requis")
     .max(254, "L'email doit contenir moins de 254 caractères")
-    .transform((email) => email.toLowerCase().trim())
-    .pipe(z.string().email("Format d'email invalide")),
+    .trim()
+    .toLowerCase()
+    .pipe(z.email({ message: "Format d'email invalide" })),
   password: z
     .string()
     .min(12, "Le mot de passe doit contenir au moins 12 caractères")
     .max(128, "Le mot de passe doit contenir moins de 128 caractères")
+    .trim()
     .refine((pwd) => /[a-z]/.test(pwd), "Au moins une lettre minuscule")
     .refine((pwd) => /[A-Z]/.test(pwd), "Au moins une lettre majuscule")
     .refine((pwd) => /[0-9]/.test(pwd), "Au moins un chiffre"),
@@ -26,9 +28,14 @@ const SignInSchema = z.object({
     .string()
     .min(1, "L'email est requis")
     .max(254, "L'email doit contenir moins de 254 caractères")
-    .transform((email) => email.toLowerCase().trim())
-    .pipe(z.string().email("Format d'email invalide")),
-  password: z.string().min(1, "Le mot de passe est requis"),
+    .trim()
+    .toLowerCase()
+    .pipe(z.email({ message: "Format d'email invalide" })),
+  password: z
+    .string()
+    .min(1, "Le mot de passe est requis")
+    .max(128, "Le mot de passe doit contenir moins de 128 caractères")
+    .trim(),
 });
 
 const ForgotPasswordSchema = z.object({
@@ -36,8 +43,9 @@ const ForgotPasswordSchema = z.object({
     .string()
     .min(1, "L'email est requis")
     .max(254, "L'email doit contenir moins de 254 caractères")
-    .transform((email) => email.toLowerCase().trim())
-    .pipe(z.string().email("Format d'email invalide")),
+    .trim()
+    .toLowerCase()
+    .pipe(z.email({ message: "Format d'email invalide" })),
 });
 
 const ResetPasswordSchema = z
@@ -46,10 +54,18 @@ const ResetPasswordSchema = z
       .string()
       .min(12, "Le mot de passe doit contenir au moins 12 caractères")
       .max(128, "Le mot de passe doit contenir moins de 128 caractères")
+      .trim()
       .refine((pwd) => /[a-z]/.test(pwd), "Au moins une lettre minuscule")
       .refine((pwd) => /[A-Z]/.test(pwd), "Au moins une lettre majuscule")
       .refine((pwd) => /[0-9]/.test(pwd), "Au moins un chiffre"),
-    confirmPassword: z.string().min(1, "Confirmez le mot de passe"),
+    confirmPassword: z
+      .string()
+      .min(12, "Le mot de passe doit contenir au moins 12 caractères")
+      .max(128, "Le mot de passe doit contenir moins de 128 caractères")
+      .trim()
+      .refine((pwd) => /[a-z]/.test(pwd), "Au moins une lettre minuscule")
+      .refine((pwd) => /[A-Z]/.test(pwd), "Au moins une lettre majuscule")
+      .refine((pwd) => /[0-9]/.test(pwd), "Au moins un chiffre"),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Les mots de passe ne correspondent pas",
@@ -67,6 +83,7 @@ export {
   ForgotPasswordSchema,
   ResetPasswordSchema,
 };
+
 export type {
   SignUpSchemaType,
   SignInSchemaType,

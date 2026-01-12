@@ -3,7 +3,7 @@ import { z } from "zod";
 const nameSchema = z
   .string()
   .min(2, "Le nom doit contenir au moins 2 caractères")
-  .max(50, "Le nom ne peut pas dépasser 50 caractères")
+  .max(100, "Le nom doit contenir moins de 100 caractères")
   .trim();
 
 const updateProfileSchema = z.object({

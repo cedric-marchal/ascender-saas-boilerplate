@@ -13,7 +13,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/politique-de-confidentialite",
   ];
 
-  return staticPages.map((path) => ({
+  return staticPages.map((path: string) => ({
     url: `${BASE_URL}${path}`,
     lastModified: new Date(),
     changeFrequency: path === "" ? "weekly" : "monthly",

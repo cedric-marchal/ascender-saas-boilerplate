@@ -63,7 +63,8 @@ function handleApiError(error: unknown): NextResponse {
       JSON.stringify({
         success: false,
         type: "ValidationError",
-        message: error.errors[0]?.message ?? "Validation error",
+        message:
+          error.issues[0]?.message ?? "Une erreur de validation s'est produite",
       }),
       { status: 400, headers: { "Content-Type": "application/json" } }
     );
