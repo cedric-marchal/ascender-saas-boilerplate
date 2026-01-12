@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 
-import { authClient } from "@/lib/auth-client";
+import { authClient, signIn } from "@/lib/auth-client";
 import { SignInSchema, type SignInSchemaType } from "@/lib/schemas/auth.schema";
 import { Button } from "@/components/ui/button";
 import {
@@ -48,58 +48,70 @@ function SignInForm() {
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="email"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Email</FormLabel>
-              <FormControl>
-                <Input
-                  type="email"
-                  placeholder="jean@exemple.fr"
-                  autoComplete="email"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="password"
-          render={({ field }) => (
-            <FormItem>
-              <div className="flex items-center justify-between">
-                <FormLabel>Mot de passe</FormLabel>
-                <ForgotPasswordLink />
-              </div>
-              <FormControl>
-                <Input
-                  type="password"
-                  placeholder="••••••••••••"
-                  autoComplete="current-password"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <Button
-          type="submit"
-          className="w-full"
-          disabled={form.formState.isSubmitting}
-        >
-          {form.formState.isSubmitting
-            ? "Connexion en cours..."
-            : "Se connecter"}
-        </Button>
-      </form>
-    </Form>
+    <>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Email</FormLabel>
+                <FormControl>
+                  <Input
+                    type="email"
+                    placeholder="jean@exemple.fr"
+                    autoComplete="email"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="password"
+            render={({ field }) => (
+              <FormItem>
+                <div className="flex items-center justify-between">
+                  <FormLabel>Mot de passe</FormLabel>
+                  <ForgotPasswordLink />
+                </div>
+                <FormControl>
+                  <Input
+                    type="password"
+                    placeholder="••••••••••••"
+                    autoComplete="current-password"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={form.formState.isSubmitting}
+          >
+            {form.formState.isSubmitting
+              ? "Connexion en cours..."
+              : "Se connecter"}
+          </Button>
+        </form>
+      </Form>
+
+      <Button
+        type="button"
+        className="w-full"
+        onClick={() => signIn.social({ provider: "google" })}
+      >
+        {form.formState.isSubmitting
+          ? "Connexion en cours..."
+          : "Se connecter avec Google"}
+      </Button>
+    </>
   );
 }
 
