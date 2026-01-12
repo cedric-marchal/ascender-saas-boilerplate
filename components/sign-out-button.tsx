@@ -13,7 +13,12 @@ function SignOutButton() {
   };
 
   return (
-    <Button type="button" variant="outline" onClick={handleSignOut}>
+    <Button
+      type="button"
+      variant="destructive"
+      onClick={handleSignOut}
+      className="cursor-pointer hover:opacity-80 transition"
+    >
       Déconnexion
     </Button>
   );

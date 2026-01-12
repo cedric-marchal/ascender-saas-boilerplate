@@ -1,0 +1,128 @@
+import {
+  ChevronUp,
+  FolderKanban,
+  LayoutDashboard,
+  CreditCard,
+  Settings,
+  User2,
+} from "lucide-react";
+
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+} from "@/components/ui/sidebar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+import { SignOutButton } from "@/components/sign-out-button";
+
+import Link from "next/link";
+import { env } from "@/lib/env";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
+// Menu items.
+const items = [
+  {
+    title: "Tableau de bord",
+    url: "/dashboard",
+    icon: LayoutDashboard,
+  },
+  {
+    title: "Projets",
+    url: "/dashboard/projets",
+    icon: FolderKanban,
+  },
+  {
+    title: "Facturation",
+    url: "/dashboard/facturation",
+    icon: CreditCard,
+  },
+  {
+    title: "Paramètres",
+    url: "/dashboard/parametres",
+    icon: Settings,
+  },
+];
+
+type AppSidebarProps = {
+  image?: string | null;
+  name: string;
+};
+
+function AppSidebar({ image, name }: AppSidebarProps) {
+  return (
+    <Sidebar>
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupLabel>{env.NEXT_PUBLIC_APP_NAME}</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {items.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild>
+                    <Link href={item.url}>
+                      <item.icon />
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+      <SidebarFooter>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <SidebarMenuButton>
+                  <Avatar>
+                    {image ? (
+                      <AvatarImage src={image} alt={`${name} avatar`} />
+                    ) : (
+                      <AvatarFallback>{name.charAt(0)}</AvatarFallback>
+                    )}
+                  </Avatar>
+                  <span>{name}</span>
+                  <ChevronUp className="ml-auto" />
+                </SidebarMenuButton>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                side="top"
+                className="w-[--radix-popper-anchor-width]"
+              >
+                <DropdownMenuItem asChild>
+                  <Link href="/dashboard/parametres">
+                    <span>Mon compte</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/dashboard/facturation">
+                    <span>Facturation</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <SignOutButton />
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
+    </Sidebar>
+  );
+}
+
+export { AppSidebar };

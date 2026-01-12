@@ -6,6 +6,8 @@ import Link from "next/link";
 import { env } from "@/lib/env";
 
 import { SignUpForm } from "@/app/(public)/(auth)/inscription/_components/sign-up-form";
+import { getSession } from "@/lib/session";
+import { redirect } from "next/navigation";
 
 const APP_NAME = env.NEXT_PUBLIC_APP_NAME;
 const BASE_URL = env.NEXT_PUBLIC_BASE_URL;
@@ -32,7 +34,13 @@ export const metadata: Metadata = {
   },
 };
 
-export default function SignUpPage() {
+export default async function SignUpPage() {
+  const session = await getSession();
+
+  if (session) {
+    return redirect("/dashboard");
+  }
+
   const webPageSchema: WithContext<WebPage> = {
     "@context": "https://schema.org",
     "@type": "WebPage",

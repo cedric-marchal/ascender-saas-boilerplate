@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { env } from "@/lib/env";
 
 import { ResetPasswordForm } from "@/app/(public)/(auth)/nouveau-mot-de-passe/_components/reset-password-form";
+import { getSession } from "@/lib/session";
 
 const APP_NAME = env.NEXT_PUBLIC_APP_NAME;
 const BASE_URL = env.NEXT_PUBLIC_BASE_URL;
@@ -30,6 +31,12 @@ type ResetPasswordPageProps = {
 export default async function ResetPasswordPage({
   searchParams,
 }: ResetPasswordPageProps) {
+  const session = await getSession();
+
+  if (session) {
+    return redirect("/dashboard");
+  }
+
   const { token } = await searchParams;
 
   if (!token) {

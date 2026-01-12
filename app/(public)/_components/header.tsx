@@ -21,6 +21,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { getSession } from "@/lib/session";
+import { SignOutButton } from "@/components/sign-out-button";
 
 async function Header() {
   const session = await getSession();
@@ -60,9 +61,12 @@ async function Header() {
 
         <div className="hidden items-center gap-2 md:flex">
           {session ? (
-            <Button asChild variant="ghost">
-              <Link href="/dashboard">Dashboard</Link>
-            </Button>
+            <>
+              <Button asChild variant="ghost">
+                <Link href="/dashboard">Dashboard</Link>
+              </Button>
+              <SignOutButton />
+            </>
           ) : (
             <>
               <Button asChild variant="ghost">
@@ -136,9 +140,12 @@ async function Header() {
                     Compte
                   </p>
                   {session ? (
-                    <Button asChild variant="ghost">
-                      <Link href="/dashboard">Dashboard</Link>
-                    </Button>
+                    <>
+                      <Button asChild variant="ghost">
+                        <Link href="/dashboard">Dashboard</Link>
+                      </Button>
+                      <SignOutButton />
+                    </>
                   ) : (
                     <ul className="space-y-1.5 text-sm text-muted-foreground">
                       <li>
