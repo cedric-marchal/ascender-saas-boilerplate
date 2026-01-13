@@ -28,42 +28,42 @@ function ResetPasswordEmail({ name, resetLink }: ResetPasswordEmailProps) {
       <Preview>Réinitialisez votre mot de passe {APP_NAME}</Preview>
       <Tailwind>
         <Body className="bg-zinc-100 font-sans">
-          <Container className="mx-auto max-w-xl bg-white border border-zinc-200 rounded-md p-8 my-10">
-            <Heading className="text-xl font-semibold text-zinc-900 m-0 mb-6">
+          <Container className="mx-auto my-10 max-w-xl rounded-md border border-zinc-200 bg-white p-8">
+            <Heading className="m-0 mb-6 text-xl font-semibold text-zinc-900">
               Réinitialisation de mot de passe
             </Heading>
 
-            <Text className="text-sm text-zinc-700 leading-relaxed">
+            <Text className="text-sm leading-relaxed text-zinc-700">
               Bonjour {name},
             </Text>
 
-            <Text className="text-sm text-zinc-700 leading-relaxed">
+            <Text className="text-sm leading-relaxed text-zinc-700">
               Vous avez demandé à réinitialiser votre mot de passe sur{" "}
               {APP_NAME}. Cliquez sur le bouton ci-dessous pour créer un nouveau
               mot de passe.
             </Text>
 
-            <Section className="text-center my-8">
+            <Section className="my-8 text-center">
               <Button
                 href={resetLink}
-                className="bg-zinc-900 text-white text-sm font-medium px-6 py-3 rounded-md"
+                className="rounded-md bg-zinc-900 px-6 py-3 text-sm font-medium text-white"
               >
                 Réinitialiser mon mot de passe
               </Button>
             </Section>
 
-            <Text className="text-sm text-zinc-700 leading-relaxed">
+            <Text className="text-sm leading-relaxed text-zinc-700">
               Ce lien expire dans 1 heure. Si vous n&apos;avez pas demandé cette
               réinitialisation, vous pouvez ignorer cet email.
             </Text>
 
-            <Hr className="border-zinc-200 my-6" />
+            <Hr className="my-6 border-zinc-200" />
 
-            <Text className="text-xs text-zinc-500 m-0">
+            <Text className="m-0 text-xs text-zinc-500">
               Si le bouton ne fonctionne pas, copiez ce lien dans votre
               navigateur :
             </Text>
-            <Text className="text-xs text-zinc-500 m-0 break-all">
+            <Text className="m-0 text-xs break-all text-zinc-500">
               {resetLink}
             </Text>
           </Container>

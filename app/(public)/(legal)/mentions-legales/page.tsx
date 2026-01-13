@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+
 import type { WebPage, WithContext } from "schema-dts";
 
 import { env } from "@/lib/env";
@@ -52,13 +53,13 @@ export default function LegalNoticePage() {
         }}
       />
 
-      <main className="min-h-screen bg-background">
+      <main className="bg-background min-h-screen">
         <article className="mx-auto max-w-3xl px-4 py-12 sm:px-6 md:py-16 lg:px-8 lg:py-20">
           <header className="mb-10">
             <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
               Mentions légales
             </h1>
-            <p className="mt-4 text-sm text-muted-foreground">
+            <p className="text-muted-foreground mt-4 text-sm">
               Dernière mise à jour :{" "}
               {new Date().toLocaleDateString("fr-FR", {
                 day: "numeric",

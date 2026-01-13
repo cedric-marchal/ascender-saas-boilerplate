@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { requireSession } from "@/lib/session";
+
 import { SignOutButton } from "@/components/sign-out-button";
 
 export const metadata: Metadata = {
@@ -17,7 +18,7 @@ export default async function DashboardPage() {
   return (
     <main className="flex min-h-screen w-full flex-col px-4 py-8 sm:px-6 lg:px-8">
       <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
-      <p className="mt-2 text-muted-foreground">
+      <p className="text-muted-foreground mt-2">
         Bienvenue, {session.user.name}
       </p>
     </main>

@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 import { authClient } from "@/lib/auth-client";
@@ -11,6 +11,7 @@ import {
   ForgotPasswordSchema,
   type ForgotPasswordSchemaType,
 } from "@/lib/schemas/auth.schema";
+
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -48,12 +49,12 @@ function ForgotPasswordForm() {
 
   if (isSubmitted) {
     return (
-      <div className="rounded-md border border-border bg-muted/50 p-4 text-center">
-        <p className="text-sm text-foreground">
+      <div className="border-border bg-muted/50 rounded-md border p-4 text-center">
+        <p className="text-foreground text-sm">
           Si un compte existe avec cette adresse email, vous recevrez un lien de
           réinitialisation dans quelques instants.
         </p>
-        <p className="mt-2 text-xs text-muted-foreground">
+        <p className="text-muted-foreground mt-2 text-xs">
           Pensez à vérifier vos spams.
         </p>
       </div>

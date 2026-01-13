@@ -1,8 +1,13 @@
 "use client";
 
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+
+import {
+  ContactSchema,
+  type ContactSchemaType,
+} from "@/lib/schemas/contact.schema";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -15,10 +20,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  ContactSchema,
-  type ContactSchemaType,
-} from "@/lib/schemas/contact.schema";
 
 function ContactForm() {
   const form = useForm<ContactSchemaType>({

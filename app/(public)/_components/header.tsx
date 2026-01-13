@@ -1,17 +1,19 @@
-import { env } from "@/lib/env";
-
 import Link from "next/link";
 
 import { Menu } from "lucide-react";
 
+import { env } from "@/lib/env";
+import { getSession } from "@/lib/session";
+
+import { SignOutButton } from "@/components/sign-out-button";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import {
   NavigationMenu,
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuList,
 } from "@/components/ui/navigation-menu";
+import { Separator } from "@/components/ui/separator";
 import {
   Sheet,
   SheetClose,
@@ -20,14 +22,12 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { getSession } from "@/lib/session";
-import { SignOutButton } from "@/components/sign-out-button";
 
 async function Header() {
   const session = await getSession();
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur">
+    <header className="bg-background/80 sticky top-0 z-50 w-full border-b backdrop-blur">
       <div className="container mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
         <Link href="/" className="flex items-center gap-2 font-semibold">
           <span className="rounded-md border px-2 py-1 text-xs font-medium tracking-wide uppercase">
@@ -41,7 +41,7 @@ async function Header() {
               <NavigationMenuItem>
                 <NavigationMenuLink
                   asChild
-                  className="px-3 py-2 text-sm font-medium transition-colors hover:text-foreground"
+                  className="hover:text-foreground px-3 py-2 text-sm font-medium transition-colors"
                 >
                   <Link href="/tarifs">Tarifs</Link>
                 </NavigationMenuLink>
@@ -50,7 +50,7 @@ async function Header() {
               <NavigationMenuItem>
                 <NavigationMenuLink
                   asChild
-                  className="px-3 py-2 text-sm font-medium transition-colors hover:text-foreground"
+                  className="hover:text-foreground px-3 py-2 text-sm font-medium transition-colors"
                 >
                   <Link href="/contact">Contact</Link>
                 </NavigationMenuLink>
@@ -88,7 +88,7 @@ async function Header() {
             </SheetTrigger>
             <SheetContent
               side="right"
-              className="flex h-full flex-col border-l bg-background/95 px-6 py-6 sm:max-w-xs"
+              className="bg-background/95 flex h-full flex-col border-l px-6 py-6 sm:max-w-xs"
             >
               <SheetHeader className="px-0 text-left">
                 <SheetTitle className="text-base font-semibold">
@@ -98,15 +98,15 @@ async function Header() {
 
               <nav className="mt-4 flex-1 space-y-6 overflow-y-auto px-0">
                 <div className="space-y-3">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
+                  <p className="text-muted-foreground text-[11px] font-semibold tracking-[0.15em] uppercase">
                     Navigation
                   </p>
-                  <ul className="space-y-1.5 text-sm text-muted-foreground">
+                  <ul className="text-muted-foreground space-y-1.5 text-sm">
                     <li>
                       <SheetClose asChild>
                         <Link
                           href="/"
-                          className="flex items-center justify-between rounded-md px-3 py-2 hover:bg-accent hover:text-accent-foreground"
+                          className="hover:bg-accent hover:text-accent-foreground flex items-center justify-between rounded-md px-3 py-2"
                         >
                           <span>Accueil</span>
                         </Link>
@@ -116,7 +116,7 @@ async function Header() {
                       <SheetClose asChild>
                         <Link
                           href="/tarifs"
-                          className="flex items-center justify-between rounded-md px-3 py-2 hover:bg-accent hover:text-accent-foreground"
+                          className="hover:bg-accent hover:text-accent-foreground flex items-center justify-between rounded-md px-3 py-2"
                         >
                           <span>Tarifs</span>
                         </Link>
@@ -126,7 +126,7 @@ async function Header() {
                       <SheetClose asChild>
                         <Link
                           href="/contact"
-                          className="flex items-center justify-between rounded-md px-3 py-2 hover:bg-accent hover:text-accent-foreground"
+                          className="hover:bg-accent hover:text-accent-foreground flex items-center justify-between rounded-md px-3 py-2"
                         >
                           <span>Contact</span>
                         </Link>
@@ -136,7 +136,7 @@ async function Header() {
                 </div>
 
                 <div className="space-y-3">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
+                  <p className="text-muted-foreground text-[11px] font-semibold tracking-[0.15em] uppercase">
                     Compte
                   </p>
                   {session ? (
@@ -147,12 +147,12 @@ async function Header() {
                       <SignOutButton />
                     </>
                   ) : (
-                    <ul className="space-y-1.5 text-sm text-muted-foreground">
+                    <ul className="text-muted-foreground space-y-1.5 text-sm">
                       <li>
                         <SheetClose asChild>
                           <Link
                             href="/connexion"
-                            className="flex items-center justify-between rounded-md px-3 py-2 hover:bg-accent hover:text-accent-foreground"
+                            className="hover:bg-accent hover:text-accent-foreground flex items-center justify-between rounded-md px-3 py-2"
                           >
                             <span>Connexion</span>
                           </Link>
@@ -162,7 +162,7 @@ async function Header() {
                         <SheetClose asChild>
                           <Link
                             href="/inscription"
-                            className="flex items-center justify-between rounded-md px-3 py-2 hover:bg-accent hover:text-accent-foreground"
+                            className="hover:bg-accent hover:text-accent-foreground flex items-center justify-between rounded-md px-3 py-2"
                           >
                             <span>Inscription</span>
                           </Link>
@@ -173,7 +173,7 @@ async function Header() {
                 </div>
               </nav>
 
-              <div className="mt-4 border-t pt-4 text-xs text-muted-foreground">
+              <div className="text-muted-foreground mt-4 border-t pt-4 text-xs">
                 <p>
                   Accédez rapidement aux principales pages du site ou créez un
                   compte pour commencer à utiliser {env.NEXT_PUBLIC_APP_NAME}.

@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
-import type { WebPage, WithContext } from "schema-dts";
-
 import { redirect } from "next/navigation";
 
+import type { WebPage, WithContext } from "schema-dts";
+
 import { env } from "@/lib/env";
+import { getSession } from "@/lib/session";
 
 import { ResetPasswordForm } from "@/app/(public)/(auth)/nouveau-mot-de-passe/_components/reset-password-form";
-import { getSession } from "@/lib/session";
 
 const APP_NAME = env.NEXT_PUBLIC_APP_NAME;
 const BASE_URL = env.NEXT_PUBLIC_BASE_URL;
@@ -66,13 +66,13 @@ export default async function ResetPasswordPage({
         }}
       />
 
-      <main className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
+      <main className="bg-background flex min-h-screen items-center justify-center px-4 py-12">
         <div className="w-full max-w-sm space-y-6">
           <header className="space-y-2 text-center">
             <h1 className="text-2xl font-semibold tracking-tight">
               Nouveau mot de passe
             </h1>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-muted-foreground text-sm">
               Choisissez un nouveau mot de passe pour votre compte
             </p>
           </header>

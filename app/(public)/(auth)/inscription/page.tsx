@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import { redirect } from "next/navigation";
+
 import type { WebPage, WithContext } from "schema-dts";
 
-import Link from "next/link";
-
 import { env } from "@/lib/env";
+import { getSession } from "@/lib/session";
 
 import { SignUpForm } from "@/app/(public)/(auth)/inscription/_components/sign-up-form";
-import { getSession } from "@/lib/session";
-import { redirect } from "next/navigation";
 
 const APP_NAME = env.NEXT_PUBLIC_APP_NAME;
 const BASE_URL = env.NEXT_PUBLIC_BASE_URL;
@@ -64,41 +64,41 @@ export default async function SignUpPage() {
         }}
       />
 
-      <main className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
+      <main className="bg-background flex min-h-screen items-center justify-center px-4 py-12">
         <div className="w-full max-w-sm space-y-6">
           <header className="space-y-2 text-center">
             <h1 className="text-2xl font-semibold tracking-tight">
               Créer un compte
             </h1>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-muted-foreground text-sm">
               Entrez vos informations pour créer votre compte
             </p>
           </header>
 
           <SignUpForm />
 
-          <p className="text-center text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-center text-sm">
             Vous avez déjà un compte ?{" "}
             <Link
               href="/connexion"
-              className="font-medium text-foreground underline underline-offset-4 hover:text-primary"
+              className="text-foreground hover:text-primary font-medium underline underline-offset-4"
             >
               Se connecter
             </Link>
           </p>
 
-          <p className="text-center text-xs text-muted-foreground">
+          <p className="text-muted-foreground text-center text-xs">
             En créant un compte, vous acceptez nos{" "}
             <Link
               href="/mentions-legales"
-              className="underline underline-offset-4 hover:text-foreground"
+              className="hover:text-foreground underline underline-offset-4"
             >
               mentions légales
             </Link>{" "}
             et notre{" "}
             <Link
               href="/politique-de-confidentialite"
-              className="underline underline-offset-4 hover:text-foreground"
+              className="hover:text-foreground underline underline-offset-4"
             >
               politique de confidentialité
             </Link>

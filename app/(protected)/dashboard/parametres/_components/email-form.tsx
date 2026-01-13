@@ -2,12 +2,14 @@
 
 import { useState } from "react";
 import type { FormEvent } from "react";
-import { useRouter } from "next/navigation";
-import { Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 
+import { useRouter } from "next/navigation";
+
+import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
+import { toast } from "sonner";
+
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Card,
   CardContent,
@@ -15,7 +17,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 type EmailFormProps = {
   user: {
@@ -28,37 +31,33 @@ function EmailForm({ user }: EmailFormProps) {
   const router = useRouter();
 
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setIsLoading(true);
-    setError(null);
-    setSuccess(false);
 
     const formData = new FormData(event.currentTarget);
-    const email = formData.get("email") as string;
 
     try {
       const response = await fetch("/api/user/email", {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: formData,
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        setError(data.message ?? "Une erreur est survenue");
-        setIsLoading(false);
+        toast.error(data.message ?? "Une erreur est survenue");
         return;
       }
 
-      setSuccess(true);
+      toast.success(
+        "Email mis à jour. Veuillez vérifier votre nouvelle adresse."
+      );
+
       router.refresh();
     } catch (error: unknown) {
-      setError("Une erreur est survenue");
+      toast.error("Une erreur est survenue");
     } finally {
       setIsLoading(false);
     }
@@ -75,18 +74,6 @@ function EmailForm({ user }: EmailFormProps) {
       </CardHeader>
       <CardContent>
         <form onSubmit={onSubmit} className="space-y-4">
-          {error && (
-            <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-              {error}
-            </div>
-          )}
-
-          {success && (
-            <div className="rounded-md bg-green-500/10 p-3 text-sm text-green-600">
-              Email mis à jour. Veuillez vérifier votre nouvelle adresse.
-            </div>
-          )}
-
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <Label htmlFor="email">Email</Label>
@@ -96,7 +83,7 @@ function EmailForm({ user }: EmailFormProps) {
                   Vérifié
                 </Badge>
               ) : (
-                <Badge variant="outline" className="gap-1 text-destructive">
+                <Badge variant="outline" className="text-destructive gap-1">
                   <AlertCircle className="h-3 w-3" />
                   Non vérifié
                 </Badge>

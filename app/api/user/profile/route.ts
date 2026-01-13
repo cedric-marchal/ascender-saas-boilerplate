@@ -1,17 +1,18 @@
 import { NextResponse } from "next/server";
 
+import { env } from "@/lib/env";
+import { optimizeAvatar } from "@/lib/optimize";
+import { prisma } from "@/lib/prisma";
+import { deleteFile, uploadFile } from "@/lib/r2";
+import { updateProfileSchema } from "@/lib/schemas/user.schema";
 import { requireSession } from "@/lib/session";
+
 import {
-  handleApiError,
   BadRequestError,
   PayloadTooLargeError,
   UnprocessableEntityError,
+  handleApiError,
 } from "@/utils/api/handle-api-error";
-import { prisma } from "@/lib/prisma";
-import { uploadFile, deleteFile } from "@/lib/r2";
-import { optimizeAvatar } from "@/lib/optimize";
-import { updateProfileSchema } from "@/lib/schemas/user.schema";
-import { env } from "@/lib/env";
 
 const MAX_FILE_SIZE = env.NEXT_PUBLIC_VERCEL_MAX_UPLOAD_SIZE;
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];

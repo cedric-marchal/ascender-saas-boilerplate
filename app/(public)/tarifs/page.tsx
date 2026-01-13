@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
-import type { WebPage, Product, WithContext } from "schema-dts";
-
 import Link from "next/link";
+
+import type { Product, WebPage, WithContext } from "schema-dts";
+
+import { env } from "@/lib/env";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -11,7 +13,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { env } from "@/lib/env";
 
 const APP_NAME = env.NEXT_PUBLIC_APP_NAME;
 const BASE_URL = env.NEXT_PUBLIC_BASE_URL;
@@ -149,13 +150,13 @@ export default function PricingPage() {
         />
       ))}
 
-      <main className="min-h-screen bg-background">
+      <main className="bg-background min-h-screen">
         <section className="mx-auto flex w-full max-w-5xl flex-col gap-10 px-4 py-12 sm:px-6 md:gap-12 md:py-16 lg:px-8 lg:py-20">
           <header className="space-y-4 text-center">
             <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
               Des tarifs clairs, pensés pour grandir avec vous
             </h1>
-            <p className="mx-auto max-w-2xl text-muted-foreground">
+            <p className="text-muted-foreground mx-auto max-w-2xl">
               Que vous soyez indépendant, en petite équipe ou dans une structure
               plus large, {APP_NAME} propose des offres flexibles, sans
               engagement, pour vous permettre d&apos;avancer à votre rythme.
@@ -168,13 +169,13 @@ export default function PricingPage() {
                 key={plan.name}
                 className={
                   plan.featured
-                    ? "border-primary/40 ring-1 ring-primary/20"
+                    ? "border-primary/40 ring-primary/20 ring-1"
                     : "border-muted"
                 }
               >
                 <CardHeader>
                   {plan.featured && (
-                    <p className="text-xs font-semibold uppercase tracking-wide text-primary">
+                    <p className="text-primary text-xs font-semibold tracking-wide uppercase">
                       Populaire
                     </p>
                   )}
@@ -189,7 +190,7 @@ export default function PricingPage() {
                       ) : (
                         <>
                           {plan.price} €
-                          <span className="text-xs font-normal text-muted-foreground">
+                          <span className="text-muted-foreground text-xs font-normal">
                             {" "}
                             / {plan.period}
                           </span>
@@ -197,7 +198,7 @@ export default function PricingPage() {
                       )}
                     </p>
                   </div>
-                  <ul className="space-y-1 text-muted-foreground">
+                  <ul className="text-muted-foreground space-y-1">
                     {plan.features.map((feature) => (
                       <li key={feature}>• {feature}</li>
                     ))}
@@ -214,12 +215,12 @@ export default function PricingPage() {
             ))}
           </div>
 
-          <p className="text-center text-xs text-muted-foreground">
+          <p className="text-muted-foreground text-center text-xs">
             Les tarifs affichés sont présentés à titre indicatif et peuvent
             évoluer. Pour des besoins spécifiques ou des volumes importants,{" "}
             <Link
               href="/contact"
-              className="underline underline-offset-4 hover:text-foreground"
+              className="hover:text-foreground underline underline-offset-4"
             >
               contactez-nous
             </Link>

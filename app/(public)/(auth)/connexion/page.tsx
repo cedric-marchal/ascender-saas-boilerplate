@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import { redirect } from "next/navigation";
+
 import type { WebPage, WithContext } from "schema-dts";
 
-import Link from "next/link";
-
 import { env } from "@/lib/env";
+import { getSession } from "@/lib/session";
 
 import { SignInForm } from "@/app/(public)/(auth)/connexion/_components/sign-in-form";
-import { getSession } from "@/lib/session";
-import { redirect } from "next/navigation";
 
 const APP_NAME = env.NEXT_PUBLIC_APP_NAME;
 const BASE_URL = env.NEXT_PUBLIC_BASE_URL;
@@ -64,22 +64,22 @@ export default async function SignInPage() {
         }}
       />
 
-      <main className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
+      <main className="bg-background flex min-h-screen items-center justify-center px-4 py-12">
         <div className="w-full max-w-sm space-y-6">
           <header className="space-y-2 text-center">
             <h1 className="text-2xl font-semibold tracking-tight">Connexion</h1>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-muted-foreground text-sm">
               Entrez vos identifiants pour accéder à votre compte
             </p>
           </header>
 
           <SignInForm />
 
-          <p className="text-center text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-center text-sm">
             Vous n&apos;avez pas de compte ?{" "}
             <Link
               href="/inscription"
-              className="font-medium text-foreground underline underline-offset-4 hover:text-primary"
+              className="text-foreground hover:text-primary font-medium underline underline-offset-4"
             >
               Créer un compte
             </Link>

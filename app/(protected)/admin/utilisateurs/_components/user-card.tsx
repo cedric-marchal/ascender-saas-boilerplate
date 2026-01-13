@@ -1,12 +1,14 @@
-import type { User as PrismaUser } from "@/lib/generated/prisma/client";
-
-import { Card, CardContent } from "@/components/ui/card";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { USER_ROLE_CONFIG } from "@/lib/constants/user-role.constant";
-import { formatDate } from "@/utils/date/format-date";
-import { cn } from "@/lib/utils";
 import { CheckCircle2, XCircle } from "lucide-react";
+
+import { USER_ROLE_CONFIG } from "@/lib/constants/user-role.constant";
+import type { User as PrismaUser } from "@/lib/generated/prisma/client";
+import { cn } from "@/lib/utils";
+
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+
+import { formatDate } from "@/utils/date/format-date";
 
 const ROLE_BADGE_STYLES = {
   indigo: "bg-indigo-50 text-indigo-700 border-indigo-200 hover:bg-indigo-100",
@@ -48,7 +50,7 @@ function UserCard({ user }: UserCardProps) {
 
           <div className="flex-1 space-y-1">
             <div className="flex items-center justify-between gap-2">
-              <h3 className="font-semibold leading-none">{user.name}</h3>
+              <h3 className="leading-none font-semibold">{user.name}</h3>
               <Badge
                 variant="outline"
                 className={cn(
@@ -60,16 +62,16 @@ function UserCard({ user }: UserCardProps) {
               </Badge>
             </div>
 
-            <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+            <div className="text-muted-foreground flex items-center gap-1.5 text-sm">
               <span>{user.email}</span>
               {user.emailVerified ? (
                 <CheckCircle2 className="h-3.5 w-3.5 text-green-600" />
               ) : (
-                <XCircle className="h-3.5 w-3.5 text-muted-foreground/50" />
+                <XCircle className="text-muted-foreground/50 h-3.5 w-3.5" />
               )}
             </div>
 
-            <p className="text-xs text-muted-foreground">
+            <p className="text-muted-foreground text-xs">
               Inscrit le {formatDate({ date: user.createdAt })}
             </p>
           </div>

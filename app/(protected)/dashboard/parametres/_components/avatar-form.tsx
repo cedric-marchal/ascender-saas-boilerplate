@@ -1,9 +1,11 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import type { DragEvent, ChangeEvent } from "react";
+import { useCallback, useState } from "react";
+import type { ChangeEvent, DragEvent } from "react";
+
 import { useRouter } from "next/navigation";
-import { Upload, X, Loader2, User } from "lucide-react";
+
+import { Loader2, Upload, User, X } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -170,7 +172,7 @@ function AvatarForm({ user, avatarUrl }: AvatarFormProps) {
       </CardHeader>
       <CardContent className="space-y-4">
         {error && (
-          <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+          <div className="bg-destructive/10 text-destructive rounded-md p-3 text-sm">
             {error}
           </div>
         )}
@@ -202,11 +204,11 @@ function AvatarForm({ user, avatarUrl }: AvatarFormProps) {
                 disabled={isLoading}
               />
               {isLoading ? (
-                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                <Loader2 className="text-muted-foreground h-8 w-8 animate-spin" />
               ) : (
                 <>
-                  <Upload className="h-8 w-8 text-muted-foreground" />
-                  <span className="mt-2 text-sm text-muted-foreground">
+                  <Upload className="text-muted-foreground h-8 w-8" />
+                  <span className="text-muted-foreground mt-2 text-sm">
                     Glissez une image ou cliquez
                   </span>
                 </>

@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
-import { Header } from "@/app/(public)/_components/header";
 import { Footer } from "@/app/(public)/_components/footer";
+import { Header } from "@/app/(public)/_components/header";
 
 type PublicLayoutProps = {
   children: ReactNode;

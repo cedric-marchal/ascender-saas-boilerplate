@@ -1,14 +1,16 @@
-import "./globals.css";
-
-import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { NuqsAdapter } from "nuqs/adapters/next/app";
+
 import { ThemeProvider } from "next-themes";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
+
+import { env } from "@/lib/env";
 
 import { Toaster } from "@/components/ui/sonner";
-import { env } from "@/lib/env";
+
+import "./globals.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

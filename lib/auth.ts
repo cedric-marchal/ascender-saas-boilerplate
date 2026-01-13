@@ -3,12 +3,13 @@ import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { nextCookies } from "better-auth/next-js";
 
-import { prisma } from "@/lib/prisma";
 import { env } from "@/lib/env";
+import { prisma } from "@/lib/prisma";
 import { resend } from "@/lib/resend";
-import { WelcomeEmail } from "@/components/emails/welcome-email";
-import { ResetPasswordEmail } from "@/components/emails/reset-password-email";
+
 import { PasswordChangedEmail } from "@/components/emails/password-changed-email";
+import { ResetPasswordEmail } from "@/components/emails/reset-password-email";
+import { WelcomeEmail } from "@/components/emails/welcome-email";
 
 const APP_NAME = env.NEXT_PUBLIC_APP_NAME;
 const FROM_EMAIL = "onboarding@resend.dev";

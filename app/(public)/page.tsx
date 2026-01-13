@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import type { WebSite, Organization, WithContext } from "schema-dts";
+
+import type { Organization, WebSite, WithContext } from "schema-dts";
 
 import { env } from "@/lib/env";
 
@@ -67,7 +68,7 @@ export default function HomePage() {
         }}
       />
 
-      <main className="flex min-h-screen items-center justify-center bg-background">
+      <main className="bg-background flex min-h-screen items-center justify-center">
         <h1 className="text-2xl font-bold">Hello World</h1>
       </main>
     </>

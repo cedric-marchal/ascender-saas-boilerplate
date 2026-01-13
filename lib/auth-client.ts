@@ -1,7 +1,7 @@
-import { env } from "@/lib/env";
+import { stripeClient } from "@better-auth/stripe/client";
 import { createAuthClient } from "better-auth/react";
 
-import { stripeClient } from "@better-auth/stripe/client";
+import { env } from "@/lib/env";
 
 export const authClient = createAuthClient({
   baseURL: env.NEXT_PUBLIC_BASE_URL,

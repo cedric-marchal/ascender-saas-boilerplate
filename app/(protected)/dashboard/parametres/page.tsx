@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 
-import { requireSession } from "@/lib/session";
 import { getDownloadUrl } from "@/lib/r2";
+import { requireSession } from "@/lib/session";
 
-import { EmailVerificationAlert } from "@/app/(protected)/dashboard/parametres/_components/email-verification-alert";
 import { AvatarForm } from "@/app/(protected)/dashboard/parametres/_components/avatar-form";
-import { ProfileForm } from "@/app/(protected)/dashboard/parametres/_components/profile-form";
 import { EmailForm } from "@/app/(protected)/dashboard/parametres/_components/email-form";
+import { EmailVerificationAlert } from "@/app/(protected)/dashboard/parametres/_components/email-verification-alert";
+import { ProfileForm } from "@/app/(protected)/dashboard/parametres/_components/profile-form";
 
 export const metadata: Metadata = {
   title: "Paramètres",

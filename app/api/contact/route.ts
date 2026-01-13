@@ -4,12 +4,12 @@ import { env } from "@/lib/env";
 import { resend } from "@/lib/resend";
 import { ContactSchema } from "@/lib/schemas/contact.schema";
 
-import {
-  handleApiError,
-  TooManyRequestsError,
-} from "@/utils/api/handle-api-error";
-
 import { ContactEmail } from "@/components/emails/contact-email";
+
+import {
+  TooManyRequestsError,
+  handleApiError,
+} from "@/utils/api/handle-api-error";
 
 const CONTACT_EMAIL = "contact@example.com"; // À remplacer par ton email
 

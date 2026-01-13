@@ -1,5 +1,6 @@
-import { env } from "@/lib/env";
 import Stripe from "stripe";
+
+import { env } from "@/lib/env";
 
 export const stripe = new Stripe(env.STRIPE_SECRET_KEY, {
   apiVersion: "2025-12-15.clover",

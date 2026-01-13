@@ -1,12 +1,24 @@
+import Link from "next/link";
+
 import {
   ChevronUp,
+  CreditCard,
   FolderKanban,
   LayoutDashboard,
-  CreditCard,
   Settings,
   User2,
 } from "lucide-react";
 
+import { env } from "@/lib/env";
+
+import { SignOutButton } from "@/components/sign-out-button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Sidebar,
   SidebarContent,
@@ -18,18 +30,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-
-import { SignOutButton } from "@/components/sign-out-button";
-
-import Link from "next/link";
-import { env } from "@/lib/env";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 // Menu items.
 const items = [

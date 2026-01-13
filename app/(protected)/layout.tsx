@@ -1,10 +1,12 @@
 import type { ReactNode } from "react";
 
-import { AppSidebar } from "@/app/(protected)/_components/app-sidebar";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { redirect } from "next/navigation";
+
 import { getSession } from "@/lib/session";
 
-import { redirect } from "next/navigation";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+
+import { AppSidebar } from "@/app/(protected)/_components/app-sidebar";
 
 type ProtectedLayoutProps = {
   children: ReactNode;

@@ -1,8 +1,9 @@
-import "server-only";
-
 import { cache } from "react";
+
 import { headers } from "next/headers";
-import { redirect, notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
+
+import "server-only";
 
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";

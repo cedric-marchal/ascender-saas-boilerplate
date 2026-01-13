@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import { redirect } from "next/navigation";
+
+import { ArrowLeft } from "lucide-react";
 import type { WebPage, WithContext } from "schema-dts";
 
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
-
 import { env } from "@/lib/env";
+import { getSession } from "@/lib/session";
 
 import { ForgotPasswordForm } from "./_components/forgot-password-form";
-import { getSession } from "@/lib/session";
-import { redirect } from "next/navigation";
 
 const APP_NAME = env.NEXT_PUBLIC_APP_NAME;
 const BASE_URL = env.NEXT_PUBLIC_BASE_URL;
@@ -65,13 +65,13 @@ export default async function ForgotPasswordPage() {
         }}
       />
 
-      <main className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
+      <main className="bg-background flex min-h-screen items-center justify-center px-4 py-12">
         <div className="w-full max-w-sm space-y-6">
           <header className="space-y-2 text-center">
             <h1 className="text-2xl font-semibold tracking-tight">
               Mot de passe oublié
             </h1>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-muted-foreground text-sm">
               Entrez votre adresse email pour recevoir un lien de
               réinitialisation
             </p>
@@ -81,7 +81,7 @@ export default async function ForgotPasswordPage() {
 
           <Link
             href="/connexion"
-            className="flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-foreground"
+            className="text-muted-foreground hover:text-foreground flex items-center justify-center gap-2 text-sm"
           >
             <ArrowLeft className="h-4 w-4" />
             Retour à la connexion

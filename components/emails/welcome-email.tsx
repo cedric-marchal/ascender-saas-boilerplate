@@ -63,7 +63,7 @@ function WelcomeEmail({ name, verificationLink }: WelcomeEmailProps) {
               Si le bouton ne fonctionne pas, copiez ce lien dans votre
               navigateur :
             </Text>
-            <Text className="m-0 break-all text-xs text-zinc-500">
+            <Text className="m-0 text-xs break-all text-zinc-500">
               {verificationLink}
             </Text>
           </Container>

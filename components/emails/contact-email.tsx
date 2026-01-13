@@ -27,46 +27,46 @@ function ContactEmail({ name, email, subject, message }: ContactEmailProps) {
       </Preview>
       <Tailwind>
         <Body className="bg-zinc-100 font-sans">
-          <Container className="mx-auto max-w-xl bg-white border border-zinc-200 rounded-md p-8 my-10">
-            <Heading className="text-xl font-semibold text-zinc-900 m-0 mb-6">
+          <Container className="mx-auto my-10 max-w-xl rounded-md border border-zinc-200 bg-white p-8">
+            <Heading className="m-0 mb-6 text-xl font-semibold text-zinc-900">
               Nouveau message de contact
             </Heading>
 
             <Section className="mb-4">
-              <Text className="text-xs font-medium uppercase tracking-wide text-zinc-500 m-0 mb-1">
+              <Text className="m-0 mb-1 text-xs font-medium tracking-wide text-zinc-500 uppercase">
                 Nom
               </Text>
-              <Text className="text-sm text-zinc-900 m-0">{name}</Text>
+              <Text className="m-0 text-sm text-zinc-900">{name}</Text>
             </Section>
 
             <Section className="mb-4">
-              <Text className="text-xs font-medium uppercase tracking-wide text-zinc-500 m-0 mb-1">
+              <Text className="m-0 mb-1 text-xs font-medium tracking-wide text-zinc-500 uppercase">
                 Email
               </Text>
-              <Text className="text-sm text-zinc-900 m-0">{email}</Text>
+              <Text className="m-0 text-sm text-zinc-900">{email}</Text>
             </Section>
 
             <Section className="mb-4">
-              <Text className="text-xs font-medium uppercase tracking-wide text-zinc-500 m-0 mb-1">
+              <Text className="m-0 mb-1 text-xs font-medium tracking-wide text-zinc-500 uppercase">
                 Sujet
               </Text>
-              <Text className="text-sm text-zinc-900 m-0">{subject}</Text>
+              <Text className="m-0 text-sm text-zinc-900">{subject}</Text>
             </Section>
 
-            <Hr className="border-zinc-200 my-6" />
+            <Hr className="my-6 border-zinc-200" />
 
             <Section className="mb-4">
-              <Text className="text-xs font-medium uppercase tracking-wide text-zinc-500 m-0 mb-1">
+              <Text className="m-0 mb-1 text-xs font-medium tracking-wide text-zinc-500 uppercase">
                 Message
               </Text>
-              <Text className="text-sm text-zinc-900 m-0 whitespace-pre-wrap leading-relaxed">
+              <Text className="m-0 text-sm leading-relaxed whitespace-pre-wrap text-zinc-900">
                 {message}
               </Text>
             </Section>
 
-            <Hr className="border-zinc-200 my-6" />
+            <Hr className="my-6 border-zinc-200" />
 
-            <Text className="text-xs text-zinc-500 m-0">
+            <Text className="m-0 text-xs text-zinc-500">
               Vous pouvez répondre directement à cet email pour contacter {name}
               .
             </Text>

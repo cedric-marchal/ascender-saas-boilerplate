@@ -1,5 +1,4 @@
 import "server-only";
-
 import sharp from "sharp";
 
 type ImageFormat = "webp" | "avif" | "jpeg" | "png";

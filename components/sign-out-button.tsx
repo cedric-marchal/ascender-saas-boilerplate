@@ -1,8 +1,10 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { signOut } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
+
+import { signOut } from "@/lib/auth-client";
+
+import { Button } from "@/components/ui/button";
 
 function SignOutButton() {
   const router = useRouter();
@@ -17,7 +19,7 @@ function SignOutButton() {
       type="button"
       variant="destructive"
       onClick={handleSignOut}
-      className="cursor-pointer hover:opacity-80 transition"
+      className="cursor-pointer transition hover:opacity-80"
     >
       Déconnexion
     </Button>
