@@ -2,13 +2,12 @@ import { NextResponse } from "next/server";
 
 import { env } from "@/lib/env";
 import { resend } from "@/lib/resend";
-import { ContactSchema } from "@/lib/schemas/contact.schema";
+import { CreateContactSchema } from "@/lib/schemas/contact.schema";
 
 import { ContactEmail } from "@/components/emails/contact-email";
 
 import {
-  TooManyRequestsError,
-  handleApiError,
+  handleApiError
 } from "@/utils/api/handle-api-error";
 
 const CONTACT_EMAIL = "contact@example.com"; // À remplacer par ton email
@@ -17,7 +16,7 @@ async function POST(request: Request) {
   try {
     const formData = await request.formData();
 
-    const data = ContactSchema.parse({
+    const contactData = CreateContactSchema.parse({
       name: formData.get("name"),
       email: formData.get("email"),
       subject: formData.get("subject"),
@@ -27,13 +26,13 @@ async function POST(request: Request) {
     await resend.emails.send({
       from: `${env.NEXT_PUBLIC_APP_NAME} <noreply@${env.RESEND_DOMAIN}>`,
       to: CONTACT_EMAIL,
-      replyTo: data.email,
-      subject: `[Contact] ${data.subject}`,
+      replyTo: contactData.email,
+      subject: `[Contact] ${contactData.subject}`,
       react: ContactEmail({
-        name: data.name,
-        email: data.email,
-        subject: data.subject,
-        message: data.message,
+        name: contactData.name,
+        email: contactData.email,
+        subject: contactData.subject,
+        message: contactData.message,
       }),
     });
 

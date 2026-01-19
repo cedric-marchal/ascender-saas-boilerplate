@@ -6,7 +6,6 @@ import {
   FolderKanban,
   LayoutDashboard,
   Settings,
-  User2,
 } from "lucide-react";
 
 import { env } from "@/lib/env";
@@ -72,7 +71,7 @@ function AppSidebar({ image, name }: AppSidebarProps) {
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <Link href={item.url}>
-                      <item.icon />
+                      <item.icon aria-hidden="true" />
                       <span>{item.title}</span>
                     </Link>
                   </SidebarMenuButton>
@@ -96,7 +95,7 @@ function AppSidebar({ image, name }: AppSidebarProps) {
                     )}
                   </Avatar>
                   <span>{name}</span>
-                  <ChevronUp className="ml-auto" />
+                  <ChevronUp className="ml-auto" aria-hidden="true" />
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent

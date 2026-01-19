@@ -6,11 +6,12 @@ const nameSchema = z
   .max(100, "Le nom doit contenir moins de 100 caractères")
   .trim();
 
-const updateProfileSchema = z.object({
+const UpdateProfileSchema = z.object({
   name: nameSchema.optional(),
 });
 
-type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
+type UpdateProfileSchemaType = z.infer<typeof UpdateProfileSchema>;
 
-export { updateProfileSchema, nameSchema };
-export type { UpdateProfileInput };
+export { UpdateProfileSchema, nameSchema };
+
+export type { UpdateProfileSchemaType };

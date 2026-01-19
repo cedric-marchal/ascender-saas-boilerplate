@@ -181,7 +181,7 @@ function AvatarForm({ user, avatarUrl }: AvatarFormProps) {
           <Avatar className="h-20 w-20">
             <AvatarImage src={displayImage ?? undefined} alt={user.name} />
             <AvatarFallback className="text-lg">
-              {initials || <User className="h-8 w-8" />}
+              {initials || <User className="h-8 w-8" aria-hidden="true" />}
             </AvatarFallback>
           </Avatar>
 
@@ -204,10 +204,10 @@ function AvatarForm({ user, avatarUrl }: AvatarFormProps) {
                 disabled={isLoading}
               />
               {isLoading ? (
-                <Loader2 className="text-muted-foreground h-8 w-8 animate-spin" />
+                <Loader2 className="text-muted-foreground h-8 w-8 animate-spin" aria-hidden="true" />
               ) : (
                 <>
-                  <Upload className="text-muted-foreground h-8 w-8" />
+                  <Upload className="text-muted-foreground h-8 w-8" aria-hidden="true" />
                   <span className="text-muted-foreground mt-2 text-sm">
                     Glissez une image ou cliquez
                   </span>
@@ -217,15 +217,16 @@ function AvatarForm({ user, avatarUrl }: AvatarFormProps) {
 
             {displayImage && (
               <Button
+                type="button"
                 variant="outline"
                 size="sm"
                 onClick={handleDelete}
                 disabled={isDeleting}
               >
                 {isDeleting ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
                 ) : (
-                  <X className="mr-2 h-4 w-4" />
+                  <X className="mr-2 h-4 w-4" aria-hidden="true" />
                 )}
                 Supprimer
               </Button>

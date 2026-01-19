@@ -83,7 +83,7 @@ export default async function ForgotPasswordPage() {
             href="/connexion"
             className="text-muted-foreground hover:text-foreground flex items-center justify-center gap-2 text-sm"
           >
-            <ArrowLeft className="h-4 w-4" />
+            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
             Retour à la connexion
           </Link>
         </div>

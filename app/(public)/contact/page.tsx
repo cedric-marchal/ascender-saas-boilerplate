@@ -83,7 +83,7 @@ export default function ContactPage() {
                 <h2 className="text-lg font-medium">Informations</h2>
                 <div className="text-muted-foreground space-y-3 text-sm">
                   <div className="flex items-start gap-3">
-                    <Mail className="mt-0.5 h-4 w-4 shrink-0" />
+                    <Mail className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
                     <div>
                       <p className="text-foreground font-medium">Email</p>
                       <a
@@ -95,7 +95,7 @@ export default function ContactPage() {
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
-                    <MapPin className="mt-0.5 h-4 w-4 shrink-0" />
+                    <MapPin className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
                     <div>
                       <p className="text-foreground font-medium">Adresse</p>
                       <p>Paris, France</p>

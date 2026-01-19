@@ -2,8 +2,6 @@ import type { Metadata } from "next";
 
 import { requireSession } from "@/lib/session";
 
-import { SignOutButton } from "@/components/sign-out-button";
-
 export const metadata: Metadata = {
   title: "Dashboard",
   robots: {

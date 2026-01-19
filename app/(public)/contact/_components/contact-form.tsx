@@ -5,8 +5,8 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 import {
-  ContactSchema,
-  type ContactSchemaType,
+  CreateContactSchema,
+  type CreateContactSchemaType,
 } from "@/lib/schemas/contact.schema";
 
 import { Button } from "@/components/ui/button";
@@ -22,8 +22,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
 function ContactForm() {
-  const form = useForm<ContactSchemaType>({
-    resolver: zodResolver(ContactSchema),
+  const form = useForm<CreateContactSchemaType>({
+    resolver: zodResolver(CreateContactSchema),
     defaultValues: {
       name: "",
       email: "",
@@ -32,7 +32,7 @@ function ContactForm() {
     },
   });
 
-  const onSubmit = async (data: ContactSchemaType) => {
+  const onSubmit = async (data: CreateContactSchemaType) => {
     try {
       const formData = new FormData();
       formData.append("name", data.name);

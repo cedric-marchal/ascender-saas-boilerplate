@@ -40,7 +40,7 @@ function EmailVerificationAlert() {
   if (isSent) {
     return (
       <Alert>
-        <CheckCircle2 className="h-4 w-4" />
+        <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
         <AlertTitle>Email envoyé</AlertTitle>
         <AlertDescription>
           Un email de vérification a été envoyé à votre adresse.
@@ -51,7 +51,7 @@ function EmailVerificationAlert() {
 
   return (
     <Alert variant="destructive">
-      <AlertCircle className="h-4 w-4" />
+      <AlertCircle className="h-4 w-4" aria-hidden="true" />
       <AlertTitle>Email non vérifié</AlertTitle>
       <AlertDescription className="flex flex-col gap-3">
         <span>
@@ -67,9 +67,9 @@ function EmailVerificationAlert() {
           disabled={isLoading}
         >
           {isLoading ? (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
           ) : (
-            <Mail className="mr-2 h-4 w-4" />
+            <Mail className="mr-2 h-4 w-4" aria-hidden="true" />
           )}
           Renvoyer l'email de vérification
         </Button>

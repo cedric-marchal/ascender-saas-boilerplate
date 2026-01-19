@@ -4,7 +4,7 @@ import { env } from "@/lib/env";
 import { optimizeAvatar } from "@/lib/optimize";
 import { prisma } from "@/lib/prisma";
 import { deleteFile, uploadFile } from "@/lib/r2";
-import { updateProfileSchema } from "@/lib/schemas/user.schema";
+import { UpdateProfileSchema } from "@/lib/schemas/user.schema";
 import { requireSession } from "@/lib/session";
 
 import {
@@ -43,7 +43,7 @@ async function PATCH(request: Request) {
     const updateData: { name?: string; image?: string } = {};
 
     if (name) {
-      const validated = updateProfileSchema.parse({ name });
+      const validated = UpdateProfileSchema.parse({ name });
       updateData.name = validated.name;
     }
 

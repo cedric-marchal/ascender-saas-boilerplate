@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-const ContactSchema = z.object({
+const CreateContactSchema = z.object({
   name: z
     .string()
     .min(1, "Le nom est requis")
@@ -25,7 +25,8 @@ const ContactSchema = z.object({
     .trim(),
 });
 
-type ContactSchemaType = z.infer<typeof ContactSchema>;
+type CreateContactSchemaType = z.infer<typeof CreateContactSchema>;
 
-export { ContactSchema };
-export type { ContactSchemaType };
+export { CreateContactSchema };
+
+export type { CreateContactSchemaType };
