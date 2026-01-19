@@ -38,10 +38,10 @@ These rules apply exclusively to creating new `page.tsx` files in the Next.js Ap
 ```tsx
 // ✅ Correct
 import type { Metadata } from "next";
-import type { WebSite, WithContext } from "schema-dts";
-
 // ❌ Wrong
 import { Metadata } from "next";
+
+import type { WebSite, WithContext } from "schema-dts";
 ```
 
 ### 4. Metadata Configuration (P1)
@@ -215,9 +215,7 @@ export default async function DashboardSettingsPage() {
   await requireSession();
 
   return (
-    <main className="flex min-h-screen flex-col">
-      {/* Page content */}
-    </main>
+    <main className="flex min-h-screen flex-col">{/* Page content */}</main>
   );
 }
 ```
@@ -243,9 +241,7 @@ export default async function AdminUsersPage() {
   await requireAdmin();
 
   return (
-    <main className="flex min-h-screen flex-col">
-      {/* Page content */}
-    </main>
+    <main className="flex min-h-screen flex-col">{/* Page content */}</main>
   );
 }
 ```

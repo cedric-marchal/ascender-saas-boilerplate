@@ -31,13 +31,13 @@ These rules apply exclusively to creating Zod validation schemas. Schemas are us
 - Only create schemas when needed (not all actions required)
 - In practice, most common order: `Create` → `Update` → `Delete`
 
-| HTTP Method | Zod Action | Usage |
-|-------------|------------|-------|
-| `GET` | `Read` | Query params validation (rare) |
-| `POST` | `Create` | New resource validation |
-| `PUT` | `Replace` | Full resource replacement (rare) |
-| `PATCH` | `Update` | Partial resource update |
-| `DELETE` | `Delete` | Deletion params validation |
+| HTTP Method | Zod Action | Usage                            |
+| ----------- | ---------- | -------------------------------- |
+| `GET`       | `Read`     | Query params validation (rare)   |
+| `POST`      | `Create`   | New resource validation          |
+| `PUT`       | `Replace`  | Full resource replacement (rare) |
+| `PATCH`     | `Update`   | Partial resource update          |
+| `DELETE`    | `Delete`   | Deletion params validation       |
 
 ```tsx
 // ✅ Correct (matching HTTP method order)
@@ -71,8 +71,8 @@ type UpdateUserSchemaType = z.infer<typeof UpdateUserSchema>;
 type DeleteUserSchemaType = z.infer<typeof DeleteUserSchema>;
 
 // ❌ Wrong
-type CreateUserType = z.infer<typeof CreateUserSchema>;  // Missing "Schema" in name
-type UserCreateSchemaType = z.infer<typeof CreateUserSchema>;  // Wrong pattern
+type CreateUserType = z.infer<typeof CreateUserSchema>; // Missing "Schema" in name
+type UserCreateSchemaType = z.infer<typeof CreateUserSchema>; // Wrong pattern
 ```
 
 ### 4. String Validation (P0)
@@ -150,16 +150,17 @@ export const MAX_FILE_SIZE = ...;
 ### 7. File Structure (P0)
 
 Follow this exact order:
+
 1. Imports
-2. *(empty line)*
+2. _(empty line)_
 3. Constants (internal only)
-4. *(empty line)*
+4. _(empty line)_
 5. Schemas (HTTP method order: Read → Create → Replace → Update → Delete)
-6. *(empty line)*
+6. _(empty line)_
 7. Types (same order as schemas)
-8. *(empty line)*
+8. _(empty line)_
 9. Export schemas (same order)
-10. *(empty line)*
+10. _(empty line)_
 11. Export types (same order)
 
 ```tsx
@@ -252,11 +253,7 @@ type CreateDocumentSchemaType = z.infer<typeof CreateDocumentSchema>;
 type UpdateDocumentSchemaType = z.infer<typeof UpdateDocumentSchema>;
 type DeleteDocumentSchemaType = z.infer<typeof DeleteDocumentSchema>;
 
-export {
-  CreateDocumentSchema,
-  UpdateDocumentSchema,
-  DeleteDocumentSchema,
-};
+export { CreateDocumentSchema, UpdateDocumentSchema, DeleteDocumentSchema };
 
 export type {
   CreateDocumentSchemaType,
@@ -324,12 +321,7 @@ type CreateUserSchemaType = z.infer<typeof CreateUserSchema>;
 type UpdateUserSchemaType = z.infer<typeof UpdateUserSchema>;
 type DeleteUserSchemaType = z.infer<typeof DeleteUserSchema>;
 
-export {
-  ReadUserSchema,
-  CreateUserSchema,
-  UpdateUserSchema,
-  DeleteUserSchema,
-};
+export { ReadUserSchema, CreateUserSchema, UpdateUserSchema, DeleteUserSchema };
 
 export type {
   ReadUserSchemaType,
@@ -387,4 +379,7 @@ const CreateUserSchema = z.object({ ... });  // Should be in user.schema.ts
 6. **Internal constants**: Schema constants are not exported
 7. **Type inference**: Every schema has its `{SchemaName}Type`
 8. **Clear separation**: Empty line between `export` and `export type`
+
+```
+
 ```

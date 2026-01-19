@@ -6,9 +6,7 @@ import { CreateContactSchema } from "@/lib/schemas/contact.schema";
 
 import { ContactEmail } from "@/components/emails/contact-email";
 
-import {
-  handleApiError
-} from "@/utils/api/handle-api-error";
+import { handleApiError } from "@/utils/api/handle-api-error";
 
 const CONTACT_EMAIL = "contact@example.com"; // À remplacer par ton email
 

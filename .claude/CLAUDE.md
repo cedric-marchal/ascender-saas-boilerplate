@@ -20,6 +20,7 @@ This is a SaaS boilerplate built with Next.js 16 (App Router), TypeScript, Tailw
 - **Deployment**: Vercel
 
 ## Project Structure
+
 ```
 ├── app/
 │   ├── (public)/                    # Public pages (SEO-indexed)
@@ -84,26 +85,27 @@ This is a SaaS boilerplate built with Next.js 16 (App Router), TypeScript, Tailw
 
 ### Component Suffixes
 
-| Suffix | Usage |
-|--------|-------|
-| `-card.tsx` | Displays ONE resource |
-| `-list.tsx` | Maps over cards |
-| `-table.tsx` | Data table |
-| `-columns.tsx` | Table column definitions |
-| `-row.tsx` | Single table row |
-| `-form.tsx` | Form component |
-| `-modal.tsx` | Dialog/Modal |
-| `-button.tsx` | Button with specific logic |
-| `-header.tsx` | Section/page header |
-| `-tabs.tsx` | Tab navigation |
-| `-filters.tsx` | Filters (Nuqs) |
-| `-skeleton.tsx` | Loading state |
-| `-empty.tsx` | Empty state (always separate file) |
-| `-error.tsx` | Error state |
+| Suffix          | Usage                              |
+| --------------- | ---------------------------------- |
+| `-card.tsx`     | Displays ONE resource              |
+| `-list.tsx`     | Maps over cards                    |
+| `-table.tsx`    | Data table                         |
+| `-columns.tsx`  | Table column definitions           |
+| `-row.tsx`      | Single table row                   |
+| `-form.tsx`     | Form component                     |
+| `-modal.tsx`    | Dialog/Modal                       |
+| `-button.tsx`   | Button with specific logic         |
+| `-header.tsx`   | Section/page header                |
+| `-tabs.tsx`     | Tab navigation                     |
+| `-filters.tsx`  | Filters (Nuqs)                     |
+| `-skeleton.tsx` | Loading state                      |
+| `-empty.tsx`    | Empty state (always separate file) |
+| `-error.tsx`    | Error state                        |
 
 ## Component Guidelines
 
 ### Structure
+
 ```tsx
 // 1. Imports (type imports first)
 import type { ReactNode } from "react";
@@ -139,12 +141,12 @@ export { MyComponent };
 
 Place components in the `_components` folder of the closest common ancestor:
 
-| Used in... | Place in... |
-|------------|-------------|
-| Only one page | `app/(public)/[page]/_components/` |
-| Multiple public pages | `app/(public)/_components/` |
-| Multiple protected pages | `app/(protected)/_components/` |
-| Public AND protected | `components/` |
+| Used in...               | Place in...                        |
+| ------------------------ | ---------------------------------- |
+| Only one page            | `app/(public)/[page]/_components/` |
+| Multiple public pages    | `app/(public)/_components/`        |
+| Multiple protected pages | `app/(protected)/_components/`     |
+| Public AND protected     | `components/`                      |
 
 ## Page Guidelines
 
@@ -154,8 +156,10 @@ Place components in the `_components` folder of the closest common ancestor:
 - Top-level element: `<main>`
 
 ### Public Pages
+
 ```tsx
 import type { Metadata } from "next";
+
 import type { WebPage, WithContext } from "schema-dts";
 
 import { env } from "@/lib/env";
@@ -174,7 +178,9 @@ export const metadata: Metadata = {
 };
 
 export default function ExamplePage() {
-  const pageSchema: WithContext<WebPage> = { /* ... */ };
+  const pageSchema: WithContext<WebPage> = {
+    /* ... */
+  };
 
   return (
     <>
@@ -189,10 +195,12 @@ export default function ExamplePage() {
 ```
 
 ### Protected Pages
+
 ```tsx
 import type { Metadata } from "next";
 
 import { requireSession } from "@/lib/session";
+
 // or: import { requireAdmin } from "@/lib/session";
 
 export const metadata: Metadata = {
@@ -215,6 +223,7 @@ export default async function DashboardExamplePage() {
 - Function: `{Path}Loading` (e.g., `BlogLoading`, `DashboardSettingsLoading`)
 
 ### Structure
+
 ```tsx
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -245,6 +254,7 @@ export default function ExampleLoading() {
 Read → Create → Replace → Update → Delete (matching HTTP methods)
 
 ### Structure
+
 ```tsx
 import { z } from "zod";
 
@@ -291,21 +301,21 @@ export type { CreateDocumentSchemaType, UpdateDocumentSchemaType };
 GET → POST → PUT → PATCH → DELETE
 
 ### Structure
+
 ```tsx
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-
 import { CreateDocumentSchema } from "@/lib/schemas/document.schema";
 
 import {
   BadRequestError,
   ForbiddenError,
-  handleApiError,
   NotFoundError,
   UnauthorizedError,
+  handleApiError,
 } from "@/utils/api/handle-api-error";
 
 type RouteParams = {
@@ -345,7 +355,10 @@ async function GET(request: Request, { params }: RouteParams) {
       throw new ForbiddenError("Accès non autorisé");
     }
 
-    return NextResponse.json({ success: true, data: document }, { status: 200 });
+    return NextResponse.json(
+      { success: true, data: document },
+      { status: 200 }
+    );
   } catch (error: unknown) {
     return handleApiError(error);
   }
@@ -378,7 +391,10 @@ async function POST(request: Request) {
       },
     });
 
-    return NextResponse.json({ success: true, data: document }, { status: 201 });
+    return NextResponse.json(
+      { success: true, data: document },
+      { status: 201 }
+    );
   } catch (error: unknown) {
     return handleApiError(error);
   }
@@ -436,11 +452,11 @@ export { GET, POST, DELETE };
 
 ### Options
 
-| Option | Value | Reason |
-|--------|-------|--------|
-| `shallow` | `false` | Server re-fetches data |
-| `history` | `push` | Back button works |
-| `startTransition` | Used | Shows loading state |
+| Option            | Value   | Reason                 |
+| ----------------- | ------- | ---------------------- |
+| `shallow`         | `false` | Server re-fetches data |
+| `history`         | `push`  | Back button works      |
+| `startTransition` | Used    | Shows loading state    |
 
 ### Parser Security
 
@@ -466,16 +482,16 @@ export { GET, POST, DELETE };
 
 Binary pattern: either success or throw
 
-| Error Class | Status | Usage |
-|-------------|--------|-------|
-| `BadRequestError` | 400 | Invalid input |
-| `UnauthorizedError` | 401 | No session |
-| `ForbiddenError` | 403 | Not allowed |
-| `NotFoundError` | 404 | Not found |
-| `ConflictError` | 409 | Duplicate |
-| `PayloadTooLargeError` | 413 | Too large |
-| `UnprocessableEntityError` | 422 | Semantic error |
-| `TooManyRequestsError` | 429 | Rate limited |
+| Error Class                | Status | Usage          |
+| -------------------------- | ------ | -------------- |
+| `BadRequestError`          | 400    | Invalid input  |
+| `UnauthorizedError`        | 401    | No session     |
+| `ForbiddenError`           | 403    | Not allowed    |
+| `NotFoundError`            | 404    | Not found      |
+| `ConflictError`            | 409    | Duplicate      |
+| `PayloadTooLargeError`     | 413    | Too large      |
+| `UnprocessableEntityError` | 422    | Semantic error |
+| `TooManyRequestsError`     | 429    | Rate limited   |
 
 ## Skill Files
 

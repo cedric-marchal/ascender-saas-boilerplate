@@ -82,7 +82,12 @@ async function Header() {
         <div className="flex items-center md:hidden">
           <Sheet>
             <SheetTrigger asChild>
-              <Button type="button" variant="outline" size="icon" aria-label="Ouvrir le menu">
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                aria-label="Ouvrir le menu"
+              >
                 <Menu className="h-4 w-4" aria-hidden="true" />
               </Button>
             </SheetTrigger>

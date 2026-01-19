@@ -65,9 +65,15 @@ function UserCard({ user }: UserCardProps) {
             <div className="text-muted-foreground flex items-center gap-1.5 text-sm">
               <span>{user.email}</span>
               {user.emailVerified ? (
-                <CheckCircle2 className="h-3.5 w-3.5 text-green-600" aria-hidden="true" />
+                <CheckCircle2
+                  className="h-3.5 w-3.5 text-green-600"
+                  aria-hidden="true"
+                />
               ) : (
-                <XCircle className="text-muted-foreground/50 h-3.5 w-3.5" aria-hidden="true" />
+                <XCircle
+                  className="text-muted-foreground/50 h-3.5 w-3.5"
+                  aria-hidden="true"
+                />
               )}
             </div>
 

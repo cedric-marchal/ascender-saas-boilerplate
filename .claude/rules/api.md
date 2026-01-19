@@ -53,6 +53,7 @@ export { DELETE, POST, GET };
 ### 3. File Structure (P0)
 
 Follow this exact order:
+
 1. Imports (Next.js → libs → schemas → components → utils)
 2. Constants (internal only)
 3. Type declarations (RouteParams if needed)
@@ -118,7 +119,10 @@ async function POST(request: Request) {
     const document = await createDocument(data, session.user.id);
 
     // Step 4: Success (only return in try block)
-    return NextResponse.json({ success: true, data: document }, { status: 201 });
+    return NextResponse.json(
+      { success: true, data: document },
+      { status: 201 }
+    );
   } catch (error: unknown) {
     return handleApiError(error);
   }
@@ -180,7 +184,10 @@ async function GET(request: Request, { params }: RouteParams) {
       throw new ForbiddenError("Accès non autorisé");
     }
 
-    return NextResponse.json({ success: true, data: document }, { status: 200 });
+    return NextResponse.json(
+      { success: true, data: document },
+      { status: 200 }
+    );
   } catch (error: unknown) {
     return handleApiError(error);
   }
@@ -225,7 +232,10 @@ async function POST(request: Request) {
       },
     });
 
-    return NextResponse.json({ success: true, data: document }, { status: 201 });
+    return NextResponse.json(
+      { success: true, data: document },
+      { status: 201 }
+    );
   } catch (error: unknown) {
     return handleApiError(error);
   }
@@ -260,13 +270,13 @@ async function GET(request: Request, { params }: RouteParams) {
 
 ### 8. HTTP Status Codes (P0)
 
-| Method | Success Action | Status Code |
-|--------|---------------|-------------|
-| `GET` | Resource(s) retrieved | `200` |
-| `POST` | Resource created | `201` |
-| `PUT` | Resource replaced | `200` |
-| `PATCH` | Resource updated | `200` |
-| `DELETE` | Resource deleted | `204` |
+| Method   | Success Action        | Status Code |
+| -------- | --------------------- | ----------- |
+| `GET`    | Resource(s) retrieved | `200`       |
+| `POST`   | Resource created      | `201`       |
+| `PUT`    | Resource replaced     | `200`       |
+| `PATCH`  | Resource updated      | `200`       |
+| `DELETE` | Resource deleted      | `204`       |
 
 ```tsx
 // GET - Retrieval
@@ -377,16 +387,16 @@ return NextResponse.json({ success: true, data: safeDocument });
 
 ### 11. Error Classes Usage (P0)
 
-| Error Class | HTTP Status | Usage |
-|-------------|-------------|-------|
-| `BadRequestError` | 400 | Invalid input, missing required params |
-| `UnauthorizedError` | 401 | No authentication / invalid session |
-| `ForbiddenError` | 403 | Authenticated but not allowed |
-| `NotFoundError` | 404 | Resource doesn't exist |
-| `ConflictError` | 409 | Duplicate resource, state conflict |
-| `PayloadTooLargeError` | 413 | File/request too large |
-| `UnprocessableEntityError` | 422 | Valid syntax but semantic error |
-| `TooManyRequestsError` | 429 | Rate limit exceeded |
+| Error Class                | HTTP Status | Usage                                  |
+| -------------------------- | ----------- | -------------------------------------- |
+| `BadRequestError`          | 400         | Invalid input, missing required params |
+| `UnauthorizedError`        | 401         | No authentication / invalid session    |
+| `ForbiddenError`           | 403         | Authenticated but not allowed          |
+| `NotFoundError`            | 404         | Resource doesn't exist                 |
+| `ConflictError`            | 409         | Duplicate resource, state conflict     |
+| `PayloadTooLargeError`     | 413         | File/request too large                 |
+| `UnprocessableEntityError` | 422         | Valid syntax but semantic error        |
+| `TooManyRequestsError`     | 429         | Rate limit exceeded                    |
 
 ```tsx
 // Missing param
@@ -431,7 +441,6 @@ import { NextResponse } from "next/server";
 
 import { env } from "@/lib/env";
 import { resend } from "@/lib/resend";
-
 import { CreateContactSchema } from "@/lib/schemas/contact.schema";
 
 import { ContactEmail } from "@/components/emails/contact-email";
@@ -483,12 +492,11 @@ import { NextResponse } from "next/server";
 
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-
 import { CreateDocumentSchema } from "@/lib/schemas/document.schema";
 
 import {
-  handleApiError,
   UnauthorizedError,
+  handleApiError,
 } from "@/utils/api/handle-api-error";
 
 async function GET(request: Request) {
@@ -512,7 +520,10 @@ async function GET(request: Request) {
       orderBy: { createdAt: "desc" },
     });
 
-    return NextResponse.json({ success: true, data: documents }, { status: 200 });
+    return NextResponse.json(
+      { success: true, data: documents },
+      { status: 200 }
+    );
   } catch (error: unknown) {
     return handleApiError(error);
   }
@@ -548,7 +559,10 @@ async function POST(request: Request) {
       },
     });
 
-    return NextResponse.json({ success: true, data: document }, { status: 201 });
+    return NextResponse.json(
+      { success: true, data: document },
+      { status: 201 }
+    );
   } catch (error: unknown) {
     return handleApiError(error);
   }
@@ -567,15 +581,14 @@ import { NextResponse } from "next/server";
 
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-
 import { UpdateDocumentSchema } from "@/lib/schemas/document.schema";
 
 import {
   BadRequestError,
   ForbiddenError,
-  handleApiError,
   NotFoundError,
   UnauthorizedError,
+  handleApiError,
 } from "@/utils/api/handle-api-error";
 
 type RouteParams = {
@@ -630,13 +643,16 @@ async function GET(request: Request, { params }: RouteParams) {
       throw new ForbiddenError("Accès non autorisé");
     }
 
-    return NextResponse.json({
-      success: true,
-      data: {
-        ...document,
-        items: relatedItems,
+    return NextResponse.json(
+      {
+        success: true,
+        data: {
+          ...document,
+          items: relatedItems,
+        },
       },
-    }, { status: 200 });
+      { status: 200 }
+    );
   } catch (error: unknown) {
     return handleApiError(error);
   }
@@ -693,7 +709,10 @@ async function PATCH(request: Request, { params }: RouteParams) {
       },
     });
 
-    return NextResponse.json({ success: true, data: updatedDocument }, { status: 200 });
+    return NextResponse.json(
+      { success: true, data: updatedDocument },
+      { status: 200 }
+    );
   } catch (error: unknown) {
     return handleApiError(error);
   }
@@ -820,4 +839,7 @@ return NextResponse.json({ success: true }, { status: 200 }); // Should be 204 w
 10. **Await params**: Always await route parameters before using
 11. **Named exports**: No default exports, no inline exports
 12. **Type error as unknown**: Always `catch (error: unknown)`
+
+```
+
 ```

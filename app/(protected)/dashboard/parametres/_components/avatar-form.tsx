@@ -204,10 +204,16 @@ function AvatarForm({ user, avatarUrl }: AvatarFormProps) {
                 disabled={isLoading}
               />
               {isLoading ? (
-                <Loader2 className="text-muted-foreground h-8 w-8 animate-spin" aria-hidden="true" />
+                <Loader2
+                  className="text-muted-foreground h-8 w-8 animate-spin"
+                  aria-hidden="true"
+                />
               ) : (
                 <>
-                  <Upload className="text-muted-foreground h-8 w-8" aria-hidden="true" />
+                  <Upload
+                    className="text-muted-foreground h-8 w-8"
+                    aria-hidden="true"
+                  />
                   <span className="text-muted-foreground mt-2 text-sm">
                     Glissez une image ou cliquez
                   </span>
@@ -224,7 +230,10 @@ function AvatarForm({ user, avatarUrl }: AvatarFormProps) {
                 disabled={isDeleting}
               >
                 {isDeleting ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+                  <Loader2
+                    className="mr-2 h-4 w-4 animate-spin"
+                    aria-hidden="true"
+                  />
                 ) : (
                   <X className="mr-2 h-4 w-4" aria-hidden="true" />
                 )}

@@ -2,9 +2,9 @@
 
 import { useRouter } from "next/navigation";
 
-import { signOut } from "@/lib/auth-client";
-
 import { Button } from "@/components/ui/button";
+
+import { signOut } from "@/lib/auth-client";
 
 function SignOutButton() {
   const router = useRouter();

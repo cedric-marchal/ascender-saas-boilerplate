@@ -13,7 +13,10 @@ function UserList({ users }: UserListProps) {
   if (users.length === 0) {
     return (
       <section className="flex flex-col items-center justify-center py-12 text-center">
-        <FolderOpen className="text-muted-foreground h-12 w-12" aria-hidden="true" />
+        <FolderOpen
+          className="text-muted-foreground h-12 w-12"
+          aria-hidden="true"
+        />
         <h3 className="mt-4 text-lg font-medium">Aucun utilisateur</h3>
         <p className="text-muted-foreground mt-1 text-sm">
           Créez votre premier utilisateur pour commencer.

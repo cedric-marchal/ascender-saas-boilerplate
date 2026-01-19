@@ -266,12 +266,12 @@ export default function DashboardLoading() {
 
 ## Placement Guidelines
 
-| Route Type       | Loading File Location                              | Function Name (English)       |
-| ---------------- | -------------------------------------------------- | ----------------------------- |
-| Public pages     | `app/(public)/[route]/loading.tsx`                 | `{EnglishRoute}Loading`       |
-| Dashboard pages  | `app/(protected)/dashboard/[route]/loading.tsx`    | `Dashboard{EnglishRoute}Loading` |
-| Admin pages      | `app/(protected)/admin/[route]/loading.tsx`        | `Admin{EnglishRoute}Loading`  |
-| Shared dashboard | `app/(protected)/dashboard/loading.tsx`            | `DashboardLoading`            |
+| Route Type       | Loading File Location                           | Function Name (English)          |
+| ---------------- | ----------------------------------------------- | -------------------------------- |
+| Public pages     | `app/(public)/[route]/loading.tsx`              | `{EnglishRoute}Loading`          |
+| Dashboard pages  | `app/(protected)/dashboard/[route]/loading.tsx` | `Dashboard{EnglishRoute}Loading` |
+| Admin pages      | `app/(protected)/admin/[route]/loading.tsx`     | `Admin{EnglishRoute}Loading`     |
+| Shared dashboard | `app/(protected)/dashboard/loading.tsx`         | `DashboardLoading`               |
 
 ## Key Principles
 
@@ -280,4 +280,7 @@ export default function DashboardLoading() {
 3. **Consistency**: Use the same spacing, sizing, and structure as the real content
 4. **Accessibility**: Always include ARIA attributes for assistive technologies
 5. **English naming**: Function names use English equivalents regardless of French URL paths
+
+```
+
 ```

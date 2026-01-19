@@ -26,22 +26,22 @@ BlogPostPreview.tsx
 
 ### 2. Naming Conventions by Component Type (P0)
 
-| Suffix | Usage | Example |
-|--------|-------|---------|
-| `-card.tsx` | Displays ONE resource | `project-card.tsx` |
-| `-list.tsx` | Maps over cards | `project-list.tsx` |
-| `-table.tsx` | Data table component | `users-table.tsx` |
-| `-columns.tsx` | Table column definitions | `users-columns.tsx` |
-| `-row.tsx` | Single table row component | `user-row.tsx` |
-| `-form.tsx` | Form component | `profile-form.tsx` |
-| `-modal.tsx` | Dialog/Modal | `delete-account-modal.tsx` |
-| `-button.tsx` | Button with specific logic | `sign-out-button.tsx` |
-| `-header.tsx` | Section/page header | `settings-header.tsx` |
-| `-tabs.tsx` | Tab navigation | `settings-tabs.tsx` |
-| `-filters.tsx` | Filters (Nuqs) | `project-filters.tsx` |
-| `-skeleton.tsx` | Loading state | `project-card-skeleton.tsx` |
-| `-empty.tsx` | Empty state (ALWAYS separate file) | `project-list-empty.tsx` |
-| `-error.tsx` | Error state | `project-list-error.tsx` |
+| Suffix          | Usage                              | Example                     |
+| --------------- | ---------------------------------- | --------------------------- |
+| `-card.tsx`     | Displays ONE resource              | `project-card.tsx`          |
+| `-list.tsx`     | Maps over cards                    | `project-list.tsx`          |
+| `-table.tsx`    | Data table component               | `users-table.tsx`           |
+| `-columns.tsx`  | Table column definitions           | `users-columns.tsx`         |
+| `-row.tsx`      | Single table row component         | `user-row.tsx`              |
+| `-form.tsx`     | Form component                     | `profile-form.tsx`          |
+| `-modal.tsx`    | Dialog/Modal                       | `delete-account-modal.tsx`  |
+| `-button.tsx`   | Button with specific logic         | `sign-out-button.tsx`       |
+| `-header.tsx`   | Section/page header                | `settings-header.tsx`       |
+| `-tabs.tsx`     | Tab navigation                     | `settings-tabs.tsx`         |
+| `-filters.tsx`  | Filters (Nuqs)                     | `project-filters.tsx`       |
+| `-skeleton.tsx` | Loading state                      | `project-card-skeleton.tsx` |
+| `-empty.tsx`    | Empty state (ALWAYS separate file) | `project-list-empty.tsx`    |
+| `-error.tsx`    | Error state                        | `project-list-error.tsx`    |
 
 ### 3. Component Structure (P0)
 
@@ -171,10 +171,10 @@ export { JobCard };
 ```tsx
 // ✅ Correct
 import type { ReactNode } from "react";
-import type { User } from "@/types/user";
-
 // ❌ Wrong
 import { ReactNode } from "react";
+
+import type { User } from "@/types/user";
 import { User } from "@/types/user";
 ```
 
@@ -262,7 +262,8 @@ function Button({ variant = "primary", isDisabled, className }: ButtonProps) {
       className={cn(
         "rounded-md px-4 py-2 font-medium transition-colors",
         variant === "primary" && "bg-blue-600 text-white hover:bg-blue-700",
-        variant === "secondary" && "bg-gray-200 text-gray-800 hover:bg-gray-300",
+        variant === "secondary" &&
+          "bg-gray-200 text-gray-800 hover:bg-gray-300",
         isDisabled && "cursor-not-allowed opacity-50",
         className
       )}
@@ -377,16 +378,16 @@ className={`rounded-md ${isDisabled && "opacity-50"}`}
 
 **"Bubble Up" principle**: Place components in the `_components` folder of the closest common ancestor.
 
-| Component used in... | Place in... |
-|---------------------|-------------|
-| Only `blog/page.tsx` | `app/(public)/blog/_components/` |
-| `blog/` AND `contact/` | `app/(public)/_components/` |
-| Only `dashboard/settings/` | `app/(protected)/dashboard/settings/_components/` |
-| `dashboard/` AND `dashboard/settings/` | `app/(protected)/dashboard/_components/` |
-| `dashboard/` AND `admin/` | `app/(protected)/_components/` |
-| Public AND protected pages | `components/` |
-| Shadcn/ui components | `components/ui/` |
-| Email templates | `components/emails/` |
+| Component used in...                   | Place in...                                       |
+| -------------------------------------- | ------------------------------------------------- |
+| Only `blog/page.tsx`                   | `app/(public)/blog/_components/`                  |
+| `blog/` AND `contact/`                 | `app/(public)/_components/`                       |
+| Only `dashboard/settings/`             | `app/(protected)/dashboard/settings/_components/` |
+| `dashboard/` AND `dashboard/settings/` | `app/(protected)/dashboard/_components/`          |
+| `dashboard/` AND `admin/`              | `app/(protected)/_components/`                    |
+| Public AND protected pages             | `components/`                                     |
+| Shadcn/ui components                   | `components/ui/`                                  |
+| Email templates                        | `components/emails/`                              |
 
 ### Examples
 
@@ -558,7 +559,6 @@ export { JobCard };
 
 ```tsx
 import type { Job } from "@/app/(public)/jobs/_components/job-card";
-
 import { JobCard } from "@/app/(public)/jobs/_components/job-card";
 import { JobListEmpty } from "@/app/(public)/jobs/_components/job-list-empty";
 
@@ -596,13 +596,15 @@ function JobListEmpty() {
   return (
     <section className="py-12 text-center">
       <div className="mx-auto max-w-md">
-        <Building className="mx-auto mb-4 h-12 w-12 text-slate-400" aria-hidden="true" />
+        <Building
+          className="mx-auto mb-4 h-12 w-12 text-slate-400"
+          aria-hidden="true"
+        />
         <h3 className="mb-2 text-lg font-medium text-slate-800">
           Aucune offre trouvée
         </h3>
         <p className="text-slate-500">
-          Essayez de modifier vos critères de recherche pour voir plus
-          d'offres.
+          Essayez de modifier vos critères de recherche pour voir plus d'offres.
         </p>
       </div>
     </section>
@@ -620,6 +622,7 @@ export { JobListEmpty };
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
+
 import type { User } from "@/types/user";
 
 const usersColumns: ColumnDef<User>[] = [
@@ -645,10 +648,11 @@ export { usersColumns };
 ```tsx
 "use client";
 
-import type { User } from "@/types/user";
-
 import { DataTable } from "@/components/ui/data-table";
+
 import { usersColumns } from "@/app/(protected)/admin/_components/users-columns";
+
+import type { User } from "@/types/user";
 
 type UsersTableProps = {
   users: User[];
@@ -692,6 +696,7 @@ export { StatsCardSkeleton };
 
 import { useState } from "react";
 
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -701,7 +706,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 
 type DeleteAccountModalProps = {
   onConfirm: () => Promise<void>;
@@ -848,4 +852,7 @@ function JobList({ jobs }: JobListProps) {
 10. **Responsive by default**: Every component works on desktop, tablet, and mobile
 11. **Explicit button types**: Always specify `type="button"` or `type="submit"`
 12. **Accessible icons**: `aria-hidden="true"` for decorative, `aria-label` for functional
+
+```
+
 ```

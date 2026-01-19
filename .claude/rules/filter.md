@@ -34,11 +34,7 @@ app/(public)/projects/
 - Parsers MUST be exported from page file for client component reuse
 
 ```tsx
-import {
-  createLoader,
-  createParser,
-  parseAsStringLiteral,
-} from "nuqs/server";
+import { createLoader, createParser, parseAsStringLiteral } from "nuqs/server";
 
 const MAX_PAGE = 1000;
 const MAX_SEARCH_LENGTH = 100;
@@ -89,13 +85,9 @@ const loadSearchParams = createLoader(projectSearchParams);
 
 ```tsx
 import type { Metadata } from "next";
-import type { SearchParams } from "nuqs/server";
 
-import {
-  createLoader,
-  createParser,
-  parseAsStringLiteral,
-} from "nuqs/server";
+import type { SearchParams } from "nuqs/server";
+import { createLoader, createParser, parseAsStringLiteral } from "nuqs/server";
 
 import { prisma } from "@/lib/prisma";
 
@@ -153,7 +145,9 @@ type ProjectsPageProps = {
   searchParams: Promise<SearchParams>;
 };
 
-export default async function ProjectsPage({ searchParams }: ProjectsPageProps) {
+export default async function ProjectsPage({
+  searchParams,
+}: ProjectsPageProps) {
   const { search, status, page } = await loadSearchParams(searchParams);
 
   const safeSearch = search.slice(0, MAX_SEARCH_LENGTH).trim();
@@ -195,7 +189,8 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
       <header className="mb-8">
         <h1 className="text-3xl font-bold">Projets</h1>
         <p className="mt-2 text-gray-600">
-          {totalCount} projet{totalCount > 1 ? "s" : ""} trouvé{totalCount > 1 ? "s" : ""}
+          {totalCount} projet{totalCount > 1 ? "s" : ""} trouvé
+          {totalCount > 1 ? "s" : ""}
         </p>
       </header>
 
@@ -226,15 +221,10 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
 "use client";
 
 import type { ChangeEvent } from "react";
-
 import { useTransition } from "react";
 
-import {
-  createParser,
-  parseAsStringLiteral,
-  useQueryStates,
-} from "nuqs";
 import { Search, X } from "lucide-react";
+import { createParser, parseAsStringLiteral, useQueryStates } from "nuqs";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -330,7 +320,7 @@ function ProjectFilters() {
       <div className="flex flex-col gap-4 sm:flex-row">
         <div className="relative flex-1">
           <Search
-            className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
+            className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400"
             aria-hidden="true"
           />
           <Input
@@ -392,8 +382,8 @@ export { ProjectFilters };
 
 import { useTransition } from "react";
 
-import { createParser, useQueryState } from "nuqs";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { createParser, useQueryState } from "nuqs";
 
 import { Button } from "@/components/ui/button";
 
@@ -417,7 +407,10 @@ type ProjectPaginationProps = {
   totalPages: number;
 };
 
-function ProjectPagination({ currentPage, totalPages }: ProjectPaginationProps) {
+function ProjectPagination({
+  currentPage,
+  totalPages,
+}: ProjectPaginationProps) {
   const [isLoading, startTransition] = useTransition();
 
   const [, setPage] = useQueryState(
@@ -486,8 +479,8 @@ export { ProjectPagination };
 
 ```tsx
 import type { Metadata } from "next";
-import type { SearchParams } from "nuqs/server";
 
+import type { SearchParams } from "nuqs/server";
 import { createLoader, createParser, parseAsStringLiteral } from "nuqs/server";
 
 import { env } from "@/lib/env";
@@ -518,17 +511,20 @@ type ProjectsPageProps = {
   searchParams: Promise<SearchParams>;
 };
 
-export async function generateMetadata({ searchParams }: ProjectsPageProps): Promise<Metadata> {
+export async function generateMetadata({
+  searchParams,
+}: ProjectsPageProps): Promise<Metadata> {
   const { status, page } = await loadSearchParams(searchParams);
 
   const baseUrl = env.NEXT_PUBLIC_BASE_URL;
   const hasFilters = status !== "all" || page > 1;
 
-  const title = status !== "all"
-    ? `Projets ${status} - Page ${page}`
-    : page > 1
-      ? `Projets - Page ${page}`
-      : "Projets";
+  const title =
+    status !== "all"
+      ? `Projets ${status} - Page ${page}`
+      : page > 1
+        ? `Projets - Page ${page}`
+        : "Projets";
 
   return {
     title,
@@ -550,41 +546,41 @@ export async function generateMetadata({ searchParams }: ProjectsPageProps): Pro
 
 ### 7. Options Configuration (P0)
 
-| Option | Value | Reason |
-|--------|-------|--------|
-| `shallow` | `false` | Server re-fetches data on filter change |
-| `history` | `push` | Back button navigates through filter states |
-| `startTransition` | Used | Shows loading state during server re-render |
-| `withDefault()` | Always | Prevents null values, ensures type safety |
+| Option            | Value   | Reason                                      |
+| ----------------- | ------- | ------------------------------------------- |
+| `shallow`         | `false` | Server re-fetches data on filter change     |
+| `history`         | `push`  | Back button navigates through filter states |
+| `startTransition` | Used    | Shows loading state during server re-render |
+| `withDefault()`   | Always  | Prevents null values, ensures type safety   |
 
 ### 8. Security Validation (P0)
 
-| Attack Vector | Protection | Implementation |
-|---------------|------------|----------------|
-| SQL Injection | Prisma parameterized queries | Automatic |
-| XSS via search | React auto-escapes | Automatic |
-| Invalid enum value | `parseAsStringLiteral` rejects | Parser level |
-| Negative page | `createParser` with min(1) | Parser level |
-| Huge page number | `createParser` with max(1000) | Parser level |
-| Long search string | `createParser` with slice(100) | Parser level |
-| Missing params | `withDefault()` | Parser level |
-| Page > totalPages | Server-side check | Page component |
+| Attack Vector      | Protection                     | Implementation |
+| ------------------ | ------------------------------ | -------------- |
+| SQL Injection      | Prisma parameterized queries   | Automatic      |
+| XSS via search     | React auto-escapes             | Automatic      |
+| Invalid enum value | `parseAsStringLiteral` rejects | Parser level   |
+| Negative page      | `createParser` with min(1)     | Parser level   |
+| Huge page number   | `createParser` with max(1000)  | Parser level   |
+| Long search string | `createParser` with slice(100) | Parser level   |
+| Missing params     | `withDefault()`                | Parser level   |
+| Page > totalPages  | Server-side check              | Page component |
 
 ## Available Parsers
 
-| Parser | Usage | Example |
-|--------|-------|---------|
-| `parseAsString` | Basic string | `parseAsString.withDefault("")` |
-| `parseAsInteger` | Integer (use createParser for bounds) | `parseAsInteger.withDefault(1)` |
-| `parseAsFloat` | Float number | `parseAsFloat.withDefault(0)` |
-| `parseAsBoolean` | Boolean | `parseAsBoolean.withDefault(false)` |
-| `parseAsStringLiteral` | Enum values | `parseAsStringLiteral(["a", "b"] as const)` |
-| `parseAsNumberLiteral` | Number enum | `parseAsNumberLiteral([1, 2, 3] as const)` |
-| `parseAsArrayOf` | Comma-separated array | `parseAsArrayOf(parseAsInteger)` |
-| `parseAsIsoDate` | Date (YYYY-MM-DD) | `parseAsIsoDate` |
-| `parseAsIsoDateTime` | DateTime | `parseAsIsoDateTime` |
-| `parseAsTimestamp` | Timestamp (ms) | `parseAsTimestamp` |
-| `createParser` | Custom validation | See examples above |
+| Parser                 | Usage                                 | Example                                     |
+| ---------------------- | ------------------------------------- | ------------------------------------------- |
+| `parseAsString`        | Basic string                          | `parseAsString.withDefault("")`             |
+| `parseAsInteger`       | Integer (use createParser for bounds) | `parseAsInteger.withDefault(1)`             |
+| `parseAsFloat`         | Float number                          | `parseAsFloat.withDefault(0)`               |
+| `parseAsBoolean`       | Boolean                               | `parseAsBoolean.withDefault(false)`         |
+| `parseAsStringLiteral` | Enum values                           | `parseAsStringLiteral(["a", "b"] as const)` |
+| `parseAsNumberLiteral` | Number enum                           | `parseAsNumberLiteral([1, 2, 3] as const)`  |
+| `parseAsArrayOf`       | Comma-separated array                 | `parseAsArrayOf(parseAsInteger)`            |
+| `parseAsIsoDate`       | Date (YYYY-MM-DD)                     | `parseAsIsoDate`                            |
+| `parseAsIsoDateTime`   | DateTime                              | `parseAsIsoDateTime`                        |
+| `parseAsTimestamp`     | Timestamp (ms)                        | `parseAsTimestamp`                          |
+| `createParser`         | Custom validation                     | See examples above                          |
 
 ## Anti-Patterns
 
@@ -639,4 +635,7 @@ prisma.project.findMany({ where: whereClause });
 6. **Clean URLs**: Use `null` to remove params, not empty strings
 7. **Bounds validation**: Always limit page numbers and string lengths
 8. **Consistent parsers**: Same parser definitions in page and components
+
+```
+
 ```

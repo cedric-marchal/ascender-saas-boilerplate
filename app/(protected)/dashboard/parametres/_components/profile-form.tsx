@@ -99,7 +99,12 @@ function ProfileForm({ user }: ProfileFormProps) {
           </div>
 
           <Button type="submit" disabled={isLoading}>
-            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />}
+            {isLoading && (
+              <Loader2
+                className="mr-2 h-4 w-4 animate-spin"
+                aria-hidden="true"
+              />
+            )}
             Enregistrer
           </Button>
         </form>
