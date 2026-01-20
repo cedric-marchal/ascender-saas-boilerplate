@@ -58,7 +58,7 @@ export const metadata: Metadata = {
     siteName: APP_NAME,
     images: [
       {
-        url: "/images/open-graph/sums-saas-boilerplate-open-graph.webp",
+        url: "/images/open-graph/ascender-saas-boilerplate-open-graph.webp",
         width: 1200,
         height: 630,
         alt: APP_NAME,
