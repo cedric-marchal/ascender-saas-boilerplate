@@ -12,6 +12,8 @@ const CONTACT_EMAIL = "contact@example.com"; // À remplacer par ton email
 
 async function POST(request: Request) {
   try {
+    // Rate limit
+
     const formData = await request.formData();
 
     const contactData = CreateContactSchema.parse({

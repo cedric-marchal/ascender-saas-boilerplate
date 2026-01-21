@@ -10,6 +10,7 @@
   "arrowParens": "always",
   "endOfLine": "lf",
   "importOrder": [
+    "^server-only$",
     "^(react|react-dom)$",
     "^next(/.*)?$",
     "<THIRD_PARTY_MODULES>",

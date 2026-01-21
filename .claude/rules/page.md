@@ -37,9 +37,8 @@ These rules apply exclusively to creating new `page.tsx` files in the Next.js Ap
 
 ```tsx
 // ✅ Correct
-import type { Metadata } from "next";
 // ❌ Wrong
-import { Metadata } from "next";
+import { Metadata, type Metadata } from "next";
 
 import type { WebSite, WithContext } from "schema-dts";
 ```

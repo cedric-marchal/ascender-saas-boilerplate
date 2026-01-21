@@ -1,3 +1,5 @@
+import type { ComponentType } from "react";
+
 import Link from "next/link";
 
 import {
@@ -30,7 +32,12 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 
-// Menu items.
+type MenuItem = {
+  title: string;
+  url: string;
+  icon: ComponentType<React.SVGProps<SVGSVGElement>>;
+};
+
 const items = [
   {
     title: "Tableau de bord",
@@ -67,7 +74,7 @@ function AppSidebar({ image, name }: AppSidebarProps) {
           <SidebarGroupLabel>{env.NEXT_PUBLIC_APP_NAME}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {items.map((item) => (
+              {items.map((item: MenuItem) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <Link href={item.url}>

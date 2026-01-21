@@ -360,9 +360,8 @@ app/(protected)/dashboard/settings/
 
 ```tsx
 // 1. Type imports first
-import type { ChangeEvent, FormEvent } from "react";
 // 2. Regular imports
-import { useState } from "react";
+import { type ChangeEvent, type FormEvent, useState } from "react";
 
 import type { User } from "@prisma/client";
 
@@ -743,8 +742,7 @@ export { GET, POST, DELETE };
 ```tsx
 "use client";
 
-import type { ChangeEvent } from "react";
-import { useState } from "react";
+import { type ChangeEvent, useState } from "react";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";

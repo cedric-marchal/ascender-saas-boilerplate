@@ -93,14 +93,15 @@ export { ComponentA, ComponentB };
 
 ```tsx
 // ✅ Correct
-import { JobCard } from "@/app/(public)/jobs/_components/job-card";
-import type { Job } from "@/app/(public)/jobs/_components/job-card";
 import { cn } from "@/lib/utils";
+
 import { Button } from "@/components/ui/button";
 
+import { JobCard, type Job } from "@/app/(public)/jobs/_components/job-card";
+
+import { Button } from "../../components/ui/button";
 // ❌ Wrong
 import { JobCard } from "./job-card";
-import { Button } from "../../components/ui/button";
 ```
 
 ### 5. Props Typing (P0)
@@ -170,12 +171,10 @@ export { JobCard };
 
 ```tsx
 // ✅ Correct
-import type { ReactNode } from "react";
 // ❌ Wrong
-import { ReactNode } from "react";
+import { ReactNode, type ReactNode } from "react";
 
-import type { User } from "@/types/user";
-import { User } from "@/types/user";
+import { User, type User } from "@/types/user";
 ```
 
 ### 7. Server vs Client Components (P0)
@@ -558,8 +557,7 @@ export { JobCard };
 `app/(public)/jobs/_components/job-list.tsx`:
 
 ```tsx
-import type { Job } from "@/app/(public)/jobs/_components/job-card";
-import { JobCard } from "@/app/(public)/jobs/_components/job-card";
+import { type Job, JobCard } from "@/app/(public)/jobs/_components/job-card";
 import { JobListEmpty } from "@/app/(public)/jobs/_components/job-list-empty";
 
 type JobListProps = {

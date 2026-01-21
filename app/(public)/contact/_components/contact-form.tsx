@@ -1,6 +1,9 @@
 "use client";
 
+import { useState } from "react";
+
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -22,6 +25,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
 function ContactForm() {
+  const [isLoading, setIsLoading] = useState(false);
+
   const form = useForm<CreateContactSchemaType>({
     resolver: zodResolver(CreateContactSchema),
     defaultValues: {
@@ -34,6 +39,8 @@ function ContactForm() {
 
   const onSubmit = async (data: CreateContactSchemaType) => {
     try {
+      setIsLoading(true);
+
       const formData = new FormData();
       formData.append("name", data.name);
       formData.append("email", data.email);
@@ -56,6 +63,8 @@ function ContactForm() {
       toast.error(
         error instanceof Error ? error.message : "Une erreur est survenue"
       );
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -127,14 +136,12 @@ function ContactForm() {
             </FormItem>
           )}
         />
-        <Button
-          type="submit"
-          className="w-full"
-          disabled={form.formState.isSubmitting}
-        >
-          {form.formState.isSubmitting
-            ? "Envoi en cours..."
-            : "Envoyer le message"}
+        <Button type="submit" className="w-full" disabled={isLoading}>
+          {isLoading ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+          ) : (
+            "Envoyer le message"
+          )}
         </Button>
       </form>
     </Form>

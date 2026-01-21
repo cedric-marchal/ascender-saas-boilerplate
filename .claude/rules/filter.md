@@ -86,8 +86,12 @@ const loadSearchParams = createLoader(projectSearchParams);
 ```tsx
 import type { Metadata } from "next";
 
-import type { SearchParams } from "nuqs/server";
-import { createLoader, createParser, parseAsStringLiteral } from "nuqs/server";
+import {
+  type SearchParams,
+  createLoader,
+  createParser,
+  parseAsStringLiteral,
+} from "nuqs/server";
 
 import { prisma } from "@/lib/prisma";
 
@@ -206,11 +210,43 @@ export default async function ProjectsPage({
 }
 ```
 
-### 4. Client Component Filters (P0)
+### 4. Search Input Debounce (P0)
+
+- MUST use debounce for search inputs that trigger database queries
+- MUST use a custom `useDebounce` hook with 500ms delay (default)
+- Prevents database overload from rapid typing
+- Improves UX by reducing unnecessary queries
+
+Create a reusable hook at `@/hooks/use-debounce.ts`:
+
+```tsx
+import { useEffect, useState } from "react";
+
+function useDebounce<T>(value: T, delay: number = 500): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+}
+
+export { useDebounce };
+```
+
+### 5. Client Component Filters (P0)
 
 - MUST be a Client Component (`"use client"`)
 - MUST use `useQueryStates` for multiple filters
 - MUST use `useTransition` for loading state
+- MUST use `useDebounce` for search inputs (500ms delay)
 - MUST set `shallow: false` to notify server
 - MUST set `history: "push"` for back button support
 - MUST reset page to 1 when filters change
@@ -220,11 +256,12 @@ export default async function ProjectsPage({
 ```tsx
 "use client";
 
-import type { ChangeEvent } from "react";
-import { useTransition } from "react";
+import { type ChangeEvent, useState, useTransition } from "react";
 
 import { Search, X } from "lucide-react";
 import { createParser, parseAsStringLiteral, useQueryStates } from "nuqs";
+
+import { useDebounce } from "@/hooks/use-debounce";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -277,6 +314,8 @@ const statusLabels: Record<ProjectStatus, string> = {
 
 function ProjectFilters() {
   const [isLoading, startTransition] = useTransition();
+  const [searchInput, setSearchInput] = useState("");
+  const debouncedSearch = useDebounce(searchInput, 500);
 
   const [filters, setFilters] = useQueryStates(
     {
@@ -291,11 +330,16 @@ function ProjectFilters() {
     }
   );
 
-  function handleSearchChange(event: ChangeEvent<HTMLInputElement>) {
+  // Update URL when debounced search changes
+  React.useEffect(() => {
     setFilters({
-      search: event.target.value || null,
+      search: debouncedSearch || null,
       page: 1,
     });
+  }, [debouncedSearch, setFilters]);
+
+  function handleSearchChange(event: ChangeEvent<HTMLInputElement>) {
+    setSearchInput(event.target.value);
   }
 
   function handleStatusChange(value: ProjectStatus) {
@@ -306,6 +350,7 @@ function ProjectFilters() {
   }
 
   function handleClearFilters() {
+    setSearchInput("");
     setFilters({
       search: null,
       status: null,
@@ -326,7 +371,7 @@ function ProjectFilters() {
           <Input
             type="search"
             placeholder="Rechercher un projet..."
-            value={filters.search}
+            value={searchInput}
             onChange={handleSearchChange}
             className="pl-10"
           />
@@ -480,8 +525,12 @@ export { ProjectPagination };
 ```tsx
 import type { Metadata } from "next";
 
-import type { SearchParams } from "nuqs/server";
-import { createLoader, createParser, parseAsStringLiteral } from "nuqs/server";
+import {
+  type SearchParams,
+  createLoader,
+  createParser,
+  parseAsStringLiteral,
+} from "nuqs/server";
 
 import { env } from "@/lib/env";
 
@@ -591,6 +640,11 @@ const page = parseAsInteger.withDefault(1);
 // ❌ Wrong: Using parseAsString without length limit for search
 const search = parseAsString.withDefault("");
 
+// ❌ Wrong: Not using debounce for search inputs (overloads database)
+function handleSearchChange(event: ChangeEvent<HTMLInputElement>) {
+  setFilters({ search: event.target.value, page: 1 });
+}
+
 // ❌ Wrong: shallow: true (server won't re-fetch)
 useQueryStates(parsers, { shallow: true });
 
@@ -630,11 +684,12 @@ prisma.project.findMany({ where: whereClause });
 1. **Defense in depth**: Validate at parser level AND server level
 2. **Type safety**: Always type event handlers with `import type`
 3. **SEO friendly**: `shallow: false` + `history: "push"` + canonical URLs
-4. **Performance**: `$transaction` for parallel queries, `select` for fields
-5. **UX**: `useTransition` for loading states, reset page on filter change
-6. **Clean URLs**: Use `null` to remove params, not empty strings
-7. **Bounds validation**: Always limit page numbers and string lengths
-8. **Consistent parsers**: Same parser definitions in page and components
+4. **Performance**: `$transaction` for parallel queries, `select` for fields, `useDebounce` for search
+5. **Database protection**: Always debounce search inputs (500ms) to prevent query overload
+6. **UX**: `useTransition` for loading states, reset page on filter change
+7. **Clean URLs**: Use `null` to remove params, not empty strings
+8. **Bounds validation**: Always limit page numbers and string lengths
+9. **Consistent parsers**: Same parser definitions in page and components
 
 ```
 

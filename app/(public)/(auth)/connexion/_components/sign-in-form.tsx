@@ -1,8 +1,11 @@
 "use client";
 
+import { useState } from "react";
+
 import { useRouter } from "next/navigation";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -25,6 +28,8 @@ import { ForgotPasswordLink } from "@/app/(public)/(auth)/connexion/_components/
 function SignInForm() {
   const router = useRouter();
 
+  const [isLoading, setIsLoading] = useState(false);
+
   const form = useForm<SignInSchemaType>({
     resolver: zodResolver(SignInSchema),
     defaultValues: {
@@ -34,6 +39,8 @@ function SignInForm() {
   });
 
   const onSubmit = async (data: SignInSchemaType) => {
+    setIsLoading(true);
+
     const { error } = await authClient.signIn.email({
       email: data.email,
       password: data.password,
@@ -41,11 +48,14 @@ function SignInForm() {
 
     if (error) {
       toast.error(error.message || "Identifiants incorrects");
+      setIsLoading(false);
       return;
     }
 
     router.push("/dashboard");
     router.refresh();
+
+    setIsLoading(false);
   };
 
   return (
@@ -91,26 +101,30 @@ function SignInForm() {
               </FormItem>
             )}
           />
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={form.formState.isSubmitting}
-          >
-            {form.formState.isSubmitting
-              ? "Connexion en cours..."
-              : "Se connecter"}
+          <Button type="submit" disabled={isLoading} className="w-full">
+            {isLoading ? (
+              <Loader2
+                className="mr-2 h-4 w-4 animate-spin"
+                aria-hidden="true"
+              />
+            ) : (
+              "Se connecter"
+            )}
           </Button>
         </form>
       </Form>
 
       <Button
         type="button"
-        className="w-full"
+        disabled={isLoading}
         onClick={() => signIn.social({ provider: "google" })}
+        className="w-full"
       >
-        {form.formState.isSubmitting
-          ? "Connexion en cours..."
-          : "Se connecter avec Google"}
+        {isLoading ? (
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+        ) : (
+          "Se connecter avec Google"
+        )}
       </Button>
     </>
   );

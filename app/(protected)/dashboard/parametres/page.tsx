@@ -1,12 +1,7 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 
-import { getDownloadUrl } from "@/lib/r2";
-import { requireSession } from "@/lib/session";
-
-import { AvatarForm } from "@/app/(protected)/dashboard/parametres/_components/avatar-form";
-import { EmailForm } from "@/app/(protected)/dashboard/parametres/_components/email-form";
-import { EmailVerificationAlert } from "@/app/(protected)/dashboard/parametres/_components/email-verification-alert";
-import { ProfileForm } from "@/app/(protected)/dashboard/parametres/_components/profile-form";
+import { getSession } from "@/lib/session";
 
 export const metadata: Metadata = {
   title: "Paramètres",
@@ -16,13 +11,11 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function SettingsPage() {
-  const session = await requireSession();
+export default async function DashboardSettingsPage() {
+  const session = await getSession();
 
-  let avatarUrl: string | null = null;
-
-  if (session.user.image?.startsWith("users/avatars/")) {
-    avatarUrl = await getDownloadUrl(session.user.image);
+  if (!session) {
+    return redirect("/connexion");
   }
 
   return (
@@ -33,29 +26,6 @@ export default async function SettingsPage() {
           Gérez les paramètres de votre compte.
         </p>
       </div>
-
-      {!session.user.emailVerified && <EmailVerificationAlert />}
-
-      <AvatarForm
-        user={{
-          name: session.user.name,
-          image: session.user.image,
-        }}
-        avatarUrl={avatarUrl}
-      />
-
-      <ProfileForm
-        user={{
-          name: session.user.name,
-        }}
-      />
-
-      <EmailForm
-        user={{
-          email: session.user.email,
-          emailVerified: session.user.emailVerified,
-        }}
-      />
     </main>
   );
 }

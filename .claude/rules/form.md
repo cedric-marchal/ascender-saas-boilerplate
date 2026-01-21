@@ -39,8 +39,7 @@ app/(protected)/dashboard/settings/_components/settings-forms.tsx
 ```tsx
 "use client";
 
-import type { ChangeEvent, DragEvent } from "react";
-import { useState } from "react";
+import { type ChangeEvent, type DragEvent, useState } from "react";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, Upload, X } from "lucide-react";
@@ -854,8 +853,7 @@ export { DeleteAccountModal };
 ```tsx
 "use client";
 
-import type { ChangeEvent, DragEvent } from "react";
-import { useState } from "react";
+import { type ChangeEvent, type DragEvent, useState } from "react";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, Upload, X } from "lucide-react";

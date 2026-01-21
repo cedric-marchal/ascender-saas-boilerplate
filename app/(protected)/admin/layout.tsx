@@ -2,28 +2,28 @@ import type { ReactNode } from "react";
 
 import { redirect } from "next/navigation";
 
-import { getSession } from "@/lib/session";
+import { getSession, requireAdmin } from "@/lib/session";
 
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 
-import { AppSidebar } from "@/app/(protected)/_components/app-sidebar";
+import { AdminSidebar } from "@/app/(protected)/admin/_components/admin-sidebar";
 
-type ProtectedLayoutProps = {
+type AdminLayoutProps = {
   children: ReactNode;
 };
 
-export default async function ProtectedLayout({
-  children,
-}: ProtectedLayoutProps) {
+export default async function AdminLayout({ children }: AdminLayoutProps) {
   const session = await getSession();
 
   if (!session) {
     return redirect("/connexion");
   }
 
+  await requireAdmin();
+
   return (
     <SidebarProvider>
-      <AppSidebar image={session.user.image} name={session.user.name} />
+      <AdminSidebar image={session.user.image} name={session.user.name} />
       <SidebarTrigger />
       {children}
     </SidebarProvider>

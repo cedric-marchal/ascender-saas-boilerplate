@@ -1,9 +1,9 @@
+import "server-only";
+
 import { cache } from "react";
 
 import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
-
-import "server-only";
 
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -33,9 +33,10 @@ const requireSession = cache(async (): Promise<Session> => {
     return redirect("/connexion");
   }
 
+  /*
   if (!session.user.emailVerified) {
     return redirect("/dashboard/parametres");
-  }
+  }*/
 
   return session;
 });
@@ -63,5 +64,5 @@ const requireAdmin = cache(async (): Promise<Session> => {
   return session;
 });
 
-export { getSession, requireSession, requireAdmin };
+export { getSession, requireAdmin, requireSession };
 export type { Session };
