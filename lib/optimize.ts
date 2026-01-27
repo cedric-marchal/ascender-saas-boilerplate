@@ -2,6 +2,12 @@ import "server-only";
 
 import sharp from "sharp";
 
+import { BadRequestError } from "@/utils/api/handle-api-error";
+
+const ACCEPTED_IMAGE_FORMATS = ["image/jpeg", "image/png", "image/webp"];
+const MAX_IMAGE_WIDTH = 10000;
+const MAX_IMAGE_HEIGHT = 10000;
+
 type ImageFormat = "webp" | "avif" | "jpeg" | "png";
 
 type OptimizeImageOptions = {
@@ -11,17 +17,64 @@ type OptimizeImageOptions = {
   format?: ImageFormat;
 };
 
-type OptimizeImageResult =
-  | { success: true; buffer: Buffer; format: ImageFormat; size: number }
-  | { success: false };
+type OptimizeImageResult = {
+  buffer: Buffer;
+  format: ImageFormat;
+  size: number;
+};
 
-/**
- * Optimise une image (resize + compression + conversion)
- */
+type ImageMetadata = {
+  width: number;
+  height: number;
+  format: string;
+};
+
+async function validateImageBuffer(input: Buffer): Promise<void> {
+  if (!input || input.length === 0) {
+    throw new BadRequestError("Le fichier image est vide");
+  }
+
+  try {
+    const metadata = await sharp(input).metadata();
+
+    if (!metadata.format) {
+      throw new BadRequestError("Format d'image non reconnu");
+    }
+
+    const mimeType = `image/${metadata.format}`;
+    if (!ACCEPTED_IMAGE_FORMATS.includes(mimeType)) {
+      throw new BadRequestError(
+        "Format d'image non supporté. Formats acceptés : JPEG, PNG, WebP"
+      );
+    }
+
+    if (!metadata.width || !metadata.height) {
+      throw new BadRequestError("Impossible de lire les dimensions de l'image");
+    }
+
+    if (
+      metadata.width > MAX_IMAGE_WIDTH ||
+      metadata.height > MAX_IMAGE_HEIGHT
+    ) {
+      throw new BadRequestError(
+        `L'image est trop grande (max ${MAX_IMAGE_WIDTH}x${MAX_IMAGE_HEIGHT}px)`
+      );
+    }
+  } catch (error: unknown) {
+    if (error instanceof BadRequestError) {
+      throw error;
+    }
+
+    throw new BadRequestError("Le fichier fourni n'est pas une image valide");
+  }
+}
+
 async function optimizeImage(
   input: Buffer,
   options: OptimizeImageOptions = {}
 ): Promise<OptimizeImageResult> {
+  await validateImageBuffer(input);
+
   const {
     maxWidth = 1920,
     maxHeight = 1080,
@@ -39,20 +92,18 @@ async function optimizeImage(
       .toBuffer();
 
     return {
-      success: true,
       buffer,
       format,
       size: buffer.length,
     };
-  } catch {
-    return { success: false };
+  } catch (error: unknown) {
+    throw new BadRequestError("Échec de l'optimisation de l'image");
   }
 }
 
-/**
- * Optimise un avatar (carré 256x256, WebP)
- */
 async function optimizeAvatar(input: Buffer): Promise<OptimizeImageResult> {
+  await validateImageBuffer(input);
+
   try {
     const buffer = await sharp(input)
       .resize(256, 256, {
@@ -63,20 +114,18 @@ async function optimizeAvatar(input: Buffer): Promise<OptimizeImageResult> {
       .toBuffer();
 
     return {
-      success: true,
       buffer,
       format: "webp",
       size: buffer.length,
     };
-  } catch {
-    return { success: false };
+  } catch (error: unknown) {
+    throw new BadRequestError("Échec de l'optimisation de l'avatar");
   }
 }
 
-/**
- * Optimise une bannière (1500x500, WebP)
- */
 async function optimizeBanner(input: Buffer): Promise<OptimizeImageResult> {
+  await validateImageBuffer(input);
+
   try {
     const buffer = await sharp(input)
       .resize(1500, 500, {
@@ -87,35 +136,35 @@ async function optimizeBanner(input: Buffer): Promise<OptimizeImageResult> {
       .toBuffer();
 
     return {
-      success: true,
       buffer,
       format: "webp",
       size: buffer.length,
     };
-  } catch {
-    return { success: false };
+  } catch (error: unknown) {
+    throw new BadRequestError("Échec de l'optimisation de la bannière");
   }
 }
 
-/**
- * Récupère les métadonnées d'une image
- */
-async function getImageMetadata(input: Buffer): Promise<{
-  width: number;
-  height: number;
-  format: string;
-} | null> {
+async function getImageMetadata(input: Buffer): Promise<ImageMetadata> {
+  await validateImageBuffer(input);
+
   try {
     const metadata = await sharp(input).metadata();
+
     return {
       width: metadata.width ?? 0,
       height: metadata.height ?? 0,
       format: metadata.format ?? "unknown",
     };
-  } catch {
-    return null;
+  } catch (error: unknown) {
+    throw new BadRequestError("Impossible de lire les métadonnées de l'image");
   }
 }
 
-export { optimizeImage, optimizeAvatar, optimizeBanner, getImageMetadata };
-export type { OptimizeImageOptions, OptimizeImageResult, ImageFormat };
+export { getImageMetadata, optimizeAvatar, optimizeBanner, optimizeImage };
+export type {
+  ImageFormat,
+  ImageMetadata,
+  OptimizeImageOptions,
+  OptimizeImageResult,
+};
