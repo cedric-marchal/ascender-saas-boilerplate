@@ -1,12 +1,10 @@
 import type { ReactNode } from "react";
 
-import { redirect } from "next/navigation";
-
-import { getSession } from "@/lib/session";
+import { requireSession } from "@/lib/session";
 
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 
-import { AppSidebar } from "@/app/(protected)/dashboard/_components/app-sidebar";
+import { DashboardSidebar } from "@/app/(protected)/dashboard/_components/dashboard-sidebar";
 
 type ProtectedLayoutProps = {
   children: ReactNode;
@@ -15,15 +13,11 @@ type ProtectedLayoutProps = {
 export default async function ProtectedDashboardLayout({
   children,
 }: ProtectedLayoutProps) {
-  const session = await getSession();
-
-  if (!session) {
-    return redirect("/connexion");
-  }
+  const session = await requireSession();
 
   return (
     <SidebarProvider>
-      <AppSidebar image={session.user.image} name={session.user.name} />
+      <DashboardSidebar image={session.user.image} name={session.user.name} />
       <SidebarTrigger />
       {children}
     </SidebarProvider>

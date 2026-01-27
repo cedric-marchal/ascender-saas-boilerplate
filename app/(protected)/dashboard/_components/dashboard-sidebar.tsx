@@ -61,12 +61,12 @@ const items = [
   },
 ];
 
-type AppSidebarProps = {
+type DashboardSidebarProps = {
   image?: string | null;
   name: string;
 };
 
-function AppSidebar({ image, name }: AppSidebarProps) {
+function DashboardSidebar({ image, name }: DashboardSidebarProps) {
   return (
     <Sidebar>
       <SidebarContent>
@@ -131,4 +131,4 @@ function AppSidebar({ image, name }: AppSidebarProps) {
   );
 }
 
-export { AppSidebar };
+export { DashboardSidebar };
