@@ -33,17 +33,27 @@ const requireSession = cache(async (): Promise<Session> => {
     return redirect("/connexion");
   }
 
-  /*
+  return session;
+});
+
+/**
+ * Récupère la session customer et vérifie que l'email est vérifié
+ * Redirige vers /dashboard/parametres si l'email n'est pas vérifié
+ * À utiliser dans les pages customer nécessitant un email vérifié
+ */
+const requireCustomerVerifiedEmail = cache(async (): Promise<Session> => {
+  const session = await requireSession();
+
   if (!session.user.emailVerified) {
     return redirect("/dashboard/parametres");
-  }*/
+  }
 
   return session;
 });
 
 /**
  * Récupère la session admin ou affiche 404
- * À utiliser dans CHAQUE page admin
+ * À utiliser dans les pages admin ne nécessitant pas d'email vérifié
  */
 const requireAdmin = cache(async (): Promise<Session> => {
   const session = await requireSession();
@@ -64,5 +74,26 @@ const requireAdmin = cache(async (): Promise<Session> => {
   return session;
 });
 
-export { getSession, requireAdmin, requireSession };
+/**
+ * Récupère la session admin et vérifie que l'email est vérifié
+ * Affiche 404 si non admin ou si l'email n'est pas vérifié
+ * À utiliser dans les pages admin nécessitant un email vérifié
+ */
+const requireAdminVerifiedEmail = cache(async (): Promise<Session> => {
+  const session = await requireAdmin();
+
+  if (!session.user.emailVerified) {
+    return redirect("/admin/parametres");
+  }
+
+  return session;
+});
+
+export {
+  getSession,
+  requireAdmin,
+  requireAdminVerifiedEmail,
+  requireCustomerVerifiedEmail,
+  requireSession,
+};
 export type { Session };

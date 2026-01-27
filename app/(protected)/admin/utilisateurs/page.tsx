@@ -8,7 +8,7 @@ import {
 } from "nuqs/server";
 
 import { prisma } from "@/lib/prisma";
-import { requireAdmin } from "@/lib/session";
+import { requireAdminVerifiedEmail } from "@/lib/session";
 
 import { DataTable } from "@/components/ui/data-table";
 
@@ -75,7 +75,7 @@ type AdminUsersPageProps = {
 export default async function AdminUsersPage({
   searchParams,
 }: AdminUsersPageProps) {
-  await requireAdmin();
+  await requireAdminVerifiedEmail();
 
   const { search, role, verified, page } = await loadSearchParams(searchParams);
 

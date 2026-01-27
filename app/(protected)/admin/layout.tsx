@@ -1,25 +1,19 @@
 import type { ReactNode } from "react";
 
-import { redirect } from "next/navigation";
-
-import { getSession, requireAdmin } from "@/lib/session";
+import { requireAdmin } from "@/lib/session";
 
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 
 import { AdminSidebar } from "@/app/(protected)/admin/_components/admin-sidebar";
 
-type AdminLayoutProps = {
+type ProtectedAdminLayoutProps = {
   children: ReactNode;
 };
 
-export default async function AdminLayout({ children }: AdminLayoutProps) {
-  const session = await getSession();
-
-  if (!session) {
-    return redirect("/connexion");
-  }
-
-  await requireAdmin();
+export default async function ProtectedAdminLayout({
+  children,
+}: ProtectedAdminLayoutProps) {
+  const session = await requireAdmin();
 
   return (
     <SidebarProvider>

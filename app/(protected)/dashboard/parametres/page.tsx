@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
 
-import { getSession } from "@/lib/session";
+import { requireSession } from "@/lib/session";
 
 export const metadata: Metadata = {
   title: "Paramètres",
@@ -12,11 +11,7 @@ export const metadata: Metadata = {
 };
 
 export default async function DashboardSettingsPage() {
-  const session = await getSession();
-
-  if (!session) {
-    return redirect("/connexion");
-  }
+  await requireSession();
 
   return (
     <main className="mx-auto w-full max-w-2xl space-y-6 px-4 py-8">
