@@ -96,7 +96,10 @@ function DashboardSidebar({ image, name }: DashboardSidebarProps) {
                 <SidebarMenuButton>
                   <Avatar>
                     {image ? (
-                      <AvatarImage src={image} alt={`${name} avatar`} />
+                      <AvatarImage
+                        src={`https://pub-72962e5431d34da686d4c668ceaaf669.r2.dev${image}`}
+                        alt={`${name} avatar`}
+                      />
                     ) : (
                       <AvatarFallback>{name.charAt(0)}</AvatarFallback>
                     )}

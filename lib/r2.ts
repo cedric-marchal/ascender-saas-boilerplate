@@ -10,6 +10,8 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 import { env } from "@/lib/env";
 
+import { BadRequestError, NotFoundError } from "@/utils/api/handle-api-error";
+
 const r2 = new S3Client({
   region: "auto",
   endpoint: `https://${env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
@@ -20,15 +22,51 @@ const r2 = new S3Client({
 });
 
 const BUCKET = env.R2_BUCKET_NAME;
+const MAX_KEY_LENGTH = 1024;
+const MIN_EXPIRES_IN = 1;
+const MAX_EXPIRES_IN = 604800;
 
-/**
- * Upload un fichier vers R2
- */
+function validateKey(key: string): void {
+  if (!key || key.trim().length === 0) {
+    throw new BadRequestError("La clé du fichier est requise");
+  }
+
+  if (key.length > MAX_KEY_LENGTH) {
+    throw new BadRequestError(
+      `La clé du fichier est trop longue (max ${MAX_KEY_LENGTH} caractères)`
+    );
+  }
+
+  if (key.includes("..") || key.startsWith("/")) {
+    throw new BadRequestError(
+      "La clé du fichier contient des caractères invalides"
+    );
+  }
+}
+
+function validateExpiresIn(expiresIn: number): void {
+  if (expiresIn < MIN_EXPIRES_IN || expiresIn > MAX_EXPIRES_IN) {
+    throw new BadRequestError(
+      `La durée d'expiration doit être entre ${MIN_EXPIRES_IN} et ${MAX_EXPIRES_IN} secondes`
+    );
+  }
+}
+
 async function uploadFile(
   key: string,
   body: Buffer | Blob,
   contentType: string
-): Promise<boolean> {
+): Promise<void> {
+  validateKey(key);
+
+  if (!body) {
+    throw new BadRequestError("Le contenu du fichier est requis");
+  }
+
+  if (!contentType || contentType.trim().length === 0) {
+    throw new BadRequestError("Le type de contenu est requis");
+  }
+
   try {
     await r2.send(
       new PutObjectCommand({
@@ -38,16 +76,14 @@ async function uploadFile(
         ContentType: contentType,
       })
     );
-    return true;
-  } catch {
-    return false;
+  } catch (error: unknown) {
+    throw new BadRequestError("Échec de l'upload du fichier vers le stockage");
   }
 }
 
-/**
- * Télécharge un fichier depuis R2
- */
-async function downloadFile(key: string): Promise<Buffer | null> {
+async function downloadFile(key: string): Promise<Buffer> {
+  validateKey(key);
+
   try {
     const response = await r2.send(
       new GetObjectCommand({
@@ -57,20 +93,23 @@ async function downloadFile(key: string): Promise<Buffer | null> {
     );
 
     if (!response.Body) {
-      return null;
+      throw new NotFoundError("Le contenu du fichier est introuvable");
     }
 
     const bytes = await response.Body.transformToByteArray();
     return Buffer.from(bytes);
-  } catch {
-    return null;
+  } catch (error: unknown) {
+    if (error instanceof NotFoundError || error instanceof BadRequestError) {
+      throw error;
+    }
+
+    throw new NotFoundError("Fichier introuvable dans le stockage");
   }
 }
 
-/**
- * Supprime un fichier de R2
- */
-async function deleteFile(key: string): Promise<boolean> {
+async function deleteFile(key: string): Promise<void> {
+  validateKey(key);
+
   try {
     await r2.send(
       new DeleteObjectCommand({
@@ -78,19 +117,18 @@ async function deleteFile(key: string): Promise<boolean> {
         Key: key,
       })
     );
-    return true;
-  } catch {
-    return false;
+  } catch (error: unknown) {
+    throw new BadRequestError("Échec de la suppression du fichier");
   }
 }
 
-/**
- * Génère une URL présignée pour upload direct (client → R2)
- */
 async function getUploadUrl(
   key: string,
   expiresIn: number = 3600
-): Promise<string | null> {
+): Promise<string> {
+  validateKey(key);
+  validateExpiresIn(expiresIn);
+
   try {
     const url = await getSignedUrl(
       r2,
@@ -100,19 +138,20 @@ async function getUploadUrl(
       }),
       { expiresIn }
     );
+
     return url;
-  } catch {
-    return null;
+  } catch (error: unknown) {
+    throw new BadRequestError("Échec de la génération de l'URL d'upload");
   }
 }
 
-/**
- * Génère une URL présignée pour téléchargement (client ← R2)
- */
 async function getDownloadUrl(
   key: string,
   expiresIn: number = 3600
-): Promise<string | null> {
+): Promise<string> {
+  validateKey(key);
+  validateExpiresIn(expiresIn);
+
   try {
     const url = await getSignedUrl(
       r2,
@@ -122,16 +161,18 @@ async function getDownloadUrl(
       }),
       { expiresIn }
     );
+
     return url;
-  } catch {
-    return null;
+  } catch (error: unknown) {
+    throw new BadRequestError(
+      "Échec de la génération de l'URL de téléchargement"
+    );
   }
 }
 
-/**
- * Vérifie si un fichier existe
- */
 async function fileExists(key: string): Promise<boolean> {
+  validateKey(key);
+
   try {
     await r2.send(
       new GetObjectCommand({
@@ -146,10 +187,10 @@ async function fileExists(key: string): Promise<boolean> {
 }
 
 export {
-  uploadFile,
-  downloadFile,
   deleteFile,
-  getUploadUrl,
-  getDownloadUrl,
+  downloadFile,
   fileExists,
+  getDownloadUrl,
+  getUploadUrl,
+  uploadFile,
 };
