@@ -17,4 +17,5 @@ const USER_ROLE_CONFIG: Record<UserRole, UserRoleConfig> = {
 };
 
 export { USER_ROLE_CONFIG };
+
 export type { UserRoleConfig };

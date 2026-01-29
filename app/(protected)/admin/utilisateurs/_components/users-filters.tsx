@@ -67,6 +67,7 @@ const verificationLabels: Record<UserVerificationStatus, string> = {
 function UsersFilters() {
   const [isLoading, startTransition] = useTransition();
   const [searchInput, setSearchInput] = useState("");
+
   const debouncedSearch = useDebounce(searchInput, 500);
 
   const [filters, setFilters] = useQueryStates(
