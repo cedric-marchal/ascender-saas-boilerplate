@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 
-import { prisma } from "@/lib/prisma";
-import { requireSession } from "@/lib/session";
+import { requireCustomer } from "@/lib/session";
 
 import {
   Card,
@@ -25,22 +24,7 @@ export const metadata: Metadata = {
 };
 
 export default async function DashboardSettingsPage() {
-  const session = await requireSession();
-
-  const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      emailVerified: true,
-      image: true,
-    },
-  });
-
-  if (!user) {
-    throw new Error("Utilisateur introuvable");
-  }
+  const session = await requireCustomer();
 
   return (
     <main className="flex min-h-screen w-full flex-col gap-6 p-6">
@@ -56,7 +40,11 @@ export default async function DashboardSettingsPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <DashboardProfileForm user={user} />
+              <DashboardProfileForm
+                name={session.user.name}
+                email={session.user.email}
+                emailVerified={session.user.emailVerified}
+              />
             </CardContent>
           </Card>
 
@@ -82,7 +70,10 @@ export default async function DashboardSettingsPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <DashboardAvatarForm user={user} />
+              <DashboardAvatarForm
+                name={session.user.name}
+                image={session.user.image}
+              />
             </CardContent>
           </Card>
         </div>

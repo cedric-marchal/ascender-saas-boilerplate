@@ -1,3 +1,5 @@
+"use client";
+
 import type { ComponentType } from "react";
 
 import Link from "next/link";
@@ -96,7 +98,10 @@ function AdminSidebar({ image, name }: AdminSidebarProps) {
                 <SidebarMenuButton>
                   <Avatar>
                     {image ? (
-                      <AvatarImage src={image} alt={`${name} avatar`} />
+                      <AvatarImage
+                        src={`https://pub-72962e5431d34da686d4c668ceaaf669.r2.dev${image}`}
+                        alt={`${name} avatar`}
+                      />
                     ) : (
                       <AvatarFallback>{name.charAt(0)}</AvatarFallback>
                     )}
@@ -110,12 +115,12 @@ function AdminSidebar({ image, name }: AdminSidebarProps) {
                 className="w-[--radix-popper-anchor-width]"
               >
                 <DropdownMenuItem asChild>
-                  <Link href="/dashboard">
-                    <span>Retour au dashboard</span>
+                  <Link href="/admin">
+                    <span>Retour à la page principale</span>
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link href="/dashboard/parametres">
+                  <Link href="/admin/parametres">
                     <span>Mon compte</span>
                   </Link>
                 </DropdownMenuItem>

@@ -37,11 +37,10 @@ const requireSession = cache(async (): Promise<Session> => {
 });
 
 /**
- * Récupère la session customer et vérifie que l'email est vérifié
- * Redirige vers /dashboard/parametres si l'email n'est pas vérifié
- * À utiliser dans les pages customer nécessitant un email vérifié
+ * Récupère la session customer ou affiche 404
+ * À utiliser dans les pages customer ne nécessitant pas d'email vérifié
  */
-const requireCustomerVerifiedEmail = cache(async (): Promise<Session> => {
+const requireCustomer = cache(async (): Promise<Session> => {
   const session = await requireSession();
 
   const user = await prisma.user.findUnique({
@@ -56,6 +55,17 @@ const requireCustomerVerifiedEmail = cache(async (): Promise<Session> => {
   if (!user || user.role !== "CUSTOMER") {
     return notFound();
   }
+
+  return session;
+});
+
+/**
+ * Récupère la session customer et vérifie que l'email est vérifié
+ * Redirige vers /dashboard/parametres si l'email n'est pas vérifié
+ * À utiliser dans les pages customer nécessitant un email vérifié
+ */
+const requireCustomerVerifiedEmail = cache(async (): Promise<Session> => {
+  const session = await requireCustomer();
 
   if (!session.user.emailVerified) {
     return redirect("/dashboard/parametres");
@@ -106,6 +116,7 @@ export {
   getSession,
   requireAdmin,
   requireAdminVerifiedEmail,
+  requireCustomer,
   requireCustomerVerifiedEmail,
   requireSession,
 };

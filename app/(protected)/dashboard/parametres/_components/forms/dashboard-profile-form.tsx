@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 
+import { useRouter } from "next/navigation";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -28,22 +29,24 @@ import { Input } from "@/components/ui/input";
 import { EmailVerificationBadge } from "@/app/(protected)/dashboard/parametres/_components/email-verification-badge";
 
 type DashboardProfileFormProps = {
-  user: {
-    name: string;
-    email: string;
-    emailVerified: boolean;
-  };
+  name: string;
+  email: string;
+  emailVerified: boolean;
 };
 
-function DashboardProfileForm({ user }: DashboardProfileFormProps) {
+function DashboardProfileForm({
+  name,
+  email,
+  emailVerified,
+}: DashboardProfileFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<UpdateProfileSchemaType>({
     resolver: zodResolver(UpdateProfileSchema),
     defaultValues: {
-      name: user.name,
-      email: user.email,
+      name: name,
+      email: email,
     },
   });
 
@@ -110,8 +113,8 @@ function DashboardProfileForm({ user }: DashboardProfileFormProps) {
                 <Input type="email" placeholder="votre@email.com" {...field} />
               </FormControl>
               <FormDescription className="flex items-center gap-2">
-                <EmailVerificationBadge isVerified={user.emailVerified} />
-                {!user.emailVerified && (
+                <EmailVerificationBadge isVerified={emailVerified} />
+                {!emailVerified && (
                   <span className="text-xs text-orange-600">
                     Vérifiez votre email pour sécuriser votre compte
                   </span>

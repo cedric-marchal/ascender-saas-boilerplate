@@ -30,13 +30,11 @@ type UpdateAvatarSchemaType = {
 };
 
 type DashboardAvatarFormProps = {
-  user: {
-    name: string;
-    image: string | null;
-  };
+  name: string;
+  image: string | null | undefined;
 };
 
-function DashboardAvatarForm({ user }: DashboardAvatarFormProps) {
+function DashboardAvatarForm({ name, image }: DashboardAvatarFormProps) {
   const router = useRouter();
 
   const [isLoading, setIsLoading] = useState(false);
@@ -91,12 +89,9 @@ function DashboardAvatarForm({ user }: DashboardAvatarFormProps) {
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <div className="flex items-center gap-6">
           <Avatar className="h-20 w-20">
-            <AvatarImage
-              src={previewUrl || user.image || undefined}
-              alt={user.name}
-            />
+            <AvatarImage src={previewUrl || image || undefined} alt={name} />
             <AvatarFallback className="text-lg">
-              {user.name.charAt(0).toUpperCase()}
+              {name.charAt(0).toUpperCase()}
             </AvatarFallback>
           </Avatar>
 
