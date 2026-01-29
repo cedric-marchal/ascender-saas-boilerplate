@@ -1,18 +1,22 @@
 import { NextResponse } from "next/server";
 
 import { env } from "@/lib/env";
+import { contactRatelimit } from "@/lib/ratelimit";
 import { resend } from "@/lib/resend";
 import { CreateContactSchema } from "@/lib/schemas/contact.schema";
 
 import { ContactEmail } from "@/components/emails/contact-email";
 
 import { handleApiError } from "@/utils/api/handle-api-error";
+import { checkRatelimit } from "@/utils/ratelimit/check-ratelimit";
+import { getRequestIdentifier } from "@/utils/ratelimit/get-request-identifier";
 
-const CONTACT_EMAIL = "contact@example.com"; // À remplacer par ton email
+const CONTACT_EMAIL = "contact@example.com";
 
 async function POST(request: Request) {
   try {
-    // Rate limit
+    const identifier = getRequestIdentifier(request);
+    await checkRatelimit(contactRatelimit, identifier);
 
     const formData = await request.formData();
 

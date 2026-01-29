@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { optimizeAvatar } from "@/lib/optimize";
 import { prisma } from "@/lib/prisma";
+import { authenticatedRatelimit } from "@/lib/ratelimit";
 import { deleteFile, uploadFile } from "@/lib/r2";
 import { UpdateAvatarSchema } from "@/lib/schemas/avatar.schema";
 import { getSession } from "@/lib/session";
@@ -12,6 +13,7 @@ import {
   UnauthorizedError,
   handleApiError,
 } from "@/utils/api/handle-api-error";
+import { checkRatelimit } from "@/utils/ratelimit/check-ratelimit";
 
 const AVATAR_FOLDER = "avatars";
 
@@ -48,6 +50,8 @@ async function POST(request: Request) {
     if (!session) {
       throw new UnauthorizedError("Vous devez être connecté");
     }
+
+    await checkRatelimit(authenticatedRatelimit, session.user.id);
 
     const formData = await request.formData();
 

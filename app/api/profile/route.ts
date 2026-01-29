@@ -5,6 +5,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { env } from "@/lib/env";
 import { prisma } from "@/lib/prisma";
+import { authenticatedRatelimit } from "@/lib/ratelimit";
 import { resend } from "@/lib/resend";
 import { UpdateProfileSchema } from "@/lib/schemas/profile.schema";
 import { getSession } from "@/lib/session";
@@ -17,6 +18,7 @@ import {
   UnauthorizedError,
   handleApiError,
 } from "@/utils/api/handle-api-error";
+import { checkRatelimit } from "@/utils/ratelimit/check-ratelimit";
 
 const EMAIL_VERIFICATION_EXPIRY_HOURS = 24;
 
@@ -65,6 +67,8 @@ async function PATCH(request: Request) {
     if (!session) {
       throw new UnauthorizedError("Vous devez être connecté");
     }
+
+    await checkRatelimit(authenticatedRatelimit, session.user.id);
 
     const formData = await request.formData();
 

@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 
 import { auth } from "@/lib/auth";
 import { env } from "@/lib/env";
+import { authenticatedRatelimit } from "@/lib/ratelimit";
 import { resend } from "@/lib/resend";
 import { UpdatePasswordSchema } from "@/lib/schemas/password.schema";
 import { getSession } from "@/lib/session";
@@ -13,6 +14,7 @@ import {
   UnauthorizedError,
   handleApiError,
 } from "@/utils/api/handle-api-error";
+import { checkRatelimit } from "@/utils/ratelimit/check-ratelimit";
 
 async function PATCH(request: Request) {
   try {
@@ -21,6 +23,8 @@ async function PATCH(request: Request) {
     if (!session) {
       throw new UnauthorizedError("Vous devez être connecté");
     }
+
+    await checkRatelimit(authenticatedRatelimit, session.user.id);
 
     const formData = await request.formData();
 

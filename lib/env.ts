@@ -7,20 +7,29 @@ export const env = createEnv({
       .enum(["true", "false"])
       .transform((value) => value === "true")
       .default(false),
-    BETTER_AUTH_SECRET: z.string(),
+    BETTER_AUTH_SECRET: z.string().min(1),
     GOOGLE_CLIENT_ID: z.string().min(1),
     GOOGLE_CLIENT_SECRET: z.string().min(1),
     DATABASE_URL: z
       .string()
+      .min(1)
       .pipe(z.url({ message: "URL de base de données invalide" })),
     R2_ACCOUNT_ID: z.string().min(1),
     R2_ACCESS_KEY_ID: z.string().min(1),
     R2_SECRET_ACCESS_KEY: z.string().min(1),
     R2_BUCKET_NAME: z.string().min(1),
     RESEND_API_KEY: z.string().min(1),
-    RESEND_DOMAIN: z.string().min(1),
+    RESEND_DOMAIN: z
+      .string()
+      .min(1)
+      .pipe(z.email({ message: "Format d'email invalide" })),
     STRIPE_SECRET_KEY: z.string().min(1),
     STRIPE_WEBHOOK_SECRET: z.string().min(1),
+    UPSTASH_REDIS_REST_URL: z
+      .string()
+      .optional()
+      .default("https://placeholder.upstash.io"),
+    UPSTASH_REDIS_REST_TOKEN: z.string().optional().default("placeholder"),
   },
   client: {
     NEXT_PUBLIC_APP_NAME: z.string().min(1),
@@ -30,6 +39,7 @@ export const env = createEnv({
       .pipe(z.url({ message: "URL invalide" })),
     NEXT_PUBLIC_SUPPORT_EMAIL: z
       .string()
+      .min(1)
       .pipe(z.email({ message: "Format d'email invalide" })),
     NEXT_PUBLIC_VERCEL_MAX_UPLOAD_SIZE: z.coerce
       .number({
@@ -54,6 +64,8 @@ export const env = createEnv({
     RESEND_DOMAIN: process.env.RESEND_DOMAIN,
     STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
     STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
+    UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL,
+    UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
 
     NEXT_PUBLIC_APP_NAME: process.env.NEXT_PUBLIC_APP_NAME,
     NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL,

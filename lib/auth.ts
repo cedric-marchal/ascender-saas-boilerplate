@@ -24,8 +24,32 @@ const auth = betterAuth({
   session: {
     cookieCache: {
       enabled: true,
-      maxAge: 60 * 5, // 5 minutes
+      maxAge: 60 * 5,
     },
+  },
+  rateLimit: {
+    enabled: true,
+    window: 60,
+    max: 100,
+    customRules: {
+      "/sign-in/email": {
+        window: 10,
+        max: 5,
+      },
+      "/sign-up/email": {
+        window: 10,
+        max: 3,
+      },
+      "/reset-password": {
+        window: 60,
+        max: 3,
+      },
+      "/forget-password": {
+        window: 60,
+        max: 3,
+      },
+    },
+    storage: "database",
   },
   emailAndPassword: {
     enabled: true,

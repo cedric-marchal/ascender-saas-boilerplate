@@ -42,6 +42,7 @@ async function validateImageBuffer(input: Buffer): Promise<void> {
     }
 
     const mimeType = `image/${metadata.format}`;
+
     if (!ACCEPTED_IMAGE_FORMATS.includes(mimeType)) {
       throw new BadRequestError(
         "Format d'image non supporté. Formats acceptés : JPEG, PNG, WebP"
