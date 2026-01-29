@@ -16,6 +16,7 @@ const DESCRIPTION = `Connectez-vous à votre compte ${APP_NAME}. Accédez à vot
 export const metadata: Metadata = {
   title: "Connexion",
   description: DESCRIPTION,
+  keywords: [APP_NAME.toLowerCase(), "connexion", "login", "sign in"],
   alternates: {
     canonical: "/connexion",
   },
@@ -29,7 +30,7 @@ export const metadata: Metadata = {
     description: DESCRIPTION,
   },
   robots: {
-    index: false,
+    index: true,
     follow: true,
   },
 };

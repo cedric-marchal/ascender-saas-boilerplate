@@ -16,6 +16,7 @@ const DESCRIPTION = `Créez votre compte ${APP_NAME} gratuitement. Accédez à t
 export const metadata: Metadata = {
   title: "Inscription",
   description: DESCRIPTION,
+  keywords: [APP_NAME.toLowerCase(), "inscription", "sign up", "créer un compte"],
   alternates: {
     canonical: "/inscription",
   },
@@ -29,7 +30,7 @@ export const metadata: Metadata = {
     description: DESCRIPTION,
   },
   robots: {
-    index: false,
+    index: true,
     follow: true,
   },
 };
