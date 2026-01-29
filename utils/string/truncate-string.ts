@@ -23,4 +23,5 @@ function slugify(text: string, options: SlugifyOptions = {}): string {
 }
 
 export { slugify };
+
 export type { SlugifyOptions };
