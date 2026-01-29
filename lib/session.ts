@@ -44,6 +44,19 @@ const requireSession = cache(async (): Promise<Session> => {
 const requireCustomerVerifiedEmail = cache(async (): Promise<Session> => {
   const session = await requireSession();
 
+  const user = await prisma.user.findUnique({
+    where: {
+      id: session.user.id,
+    },
+    select: {
+      role: true,
+    },
+  });
+
+  if (!user || user.role !== "CUSTOMER") {
+    return notFound();
+  }
+
   if (!session.user.emailVerified) {
     return redirect("/dashboard/parametres");
   }
@@ -96,4 +109,5 @@ export {
   requireCustomerVerifiedEmail,
   requireSession,
 };
+
 export type { Session };

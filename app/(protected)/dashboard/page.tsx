@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import { notFound, redirect } from "next/navigation";
 
+import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/lib/session";
 
 export const metadata: Metadata = {
@@ -12,6 +14,23 @@ export const metadata: Metadata = {
 
 export default async function DashboardPage() {
   const session = await requireSession();
+
+  const user = await prisma.user.findUnique({
+    where: {
+      id: session.user.id,
+    },
+    select: {
+      role: true,
+    },
+  });
+
+  if (!user) {
+    return notFound();
+  }
+
+  if (user.role === "ADMIN") {
+    return redirect("/admin");
+  }
 
   return (
     <main className="flex min-h-screen w-full flex-col px-4 py-8 sm:px-6 lg:px-8">

@@ -6,23 +6,25 @@ import { env } from "@/lib/env";
 
 const APP_NAME = env.NEXT_PUBLIC_APP_NAME;
 const BASE_URL = env.NEXT_PUBLIC_BASE_URL;
+
+const TITLE = "Accueil";
 const DESCRIPTION = "[Ta description de 150-160 caractères ici]";
 
 export const metadata: Metadata = {
-  title: `${APP_NAME} - [Tagline courte]`, // Page d'accueil = titre complet, pas template
+  title: TITLE, // Page d'accueil = titre complet, pas template
   description: DESCRIPTION,
   keywords: [APP_NAME.toLowerCase(), "mot-clé-1", "mot-clé-2", "mot-clé-3"],
   alternates: {
     canonical: "/", // Relatif suffit grâce à metadataBase du layout
   },
   openGraph: {
-    title: `${APP_NAME} - [Tagline courte]`,
+    title: TITLE,
     description: DESCRIPTION,
     url: "/",
     // images héritées du layout si identiques, sinon override ici
   },
   twitter: {
-    title: `${APP_NAME} - [Tagline courte]`,
+    title: TITLE,
     description: DESCRIPTION,
     // images héritées du layout
   },
