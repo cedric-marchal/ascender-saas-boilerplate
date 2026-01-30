@@ -41,6 +41,10 @@ export const env = createEnv({
       .string()
       .min(1)
       .pipe(z.email({ message: "Format d'email invalide" })),
+    NEXT_PUBLIC_R2_PUBLIC_URL: z
+      .string()
+      .min(1)
+      .pipe(z.url({ message: "URL R2 invalide" })),
     NEXT_PUBLIC_VERCEL_MAX_UPLOAD_SIZE: z.coerce
       .number({
         message: "La taille maximale de fichier est de 4.5MB",
@@ -70,6 +74,7 @@ export const env = createEnv({
     NEXT_PUBLIC_APP_NAME: process.env.NEXT_PUBLIC_APP_NAME,
     NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL,
     NEXT_PUBLIC_SUPPORT_EMAIL: process.env.NEXT_PUBLIC_SUPPORT_EMAIL,
+    NEXT_PUBLIC_R2_PUBLIC_URL: process.env.NEXT_PUBLIC_R2_PUBLIC_URL,
     NEXT_PUBLIC_VERCEL_MAX_UPLOAD_SIZE:
       process.env.NEXT_PUBLIC_VERCEL_MAX_UPLOAD_SIZE,
   },

@@ -10,7 +10,7 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 import { env } from "@/lib/env";
 
-import { BadRequestError, NotFoundError } from "@/utils/api/handle-api-error";
+import { BadRequestError } from "@/utils/api/handle-api-error";
 
 const r2 = new S3Client({
   region: "auto",
@@ -23,7 +23,7 @@ const r2 = new S3Client({
 
 const BUCKET = env.R2_BUCKET_NAME;
 const MAX_KEY_LENGTH = 1024;
-const MIN_EXPIRES_IN = 1;
+const MIN_EXPIRES_IN = 60;
 const MAX_EXPIRES_IN = 604800;
 
 function validateKey(key: string): void {
@@ -50,6 +50,14 @@ function validateExpiresIn(expiresIn: number): void {
       `La durée d'expiration doit être entre ${MIN_EXPIRES_IN} et ${MAX_EXPIRES_IN} secondes`
     );
   }
+}
+
+function getPublicUrl(key: string): string {
+  validateKey(key);
+
+  const baseUrl = env.NEXT_PUBLIC_R2_PUBLIC_URL;
+
+  return `${baseUrl}/${key}`;
 }
 
 async function uploadFile(
@@ -81,32 +89,6 @@ async function uploadFile(
   }
 }
 
-async function downloadFile(key: string): Promise<Buffer> {
-  validateKey(key);
-
-  try {
-    const response = await r2.send(
-      new GetObjectCommand({
-        Bucket: BUCKET,
-        Key: key,
-      })
-    );
-
-    if (!response.Body) {
-      throw new NotFoundError("Le contenu du fichier est introuvable");
-    }
-
-    const bytes = await response.Body.transformToByteArray();
-    return Buffer.from(bytes);
-  } catch (error: unknown) {
-    if (error instanceof NotFoundError || error instanceof BadRequestError) {
-      throw error;
-    }
-
-    throw new NotFoundError("Fichier introuvable dans le stockage");
-  }
-}
-
 async function deleteFile(key: string): Promise<void> {
   validateKey(key);
 
@@ -122,30 +104,23 @@ async function deleteFile(key: string): Promise<void> {
   }
 }
 
-async function getUploadUrl(
-  key: string,
-  expiresIn: number = 3600
-): Promise<string> {
+async function fileExists(key: string): Promise<boolean> {
   validateKey(key);
-  validateExpiresIn(expiresIn);
 
   try {
-    const url = await getSignedUrl(
-      r2,
-      new PutObjectCommand({
+    await r2.send(
+      new GetObjectCommand({
         Bucket: BUCKET,
         Key: key,
-      }),
-      { expiresIn }
+      })
     );
-
-    return url;
-  } catch (error: unknown) {
-    throw new BadRequestError("Échec de la génération de l'URL d'upload");
+    return true;
+  } catch {
+    return false;
   }
 }
 
-async function getDownloadUrl(
+async function getPrivateUrl(
   key: string,
   expiresIn: number = 3600
 ): Promise<string> {
@@ -170,27 +145,4 @@ async function getDownloadUrl(
   }
 }
 
-async function fileExists(key: string): Promise<boolean> {
-  validateKey(key);
-
-  try {
-    await r2.send(
-      new GetObjectCommand({
-        Bucket: BUCKET,
-        Key: key,
-      })
-    );
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-export {
-  deleteFile,
-  downloadFile,
-  fileExists,
-  getDownloadUrl,
-  getUploadUrl,
-  uploadFile,
-};
+export { deleteFile, fileExists, getPrivateUrl, getPublicUrl, uploadFile };

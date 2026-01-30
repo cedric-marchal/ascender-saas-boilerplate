@@ -4,8 +4,8 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { optimizeAvatar } from "@/lib/optimize";
 import { prisma } from "@/lib/prisma";
+import { deleteFile, getPublicUrl, uploadFile } from "@/lib/r2";
 import { authenticatedRatelimit } from "@/lib/ratelimit";
-import { deleteFile, uploadFile } from "@/lib/r2";
 import { UpdateAvatarSchema } from "@/lib/schemas/avatar.schema";
 import { getSession } from "@/lib/session";
 
@@ -17,7 +17,7 @@ import { checkRatelimit } from "@/utils/ratelimit/check-ratelimit";
 
 const AVATAR_FOLDER = "avatars";
 
-async function deleteOldAvatar(userId: string) {
+async function deleteOldAvatar(userId: string): Promise<void> {
   const user = await prisma.user.findUnique({
     where: { id: userId },
     select: {
@@ -30,14 +30,14 @@ async function deleteOldAvatar(userId: string) {
     return;
   }
 
-  const oldFileKey = user.image.replace("/", "");
+  const oldKey = user.image;
 
-  if (!oldFileKey.startsWith(AVATAR_FOLDER)) {
+  if (!oldKey.startsWith(AVATAR_FOLDER)) {
     return;
   }
 
   try {
-    await deleteFile(oldFileKey);
+    await deleteFile(oldKey);
   } catch (error: unknown) {
     console.error("Failed to delete old avatar:", error);
   }
@@ -65,21 +65,22 @@ async function POST(request: Request) {
     const optimizedImage = await optimizeAvatar(buffer);
 
     const fileExtension = "webp";
-    const fileName = `${session.user.id}-${Date.now()}.${fileExtension}`;
+    const sanitizedUserId = session.user.id.replace(/[^a-zA-Z0-9-]/g, "_");
+    const fileName = `${sanitizedUserId}-${Date.now()}.${fileExtension}`;
     const fileKey = `${AVATAR_FOLDER}/${fileName}`;
 
     await uploadFile(fileKey, optimizedImage.buffer, "image/webp");
-
-    const avatarUrl = `/${fileKey}`;
 
     await deleteOldAvatar(session.user.id);
 
     await auth.api.updateUser({
       body: {
-        image: avatarUrl,
+        image: fileKey,
       },
       headers: await headers(),
     });
+
+    const avatarUrl = getPublicUrl(fileKey);
 
     return NextResponse.json(
       {
