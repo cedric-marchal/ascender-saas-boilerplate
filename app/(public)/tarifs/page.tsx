@@ -1,18 +1,13 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 
 import type { Product, WebPage, WithContext } from "schema-dts";
 
 import { env } from "@/lib/env";
+import { prisma } from "@/lib/prisma";
+import { getSession } from "@/lib/session";
 
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { type Plan, PLANS } from "@/app/(public)/tarifs/_components/pricing-plans";
+import { PricingGrid } from "@/app/(public)/tarifs/_components/pricing-grid";
 
 const APP_NAME = env.NEXT_PUBLIC_APP_NAME;
 const BASE_URL = env.NEXT_PUBLIC_BASE_URL;
@@ -42,81 +37,35 @@ export const metadata: Metadata = {
   },
 };
 
-const PLANS = [
-  {
-    name: "Starter",
-    description: "Pour démarrer et tester la plateforme en solo.",
-    price: "0",
-    period: "mois",
-    features: [
-      "1 projet actif",
-      "Jusqu'à 3 espaces de travail",
-      "Historique limité",
-      "Support par e-mail standard",
-    ],
-    cta: "Commencer gratuitement",
-    href: "/inscription",
-    featured: false,
-  },
-  {
-    name: "Pro",
-    description: `Pour les indépendants et petites équipes qui utilisent ${APP_NAME} au quotidien.`,
-    price: "19",
-    period: "mois",
-    features: [
-      "Projets illimités",
-      "Utilisateurs illimités dans votre équipe",
-      "Historique étendu",
-      "Support prioritaire par e-mail",
-    ],
-    cta: "Choisir l'offre Pro",
-    href: "/inscription",
-    featured: true,
-  },
-  {
-    name: "Business",
-    description: "Pour les équipes avancées et besoins spécifiques.",
-    price: "Sur mesure",
-    period: null,
-    features: [
-      "SLA et support dédié",
-      "Intégrations avancées",
-      "Accompagnement à l'onboarding",
-      "Conditions contractuelles personnalisées",
-    ],
-    cta: "Parler avec l'équipe",
-    href: "/contact",
-    featured: false,
-  },
-] as const;
-
 function getPricingSchemas(): WithContext<Product>[] {
-  return PLANS.filter((plan) => plan.price !== "Sur mesure").map((plan) => ({
-    "@context": "https://schema.org",
-    "@type": "Product",
-    name: `${APP_NAME} ${plan.name}`,
-    description: plan.description,
-    brand: {
-      "@type": "Brand",
-      name: APP_NAME,
-    },
-    offers: {
-      "@type": "Offer",
-      price: plan.price,
-      priceCurrency: "EUR",
-      priceValidUntil: new Date(
-        new Date().setFullYear(new Date().getFullYear() + 1)
-      )
-        .toISOString()
-        .split("T")[0],
-      availability: "https://schema.org/InStock",
-      url: `${BASE_URL}/tarifs`,
-    },
-  }));
+  return PLANS.filter((plan: Plan) => plan.price !== "Sur mesure").map(
+    (plan: Plan) => ({
+      "@context": "https://schema.org",
+      "@type": "Product",
+      name: `${APP_NAME} ${plan.name}`,
+      description: plan.description,
+      brand: {
+        "@type": "Brand",
+        name: APP_NAME,
+      },
+      offers: {
+        "@type": "Offer",
+        price: plan.price,
+        priceCurrency: "EUR",
+        priceValidUntil: new Date(
+          new Date().setFullYear(new Date().getFullYear() + 1)
+        )
+          .toISOString()
+          .split("T")[0],
+        availability: "https://schema.org/InStock",
+        url: `${BASE_URL}/tarifs`,
+      },
+    })
+  );
 }
 
-export default function PricingPage() {
-  const webPageSchema: WithContext<WebPage> = {
+function getWebPageSchema(): WithContext<WebPage> {
+  return {
     "@context": "https://schema.org",
     "@type": "WebPage",
     "@id": `${BASE_URL}/tarifs/#webpage`,
@@ -128,7 +77,26 @@ export default function PricingPage() {
       "@id": `${BASE_URL}/#website`,
     },
   };
+}
 
+export default async function PricingPage() {
+  const session = await getSession();
+
+  const user = session
+    ? await prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: {
+          emailVerified: true,
+          role: true,
+        },
+      })
+    : null;
+
+  const isAuthenticated = !!session;
+  const isEmailVerified = user?.emailVerified ?? false;
+  const isCustomer = user?.role === "CUSTOMER";
+
+  const webPageSchema = getWebPageSchema();
   const pricingSchemas = getPricingSchemas();
 
   return (
@@ -140,7 +108,7 @@ export default function PricingPage() {
         }}
       />
 
-      {pricingSchemas.map((schema, index) => (
+      {pricingSchemas.map((schema: WithContext<Product>, index: number) => (
         <script
           key={index}
           type="application/ld+json"
@@ -163,68 +131,16 @@ export default function PricingPage() {
             </p>
           </header>
 
-          <div className="grid gap-6 md:grid-cols-3">
-            {PLANS.map((plan) => (
-              <Card
-                key={plan.name}
-                className={
-                  plan.featured
-                    ? "border-primary/40 ring-primary/20 ring-1"
-                    : "border-muted"
-                }
-              >
-                <CardHeader>
-                  {plan.featured && (
-                    <p className="text-primary text-xs font-semibold tracking-wide uppercase">
-                      Populaire
-                    </p>
-                  )}
-                  <CardTitle className="text-base">{plan.name}</CardTitle>
-                  <CardDescription>{plan.description}</CardDescription>
-                </CardHeader>
-                <CardContent className="mt-auto space-y-4 text-sm">
-                  <div className="space-y-1">
-                    <p className="text-2xl font-semibold">
-                      {plan.price === "Sur mesure" ? (
-                        plan.price
-                      ) : (
-                        <>
-                          {plan.price} €
-                          <span className="text-muted-foreground text-xs font-normal">
-                            {" "}
-                            / {plan.period}
-                          </span>
-                        </>
-                      )}
-                    </p>
-                  </div>
-                  <ul className="text-muted-foreground space-y-1">
-                    {plan.features.map((feature) => (
-                      <li key={feature}>• {feature}</li>
-                    ))}
-                  </ul>
-                  <Button
-                    className="mt-4 w-full"
-                    variant={plan.featured ? "default" : "outline"}
-                    asChild
-                  >
-                    <Link href={plan.href}>{plan.cta}</Link>
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          <PricingGrid
+            isAuthenticated={isAuthenticated}
+            isEmailVerified={isEmailVerified}
+            isCustomer={isCustomer}
+          />
 
           <p className="text-muted-foreground text-center text-xs">
             Les tarifs affichés sont présentés à titre indicatif et peuvent
-            évoluer. Pour des besoins spécifiques ou des volumes importants,{" "}
-            <Link
-              href="/contact"
-              className="hover:text-foreground underline underline-offset-4"
-            >
-              contactez-nous
-            </Link>
-            .
+            évoluer. Pour des besoins spécifiques ou des volumes importants,
+            contactez-nous.
           </p>
         </section>
       </main>
