@@ -8,6 +8,7 @@ import { stripe } from "@/lib/stripe";
 
 import {
   BadRequestError,
+  ConflictError,
   ForbiddenError,
   UnauthorizedError,
   handleApiError,
@@ -125,11 +126,27 @@ async function POST(request: Request) {
       priceId: formData.get("priceId"),
     });
 
+    if (data.priceId !== env.STRIPE_PRICE_ID_PRO) {
+      throw new BadRequestError("Prix invalide ou non autorisé");
+    }
+
     const stripeCustomerId = await getOrCreateStripeCustomer({
       id: user.id,
       email: user.email,
       name: user.name,
     });
+
+    const existingSubscriptions = await stripe.subscriptions.list({
+      customer: stripeCustomerId,
+      status: "active",
+      limit: 1,
+    });
+
+    if (existingSubscriptions.data.length > 0) {
+      throw new ConflictError(
+        "Vous avez déjà un abonnement actif. Gérez-le depuis votre espace facturation."
+      );
+    }
 
     const stripeSession = await stripe.checkout.sessions.create({
       customer: stripeCustomerId,

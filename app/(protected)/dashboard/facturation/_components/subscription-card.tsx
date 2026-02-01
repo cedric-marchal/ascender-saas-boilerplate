@@ -15,6 +15,11 @@ type SubscriptionCardProps = {
 };
 
 function SubscriptionCard({ subscription }: SubscriptionCardProps) {
+  const sub = subscription as Stripe.Subscription & {
+    current_period_start: number;
+    current_period_end: number;
+  };
+
   const statusConfig: Record<
     Stripe.Subscription.Status,
     {
@@ -65,7 +70,7 @@ function SubscriptionCard({ subscription }: SubscriptionCardProps) {
     },
   };
 
-  const config = statusConfig[subscription.status];
+  const config = statusConfig[sub.status];
   const StatusIcon = config.icon;
 
   return (
@@ -74,7 +79,7 @@ function SubscriptionCard({ subscription }: SubscriptionCardProps) {
         <div className="flex items-start justify-between">
           <div className="space-y-1">
             <CardTitle className="text-base">Abonnement Pro</CardTitle>
-            <CardDescription>ID: {subscription.id}</CardDescription>
+            <CardDescription>ID: {sub.id}</CardDescription>
           </div>
           <Badge variant={config.variant} className="gap-1">
             <StatusIcon className="h-3 w-3" aria-hidden="true" />
@@ -91,14 +96,15 @@ function SubscriptionCard({ subscription }: SubscriptionCardProps) {
               <span>Début de période</span>
             </div>
             <p className="text-sm font-medium">
-              {new Date(subscription.current_period_start * 1000).toLocaleDateString(
-                "fr-FR",
-                {
-                  day: "numeric",
-                  month: "long",
-                  year: "numeric",
-                }
-              )}
+              {sub.current_period_start
+                ? new Date(
+                    sub.current_period_start * 1000
+                  ).toLocaleDateString("fr-FR", {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                  })
+                : "Date inconnue"}
             </p>
           </div>
 
@@ -108,26 +114,27 @@ function SubscriptionCard({ subscription }: SubscriptionCardProps) {
               <span>Fin de période</span>
             </div>
             <p className="text-sm font-medium">
-              {new Date(subscription.current_period_end * 1000).toLocaleDateString(
-                "fr-FR",
-                {
-                  day: "numeric",
-                  month: "long",
-                  year: "numeric",
-                }
-              )}
+              {sub.current_period_end
+                ? new Date(
+                    sub.current_period_end * 1000
+                  ).toLocaleDateString("fr-FR", {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                  })
+                : "Date inconnue"}
             </p>
           </div>
         </div>
 
-        {subscription.canceled_at && (
+        {sub.canceled_at && (
           <div className="space-y-1">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <XCircle className="h-4 w-4" aria-hidden="true" />
               <span>Annulé le</span>
             </div>
             <p className="text-sm font-medium">
-              {new Date(subscription.canceled_at * 1000).toLocaleDateString("fr-FR", {
+              {new Date(sub.canceled_at * 1000).toLocaleDateString("fr-FR", {
                 day: "numeric",
                 month: "long",
                 year: "numeric",
