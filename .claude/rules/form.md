@@ -126,10 +126,11 @@ function ContactForm() {
 
 - ALWAYS use async function
 - ALWAYS use FormData for API submission
-- ALWAYS use try/catch with early return pattern
+- ALWAYS use try/catch with binary logic pattern (throw on error, continue on success)
 - ALWAYS use `toast` for success/error feedback
 - ALWAYS reset form on success
 - NEVER use `request.json()` on API side
+- NEVER use early return pattern (use throw instead)
 
 ```tsx
 async function onSubmit(data: CreateContactSchemaType) {
@@ -149,14 +150,15 @@ async function onSubmit(data: CreateContactSchemaType) {
     const result = await response.json();
 
     if (!response.ok) {
-      toast.error(result.message || "Une erreur est survenue");
-      return;
+      throw new Error(result.message || "Une erreur est survenue");
     }
 
     toast.success("Message envoyé avec succès");
     form.reset();
   } catch (error: unknown) {
-    toast.error("Une erreur est survenue");
+    toast.error(
+      error instanceof Error ? error.message : "Une erreur est survenue"
+    );
   } finally {
     setIsLoading(false);
   }
@@ -184,9 +186,18 @@ async function onSubmit(data: CreateDocumentSchemaType) {
       body: formData,
     });
 
-    // ...
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.message || "Une erreur est survenue");
+    }
+
+    toast.success("Document créé avec succès");
+    form.reset();
   } catch (error: unknown) {
-    toast.error("Une erreur est survenue");
+    toast.error(
+      error instanceof Error ? error.message : "Une erreur est survenue"
+    );
   } finally {
     setIsLoading(false);
   }
@@ -215,9 +226,18 @@ async function onSubmit(data: CreateProjectSchemaType) {
       body: formData,
     });
 
-    // ...
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.message || "Une erreur est survenue");
+    }
+
+    toast.success("Projet créé avec succès");
+    form.reset();
   } catch (error: unknown) {
-    toast.error("Une erreur est survenue");
+    toast.error(
+      error instanceof Error ? error.message : "Une erreur est survenue"
+    );
   } finally {
     setIsLoading(false);
   }
@@ -734,14 +754,15 @@ function DeleteAccountForm({ userEmail, onSuccess }: DeleteAccountFormProps) {
       const result = await response.json();
 
       if (!response.ok) {
-        toast.error(result.message || "Une erreur est survenue");
-        return;
+        throw new Error(result.message || "Une erreur est survenue");
       }
 
       toast.success("Compte supprimé avec succès");
       onSuccess();
     } catch (error: unknown) {
-      toast.error("Une erreur est survenue");
+      toast.error(
+        error instanceof Error ? error.message : "Une erreur est survenue"
+      );
     } finally {
       setIsLoading(false);
     }
@@ -930,14 +951,15 @@ function ContactForm() {
       const result = await response.json();
 
       if (!response.ok) {
-        toast.error(result.message || "Une erreur est survenue");
-        return;
+        throw new Error(result.message || "Une erreur est survenue");
       }
 
       toast.success("Message envoyé avec succès");
       form.reset();
     } catch (error: unknown) {
-      toast.error("Une erreur est survenue");
+      toast.error(
+        error instanceof Error ? error.message : "Une erreur est survenue"
+      );
     } finally {
       setIsLoading(false);
     }
@@ -1170,6 +1192,12 @@ const response = await fetch("/api/contact", {
   body: JSON.stringify(data),
 });
 
+// ❌ Wrong: Using early return instead of throw
+if (!response.ok) {
+  toast.error(result.message || "Une erreur est survenue");
+  return; // Should throw instead
+}
+
 // ❌ Wrong: Missing response.ok check
 const result = await response.json();
 toast.success("Envoyé");
@@ -1200,7 +1228,7 @@ export default function ContactForm() { ... }
 5. **Drag & Drop**: File inputs must always include drag & drop
 6. **Error handling**: Zod errors via `<FormMessage />`, API errors via `toast`
 7. **Loading state**: Use `useState`, show loader in button, disable button
-8. **Early return**: Check `response.ok` before processing success
+8. **Binary logic**: Throw on error, continue on success (no early return)
 9. **Reset on success**: Call `form.reset()` after successful submission
 10. **Explicit naming**: Full variable names, typed callbacks
 11. **Accessibility**: `aria-hidden` on icons, `sr-only` for screen readers

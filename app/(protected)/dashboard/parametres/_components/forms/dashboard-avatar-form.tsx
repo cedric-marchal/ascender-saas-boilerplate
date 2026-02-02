@@ -59,8 +59,7 @@ function DashboardAvatarForm({ name, image }: DashboardAvatarFormProps) {
       const result = await response.json();
 
       if (!response.ok) {
-        toast.error(result.message || "Une erreur est survenue");
-        return;
+        throw new Error(result.message || "Une erreur est survenue");
       }
 
       toast.success("Avatar mis à jour avec succès");
@@ -68,7 +67,9 @@ function DashboardAvatarForm({ name, image }: DashboardAvatarFormProps) {
       form.reset();
       router.refresh();
     } catch (error: unknown) {
-      toast.error("Une erreur est survenue");
+      toast.error(
+        error instanceof Error ? error.message : "Une erreur est survenue"
+      );
     } finally {
       setIsLoading(false);
     }

@@ -164,7 +164,9 @@ items.map((_, i) => ...)
 
 ### Binary Logic & Early Return Pattern (P0)
 
-Handle edge cases first with early returns, then execute main logic.
+**Context matters:**
+- **Components & synchronous functions**: Use early return pattern for edge cases
+- **Try/catch blocks (forms, async operations)**: Use throw pattern (no multiple returns in try block)
 
 ```tsx
 // ✅ Correct: Early return pattern in components
@@ -185,7 +187,7 @@ function UserProfile({ user }: UserProfileProps) {
   );
 }
 
-// ✅ Correct: Early return pattern in functions
+// ✅ Correct: Throw pattern in server functions
 async function getDocument(id: string, userId: string) {
   if (!id) {
     throw new BadRequestError("ID requis");
@@ -207,6 +209,29 @@ async function getDocument(id: string, userId: string) {
   return document;
 }
 
+// ✅ Correct: Throw pattern in try/catch (forms)
+async function onSubmit(data: FormData) {
+  try {
+    const response = await fetch("/api/endpoint", {
+      method: "POST",
+      body: data,
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.message || "Une erreur est survenue");
+    }
+
+    // Only one success path
+    toast.success("Succès !");
+  } catch (error: unknown) {
+    toast.error(
+      error instanceof Error ? error.message : "Une erreur est survenue"
+    );
+  }
+}
+
 // ❌ Wrong: Nested conditionals
 function UserProfile({ user }: UserProfileProps) {
   if (user) {
@@ -221,6 +246,25 @@ function UserProfile({ user }: UserProfileProps) {
     }
   } else {
     return <UserProfileEmpty />;
+  }
+}
+
+// ❌ Wrong: Early return in try block (forms)
+async function onSubmit(data: FormData) {
+  try {
+    const response = await fetch("/api/endpoint", {
+      method: "POST",
+      body: data,
+    });
+
+    if (!response.ok) {
+      toast.error("Erreur");
+      return; // Multiple exits in try block
+    }
+
+    toast.success("Succès !");
+  } catch (error: unknown) {
+    toast.error("Erreur");
   }
 }
 ```
@@ -792,14 +836,15 @@ function ContactForm() {
       const result = await response.json();
 
       if (!response.ok) {
-        toast.error(result.message || "Une erreur est survenue");
-        return;
+        throw new Error(result.message || "Une erreur est survenue");
       }
 
       toast.success("Message envoyé avec succès");
       form.reset();
     } catch (error: unknown) {
-      toast.error("Une erreur est survenue");
+      toast.error(
+        error instanceof Error ? error.message : "Une erreur est survenue"
+      );
     } finally {
       setIsLoading(false);
     }
@@ -930,6 +975,16 @@ if (data) {
 } else {
   return null;
 }
+
+// ❌ NEVER use early return in try/catch blocks (forms, async operations)
+try {
+  const response = await fetch("/api/endpoint", { ... });
+  if (!response.ok) {
+    toast.error("Erreur");
+    return; // Should throw instead
+  }
+  toast.success("Succès");
+} catch (error) { ... }
 
 // ❌ NEVER use default exports
 export default function Component() { ... }

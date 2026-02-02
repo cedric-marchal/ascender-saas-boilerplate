@@ -38,9 +38,9 @@ function ContactForm() {
   });
 
   const onSubmit = async (data: CreateContactSchemaType) => {
-    try {
-      setIsLoading(true);
+    setIsLoading(true);
 
+    try {
       const formData = new FormData();
       formData.append("name", data.name);
       formData.append("email", data.email);
@@ -55,8 +55,7 @@ function ContactForm() {
       const result = await response.json();
 
       if (!response.ok) {
-        toast.error(result.message || "Une erreur est survenue");
-        return;
+        throw new Error(result.message || "Une erreur est survenue");
       }
 
       toast.success("Message envoyé avec succès !");

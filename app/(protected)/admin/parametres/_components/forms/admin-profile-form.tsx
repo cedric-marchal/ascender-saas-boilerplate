@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 
+import { useRouter } from "next/navigation";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -63,21 +64,20 @@ function AdminProfileForm({ user }: AdminProfileFormProps) {
       const result = await response.json();
 
       if (!response.ok) {
-        toast.error(result.message || "Une erreur est survenue");
-        return;
+        throw new Error(result.message || "Une erreur est survenue");
       }
 
-      if (result.data.emailChanged) {
-        toast.success(
-          "Profil mis à jour avec succès. Un email de vérification a été envoyé."
-        );
-      } else {
-        toast.success("Profil mis à jour avec succès");
-      }
+      toast.success(
+        result.data.emailChanged
+          ? "Profil mis à jour avec succès. Un email de vérification a été envoyé."
+          : "Profil mis à jour avec succès"
+      );
 
       router.refresh();
     } catch (error: unknown) {
-      toast.error("Une erreur est survenue");
+      toast.error(
+        error instanceof Error ? error.message : "Une erreur est survenue"
+      );
     } finally {
       setIsLoading(false);
     }
