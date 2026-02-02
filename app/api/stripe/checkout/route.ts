@@ -73,15 +73,20 @@ async function syncStripeCustomerIfNeeded(
         email: user.email,
         name: user.name,
       });
-      console.log(
-        `Stripe customer synchronized during checkout for user ${user.id}`
-      );
+
+      if (process.env.NODE_ENV === "development") {
+        console.log(
+          `Stripe customer synchronized during checkout for user ${user.id}`
+        );
+      }
     }
   } catch (error: unknown) {
-    console.error(
-      `Failed to sync Stripe customer during checkout for user ${user.id}:`,
-      error
-    );
+    if (process.env.NODE_ENV === "development") {
+      console.error(
+        `Failed to sync Stripe customer during checkout for user ${user.id}:`,
+        error
+      );
+    }
   }
 }
 

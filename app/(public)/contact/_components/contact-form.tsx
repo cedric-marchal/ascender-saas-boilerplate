@@ -52,9 +52,11 @@ function ContactForm() {
         body: formData,
       });
 
+      const result = await response.json();
+
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message);
+        toast.error(result.message || "Une erreur est survenue");
+        return;
       }
 
       toast.success("Message envoyé avec succès !");

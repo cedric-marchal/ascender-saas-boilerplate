@@ -29,14 +29,20 @@ async function POST(request: Request) {
   } catch (error: unknown) {
     const errorMessage =
       error instanceof Error ? error.message : "Erreur inconnue";
-    console.error(`Webhook signature verification failed: ${errorMessage}`);
+
+    if (process.env.NODE_ENV === "development") {
+      console.error(`Webhook signature verification failed: ${errorMessage}`);
+    }
+
     return NextResponse.json(
       { success: false, message: `Webhook Error: ${errorMessage}` },
       { status: 400 }
     );
   }
 
-  console.log(`Received Stripe event: ${event.type}`);
+  if (process.env.NODE_ENV === "development") {
+    console.log(`Received Stripe event: ${event.type}`);
+  }
 
   try {
     switch (event.type) {
@@ -55,17 +61,21 @@ async function POST(request: Request) {
         });
 
         if (!stripeCustomer) {
-          console.error(
-            `[Webhook Error] StripeCustomer not found for ${customerId}. Event: ${event.type}`
-          );
+          if (process.env.NODE_ENV === "development") {
+            console.error(
+              `[Webhook Error] StripeCustomer not found for ${customerId}. Event: ${event.type}`
+            );
+          }
           break;
         }
 
         const subscriptionCacheKey = `subscription:${stripeCustomer.userId}:pro`;
         await redis.del(subscriptionCacheKey);
-        console.log(
-          `[Cache invalidated] Subscription cache for user ${stripeCustomer.userId} - Event: ${event.type}`
-        );
+        if (process.env.NODE_ENV === "development") {
+          console.log(
+            `[Cache invalidated] Subscription cache for user ${stripeCustomer.userId} - Event: ${event.type}`
+          );
+        }
 
         break;
       }
@@ -101,15 +111,19 @@ async function POST(request: Request) {
 
         const invoicesCacheKey = `invoices:${stripeCustomer.userId}`;
         await redis.del(invoicesCacheKey);
-        console.log(
-          `[Cache invalidated] Invoices cache for user ${stripeCustomer.userId} - Event: ${event.type}`
-        );
+        if (process.env.NODE_ENV === "development") {
+          console.log(
+            `[Cache invalidated] Invoices cache for user ${stripeCustomer.userId} - Event: ${event.type}`
+          );
+        }
 
         break;
       }
 
       default:
-        console.log(`Unhandled event type: ${event.type}`);
+        if (process.env.NODE_ENV === "development") {
+          console.log(`Unhandled event type: ${event.type}`);
+        }
     }
   } catch (error: unknown) {
     const errorMessage =

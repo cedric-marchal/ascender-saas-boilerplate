@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/session";
@@ -39,7 +40,7 @@ export default async function AdminSettingsPage() {
   });
 
   if (!user) {
-    throw new Error("Utilisateur introuvable");
+    return notFound();
   }
 
   return (
