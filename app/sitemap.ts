@@ -75,6 +75,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "yearly",
       priority: PRIORITY.MINIMAL,
     },
+    {
+      path: "/plan-du-site",
+      changeFrequency: "yearly",
+      priority: PRIORITY.MINIMAL,
+    },
   ];
 
   const staticEntries: MetadataRoute.Sitemap = staticPages.map(
