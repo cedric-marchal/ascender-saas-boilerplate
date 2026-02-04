@@ -1,0 +1,110 @@
+"use client";
+
+import { useEffect, useState } from "react";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Cookie, Shield } from "lucide-react";
+
+import { useCookieConsent } from "@/hooks/use-cookie-consent";
+
+import { Button } from "@/components/ui/button";
+
+import { CookiePreferencesModal } from "@/components/cookie-preferences-modal";
+
+function CookieBanner() {
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  const pathname = usePathname();
+
+  const hasConsented = useCookieConsent((state) => state.hasConsented);
+  const acceptAll = useCookieConsent((state) => state.acceptAll);
+  const rejectAll = useCookieConsent((state) => state.rejectAll);
+  const openPreferences = useCookieConsent((state) => state.openPreferences);
+  const closePreferences = useCookieConsent((state) => state.closePreferences);
+
+  useEffect(() => {
+    setIsHydrated(true);
+
+    const { hasConsented: persisted, preferences } =
+      useCookieConsent.getState();
+
+    if (persisted && preferences) {
+      useCookieConsent.setState({
+        preferences: {
+          essential: true,
+          functional: Boolean(preferences.functional),
+          analytics: Boolean(preferences.analytics),
+          marketing: Boolean(preferences.marketing),
+        },
+        hasConsented: Boolean(persisted),
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    closePreferences();
+  }, [pathname, closePreferences]);
+
+  if (!isHydrated) return null;
+
+  return (
+    <>
+      {hasConsented ? (
+        <Button
+          type="button"
+          variant="outline"
+          size="icon"
+          aria-label="Gérer mes préférences de cookies"
+          onClick={openPreferences}
+          className="fixed bottom-4 right-4 z-50 rounded-full shadow-lg hover:shadow-xl"
+        >
+          <Cookie className="h-5 w-5" aria-hidden="true" />
+        </Button>
+      ) : (
+        <div
+          role="dialog"
+          aria-label="Consentement aux cookies"
+          className="fixed bottom-0 left-0 right-0 z-50 border-t bg-background shadow-[0_-2px_8px_rgba(0,0,0,0.1)]"
+        >
+          <div className="mx-auto max-w-5xl px-4 py-4">
+            <div className="mb-4 flex items-start gap-3">
+              <Shield
+                className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground"
+                aria-hidden="true"
+              />
+              <p className="text-sm text-muted-foreground">
+                Nous utilisons des cookies pour améliorer votre expérience sur
+                notre site. Les cookies nécessaires sont toujours activés. Vous
+                pouvez accepter tous les cookies, les refuser ou gérer vos
+                préférences.{" "}
+                <Link
+                  href="/politique-des-cookies"
+                  className="underline hover:text-foreground"
+                >
+                  En savoir plus
+                </Link>
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <Button type="button" onClick={acceptAll}>
+                Accepter tout
+              </Button>
+              <Button type="button" variant="outline" onClick={rejectAll}>
+                Refuser tout
+              </Button>
+              <Button type="button" variant="ghost" onClick={openPreferences}>
+                Gérer mes préférences
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <CookiePreferencesModal />
+    </>
+  );
+}
+
+export { CookieBanner };

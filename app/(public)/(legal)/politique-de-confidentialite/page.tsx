@@ -61,12 +61,7 @@ export default function PrivacyPolicyPage() {
               Politique de confidentialité
             </h1>
             <p className="text-muted-foreground mt-4 text-sm">
-              Dernière mise à jour :{" "}
-              {new Date().toLocaleDateString("fr-FR", {
-                day: "numeric",
-                month: "long",
-                year: "numeric",
-              })}
+              Dernière mise à jour : 4 février 2026
             </p>
           </header>
 
@@ -190,7 +185,9 @@ export default function PrivacyPolicyPage() {
               <ul>
                 <li>
                   <strong>Prestataires de services :</strong> hébergement
-                  (Vercel), paiement (Stripe), emails (Resend)
+                  (Vercel), paiement (Stripe), emails (Resend), base de
+                  données (Neon), stockage de fichiers (Cloudflare R2), mise
+                  en cache (Upstash)
                 </li>
                 <li>
                   <strong>Autorités :</strong> si requis par la loi ou pour
@@ -285,26 +282,20 @@ export default function PrivacyPolicyPage() {
               <h2>Cookies</h2>
               <p>
                 Notre site utilise des cookies pour fonctionner correctement et
-                améliorer votre expérience.
+                améliorer votre expérience. Pour un détail complet des cookies
+                utilisés et de leurs finalités, consultez notre{" "}
+                <Link
+                  href="/politique-des-cookies"
+                  className="underline underline-offset-4"
+                >
+                  politique des cookies
+                </Link>
+                .
               </p>
-
-              <h3>Cookies essentiels</h3>
               <p>
-                Ces cookies sont nécessaires au fonctionnement du site et ne
-                peuvent pas être désactivés. Ils incluent les cookies de session
-                et d'authentification.
-              </p>
-
-              <h3>Cookies analytiques</h3>
-              <p>
-                [Si applicable] Nous utilisons [outil d'analyse] pour comprendre
-                comment les visiteurs utilisent notre site. Ces cookies ne sont
-                déposés qu'avec votre consentement.
-              </p>
-
-              <p>
-                Vous pouvez gérer vos préférences de cookies dans les paramètres
-                de votre navigateur.
+                Vous pouvez gérer vos préférences de cookies à tout moment via
+                l'icône de cookie en bas à droite de la page ou dans les
+                paramètres de votre navigateur.
               </p>
             </section>
 

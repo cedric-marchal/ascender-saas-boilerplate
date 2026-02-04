@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-This is a SaaS boilerplate built with Next.js 16 (App Router), TypeScript, Tailwind CSS, and Shadcn/ui. The project follows strict conventions for consistency, maintainability, security, and SEO.
+This is a SaaS boilerplate built with Next.js 16 (App Router), TypeScript, Tailwind CSS, and Shadcn/ui, PNPM. The project follows strict conventions for consistency, maintainability, security, and SEO.
 
 ## Tech Stack
 
@@ -165,6 +165,7 @@ items.map((_, i) => ...)
 ### Binary Logic & Early Return Pattern (P0)
 
 **Context matters:**
+
 - **Components & synchronous functions**: Use early return pattern for edge cases
 - **Try/catch blocks (forms, async operations)**: Use throw pattern (no multiple returns in try block)
 

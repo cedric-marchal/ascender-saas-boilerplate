@@ -60,12 +60,7 @@ export default function LegalNoticePage() {
               Mentions légales
             </h1>
             <p className="text-muted-foreground mt-4 text-sm">
-              Dernière mise à jour :{" "}
-              {new Date().toLocaleDateString("fr-FR", {
-                day: "numeric",
-                month: "long",
-                year: "numeric",
-              })}
+              Dernière mise à jour : 4 février 2026
             </p>
           </header>
 

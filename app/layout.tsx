@@ -10,6 +10,8 @@ import { env } from "@/lib/env";
 
 import { Toaster } from "@/components/ui/sonner";
 
+import { CookieBanner } from "@/components/cookie-banner";
+
 import "./globals.css";
 
 const geistSans = Geist({
@@ -104,6 +106,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
           >
             {children}
             <Toaster />
+            <CookieBanner />
           </ThemeProvider>
         </NuqsAdapter>
       </body>

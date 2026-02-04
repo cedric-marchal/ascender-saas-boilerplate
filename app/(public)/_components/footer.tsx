@@ -96,6 +96,30 @@ function Footer() {
                     Politique de confidentialité
                   </Link>
                 </li>
+                <li>
+                  <Link
+                    href="/politique-des-cookies"
+                    className="hover:text-foreground underline-offset-4 hover:underline"
+                  >
+                    Politique des cookies
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/conditions-d-utilisation"
+                    className="hover:text-foreground underline-offset-4 hover:underline"
+                  >
+                    Conditions d'utilisation
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/conditions-de-vente"
+                    className="hover:text-foreground underline-offset-4 hover:underline"
+                  >
+                    Conditions de vente
+                  </Link>
+                </li>
               </ul>
             </nav>
           </div>
