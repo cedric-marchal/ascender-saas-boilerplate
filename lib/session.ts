@@ -1,7 +1,5 @@
 import "server-only";
 
-import { cache } from "react";
-
 import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 
@@ -15,25 +13,25 @@ import { stripe } from "@/lib/stripe";
 
 type Session = typeof auth.$Infer.Session;
 
-const SUBSCRIPTION_CACHE_TTL = 120;
+const SUBSCRIPTION_CACHE_TTL = 300;
 
 /**
  * Récupère la session (mémorisée pendant le rendu)
  * Retourne null si non connecté
  */
-const getSession = cache(async (): Promise<Session | null> => {
+const getSession = async (): Promise<Session | null> => {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
 
   return session;
-});
+};
 
 /**
  * Récupère la session ou redirige vers connexion
  * À utiliser dans CHAQUE page protégée
  */
-const requireSession = cache(async (): Promise<Session> => {
+const requireSession = async (): Promise<Session> => {
   const session = await getSession();
 
   if (!session) {
@@ -41,13 +39,13 @@ const requireSession = cache(async (): Promise<Session> => {
   }
 
   return session;
-});
+};
 
 /**
  * Récupère la session customer ou affiche 404
  * À utiliser dans les pages customer ne nécessitant pas d'email vérifié
  */
-const requireCustomer = cache(async (): Promise<Session> => {
+const requireCustomer = async (): Promise<Session> => {
   const session = await requireSession();
 
   const user = await prisma.user.findUnique({
@@ -64,14 +62,14 @@ const requireCustomer = cache(async (): Promise<Session> => {
   }
 
   return session;
-});
+};
 
 /**
  * Récupère la session customer et vérifie que l'email est vérifié
  * Redirige vers /dashboard/parametres si l'email n'est pas vérifié
  * À utiliser dans les pages customer nécessitant un email vérifié
  */
-const requireCustomerVerifiedEmail = cache(async (): Promise<Session> => {
+const requireCustomerVerifiedEmail = async (): Promise<Session> => {
   const session = await requireCustomer();
 
   if (!session.user.emailVerified) {
@@ -79,7 +77,7 @@ const requireCustomerVerifiedEmail = cache(async (): Promise<Session> => {
   }
 
   return session;
-});
+};
 
 /**
  * Récupère la session customer et vérifie qu'il est abonné à la version Pro
@@ -109,7 +107,7 @@ const requireCustomerVerifiedEmail = cache(async (): Promise<Session> => {
  * - unpaid: Tous les essais de paiement ont échoué
  * - paused: Trial gratuit terminé sans moyen de paiement
  */
-const requireCustomerProSubscription = cache(async (): Promise<Session> => {
+const requireCustomerProSubscription = async (): Promise<Session> => {
   const session = await requireCustomer();
 
   const stripeCustomer = await prisma.stripeCustomer.findUnique({
@@ -159,11 +157,9 @@ const requireCustomerProSubscription = cache(async (): Promise<Session> => {
       }
     );
 
-    await redis.set(
-      cacheKey,
-      hasValidProSubscription ? "valid" : "invalid",
-      { ex: SUBSCRIPTION_CACHE_TTL }
-    );
+    await redis.set(cacheKey, hasValidProSubscription ? "valid" : "invalid", {
+      ex: SUBSCRIPTION_CACHE_TTL,
+    });
 
     if (!hasValidProSubscription) {
       return redirect("/tarifs");
@@ -178,9 +174,7 @@ const requireCustomerProSubscription = cache(async (): Promise<Session> => {
 
     const cachedFallback = await redis.get<string>(cacheKey);
     if (cachedFallback === "valid") {
-      console.log(
-        `[Fallback] Using cached status for user ${session.user.id}`
-      );
+      console.log(`[Fallback] Using cached status for user ${session.user.id}`);
       return session;
     }
 
@@ -188,13 +182,13 @@ const requireCustomerProSubscription = cache(async (): Promise<Session> => {
       "Service temporairement indisponible. Veuillez réessayer dans quelques instants."
     );
   }
-});
+};
 
 /**
  * Récupère la session admin ou affiche 404
  * À utiliser dans les pages admin ne nécessitant pas d'email vérifié
  */
-const requireAdmin = cache(async (): Promise<Session> => {
+const requireAdmin = async (): Promise<Session> => {
   const session = await requireSession();
 
   const user = await prisma.user.findUnique({
@@ -211,14 +205,14 @@ const requireAdmin = cache(async (): Promise<Session> => {
   }
 
   return session;
-});
+};
 
 /**
  * Récupère la session admin et vérifie que l'email est vérifié
  * Affiche 404 si non admin ou si l'email n'est pas vérifié
  * À utiliser dans les pages admin nécessitant un email vérifié
  */
-const requireAdminVerifiedEmail = cache(async (): Promise<Session> => {
+const requireAdminVerifiedEmail = async (): Promise<Session> => {
   const session = await requireAdmin();
 
   if (!session.user.emailVerified) {
@@ -226,7 +220,7 @@ const requireAdminVerifiedEmail = cache(async (): Promise<Session> => {
   }
 
   return session;
-});
+};
 
 export {
   getSession,

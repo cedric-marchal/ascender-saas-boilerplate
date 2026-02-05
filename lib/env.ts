@@ -1,7 +1,7 @@
 import { createEnv } from "@t3-oss/env-nextjs";
 import { z } from "zod";
 
-export const env = createEnv({
+const env = createEnv({
   server: {
     MAINTENANCE_ENABLED: z
       .enum(["true", "false"])
@@ -83,3 +83,5 @@ export const env = createEnv({
   emptyStringAsUndefined: true,
   skipValidation: false,
 });
+
+export { env };

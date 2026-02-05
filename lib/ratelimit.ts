@@ -1,18 +1,8 @@
 import "server-only";
 
 import { Ratelimit } from "@upstash/ratelimit";
-import { Redis } from "@upstash/redis";
 
-import { env } from "@/lib/env";
-
-function createRedisClient() {
-  return new Redis({
-    url: env.UPSTASH_REDIS_REST_URL || "https://placeholder.upstash.io",
-    token: env.UPSTASH_REDIS_REST_TOKEN || "placeholder",
-  });
-}
-
-const redis = createRedisClient();
+import { redis } from "@/lib/redis";
 
 const contactRatelimit = new Ratelimit({
   redis,
