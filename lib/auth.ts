@@ -9,6 +9,7 @@ import { prisma } from "@/lib/prisma";
 import { resend } from "@/lib/resend";
 import { stripe } from "@/lib/stripe";
 
+import { EmailChangeNotificationEmail } from "@/components/emails/email-change-notification-email";
 import { PasswordChangedEmail } from "@/components/emails/password-changed-email";
 import { ResetPasswordEmail } from "@/components/emails/reset-password-email";
 import { WelcomeEmail } from "@/components/emails/welcome-email";
@@ -135,15 +136,23 @@ const auth = betterAuth({
     changeEmail: {
       enabled: true,
       sendChangeEmailVerification: async ({ user, newEmail, url }) => {
-        await resend.emails.send({
-          from: FROM_EMAIL,
-          to: newEmail,
-          subject: `Vérifiez votre nouvelle adresse email ${APP_NAME}`,
-          react: WelcomeEmail({
-            name: user.name,
-            verificationLink: url,
+        await Promise.all([
+          resend.emails.send({
+            from: FROM_EMAIL,
+            to: newEmail,
+            subject: `Vérifiez votre nouvelle adresse email ${APP_NAME}`,
+            react: WelcomeEmail({
+              name: user.name,
+              verificationLink: url,
+            }),
           }),
-        });
+          resend.emails.send({
+            from: FROM_EMAIL,
+            to: user.email,
+            subject: `Modification d'adresse email demandée sur ${APP_NAME}`,
+            react: EmailChangeNotificationEmail({ name: user.name }),
+          }),
+        ]);
       },
     },
   },
