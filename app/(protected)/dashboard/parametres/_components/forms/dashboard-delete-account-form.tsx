@@ -7,6 +7,7 @@ import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
+import { signOut } from "@/lib/auth-client";
 import {
   DeleteAccountSchema,
   type DeleteAccountSchemaType,
@@ -60,6 +61,7 @@ function DashboardDeleteAccountForm({
       }
 
       toast.success("Votre compte a été supprimé avec succès");
+      await signOut().catch(() => {});
       onSuccess();
     } catch (error: unknown) {
       toast.error(

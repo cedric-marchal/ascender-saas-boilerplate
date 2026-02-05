@@ -1,12 +1,16 @@
 import { NextResponse } from "next/server";
 
+import { env } from "@/lib/env";
 import { prisma } from "@/lib/prisma";
 import { deleteFile } from "@/lib/r2";
 import { authenticatedRatelimit } from "@/lib/ratelimit";
 import { redis } from "@/lib/redis";
+import { resend } from "@/lib/resend";
 import { DeleteAccountSchema } from "@/lib/schemas/account.schema";
 import { getSession } from "@/lib/session";
 import { stripe } from "@/lib/stripe";
+
+import { AccountDeletedEmail } from "@/components/emails/account-deleted-email";
 
 import {
   BadRequestError,
@@ -103,6 +107,17 @@ async function DELETE(request: Request) {
     await deleteUserAvatar(user.image);
 
     await prisma.user.delete({ where: { id: user.id } });
+
+    try {
+      await resend.emails.send({
+        from: `${env.NEXT_PUBLIC_APP_NAME} <noreply@${env.RESEND_DOMAIN}>`,
+        to: user.email,
+        subject: `Votre compte ${env.NEXT_PUBLIC_APP_NAME} a été supprimé`,
+        react: AccountDeletedEmail({ name: session.user.name }),
+      });
+    } catch (emailError: unknown) {
+      console.error("Failed to send account deletion email:", emailError);
+    }
 
     return new NextResponse(null, { status: 204 });
   } catch (error: unknown) {
