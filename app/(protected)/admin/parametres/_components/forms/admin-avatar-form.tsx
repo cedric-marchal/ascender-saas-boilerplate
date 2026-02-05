@@ -58,10 +58,9 @@ function AdminAvatarForm({ user }: AdminAvatarFormProps) {
         body: formData,
       });
 
-      const result = await response.json();
-
       if (!response.ok) {
-        throw new Error(result.message || "Une erreur est survenue");
+        const body = await response.json();
+        throw new Error(body.message || "Une erreur est survenue");
       }
 
       toast.success("Avatar mis à jour avec succès");

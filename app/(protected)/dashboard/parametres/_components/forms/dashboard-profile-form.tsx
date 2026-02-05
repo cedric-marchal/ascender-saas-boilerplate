@@ -63,14 +63,14 @@ function DashboardProfileForm({
         body: formData,
       });
 
-      const result = await response.json();
+      const body = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.message || "Une erreur est survenue");
+        throw new Error(body.message || "Une erreur est survenue");
       }
 
       toast.success(
-        result.data.emailChanged
+        body.data.emailChanged
           ? "Profil mis à jour avec succès. Un email de vérification a été envoyé."
           : "Profil mis à jour avec succès"
       );

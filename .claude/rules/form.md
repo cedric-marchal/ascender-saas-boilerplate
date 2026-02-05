@@ -147,10 +147,9 @@ async function onSubmit(data: CreateContactSchemaType) {
       body: formData,
     });
 
-    const result = await response.json();
-
     if (!response.ok) {
-      throw new Error(result.message || "Une erreur est survenue");
+      const body = await response.json();
+      throw new Error(body.message || "Une erreur est survenue");
     }
 
     toast.success("Message envoyé avec succès");
@@ -186,10 +185,9 @@ async function onSubmit(data: CreateDocumentSchemaType) {
       body: formData,
     });
 
-    const result = await response.json();
-
     if (!response.ok) {
-      throw new Error(result.message || "Une erreur est survenue");
+      const body = await response.json();
+      throw new Error(body.message || "Une erreur est survenue");
     }
 
     toast.success("Document créé avec succès");
@@ -226,10 +224,9 @@ async function onSubmit(data: CreateProjectSchemaType) {
       body: formData,
     });
 
-    const result = await response.json();
-
     if (!response.ok) {
-      throw new Error(result.message || "Une erreur est survenue");
+      const body = await response.json();
+      throw new Error(body.message || "Une erreur est survenue");
     }
 
     toast.success("Projet créé avec succès");
@@ -751,10 +748,9 @@ function DeleteAccountForm({ userEmail, onSuccess }: DeleteAccountFormProps) {
         body: formData,
       });
 
-      const result = await response.json();
-
       if (!response.ok) {
-        throw new Error(result.message || "Une erreur est survenue");
+        const body = await response.json();
+        throw new Error(body.message || "Une erreur est survenue");
       }
 
       toast.success("Compte supprimé avec succès");
@@ -948,10 +944,9 @@ function ContactForm() {
         body: formData,
       });
 
-      const result = await response.json();
-
       if (!response.ok) {
-        throw new Error(result.message || "Une erreur est survenue");
+        const body = await response.json();
+        throw new Error(body.message || "Une erreur est survenue");
       }
 
       toast.success("Message envoyé avec succès");
@@ -1194,12 +1189,12 @@ const response = await fetch("/api/contact", {
 
 // ❌ Wrong: Using early return instead of throw
 if (!response.ok) {
-  toast.error(result.message || "Une erreur est survenue");
+  toast.error(body.message || "Une erreur est survenue");
   return; // Should throw instead
 }
 
 // ❌ Wrong: Missing response.ok check
-const result = await response.json();
+const body = await response.json();
 toast.success("Envoyé");
 
 // ❌ Wrong: File input without drag & drop

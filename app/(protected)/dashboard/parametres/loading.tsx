@@ -85,6 +85,14 @@ export default function DashboardSettingsLoading() {
           </div>
         </div>
       </div>
+
+      <div className="rounded-lg border border-red-200 bg-red-50 p-6">
+        <div className="mb-4 space-y-2">
+          <Skeleton className="h-6 w-40" />
+          <Skeleton className="h-4 w-96" />
+        </div>
+        <Skeleton className="h-10 w-56" />
+      </div>
     </main>
   );
 }

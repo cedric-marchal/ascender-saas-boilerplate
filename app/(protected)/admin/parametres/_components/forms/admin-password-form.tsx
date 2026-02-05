@@ -50,10 +50,9 @@ function AdminPasswordForm() {
         body: formData,
       });
 
-      const result = await response.json();
-
       if (!response.ok) {
-        throw new Error(result.message || "Une erreur est survenue");
+        const body = await response.json();
+        throw new Error(body.message || "Une erreur est survenue");
       }
 
       toast.success(

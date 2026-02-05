@@ -14,6 +14,7 @@ import { DashboardSettingsHeader } from "@/app/(protected)/dashboard/parametres/
 import { DashboardAvatarForm } from "@/app/(protected)/dashboard/parametres/_components/forms/dashboard-avatar-form";
 import { DashboardPasswordForm } from "@/app/(protected)/dashboard/parametres/_components/forms/dashboard-password-form";
 import { DashboardProfileForm } from "@/app/(protected)/dashboard/parametres/_components/forms/dashboard-profile-form";
+import { DashboardDeleteAccountModal } from "@/app/(protected)/dashboard/parametres/_components/modals/dashboard-delete-account-modal";
 
 export const metadata: Metadata = {
   title: "Paramètres",
@@ -78,6 +79,19 @@ export default async function DashboardSettingsPage() {
           </Card>
         </div>
       </div>
+
+      <Card className="border-red-200 bg-red-50">
+        <CardHeader>
+          <CardTitle className="text-red-700">Zone de danger</CardTitle>
+          <CardDescription className="text-red-600">
+            La suppression de votre compte est irréversible. Toutes vos données
+            et votre abonnement seront définitivement supprimés.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <DashboardDeleteAccountModal email={session.user.email} />
+        </CardContent>
+      </Card>
     </main>
   );
 }

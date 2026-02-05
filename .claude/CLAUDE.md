@@ -110,7 +110,7 @@ function handleSubmit(event: FormEvent<HTMLFormElement>) { ... }
 function handleChange(event: ChangeEvent<HTMLInputElement>) { ... }
 function handleClick(event: MouseEvent<HTMLButtonElement>) { ... }
 const response = await fetch("/api/users");
-const result = await response.json();
+const body = await response.json();
 const document = await prisma.document.findUnique({ ... });
 const user = await prisma.user.findUnique({ ... });
 items.map((item: Item, index: number) => ...)
@@ -133,6 +133,7 @@ items.map((_, i) => ...)
 | --------------- | ----------------------------- | ---------------------------- |
 | Event handlers  | `event`                       | `e`, `evt`                   |
 | Fetch response  | `response`                    | `res`, `r`                   |
+| Response body   | `body`                        | `result`, `data`             |
 | Database result | `document`, `user`, `project` | `doc`, `usr`, `proj`         |
 | Array index     | `index`                       | `i`, `idx`, `_`              |
 | Error           | `error`                       | `err`, `e`                   |
@@ -218,10 +219,9 @@ async function onSubmit(data: FormData) {
       body: data,
     });
 
-    const result = await response.json();
-
     if (!response.ok) {
-      throw new Error(result.message || "Une erreur est survenue");
+      const body = await response.json();
+      throw new Error(body.message || "Une erreur est survenue");
     }
 
     // Only one success path
@@ -834,10 +834,9 @@ function ContactForm() {
         body: formData,
       });
 
-      const result = await response.json();
-
       if (!response.ok) {
-        throw new Error(result.message || "Une erreur est survenue");
+        const body = await response.json();
+        throw new Error(body.message || "Une erreur est survenue");
       }
 
       toast.success("Message envoyé avec succès");

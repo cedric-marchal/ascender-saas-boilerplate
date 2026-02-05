@@ -16,6 +16,7 @@ import { AdminSettingsHeader } from "@/app/(protected)/admin/parametres/_compone
 import { AdminAvatarForm } from "@/app/(protected)/admin/parametres/_components/forms/admin-avatar-form";
 import { AdminPasswordForm } from "@/app/(protected)/admin/parametres/_components/forms/admin-password-form";
 import { AdminProfileForm } from "@/app/(protected)/admin/parametres/_components/forms/admin-profile-form";
+import { AdminDeleteAccountModal } from "@/app/(protected)/admin/parametres/_components/modals/admin-delete-account-modal";
 
 export const metadata: Metadata = {
   title: "Paramètres",
@@ -88,6 +89,19 @@ export default async function AdminSettingsPage() {
           </Card>
         </div>
       </div>
+
+      <Card className="border-red-200 bg-red-50">
+        <CardHeader>
+          <CardTitle className="text-red-700">Zone de danger</CardTitle>
+          <CardDescription className="text-red-600">
+            La suppression de votre compte est irréversible. Toutes vos données
+            seront définitivement supprimées.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <AdminDeleteAccountModal email={user.email} />
+        </CardContent>
+      </Card>
     </main>
   );
 }
