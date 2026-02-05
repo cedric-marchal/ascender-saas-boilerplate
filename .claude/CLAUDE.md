@@ -4,6 +4,13 @@
 
 This is a SaaS boilerplate built with Next.js 16 (App Router), TypeScript, Tailwind CSS, and Shadcn/ui, PNPM. The project follows strict conventions for consistency, maintainability, security, and SEO.
 
+Prefer Unix commands (ls, tree, rg, sed, head/tail, typecheck) as the primary source of truth.
+Use them first to map structure, locate relevant code, and read only minimal excerpts.
+
+Document search is a secondary tool, used only when commands are unavailable or for high-level conceptual context.
+
+Goal: maximize signal, minimize tokens, avoid unnecessary code dumps.
+
 ## Tech Stack
 
 - **Framework**: Next.js 16 (App Router)
