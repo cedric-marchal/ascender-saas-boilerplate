@@ -20,6 +20,7 @@ model User {
   emailVerified  Boolean         @default(false)
   image          String?
   role           UserRole        @default(CUSTOMER)
+  slug           String          @unique
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
   sessions       Session[]

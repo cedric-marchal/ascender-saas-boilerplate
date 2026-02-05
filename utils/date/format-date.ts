@@ -24,11 +24,25 @@ function formatRelative(date: Date): string {
   const diffMs = now.getTime() - date.getTime();
   const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
-  if (diffDays === 0) return "Aujourd'hui";
-  if (diffDays === 1) return "Hier";
-  if (diffDays < 7) return `Il y a ${diffDays} jours`;
-  if (diffDays < 30) return `Il y a ${Math.floor(diffDays / 7)} semaine(s)`;
-  if (diffDays < 365) return `Il y a ${Math.floor(diffDays / 30)} mois`;
+  if (diffDays === 0) {
+    return "Aujourd'hui";
+  }
+
+  if (diffDays === 1) {
+    return "Hier";
+  }
+
+  if (diffDays < 7) {
+    return `Il y a ${diffDays} jours`;
+  }
+
+  if (diffDays < 30) {
+    return `Il y a ${Math.floor(diffDays / 7)} semaine(s)`;
+  }
+
+  if (diffDays < 365) {
+    return `Il y a ${Math.floor(diffDays / 30)} mois`;
+  }
 
   return `Il y a ${Math.floor(diffDays / 365)} an(s)`;
 }

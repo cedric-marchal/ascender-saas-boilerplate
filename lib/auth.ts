@@ -14,6 +14,8 @@ import { PasswordChangedEmail } from "@/components/emails/password-changed-email
 import { ResetPasswordEmail } from "@/components/emails/reset-password-email";
 import { WelcomeEmail } from "@/components/emails/welcome-email";
 
+import { slugify } from "@/utils/string/slugify";
+
 const APP_NAME = env.NEXT_PUBLIC_APP_NAME;
 const FROM_EMAIL = "onboarding@resend.dev";
 
@@ -133,6 +135,12 @@ const auth = betterAuth({
     },
   },
   user: {
+    additionalFields: {
+      slug: {
+        type: "string",
+        input: false,
+      },
+    },
     changeEmail: {
       enabled: true,
       sendChangeEmailVerification: async ({ user, newEmail, url }) => {
@@ -153,6 +161,20 @@ const auth = betterAuth({
             react: EmailChangeNotificationEmail({ name: user.name }),
           }),
         ]);
+      },
+    },
+  },
+  databaseHooks: {
+    user: {
+      create: {
+        before: async (user) => {
+          const baseSlug = slugify(user.name) || "utilisateur";
+          const randomValue = crypto.getRandomValues(new Uint32Array(1))[0];
+          const uniqueSuffix =
+            Date.now().toString(36) + randomValue.toString(36);
+
+          return { data: { ...user, slug: `${baseSlug}-${uniqueSuffix}` } };
+        },
       },
     },
   },
