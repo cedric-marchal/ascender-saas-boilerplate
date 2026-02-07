@@ -6,7 +6,7 @@ import { nextCookies } from "better-auth/next-js";
 
 import { env } from "@/lib/env";
 import { prisma } from "@/lib/prisma";
-import { resend } from "@/lib/resend";
+import { sendEmailSafe } from "@/lib/resend";
 import { stripe } from "@/lib/stripe";
 
 import { EmailChangeNotificationEmail } from "@/components/emails/email-change-notification-email";
@@ -17,9 +17,6 @@ import { WelcomeEmail } from "@/components/emails/welcome-email";
 import { slugify } from "@/utils/string/slugify";
 
 const APP_NAME = env.NEXT_PUBLIC_APP_NAME;
-const FROM_EMAIL = "onboarding@resend.dev";
-
-// `${APP_NAME} <noreply@${env.RESEND_DOMAIN}>`
 
 const auth = betterAuth({
   database: prismaAdapter(prisma, {
@@ -60,16 +57,16 @@ const auth = betterAuth({
     autoSignIn: true,
     requireEmailVerification: false,
     sendResetPassword: async ({ user, url }) => {
-      await resend.emails.send({
-        from: FROM_EMAIL,
+      await sendEmailSafe({
+        from: `${APP_NAME} Sécurité <${env.RESEND_EMAIL_SECURITY}>`,
         to: user.email,
         subject: `Réinitialisez votre mot de passe ${APP_NAME}`,
         react: ResetPasswordEmail({ name: user.name, resetLink: url }),
       });
     },
     onPasswordReset: async ({ user }) => {
-      await resend.emails.send({
-        from: FROM_EMAIL,
+      await sendEmailSafe({
+        from: `${APP_NAME} Sécurité <${env.RESEND_EMAIL_SECURITY}>`,
         to: user.email,
         subject: `Votre mot de passe ${APP_NAME} a été modifié`,
         react: PasswordChangedEmail({ name: user.name }),
@@ -80,8 +77,8 @@ const auth = betterAuth({
     sendOnSignUp: true,
     autoSignInAfterVerification: true,
     sendVerificationEmail: async ({ user, url }) => {
-      await resend.emails.send({
-        from: FROM_EMAIL,
+      await sendEmailSafe({
+        from: `${APP_NAME} <${env.RESEND_EMAIL_NOREPLY}>`,
         to: user.email,
         subject: `Vérifiez votre adresse email ${APP_NAME}`,
         react: WelcomeEmail({ name: user.name, verificationLink: url }),
@@ -144,9 +141,9 @@ const auth = betterAuth({
     changeEmail: {
       enabled: true,
       sendChangeEmailVerification: async ({ user, newEmail, url }) => {
-        await Promise.all([
-          resend.emails.send({
-            from: FROM_EMAIL,
+        await Promise.allSettled([
+          sendEmailSafe({
+            from: `${APP_NAME} <${env.RESEND_EMAIL_NOREPLY}>`,
             to: newEmail,
             subject: `Vérifiez votre nouvelle adresse email ${APP_NAME}`,
             react: WelcomeEmail({
@@ -154,8 +151,8 @@ const auth = betterAuth({
               verificationLink: url,
             }),
           }),
-          resend.emails.send({
-            from: FROM_EMAIL,
+          sendEmailSafe({
+            from: `${APP_NAME} Sécurité <${env.RESEND_EMAIL_SECURITY}>`,
             to: user.email,
             subject: `Modification d'adresse email demandée sur ${APP_NAME}`,
             react: EmailChangeNotificationEmail({ name: user.name }),

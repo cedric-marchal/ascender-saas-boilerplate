@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { deleteFile } from "@/lib/r2";
 import { authenticatedRatelimit } from "@/lib/ratelimit";
 import { redis } from "@/lib/redis";
-import { resend } from "@/lib/resend";
+import { sendEmail } from "@/lib/resend";
 import { DeleteAccountSchema } from "@/lib/schemas/account.schema";
 import { getSession } from "@/lib/session";
 import { stripe } from "@/lib/stripe";
@@ -109,8 +109,8 @@ async function DELETE(request: Request) {
     await prisma.user.delete({ where: { id: user.id } });
 
     try {
-      await resend.emails.send({
-        from: `${env.NEXT_PUBLIC_APP_NAME} <noreply@${env.RESEND_DOMAIN}>`,
+      await sendEmail({
+        from: `${env.NEXT_PUBLIC_APP_NAME} <${env.RESEND_EMAIL_NOREPLY}>`,
         to: user.email,
         subject: `Votre compte ${env.NEXT_PUBLIC_APP_NAME} a été supprimé`,
         react: AccountDeletedEmail({ name: session.user.name }),

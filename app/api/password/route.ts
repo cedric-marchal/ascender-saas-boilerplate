@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { env } from "@/lib/env";
 import { authenticatedRatelimit } from "@/lib/ratelimit";
-import { resend } from "@/lib/resend";
+import { sendEmail } from "@/lib/resend";
 import { UpdatePasswordSchema } from "@/lib/schemas/password.schema";
 import { getSession } from "@/lib/session";
 
@@ -43,8 +43,8 @@ async function PATCH(request: Request) {
       headers: await headers(),
     });
 
-    await resend.emails.send({
-      from: `${env.NEXT_PUBLIC_APP_NAME} <noreply@${env.RESEND_DOMAIN}>`,
+    await sendEmail({
+      from: `${env.NEXT_PUBLIC_APP_NAME} Sécurité <${env.RESEND_EMAIL_SECURITY}>`,
       to: session.user.email,
       subject: `Votre mot de passe ${env.NEXT_PUBLIC_APP_NAME} a été modifié`,
       react: PasswordChangedEmail({ name: session.user.name }),

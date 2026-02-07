@@ -6,7 +6,7 @@ import { auth } from "@/lib/auth";
 import { env } from "@/lib/env";
 import { prisma } from "@/lib/prisma";
 import { authenticatedRatelimit } from "@/lib/ratelimit";
-import { resend } from "@/lib/resend";
+import { sendEmail } from "@/lib/resend";
 import { UpdateProfileSchema } from "@/lib/schemas/profile.schema";
 import { getSession } from "@/lib/session";
 
@@ -23,7 +23,6 @@ import { checkRatelimit } from "@/utils/ratelimit/check-ratelimit";
 const EMAIL_VERIFICATION_EXPIRY_HOURS = 24;
 
 async function createEmailVerificationToken(
-  userId: string,
   email: string
 ): Promise<string> {
   const token = randomBytes(32).toString("hex");
@@ -49,8 +48,8 @@ async function sendEmailVerification(
 ) {
   const verificationLink = `${env.NEXT_PUBLIC_BASE_URL}/verify-email?token=${token}`;
 
-  await resend.emails.send({
-    from: `${env.NEXT_PUBLIC_APP_NAME} <noreply@${env.RESEND_DOMAIN}>`,
+  await sendEmail({
+    from: `${env.NEXT_PUBLIC_APP_NAME} <${env.RESEND_EMAIL_NOREPLY}>`,
     to: email,
     subject: "Vérifiez votre adresse email",
     react: EmailVerificationEmail({
@@ -154,7 +153,6 @@ async function PATCH(request: Request) {
 
     if (emailChanged) {
       const verificationToken = await createEmailVerificationToken(
-        updatedUser.id,
         updatedUser.email
       );
 
