@@ -11,8 +11,8 @@ import {
   ConflictError,
   ForbiddenError,
   UnauthorizedError,
-  handleApiError,
-} from "@/utils/api/handle-api-error";
+} from "@/utils/errors/errors";
+import { handleApiError } from "@/utils/errors/handle-api-error";
 
 type User = {
   id: string;

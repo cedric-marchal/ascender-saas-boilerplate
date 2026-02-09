@@ -16,8 +16,8 @@ import {
   BadRequestError,
   ForbiddenError,
   UnauthorizedError,
-  handleApiError,
-} from "@/utils/api/handle-api-error";
+} from "@/utils/errors/errors";
+import { handleApiError } from "@/utils/errors/handle-api-error";
 import { checkRatelimit } from "@/utils/ratelimit/check-ratelimit";
 
 const AVATAR_FOLDER = "avatars";

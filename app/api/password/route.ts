@@ -10,10 +10,8 @@ import { getSession } from "@/lib/session";
 
 import { PasswordChangedEmail } from "@/components/emails/password-changed-email";
 
-import {
-  UnauthorizedError,
-  handleApiError,
-} from "@/utils/api/handle-api-error";
+import { UnauthorizedError } from "@/utils/errors/errors";
+import { handleApiError } from "@/utils/errors/handle-api-error";
 import { checkRatelimit } from "@/utils/ratelimit/check-ratelimit";
 
 async function PATCH(request: Request) {

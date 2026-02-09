@@ -9,10 +9,8 @@ import { authenticatedRatelimit } from "@/lib/ratelimit";
 import { UpdateAvatarSchema } from "@/lib/schemas/avatar.schema";
 import { getSession } from "@/lib/session";
 
-import {
-  UnauthorizedError,
-  handleApiError,
-} from "@/utils/api/handle-api-error";
+import { UnauthorizedError } from "@/utils/errors/errors";
+import { handleApiError } from "@/utils/errors/handle-api-error";
 import { checkRatelimit } from "@/utils/ratelimit/check-ratelimit";
 
 const AVATAR_FOLDER = "avatars";

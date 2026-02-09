@@ -7,7 +7,7 @@ import { CreateContactSchema } from "@/lib/schemas/contact.schema";
 
 import { ContactEmail } from "@/components/emails/contact-email";
 
-import { handleApiError } from "@/utils/api/handle-api-error";
+import { handleApiError } from "@/utils/errors/handle-api-error";
 import { checkRatelimit } from "@/utils/ratelimit/check-ratelimit";
 import { getRequestIdentifier } from "@/utils/ratelimit/get-request-identifier";
 

@@ -4,61 +4,18 @@ import { NextResponse } from "next/server";
 
 import { ZodError } from "zod";
 
-class NotFoundError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = "NotFoundError";
-  }
-}
-
-class UnauthorizedError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = "UnauthorizedError";
-  }
-}
-
-class ForbiddenError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = "ForbiddenError";
-  }
-}
-
-class ConflictError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = "ConflictError";
-  }
-}
-
-class TooManyRequestsError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = "TooManyRequestsError";
-  }
-}
-
-class BadRequestError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = "BadRequestError";
-  }
-}
-
-class PayloadTooLargeError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = "PayloadTooLargeError";
-  }
-}
-
-class UnprocessableEntityError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = "UnprocessableEntityError";
-  }
-}
+import {
+  BadRequestError,
+  ConflictError,
+  ForbiddenError,
+  NotFoundError,
+  PayloadTooLargeError,
+  ServiceUnavailableError,
+  TooManyRequestsError,
+  UnauthorizedError,
+  UnprocessableEntityError,
+  UnsupportedMediaTypeError,
+} from "@/utils/errors/errors";
 
 function handleApiError(error: unknown): NextResponse {
   if (error instanceof ZodError) {
@@ -139,6 +96,17 @@ function handleApiError(error: unknown): NextResponse {
     );
   }
 
+  if (error instanceof UnsupportedMediaTypeError) {
+    return new NextResponse(
+      JSON.stringify({
+        success: false,
+        type: "UnsupportedMediaTypeError",
+        message: error.message,
+      }),
+      { status: 415, headers: { "Content-Type": "application/json" } }
+    );
+  }
+
   if (error instanceof UnprocessableEntityError) {
     return new NextResponse(
       JSON.stringify({
@@ -158,6 +126,17 @@ function handleApiError(error: unknown): NextResponse {
         message: error.message,
       }),
       { status: 429, headers: { "Content-Type": "application/json" } }
+    );
+  }
+
+  if (error instanceof ServiceUnavailableError) {
+    return new NextResponse(
+      JSON.stringify({
+        success: false,
+        type: "ServiceUnavailableError",
+        message: error.message,
+      }),
+      { status: 503, headers: { "Content-Type": "application/json" } }
     );
   }
 
@@ -185,14 +164,4 @@ function handleApiError(error: unknown): NextResponse {
   );
 }
 
-export {
-  BadRequestError,
-  ConflictError,
-  ForbiddenError,
-  handleApiError,
-  NotFoundError,
-  PayloadTooLargeError,
-  TooManyRequestsError,
-  UnauthorizedError,
-  UnprocessableEntityError,
-};
+export { handleApiError };

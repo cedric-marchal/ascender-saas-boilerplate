@@ -2,7 +2,7 @@ import "server-only";
 
 import sharp from "sharp";
 
-import { BadRequestError } from "@/utils/api/handle-api-error";
+import { BadRequestError } from "@/utils/errors/errors";
 
 const ACCEPTED_IMAGE_FORMATS = ["image/jpeg", "image/png", "image/webp"];
 const MAX_IMAGE_WIDTH = 10000;

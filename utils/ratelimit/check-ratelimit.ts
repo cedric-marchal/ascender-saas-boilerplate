@@ -4,7 +4,7 @@ import type { Ratelimit } from "@upstash/ratelimit";
 
 import { env } from "@/lib/env";
 
-import { TooManyRequestsError } from "@/utils/api/handle-api-error";
+import { TooManyRequestsError } from "../errors/errors";
 
 async function checkRatelimit(
   ratelimiter: Ratelimit,

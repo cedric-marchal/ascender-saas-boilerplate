@@ -10,7 +10,7 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 import { env } from "@/lib/env";
 
-import { BadRequestError } from "@/utils/api/handle-api-error";
+import { BadRequestError } from "@/utils/errors/errors";
 
 const r2 = new S3Client({
   region: "auto",

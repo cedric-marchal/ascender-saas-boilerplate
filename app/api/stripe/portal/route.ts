@@ -10,8 +10,8 @@ import {
   ForbiddenError,
   NotFoundError,
   UnauthorizedError,
-  handleApiError,
-} from "@/utils/api/handle-api-error";
+} from "@/utils/errors/errors";
+import { handleApiError } from "@/utils/errors/handle-api-error";
 
 async function POST(request: Request) {
   try {

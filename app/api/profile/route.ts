@@ -17,8 +17,8 @@ import {
   BadRequestError,
   ConflictError,
   UnauthorizedError,
-  handleApiError,
-} from "@/utils/api/handle-api-error";
+} from "@/utils/errors/errors";
+import { handleApiError } from "@/utils/errors/handle-api-error";
 import { checkRatelimit } from "@/utils/ratelimit/check-ratelimit";
 
 const EMAIL_VERIFICATION_EXPIRY_HOURS = 24;
