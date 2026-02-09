@@ -34,6 +34,8 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 
+import { getInitials } from "@/utils/string/get-initials";
+
 type MenuItem = {
   title: string;
   url: string;
@@ -103,7 +105,7 @@ function DashboardSidebar({ image, name }: DashboardSidebarProps) {
                         alt={`${name} avatar`}
                       />
                     ) : (
-                      <AvatarFallback>{name.charAt(0)}</AvatarFallback>
+                      <AvatarFallback>{getInitials(name)}</AvatarFallback>
                     )}
                   </Avatar>
                   <span>{name}</span>

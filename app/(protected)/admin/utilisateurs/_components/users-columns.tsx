@@ -17,6 +17,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+import { getInitials } from "@/utils/string/get-initials";
+
 export type UserTableData = Pick<
   User,
   "id" | "name" | "email" | "role" | "emailVerified" | "image" | "createdAt"
@@ -45,7 +47,7 @@ const usersColumns: ColumnDef<UserTableData>[] = [
             {user.image ? (
               <AvatarImage src={user.image} alt={`${user.name} avatar`} />
             ) : (
-              <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+              <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
             )}
           </Avatar>
           <span className="font-medium">{user.name}</span>

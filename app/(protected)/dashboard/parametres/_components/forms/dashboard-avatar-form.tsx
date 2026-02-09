@@ -25,6 +25,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
+import { getInitials } from "@/utils/string/get-initials";
+
 type UpdateAvatarSchemaType = {
   avatar: File;
 };
@@ -91,7 +93,7 @@ function DashboardAvatarForm({ name, image }: DashboardAvatarFormProps) {
           <Avatar className="h-20 w-20">
             <AvatarImage src={previewUrl || image || undefined} alt={name} />
             <AvatarFallback className="text-lg">
-              {name.charAt(0).toUpperCase()}
+              {getInitials(name)}
             </AvatarFallback>
           </Avatar>
 

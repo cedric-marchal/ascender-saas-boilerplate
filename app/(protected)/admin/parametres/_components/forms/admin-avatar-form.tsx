@@ -25,6 +25,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
+import { getInitials } from "@/utils/string/get-initials";
+
 type UpdateAvatarSchemaType = {
   avatar: File;
 };
@@ -45,6 +47,8 @@ function AdminAvatarForm({ user }: AdminAvatarFormProps) {
   const form = useForm<UpdateAvatarSchemaType>({
     resolver: zodResolver(UpdateAvatarSchema),
   });
+
+  const initials = getInitials(user.name);
 
   async function onSubmit(data: UpdateAvatarSchemaType) {
     setIsLoading(true);
@@ -95,9 +99,7 @@ function AdminAvatarForm({ user }: AdminAvatarFormProps) {
               src={previewUrl || user.image || undefined}
               alt={user.name}
             />
-            <AvatarFallback className="text-lg">
-              {user.name.charAt(0).toUpperCase()}
-            </AvatarFallback>
+            <AvatarFallback className="text-lg">{initials}</AvatarFallback>
           </Avatar>
 
           <div className="flex-1">
