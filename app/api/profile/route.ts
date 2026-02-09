@@ -1,6 +1,7 @@
-import { randomBytes } from "crypto";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
+
+import { randomBytes } from "crypto";
 
 import { auth } from "@/lib/auth";
 import { env } from "@/lib/env";
@@ -22,9 +23,7 @@ import { checkRatelimit } from "@/utils/ratelimit/check-ratelimit";
 
 const EMAIL_VERIFICATION_EXPIRY_HOURS = 24;
 
-async function createEmailVerificationToken(
-  email: string
-): Promise<string> {
+async function createEmailVerificationToken(email: string): Promise<string> {
   const token = randomBytes(32).toString("hex");
   const expiresAt = new Date();
   expiresAt.setHours(expiresAt.getHours() + EMAIL_VERIFICATION_EXPIRY_HOURS);

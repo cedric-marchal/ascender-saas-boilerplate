@@ -3,6 +3,7 @@ import { z } from "zod";
 
 const env = createEnv({
   server: {
+    NODE_ENV: z.enum(["development", "production", "test"]),
     MAINTENANCE_ENABLED: z
       .enum(["true", "false"])
       .transform((value) => value === "true")
@@ -66,6 +67,7 @@ const env = createEnv({
   },
   runtimeEnv: {
     // Server
+    NODE_ENV: process.env.NODE_ENV,
     MAINTENANCE_ENABLED: process.env.MAINTENANCE_ENABLED,
     BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET,
     GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,

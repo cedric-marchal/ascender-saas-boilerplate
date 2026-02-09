@@ -1,5 +1,5 @@
-import type Stripe from "stripe";
 import { Calendar, CheckCircle2, XCircle } from "lucide-react";
+import type Stripe from "stripe";
 
 import { Badge } from "@/components/ui/badge";
 import {
@@ -91,37 +91,39 @@ function SubscriptionCard({ subscription }: SubscriptionCardProps) {
       <CardContent className="space-y-4">
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-1">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <div className="text-muted-foreground flex items-center gap-2 text-sm">
               <Calendar className="h-4 w-4" aria-hidden="true" />
               <span>Début de période</span>
             </div>
             <p className="text-sm font-medium">
               {sub.current_period_start
-                ? new Date(
-                    sub.current_period_start * 1000
-                  ).toLocaleDateString("fr-FR", {
-                    day: "numeric",
-                    month: "long",
-                    year: "numeric",
-                  })
+                ? new Date(sub.current_period_start * 1000).toLocaleDateString(
+                    "fr-FR",
+                    {
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                    }
+                  )
                 : "Date inconnue"}
             </p>
           </div>
 
           <div className="space-y-1">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <div className="text-muted-foreground flex items-center gap-2 text-sm">
               <Calendar className="h-4 w-4" aria-hidden="true" />
               <span>Fin de période</span>
             </div>
             <p className="text-sm font-medium">
               {sub.current_period_end
-                ? new Date(
-                    sub.current_period_end * 1000
-                  ).toLocaleDateString("fr-FR", {
-                    day: "numeric",
-                    month: "long",
-                    year: "numeric",
-                  })
+                ? new Date(sub.current_period_end * 1000).toLocaleDateString(
+                    "fr-FR",
+                    {
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                    }
+                  )
                 : "Date inconnue"}
             </p>
           </div>
@@ -129,7 +131,7 @@ function SubscriptionCard({ subscription }: SubscriptionCardProps) {
 
         {sub.canceled_at && (
           <div className="space-y-1">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <div className="text-muted-foreground flex items-center gap-2 text-sm">
               <XCircle className="h-4 w-4" aria-hidden="true" />
               <span>Annulé le</span>
             </div>

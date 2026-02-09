@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
-
 import { headers } from "next/headers";
-import { type SearchParams } from "nuqs/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+
+import { CheckCircle2, XCircle } from "lucide-react";
+import { type SearchParams } from "nuqs/server";
 
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -18,8 +19,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-
-import { CheckCircle2, XCircle } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Vérification de l'email",
@@ -150,7 +149,9 @@ export default async function VerifyEmailPage({
             <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
               <XCircle className="h-6 w-6 text-red-600" aria-hidden="true" />
             </div>
-            <CardTitle className="text-center">Utilisateur introuvable</CardTitle>
+            <CardTitle className="text-center">
+              Utilisateur introuvable
+            </CardTitle>
             <CardDescription className="text-center">
               L&apos;adresse email associée à ce lien n&apos;existe plus.
             </CardDescription>
@@ -210,9 +211,14 @@ export default async function VerifyEmailPage({
       <Card className="w-full max-w-md">
         <CardHeader>
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
-            <CheckCircle2 className="h-6 w-6 text-green-600" aria-hidden="true" />
+            <CheckCircle2
+              className="h-6 w-6 text-green-600"
+              aria-hidden="true"
+            />
           </div>
-          <CardTitle className="text-center">Email vérifié avec succès</CardTitle>
+          <CardTitle className="text-center">
+            Email vérifié avec succès
+          </CardTitle>
           <CardDescription className="text-center">
             Votre adresse email a été vérifiée. Vous pouvez maintenant utiliser
             toutes les fonctionnalités de votre compte.

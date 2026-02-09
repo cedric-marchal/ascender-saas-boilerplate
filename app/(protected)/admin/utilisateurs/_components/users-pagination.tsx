@@ -27,10 +27,7 @@ type UsersPaginationProps = {
   totalPages: number;
 };
 
-function UsersPagination({
-  currentPage,
-  totalPages,
-}: UsersPaginationProps) {
+function UsersPagination({ currentPage, totalPages }: UsersPaginationProps) {
   const [isLoading, startTransition] = useTransition();
 
   const [, setPage] = useQueryState(

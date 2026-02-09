@@ -4,13 +4,13 @@ import { useEffect, useState } from "react";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+
 import { Cookie, Shield } from "lucide-react";
 
-import { useCookieConsent } from "@/hooks/use-cookie-consent";
-
+import { CookiePreferencesModal } from "@/components/cookie-preferences-modal";
 import { Button } from "@/components/ui/button";
 
-import { CookiePreferencesModal } from "@/components/cookie-preferences-modal";
+import { useCookieConsent } from "@/hooks/use-cookie-consent";
 
 function CookieBanner() {
   const [isHydrated, setIsHydrated] = useState(false);
@@ -57,7 +57,7 @@ function CookieBanner() {
           size="icon"
           aria-label="Gérer mes préférences de cookies"
           onClick={openPreferences}
-          className="fixed bottom-4 right-4 z-50 rounded-full shadow-lg hover:shadow-xl"
+          className="fixed right-4 bottom-4 z-50 rounded-full shadow-lg hover:shadow-xl"
         >
           <Cookie className="h-5 w-5" aria-hidden="true" />
         </Button>
@@ -65,22 +65,22 @@ function CookieBanner() {
         <div
           role="dialog"
           aria-label="Consentement aux cookies"
-          className="fixed bottom-0 left-0 right-0 z-50 border-t bg-background shadow-[0_-2px_8px_rgba(0,0,0,0.1)]"
+          className="bg-background fixed right-0 bottom-0 left-0 z-50 border-t shadow-[0_-2px_8px_rgba(0,0,0,0.1)]"
         >
           <div className="mx-auto max-w-5xl px-4 py-4">
             <div className="mb-4 flex items-start gap-3">
               <Shield
-                className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground"
+                className="text-muted-foreground mt-0.5 h-5 w-5 shrink-0"
                 aria-hidden="true"
               />
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 Nous utilisons des cookies pour améliorer votre expérience sur
                 notre site. Les cookies nécessaires sont toujours activés. Vous
                 pouvez accepter tous les cookies, les refuser ou gérer vos
                 préférences.{" "}
                 <Link
                   href="/politique-des-cookies"
-                  className="underline hover:text-foreground"
+                  className="hover:text-foreground underline"
                 >
                   En savoir plus
                 </Link>

@@ -69,8 +69,8 @@ export default function CookiePolicyPage() {
             <section>
               <h2>Introduction</h2>
               <p>
-                La présente politique vous informe sur les cookies déposés sur le
-                site {APP_NAME} lors de votre visite. Elle a été élaborée
+                La présente politique vous informe sur les cookies déposés sur
+                le site {APP_NAME} lors de votre visite. Elle a été élaborée
                 conformément aux recommandations de la CNIL (Commission
                 Nationale de l'Informatique et des Libertés) et au Règlement
                 Général sur la Protection des Données (RGPD).
@@ -140,9 +140,7 @@ export default function CookiePolicyPage() {
                       <td>
                         <code>theme</code>
                       </td>
-                      <td>
-                        Préférence de thème (clair / sombre)
-                      </td>
+                      <td>Préférence de thème (clair / sombre)</td>
                       <td>1 an</td>
                     </tr>
                   </tbody>

@@ -20,7 +20,7 @@ export default function DashboardBillingLoading() {
               <Skeleton className="h-10 w-48" />
             </div>
 
-            <div className="rounded-lg border bg-card">
+            <div className="bg-card rounded-lg border">
               <div className="space-y-1.5 p-6">
                 <Skeleton className="h-5 w-56" />
                 <Skeleton className="h-4 w-72" />
@@ -37,7 +37,7 @@ export default function DashboardBillingLoading() {
                   <Skeleton className="h-6 w-24 rounded-full" />
                 </div>
 
-                <div className="space-y-2 rounded-lg border bg-muted/50 p-4">
+                <div className="bg-muted/50 space-y-2 rounded-lg border p-4">
                   <div className="space-y-2">
                     <div className="flex justify-between">
                       <Skeleton className="h-4 w-16" />
@@ -56,7 +56,7 @@ export default function DashboardBillingLoading() {
           <div className="space-y-4">
             <Skeleton className="h-7 w-40" />
 
-            <div className="rounded-lg border bg-card">
+            <div className="bg-card rounded-lg border">
               <div className="p-6">
                 <div className="flex items-start justify-between">
                   <div className="space-y-2">
@@ -93,7 +93,7 @@ export default function DashboardBillingLoading() {
 
           <div className="grid gap-4">
             {Array.from({ length: 3 }).map((_, index: number) => (
-              <div key={index} className="rounded-lg border bg-card">
+              <div key={index} className="bg-card rounded-lg border">
                 <div className="p-6">
                   <div className="flex items-start justify-between">
                     <div className="space-y-2">

@@ -41,8 +41,8 @@ function EmailChangeNotificationEmail({
             </Text>
 
             <Text className="text-sm leading-relaxed text-zinc-700">
-              Une demande de modification de votre adresse email sur {APP_NAME}
-              a été soumise. Cette modification ne sera effective qu&apos;après
+              Une demande de modification de votre adresse email sur {APP_NAME}a
+              été soumise. Cette modification ne sera effective qu&apos;après
               vérification de la nouvelle adresse.
             </Text>
 

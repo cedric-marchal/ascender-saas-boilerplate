@@ -9,7 +9,10 @@ type EmailVerificationBadgeProps = {
 function EmailVerificationBadge({ isVerified }: EmailVerificationBadgeProps) {
   if (isVerified) {
     return (
-      <Badge variant="outline" className="gap-1 border-green-200 text-green-700">
+      <Badge
+        variant="outline"
+        className="gap-1 border-green-200 text-green-700"
+      >
         <CheckCircle2 className="h-3 w-3" aria-hidden="true" />
         Email vérifié
       </Badge>
@@ -17,7 +20,10 @@ function EmailVerificationBadge({ isVerified }: EmailVerificationBadgeProps) {
   }
 
   return (
-    <Badge variant="outline" className="gap-1 border-orange-200 text-orange-700">
+    <Badge
+      variant="outline"
+      className="gap-1 border-orange-200 text-orange-700"
+    >
       <XCircle className="h-3 w-3" aria-hidden="true" />
       Email non vérifié
     </Badge>

@@ -8,9 +8,8 @@ import { NuqsAdapter } from "nuqs/adapters/next/app";
 
 import { env } from "@/lib/env";
 
-import { Toaster } from "@/components/ui/sonner";
-
 import { CookieBanner } from "@/components/cookie-banner";
+import { Toaster } from "@/components/ui/sonner";
 
 import "./globals.css";
 

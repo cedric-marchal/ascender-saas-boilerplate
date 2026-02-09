@@ -63,8 +63,8 @@ function AccountDeletedEmail({ name }: AccountDeletedEmailProps) {
 
             <Text className="m-0 text-xs text-zinc-500">
               Cet email a été envoyé automatiquement suite à la suppression de
-              votre compte. Si vous avez des questions, n&apos;hésitez pas à nous
-              contacter.
+              votre compte. Si vous avez des questions, n&apos;hésitez pas à
+              nous contacter.
             </Text>
           </Container>
         </Body>

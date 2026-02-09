@@ -5,7 +5,7 @@ function SubscriptionListEmpty() {
     <section className="py-12 text-center">
       <div className="mx-auto max-w-md space-y-4">
         <CreditCard
-          className="mx-auto h-12 w-12 text-muted-foreground"
+          className="text-muted-foreground mx-auto h-12 w-12"
           aria-hidden="true"
         />
         <div className="space-y-2">

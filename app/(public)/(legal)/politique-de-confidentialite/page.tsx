@@ -185,9 +185,9 @@ export default function PrivacyPolicyPage() {
               <ul>
                 <li>
                   <strong>Prestataires de services :</strong> hébergement
-                  (Vercel), paiement (Stripe), emails (Resend), base de
-                  données (Neon), stockage de fichiers (Cloudflare R2), mise
-                  en cache (Upstash)
+                  (Vercel), paiement (Stripe), emails (Resend), base de données
+                  (Neon), stockage de fichiers (Cloudflare R2), mise en cache
+                  (Upstash)
                 </li>
                 <li>
                   <strong>Autorités :</strong> si requis par la loi ou pour

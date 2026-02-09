@@ -1,6 +1,7 @@
-import type Stripe from "stripe";
-import { Calendar, Download, FileText } from "lucide-react";
 import Link from "next/link";
+
+import { Calendar, Download, FileText } from "lucide-react";
+import type Stripe from "stripe";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -64,7 +65,10 @@ function InvoiceCard({ invoice }: InvoiceCardProps) {
         <div className="flex items-start justify-between">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <FileText className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+              <FileText
+                className="text-muted-foreground h-4 w-4"
+                aria-hidden="true"
+              />
               <CardTitle className="text-base">
                 Facture {invoice.number || invoice.id}
               </CardTitle>
@@ -89,21 +93,22 @@ function InvoiceCard({ invoice }: InvoiceCardProps) {
             <p className="text-2xl font-bold">
               {formatAmount(invoice.amount_paid)}
             </p>
-            {invoice.status === "paid" && invoice.status_transitions?.paid_at && (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Calendar className="h-3 w-3" aria-hidden="true" />
-                <span>
-                  Payé le{" "}
-                  {new Date(
-                    invoice.status_transitions.paid_at * 1000
-                  ).toLocaleDateString("fr-FR", {
-                    day: "numeric",
-                    month: "long",
-                    year: "numeric",
-                  })}
-                </span>
-              </div>
-            )}
+            {invoice.status === "paid" &&
+              invoice.status_transitions?.paid_at && (
+                <div className="text-muted-foreground flex items-center gap-2 text-sm">
+                  <Calendar className="h-3 w-3" aria-hidden="true" />
+                  <span>
+                    Payé le{" "}
+                    {new Date(
+                      invoice.status_transitions.paid_at * 1000
+                    ).toLocaleDateString("fr-FR", {
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                    })}
+                  </span>
+                </div>
+              )}
           </div>
 
           {invoice.invoice_pdf && (

@@ -261,8 +261,6 @@ import { type ChangeEvent, useState, useTransition } from "react";
 import { Search, X } from "lucide-react";
 import { createParser, parseAsStringLiteral, useQueryStates } from "nuqs";
 
-import { useDebounce } from "@/hooks/use-debounce";
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -272,6 +270,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+
+import { useDebounce } from "@/hooks/use-debounce";
 
 const MAX_PAGE = 1000;
 const MAX_SEARCH_LENGTH = 100;
