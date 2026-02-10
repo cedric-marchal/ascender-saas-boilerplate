@@ -1,7 +1,6 @@
 "use client";
 
-import type { ChangeEvent } from "react";
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useState, useTransition, type ChangeEvent } from "react";
 
 import { Search, X } from "lucide-react";
 import { createParser, parseAsStringLiteral, useQueryStates } from "nuqs";

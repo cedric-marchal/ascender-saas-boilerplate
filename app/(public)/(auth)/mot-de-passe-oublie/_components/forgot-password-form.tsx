@@ -1,8 +1,6 @@
-/* eslint-disable react/no-children-prop */
 "use client";
 
-import type { ChangeEvent, SubmitEvent } from "react";
-import { useState } from "react";
+import { type ChangeEvent, type SubmitEvent, useState } from "react";
 
 import { useForm } from "@tanstack/react-form";
 import { Loader2 } from "lucide-react";

@@ -32,15 +32,25 @@ These rules apply exclusively to creating new `page.tsx` files in the Next.js Ap
 
 ### 3. Type Imports (P0)
 
-- ALWAYS use `import type` for type-only imports
-- NEVER import types without the `type` keyword
+- ALWAYS combine imports from the same module (never separate them)
+- Use `import type {}` when importing ONLY types
+- Use inline `type` keyword when mixing types and values
+- NEVER have multiple import statements from the same module
 
 ```tsx
-// ✅ Correct
-// ❌ Wrong
-import { Metadata, type Metadata } from "next";
-
+// ✅ Correct: Type-only imports
+import type { Metadata } from "next";
 import type { WebSite, WithContext } from "schema-dts";
+
+// ✅ Correct: Mixed imports (if importing values too)
+import { cookies, type Metadata } from "next";
+
+// ❌ Wrong: Separate imports from the same module
+import type { Metadata } from "next";
+import { cookies } from "next";  // Should be combined above
+
+// ❌ Wrong: Not using inline `type` keyword
+import { Metadata, cookies } from "next";  // Metadata should have `type` prefix
 ```
 
 ### 4. Metadata Configuration (P1)

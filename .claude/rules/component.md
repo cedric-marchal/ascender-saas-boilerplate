@@ -166,15 +166,30 @@ export { JobCard };
 
 ### 6. Type Imports (P0)
 
-- ALWAYS use `import type` for type-only imports
-- NEVER import types without the `type` keyword
+- ALWAYS combine imports from the same module (never separate them)
+- Use `import type {}` when importing ONLY types
+- Use inline `type` keyword when mixing types and values
+- NEVER have multiple import statements from the same module
 
 ```tsx
-// ✅ Correct
-// ❌ Wrong
-import { ReactNode, type ReactNode } from "react";
+// ✅ Correct: Type-only imports
+import type { ReactNode } from "react";
+import type { User } from "@/types/user";
 
-import { User, type User } from "@/types/user";
+// ✅ Correct: Mixed imports (types + values)
+import { useState, type ChangeEvent, type FormEvent } from "react";
+import { Button, type ButtonProps } from "@/components/ui/button";
+import {
+  CreateUserSchema,
+  type CreateUserSchemaType,
+} from "@/lib/schemas/user.schema";
+
+// ❌ Wrong: Separate imports from the same module
+import type { ReactNode } from "react";
+import { useState } from "react";  // Should be combined above
+
+// ❌ Wrong: Not using inline `type` keyword
+import { ReactNode, useState } from "react";  // ReactNode should have `type` prefix
 ```
 
 ### 7. Server vs Client Components (P0)

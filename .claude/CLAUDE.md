@@ -160,7 +160,10 @@ items.map((_, i) => ...)
 
 ### General Rules
 
-- Use `import type` for type-only imports
+- **Import types**: Combine imports from the same module
+  - Type-only imports: `import type { Type1, Type2 } from "module";`
+  - Mixed imports: `import { value, type Type1, type Type2 } from "module";`
+  - NEVER use separate imports from the same module
 - Use absolute paths with `@/` prefix (never relative)
 - No comments in code
 - French for user-facing messages, English for code
@@ -411,10 +414,11 @@ app/(protected)/dashboard/settings/
 ### Structure
 
 ```tsx
-// 1. Type imports first
-// 2. Regular imports
+// 1. Imports: Combine types and values from the same module
+// Use inline `type` keyword when mixing types and values
 import { type ChangeEvent, type FormEvent, useState } from "react";
 
+// Use `import type` only when importing types exclusively
 import type { User } from "@prisma/client";
 
 import { cn } from "@/lib/utils";
@@ -960,6 +964,11 @@ Binary pattern: either success or throw (early throw pattern)
 ```tsx
 // ❌ NEVER use abbreviated names
 e, evt, res, req, doc, usr, btn, cfg, opts, prev, curr, temp, idx, i
+
+// ❌ NEVER use separate imports from the same module
+import type { Type } from "module";
+import { value } from "module";
+// ✅ Use: import { value, type Type } from "module";
 
 // ❌ NEVER use untyped event handlers
 function handleChange(e) { ... }

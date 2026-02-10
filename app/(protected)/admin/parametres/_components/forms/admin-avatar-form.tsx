@@ -1,8 +1,11 @@
-/* eslint-disable react/no-children-prop */
 "use client";
 
-import type { ChangeEvent, DragEvent, SubmitEvent } from "react";
-import { useState } from "react";
+import {
+  type ChangeEvent,
+  type DragEvent,
+  type SubmitEvent,
+  useState,
+} from "react";
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
