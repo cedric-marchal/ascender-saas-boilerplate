@@ -11,17 +11,17 @@ import { prisma } from "@/lib/prisma";
 import { requireAdminVerifiedEmail } from "@/lib/session";
 
 import { DataTable } from "@/components/ui/data-table";
+import { Pagination } from "@/components/pagination";
 
 import {
   type UserTableData,
   usersColumns,
 } from "@/app/(protected)/admin/utilisateurs/_components/users-columns";
 import { UsersFilters } from "@/app/(protected)/admin/utilisateurs/_components/users-filters";
-import { UsersPagination } from "@/app/(protected)/admin/utilisateurs/_components/users-pagination";
 
 const MAX_PAGE = 1000;
 const MAX_SEARCH_LENGTH = 100;
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 1;
 
 const parseAsPage = createParser({
   parse(query) {
@@ -135,7 +135,7 @@ export default async function AdminUsersPage({
 
       <section className="space-y-4">
         <DataTable columns={usersColumns} data={users as UserTableData[]} />
-        <UsersPagination currentPage={safePage} totalPages={totalPages} />
+        <Pagination currentPage={safePage} totalPages={totalPages} />
       </section>
     </main>
   );

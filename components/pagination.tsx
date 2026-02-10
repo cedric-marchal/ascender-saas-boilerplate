@@ -12,9 +12,11 @@ const MAX_PAGE = 1000;
 const parseAsPage = createParser({
   parse(query) {
     const parsed = parseInt(query, 10);
+
     if (Number.isNaN(parsed) || parsed < 1) {
       return 1;
     }
+
     return Math.min(parsed, MAX_PAGE);
   },
   serialize(value) {
@@ -22,12 +24,12 @@ const parseAsPage = createParser({
   },
 });
 
-type UsersPaginationProps = {
+type PaginationProps = {
   currentPage: number;
   totalPages: number;
 };
 
-function UsersPagination({ currentPage, totalPages }: UsersPaginationProps) {
+function Pagination({ currentPage, totalPages }: PaginationProps) {
   const [isLoading, startTransition] = useTransition();
 
   const [, setPage] = useQueryState(
@@ -89,4 +91,4 @@ function UsersPagination({ currentPage, totalPages }: UsersPaginationProps) {
   );
 }
 
-export { UsersPagination };
+export { Pagination };
