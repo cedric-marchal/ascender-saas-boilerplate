@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+"use server";
 
 import { env } from "@/lib/env";
 import { prisma } from "@/lib/prisma";
@@ -6,18 +6,13 @@ import { deleteFile } from "@/lib/r2";
 import { authenticatedRatelimit } from "@/lib/ratelimit";
 import { redis } from "@/lib/redis";
 import { sendEmail } from "@/lib/resend";
+import { authActionClient } from "@/lib/safe-action";
 import { DeleteAccountSchema } from "@/lib/schemas/account.schema";
-import { getSession } from "@/lib/session";
 import { stripe } from "@/lib/stripe";
 
 import { AccountDeletedEmail } from "@/components/emails/account-deleted-email";
 
-import {
-  BadRequestError,
-  ForbiddenError,
-  UnauthorizedError,
-} from "@/utils/errors/errors";
-import { handleApiError } from "@/utils/errors/handle-api-error";
+import { BadRequestError, ForbiddenError } from "@/utils/errors/errors";
 import { checkRatelimit } from "@/utils/ratelimit/check-ratelimit";
 
 const AVATAR_FOLDER = "avatars";
@@ -52,24 +47,15 @@ async function deleteUserAvatar(image: string | null): Promise<void> {
   }
 }
 
-async function DELETE(request: Request) {
-  try {
-    const session = await getSession();
-
-    if (!session) {
-      throw new UnauthorizedError("Vous devez être connecté");
-    }
-
-    await checkRatelimit(authenticatedRatelimit, session.user.id);
-
-    const formData = await request.formData();
-
-    const data = DeleteAccountSchema.parse({
-      confirmation: formData.get("confirmation"),
-    });
-
+export const deleteAccountAction = authActionClient
+  .use(async ({ next, ctx }) => {
+    await checkRatelimit(authenticatedRatelimit, ctx.userId);
+    return next();
+  })
+  .inputSchema(DeleteAccountSchema)
+  .action(async ({ parsedInput, ctx }) => {
     const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
+      where: { id: ctx.userId },
       select: {
         id: true,
         email: true,
@@ -82,7 +68,7 @@ async function DELETE(request: Request) {
       throw new BadRequestError("Utilisateur introuvable");
     }
 
-    if (data.confirmation !== user.email) {
+    if (parsedInput.confirmation !== user.email) {
       throw new BadRequestError(
         "L'email de confirmation ne correspond pas à votre adresse email"
       );
@@ -113,16 +99,11 @@ async function DELETE(request: Request) {
         from: `${env.NEXT_PUBLIC_APP_NAME} <${env.RESEND_EMAIL_NOREPLY}>`,
         to: user.email,
         subject: `Votre compte ${env.NEXT_PUBLIC_APP_NAME} a été supprimé`,
-        react: AccountDeletedEmail({ name: session.user.name }),
+        react: AccountDeletedEmail({ name: ctx.userName }),
       });
     } catch (emailError: unknown) {
       console.error("Failed to send account deletion email:", emailError);
     }
 
-    return new NextResponse(null, { status: 204 });
-  } catch (error: unknown) {
-    return handleApiError(error);
-  }
-}
-
-export { DELETE };
+    return { success: true };
+  });

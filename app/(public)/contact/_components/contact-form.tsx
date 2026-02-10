@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import type { ChangeEvent, SubmitEvent } from "react";
 
-import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "@tanstack/react-form";
 import { Loader2 } from "lucide-react";
-import { useForm } from "react-hook-form";
+import { useAction } from "next-safe-action/hooks";
 import { toast } from "sonner";
 
 import {
@@ -13,138 +13,186 @@ import {
 } from "@/lib/schemas/contact.schema";
 
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
-function ContactForm() {
-  const [isLoading, setIsLoading] = useState(false);
+import { createContactAction } from "@/app/(public)/contact/_actions/create-contact.action";
 
-  const form = useForm<CreateContactSchemaType>({
-    resolver: zodResolver(CreateContactSchema),
+function ContactForm() {
+  const { executeAsync, isExecuting } = useAction(createContactAction);
+
+  const form = useForm({
     defaultValues: {
       name: "",
       email: "",
       subject: "",
       message: "",
+    } as CreateContactSchemaType,
+    validators: {
+      onSubmit: CreateContactSchema,
+    },
+    onSubmit: async ({ value }) => {
+      const result = await executeAsync(value);
+
+      if (result?.serverError) {
+        toast.error(result.serverError);
+        return;
+      }
+
+      if (result?.data?.success) {
+        toast.success("Message envoyé avec succès !");
+        form.reset();
+      }
     },
   });
 
-  const onSubmit = async (data: CreateContactSchemaType) => {
-    setIsLoading(true);
-
-    try {
-      const formData = new FormData();
-      formData.append("name", data.name);
-      formData.append("email", data.email);
-      formData.append("subject", data.subject);
-      formData.append("message", data.message);
-
-      const response = await fetch("/api/contact", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!response.ok) {
-        const body = await response.json();
-        throw new Error(body.message || "Une erreur est survenue");
-      }
-
-      toast.success("Message envoyé avec succès !");
-      form.reset();
-    } catch (error: unknown) {
-      toast.error(
-        error instanceof Error ? error.message : "Une erreur est survenue"
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <div className="grid gap-4 sm:grid-cols-2">
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Nom</FormLabel>
-                <FormControl>
-                  <Input placeholder="Jean Dupont" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Email</FormLabel>
-                <FormControl>
-                  <Input
-                    type="email"
-                    placeholder="jean@exemple.fr"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-        <FormField
-          control={form.control}
-          name="subject"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Sujet</FormLabel>
-              <FormControl>
+    <form
+      onSubmit={(event: SubmitEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        form.handleSubmit();
+      }}
+      className="space-y-4"
+    >
+      <div className="grid gap-4 sm:grid-cols-2">
+        <form.Field
+          name="name"
+          children={(field) => {
+            const isInvalid =
+              field.state.meta.isTouched && !field.state.meta.isValid;
+
+            function handleChange(event: ChangeEvent<HTMLInputElement>) {
+              field.handleChange(event.target.value);
+            }
+
+            return (
+              <Field data-invalid={isInvalid}>
+                <FieldLabel htmlFor="contact-name">Nom</FieldLabel>
                 <Input
-                  placeholder="Comment pouvons-nous vous aider ?"
-                  {...field}
+                  id="contact-name"
+                  name={field.name}
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={handleChange}
+                  aria-invalid={isInvalid}
+                  placeholder="Jean Dupont"
                 />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+                {isInvalid && <FieldError errors={field.state.meta.errors} />}
+              </Field>
+            );
+          }}
         />
-        <FormField
-          control={form.control}
-          name="message"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Message</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="Décrivez votre demande..."
-                  className="min-h-32 resize-none"
-                  {...field}
+
+        <form.Field
+          name="email"
+          children={(field) => {
+            const isInvalid =
+              field.state.meta.isTouched && !field.state.meta.isValid;
+
+            function handleChange(event: ChangeEvent<HTMLInputElement>) {
+              field.handleChange(event.target.value);
+            }
+
+            return (
+              <Field data-invalid={isInvalid}>
+                <FieldLabel htmlFor="contact-email">Email</FieldLabel>
+                <Input
+                  id="contact-email"
+                  type="email"
+                  name={field.name}
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={handleChange}
+                  aria-invalid={isInvalid}
+                  placeholder="jean@exemple.fr"
                 />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+                {isInvalid && <FieldError errors={field.state.meta.errors} />}
+              </Field>
+            );
+          }}
         />
-        <Button type="submit" className="w-full" disabled={isLoading}>
-          {isLoading ? (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
-          ) : (
-            "Envoyer le message"
-          )}
-        </Button>
-      </form>
-    </Form>
+      </div>
+
+      <form.Field
+        name="subject"
+        children={(field) => {
+          const isInvalid: boolean =
+            field.state.meta.isTouched && !field.state.meta.isValid;
+
+          function handleChange(event: ChangeEvent<HTMLInputElement>): void {
+            field.handleChange(event.target.value);
+          }
+
+          return (
+            <Field data-invalid={isInvalid}>
+              <FieldLabel htmlFor="contact-subject">Sujet</FieldLabel>
+              <Input
+                id="contact-subject"
+                name={field.name}
+                value={field.state.value}
+                onBlur={field.handleBlur}
+                onChange={handleChange}
+                aria-invalid={isInvalid}
+                placeholder="Comment pouvons-nous vous aider ?"
+              />
+              {isInvalid && <FieldError errors={field.state.meta.errors} />}
+            </Field>
+          );
+        }}
+      />
+
+      <form.Field
+        name="message"
+        children={(field) => {
+          const isInvalid: boolean =
+            field.state.meta.isTouched && !field.state.meta.isValid;
+
+          function handleChange(event: ChangeEvent<HTMLTextAreaElement>) {
+            field.handleChange(event.target.value);
+          }
+
+          return (
+            <Field data-invalid={isInvalid}>
+              <FieldLabel htmlFor="contact-message">Message</FieldLabel>
+              <Textarea
+                id="contact-message"
+                name={field.name}
+                value={field.state.value}
+                onBlur={field.handleBlur}
+                onChange={handleChange}
+                aria-invalid={isInvalid}
+                placeholder="Décrivez votre demande..."
+                className="min-h-32 resize-none"
+              />
+              {isInvalid && <FieldError errors={field.state.meta.errors} />}
+            </Field>
+          );
+        }}
+      />
+
+      <form.Subscribe
+        selector={(state) => [state.canSubmit, state.isSubmitting]}
+      >
+        {([canSubmit, isSubmitting]) => (
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={!canSubmit || isExecuting || isSubmitting}
+          >
+            {isExecuting || isSubmitting ? (
+              <Loader2
+                className="mr-2 h-4 w-4 animate-spin"
+                aria-hidden="true"
+              />
+            ) : null}
+            {isExecuting || isSubmitting
+              ? "Envoi en cours..."
+              : "Envoyer le message"}
+          </Button>
+        )}
+      </form.Subscribe>
+    </form>
   );
 }
 

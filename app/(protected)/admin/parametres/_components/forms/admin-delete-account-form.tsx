@@ -1,10 +1,11 @@
+/* eslint-disable react/no-children-prop */
 "use client";
 
-import { useState } from "react";
+import type { ChangeEvent, SubmitEvent } from "react";
 
-import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "@tanstack/react-form";
 import { Loader2 } from "lucide-react";
-import { useForm } from "react-hook-form";
+import { useAction } from "next-safe-action/hooks";
 import { toast } from "sonner";
 
 import { signOut } from "@/lib/auth-client";
@@ -15,15 +16,14 @@ import {
 
 import { Button } from "@/components/ui/button";
 import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+} from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+
+import { deleteAccountAction } from "@/app/(protected)/_actions/delete-account.action";
 
 type AdminDeleteAccountFormProps = {
   email: string;
@@ -34,77 +34,95 @@ function AdminDeleteAccountForm({
   email,
   onSuccess,
 }: AdminDeleteAccountFormProps) {
-  const [isLoading, setIsLoading] = useState(false);
+  const { executeAsync, isExecuting } = useAction(deleteAccountAction);
 
-  const form = useForm<DeleteAccountSchemaType>({
-    resolver: zodResolver(DeleteAccountSchema),
+  const form = useForm({
     defaultValues: {
       confirmation: "",
+    } as DeleteAccountSchemaType,
+    validators: {
+      onSubmit: DeleteAccountSchema,
+    },
+    onSubmit: async ({ value }) => {
+      const result = await executeAsync(value);
+
+      if (result?.serverError) {
+        toast.error(result.serverError);
+        return;
+      }
+
+      if (result?.data?.success) {
+        toast.success("Votre compte a été supprimé avec succès");
+        await signOut().catch(() => {});
+        onSuccess();
+      }
     },
   });
 
-  async function onSubmit(data: DeleteAccountSchemaType) {
-    setIsLoading(true);
-
-    try {
-      const formData = new FormData();
-      formData.append("confirmation", data.confirmation);
-
-      const response = await fetch("/api/account", {
-        method: "DELETE",
-        body: formData,
-      });
-
-      if (!response.ok) {
-        const body = await response.json();
-        throw new Error(body.message || "Une erreur est survenue");
-      }
-
-      toast.success("Votre compte a été supprimé avec succès");
-      await signOut().catch(() => {});
-      onSuccess();
-    } catch (error: unknown) {
-      toast.error(
-        error instanceof Error ? error.message : "Une erreur est survenue"
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="confirmation"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Confirmation</FormLabel>
-              <FormControl>
-                <Input placeholder={email} {...field} />
-              </FormControl>
-              <FormDescription>
-                Tapez votre adresse email pour confirmer la suppression
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+    <form
+      onSubmit={(event: SubmitEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        form.handleSubmit();
+      }}
+      className="space-y-4"
+    >
+      <form.Field
+        name="confirmation"
+        children={(field) => {
+          const isInvalid =
+            field.state.meta.isTouched && !field.state.meta.isValid;
 
-        <Button
-          type="submit"
-          variant="destructive"
-          disabled={isLoading}
-          className="w-full"
-        >
-          {isLoading && (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
-          )}
-          {isLoading ? "Suppression..." : "Supprimer mon compte"}
-        </Button>
-      </form>
-    </Form>
+          function handleChange(event: ChangeEvent<HTMLInputElement>) {
+            field.handleChange(event.target.value);
+          }
+
+          return (
+            <Field data-invalid={isInvalid}>
+              <FieldLabel htmlFor="admin-delete-confirmation">
+                Confirmation
+              </FieldLabel>
+              <Input
+                id="admin-delete-confirmation"
+                name={field.name}
+                value={field.state.value}
+                onBlur={field.handleBlur}
+                onChange={handleChange}
+                aria-invalid={isInvalid}
+                placeholder={email}
+              />
+              <FieldDescription>
+                Tapez votre adresse email pour confirmer la suppression
+              </FieldDescription>
+              {isInvalid && <FieldError errors={field.state.meta.errors} />}
+            </Field>
+          );
+        }}
+      />
+
+      <form.Subscribe
+        selector={(state) => [state.canSubmit, state.isSubmitting]}
+      >
+        {([canSubmit, isSubmitting]) => (
+          <Button
+            type="submit"
+            variant="destructive"
+            disabled={!canSubmit || isExecuting || isSubmitting}
+            className="w-full"
+          >
+            {isExecuting || isSubmitting ? (
+              <Loader2
+                className="mr-2 h-4 w-4 animate-spin"
+                aria-hidden="true"
+              />
+            ) : null}
+            {isExecuting || isSubmitting
+              ? "Suppression..."
+              : "Supprimer mon compte"}
+          </Button>
+        )}
+      </form.Subscribe>
+    </form>
   );
 }
 

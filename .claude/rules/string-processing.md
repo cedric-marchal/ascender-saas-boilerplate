@@ -9,6 +9,7 @@ These rules apply to ALL string processing operations in the codebase. This is t
 ### 1. Universal Processing Order (P0)
 
 ALWAYS follow this exact order for string operations. This order is optimized for:
+
 - **Safety**: Validates before processing
 - **Performance**: Reduces data as early as possible
 - **Predictability**: Same order everywhere prevents bugs
@@ -60,7 +61,8 @@ function processName(name: string): string {
 
 // ❌ Wrong: Checking length before trim
 function processName(name: string): string {
-  if (name.length === 0) {  // "   " has length > 0
+  if (name.length === 0) {
+    // "   " has length > 0
     return "";
   }
   return name.trim(); // Would process empty string
@@ -108,9 +110,9 @@ function normalizeEmail(email: string): string {
   }
 
   return email
-    .trim()                    // Remove whitespace
-    .toLowerCase()             // Normalize case
-    .normalize("NFD")          // Decompose accents
+    .trim() // Remove whitespace
+    .toLowerCase() // Normalize case
+    .normalize("NFD") // Decompose accents
     .replace(/[\u0300-\u036f]/g, ""); // Remove accent marks
 }
 
@@ -120,16 +122,12 @@ function normalizeWhitespace(text: string): string {
     return "";
   }
 
-  return text
-    .trim()
-    .replace(/\s+/g, " "); // Multiple spaces → single space
+  return text.trim().replace(/\s+/g, " "); // Multiple spaces → single space
 }
 
 // ❌ Wrong: Transform before normalize
 function normalizeEmail(email: string): string {
-  return email
-    .toLowerCase()
-    .trim(); // trim should be first
+  return email.toLowerCase().trim(); // trim should be first
 }
 ```
 
@@ -151,9 +149,9 @@ function getInitials(name: string): string {
   }
 
   return trimmedName
-    .split(" ")                                    // 1. SPLIT: Create array
-    .filter((word: string) => word.length > 0)     // 2. FILTER: Reduce array
-    .map((word: string) => word.charAt(0))         // 3. MAP: Transform smaller array
+    .split(" ") // 1. SPLIT: Create array
+    .filter((word: string) => word.length > 0) // 2. FILTER: Reduce array
+    .map((word: string) => word.charAt(0)) // 3. MAP: Transform smaller array
     .join("")
     .toUpperCase()
     .slice(0, 2);
@@ -163,8 +161,8 @@ function getInitials(name: string): string {
 function getInitials(name: string): string {
   return name
     .split(" ")
-    .map((word: string) => word.charAt(0))         // charAt(0) on "" returns ""
-    .filter((char: string) => char.length > 0)     // Extra work
+    .map((word: string) => word.charAt(0)) // charAt(0) on "" returns ""
+    .filter((char: string) => char.length > 0) // Extra work
     .join("")
     .toUpperCase();
 }
@@ -172,9 +170,9 @@ function getInitials(name: string): string {
 // ❌ Wrong: No filter (can produce empty elements)
 function getInitials(name: string): string {
   return name
-    .split(" ")                                    // "  John  " → ["", "", "John", "", ""]
-    .map((word: string) => word.charAt(0))         // ["", "", "J", "", ""]
-    .join("")                                      // "J" (wrong, should be "JO")
+    .split(" ") // "  John  " → ["", "", "John", "", ""]
+    .map((word: string) => word.charAt(0)) // ["", "", "J", "", ""]
+    .join("") // "J" (wrong, should be "JO")
     .toUpperCase();
 }
 ```
@@ -190,8 +188,8 @@ function getInitials(name: string): string {
     .split(" ")
     .filter((word: string) => word.length > 0)
     .map((word: string) => word.charAt(0))
-    .join("")          // Join first
-    .toUpperCase()     // Format once (1 call)
+    .join("") // Join first
+    .toUpperCase() // Format once (1 call)
     .slice(0, 2);
 }
 
@@ -215,16 +213,16 @@ Apply formatting BEFORE limiting length (logical order).
 function formatName(name: string): string {
   return name
     .trim()
-    .toUpperCase()     // Format first
-    .slice(0, 50);     // Then limit
+    .toUpperCase() // Format first
+    .slice(0, 50); // Then limit
 }
 
 // ⚠️ Works but less logical: Limit then format
 function formatName(name: string): string {
   return name
     .trim()
-    .slice(0, 50)      // Limit first
-    .toUpperCase();    // Then format (works but order is confusing)
+    .slice(0, 50) // Limit first
+    .toUpperCase(); // Then format (works but order is confusing)
 }
 ```
 
@@ -283,61 +281,64 @@ string.trim().length === 0           // Is empty or whitespace-only
 
 ```tsx
 // Substring extraction
-string.slice(start, end)             // Negative indices allowed
-string.substring(start, end)         // No negative indices
-string.charAt(index)                 // Single character (returns "" if out of bounds)
-string.charCodeAt(index)             // Character code
-string[index]                        // ❌ Avoid: returns undefined if out of bounds
+string.slice(start, end); // Negative indices allowed
+string.substring(start, end); // No negative indices
+string.charAt(index); // Single character (returns "" if out of bounds)
+string.charCodeAt(index); // Character code
+string[index]; // ❌ Avoid: returns undefined if out of bounds
 
 // Splitting
-string.split(separator)              // Always returns array
-string.split(separator, limit)       // Limit number of splits
+string.split(separator); // Always returns array
+string.split(separator, limit); // Limit number of splits
 
 // Matching
-string.match(/pattern/g)             // Global match (returns array or null)
-string.matchAll(/pattern/g)          // Iterator of all matches
+string.match(/pattern/g); // Global match (returns array or null)
+string.matchAll(/pattern/g); // Iterator of all matches
 ```
 
 #### Transforming
 
 ```tsx
 // Case
-string.toLowerCase()                 // All lowercase
-string.toUpperCase()                 // All uppercase
-string.toLocaleLowerCase(locale)     // Locale-aware lowercase
-string.toLocaleUpperCase(locale)     // Locale-aware uppercase
+string.toLowerCase(); // All lowercase
+string.toUpperCase(); // All uppercase
+string.toLocaleLowerCase(locale); // Locale-aware lowercase
+string.toLocaleUpperCase(locale); // Locale-aware uppercase
 
 // Whitespace
-string.trim()                        // Remove leading/trailing whitespace
-string.trimStart()                   // Remove leading whitespace
-string.trimEnd()                     // Remove trailing whitespace
+string.trim(); // Remove leading/trailing whitespace
+string.trimStart(); // Remove leading whitespace
+string.trimEnd(); // Remove trailing whitespace
 
 // Replacing
-string.replace(search, replacement)  // First occurrence
-string.replaceAll(search, replacement) // All occurrences
-string.replace(/pattern/g, replacement) // Regex replace all
+string.replace(search, replacement); // First occurrence
+string.replaceAll(search, replacement); // All occurrences
+string.replace(/pattern/g, replacement); // Regex replace all
 
 // Padding
-string.padStart(length, fillString)  // Pad at start
-string.padEnd(length, fillString)    // Pad at end
+string.padStart(length, fillString); // Pad at start
+string.padEnd(length, fillString); // Pad at end
 
 // Repeating
-string.repeat(count)                 // Repeat string N times
+string.repeat(count); // Repeat string N times
 
 // Normalization
-string.normalize()                   // Unicode normalization (NFD, NFC, NFKD, NFKC)
+string.normalize(); // Unicode normalization (NFD, NFC, NFKD, NFKC)
 ```
 
 #### Combining
 
 ```tsx
 // Concatenation
-string1 + string2                    // Simple concat
-string1.concat(string2, string3)     // Multi concat
-`${string1} ${string2}`              // Template literal (preferred for readability)
+string1 + string2; // Simple concat
+string1.concat(
+  string2,
+  string3
+) // Multi concat
+`${string1} ${string2}`; // Template literal (preferred for readability)
 
 // Joining arrays
-array.join(separator)                // Array → string
+array.join(separator); // Array → string
 ```
 
 ### 10. Common Patterns (P0)
@@ -382,7 +383,7 @@ function toTitleCase(text: string): string {
   }
 
   return trimmed
-    .toLowerCase()                               // Normalize first
+    .toLowerCase() // Normalize first
     .split(" ")
     .filter((word: string) => word.length > 0)
     .map((word: string) => {
@@ -408,12 +409,12 @@ function slugify(text: string): string {
   return text
     .trim()
     .toLowerCase()
-    .normalize("NFD")                            // Decompose accents
-    .replace(/[\u0300-\u036f]/g, "")            // Remove accent marks
-    .replace(/[^a-z0-9\s-]/g, "")               // Remove special chars
-    .replace(/\s+/g, "-")                        // Spaces → hyphens
-    .replace(/-+/g, "-")                         // Multiple hyphens → single
-    .replace(/^-+|-+$/g, "");                   // Remove leading/trailing hyphens
+    .normalize("NFD") // Decompose accents
+    .replace(/[\u0300-\u036f]/g, "") // Remove accent marks
+    .replace(/[^a-z0-9\s-]/g, "") // Remove special chars
+    .replace(/\s+/g, "-") // Spaces → hyphens
+    .replace(/-+/g, "-") // Multiple hyphens → single
+    .replace(/^-+|-+$/g, ""); // Remove leading/trailing hyphens
 }
 
 // Test cases:
@@ -492,9 +493,7 @@ function removeSpecialChars(text: string): string {
     return "";
   }
 
-  return text
-    .trim()
-    .replace(/[^a-zA-Z0-9\s]/g, "");            // Keep alphanumeric + spaces
+  return text.trim().replace(/[^a-zA-Z0-9\s]/g, ""); // Keep alphanumeric + spaces
 }
 
 // For keeping accents:
@@ -503,9 +502,7 @@ function removeSpecialCharsKeepAccents(text: string): string {
     return "";
   }
 
-  return text
-    .trim()
-    .replace(/[^\p{L}\p{N}\s]/gu, "");          // Keep letters (any language) + numbers + spaces
+  return text.trim().replace(/[^\p{L}\p{N}\s]/gu, ""); // Keep letters (any language) + numbers + spaces
 }
 ```
 
@@ -527,7 +524,10 @@ function formatPhoneNumber(phone: string): string {
   }
 
   // Format: XX XX XX XX XX
-  return digits.replace(/(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})/, "$1 $2 $3 $4 $5");
+  return digits.replace(
+    /(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})/,
+    "$1 $2 $3 $4 $5"
+  );
 }
 
 // Test cases:
@@ -542,25 +542,22 @@ function formatPhoneNumber(phone: string): string {
 
 ```tsx
 // ✅ Use native methods for simple operations (faster)
-text.includes("search")              // Faster than /search/.test(text)
-text.startsWith("prefix")            // Faster than /^prefix/.test(text)
-text.endsWith("suffix")              // Faster than /suffix$/.test(text)
-text.toLowerCase()                   // Faster than .replace(/[A-Z]/g, ...)
+text.includes("search"); // Faster than /search/.test(text)
+text.startsWith("prefix"); // Faster than /^prefix/.test(text)
+text.endsWith("suffix"); // Faster than /suffix$/.test(text)
+text.toLowerCase(); // Faster than .replace(/[A-Z]/g, ...)
 
 // ✅ Use regex for complex patterns
-text.replace(/\s+/g, " ")            // Replace multiple spaces
-text.replace(/[^a-zA-Z0-9]/g, "")   // Remove special chars
-text.match(/\d+/g)                   // Extract all numbers
+text.replace(/\s+/g, " "); // Replace multiple spaces
+text.replace(/[^a-zA-Z0-9]/g, ""); // Remove special chars
+text.match(/\d+/g); // Extract all numbers
 ```
 
 #### Chain vs Multiple Variables
 
 ```tsx
 // ✅ Preferred: Single chain (more readable)
-const result = text
-  .trim()
-  .toLowerCase()
-  .replace(/\s+/g, " ");
+const result = text.trim().toLowerCase().replace(/\s+/g, " ");
 
 // ⚠️ Also valid: Multiple variables (use for debugging or complex logic)
 const trimmed = text.trim();
@@ -635,7 +632,7 @@ function sanitizeForDisplay(userInput: string): string {
       const htmlEntities: Record<string, string> = {
         "<": "&lt;",
         ">": "&gt;",
-        "\"": "&quot;",
+        '"': "&quot;",
         "'": "&#x27;",
         "&": "&amp;",
       };
@@ -666,7 +663,7 @@ function sanitizeSearchQuery(query: string): string {
 
   return query
     .trim()
-    .replace(/[;'\"\\]/g, "")                    // Remove SQL dangerous chars
+    .replace(/[;'\"\\]/g, "") // Remove SQL dangerous chars
     .slice(0, MAX_SEARCH_LENGTH);
 }
 
@@ -684,8 +681,8 @@ function sanitizeFilename(filename: string): string {
 
   return filename
     .trim()
-    .replace(/[^a-zA-Z0-9._-]/g, "")            // Only safe chars
-    .replace(/\.\.+/g, ".")                      // Remove ".."
+    .replace(/[^a-zA-Z0-9._-]/g, "") // Only safe chars
+    .replace(/\.\.+/g, ".") // Remove ".."
     .slice(0, MAX_FILENAME_LENGTH);
 }
 
@@ -699,7 +696,11 @@ function sanitizeFilename(filename: string): string {
 
 ```tsx
 // ✅ Correct: Locale-aware comparison
-function compareStringsLocale(a: string, b: string, locale: string = "fr-FR"): number {
+function compareStringsLocale(
+  a: string,
+  b: string,
+  locale: string = "fr-FR"
+): number {
   return a.localeCompare(b, locale, { sensitivity: "base" });
 }
 
@@ -721,8 +722,8 @@ function normalizeForSearch(text: string): string {
   return text
     .trim()
     .toLowerCase()
-    .normalize("NFD")                            // Decompose: é → e + ´
-    .replace(/[\u0300-\u036f]/g, "");           // Remove accents: e + ´ → e
+    .normalize("NFD") // Decompose: é → e + ´
+    .replace(/[\u0300-\u036f]/g, ""); // Remove accents: e + ´ → e
 }
 
 // Test:
@@ -833,10 +834,7 @@ function normalizeName(name: string): string {
     return "";
   }
 
-  return name
-    .trim()
-    .replace(/\s+/g, " ")
-    .slice(0, MAX_NAME_LENGTH);
+  return name.trim().replace(/\s+/g, " ").slice(0, MAX_NAME_LENGTH);
 }
 
 function toTitleCase(name: string): string {
@@ -976,7 +974,7 @@ function sanitizeUserInput(input: string): string {
       const htmlEntities: Record<string, string> = {
         "<": "&lt;",
         ">": "&gt;",
-        "\"": "&quot;",
+        '"': "&quot;",
         "'": "&#x27;",
         "&": "&amp;",
       };

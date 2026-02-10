@@ -1,10 +1,11 @@
+/* eslint-disable react/no-children-prop */
 "use client";
 
-import { useState } from "react";
+import type { ChangeEvent, SubmitEvent } from "react";
 
-import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "@tanstack/react-form";
 import { Loader2 } from "lucide-react";
-import { useForm } from "react-hook-form";
+import { useAction } from "next-safe-action/hooks";
 import { toast } from "sonner";
 
 import {
@@ -14,116 +15,169 @@ import {
 
 import { Button } from "@/components/ui/button";
 import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+} from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 
-function AdminPasswordForm() {
-  const [isLoading, setIsLoading] = useState(false);
+import { updatePasswordAction } from "@/app/(protected)/_actions/update-password.action";
 
-  const form = useForm<UpdatePasswordSchemaType>({
-    resolver: zodResolver(UpdatePasswordSchema),
+function AdminPasswordForm() {
+  const { executeAsync, isExecuting } = useAction(updatePasswordAction);
+
+  const form = useForm({
     defaultValues: {
       currentPassword: "",
       newPassword: "",
       confirmPassword: "",
+    } as UpdatePasswordSchemaType,
+    validators: {
+      onSubmit: UpdatePasswordSchema,
+    },
+    onSubmit: async ({ value }) => {
+      const result = await executeAsync(value);
+
+      if (result?.serverError) {
+        toast.error(result.serverError);
+        return;
+      }
+
+      if (result?.data?.success) {
+        toast.success(
+          "Mot de passe modifié avec succès. Un email de confirmation a été envoyé."
+        );
+        form.reset();
+      }
     },
   });
 
-  async function onSubmit(data: UpdatePasswordSchemaType) {
-    setIsLoading(true);
-
-    try {
-      const formData = new FormData();
-      formData.append("currentPassword", data.currentPassword);
-      formData.append("newPassword", data.newPassword);
-      formData.append("confirmPassword", data.confirmPassword);
-
-      const response = await fetch("/api/password", {
-        method: "PATCH",
-        body: formData,
-      });
-
-      if (!response.ok) {
-        const body = await response.json();
-        throw new Error(body.message || "Une erreur est survenue");
-      }
-
-      toast.success(
-        "Mot de passe modifié avec succès. Un email de confirmation a été envoyé."
-      );
-      form.reset();
-    } catch (error: unknown) {
-      toast.error(
-        error instanceof Error ? error.message : "Une erreur est survenue"
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <FormField
-          control={form.control}
-          name="currentPassword"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Mot de passe actuel</FormLabel>
-              <FormControl>
-                <Input type="password" placeholder="••••••••" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+    <form
+      onSubmit={(event: SubmitEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        form.handleSubmit();
+      }}
+      className="space-y-6"
+    >
+      <form.Field
+        name="currentPassword"
+        children={(field) => {
+          const isInvalid =
+            field.state.meta.isTouched && !field.state.meta.isValid;
 
-        <FormField
-          control={form.control}
-          name="newPassword"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Nouveau mot de passe</FormLabel>
-              <FormControl>
-                <Input type="password" placeholder="••••••••" {...field} />
-              </FormControl>
-              <FormDescription>
+          function handleChange(event: ChangeEvent<HTMLInputElement>) {
+            field.handleChange(event.target.value);
+          }
+
+          return (
+            <Field data-invalid={isInvalid}>
+              <FieldLabel htmlFor="admin-password-current">
+                Mot de passe actuel
+              </FieldLabel>
+              <Input
+                id="admin-password-current"
+                type="password"
+                name={field.name}
+                value={field.state.value}
+                onBlur={field.handleBlur}
+                onChange={handleChange}
+                aria-invalid={isInvalid}
+                placeholder="••••••••"
+              />
+              {isInvalid && <FieldError errors={field.state.meta.errors} />}
+            </Field>
+          );
+        }}
+      />
+
+      <form.Field
+        name="newPassword"
+        children={(field) => {
+          const isInvalid =
+            field.state.meta.isTouched && !field.state.meta.isValid;
+
+          function handleChange(event: ChangeEvent<HTMLInputElement>) {
+            field.handleChange(event.target.value);
+          }
+
+          return (
+            <Field data-invalid={isInvalid}>
+              <FieldLabel htmlFor="admin-password-new">
+                Nouveau mot de passe
+              </FieldLabel>
+              <Input
+                id="admin-password-new"
+                type="password"
+                name={field.name}
+                value={field.state.value}
+                onBlur={field.handleBlur}
+                onChange={handleChange}
+                aria-invalid={isInvalid}
+                placeholder="••••••••"
+              />
+              <FieldDescription>
                 Minimum 8 caractères, différent de l&apos;ancien
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+              </FieldDescription>
+              {isInvalid && <FieldError errors={field.state.meta.errors} />}
+            </Field>
+          );
+        }}
+      />
 
-        <FormField
-          control={form.control}
-          name="confirmPassword"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Confirmer le nouveau mot de passe</FormLabel>
-              <FormControl>
-                <Input type="password" placeholder="••••••••" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+      <form.Field
+        name="confirmPassword"
+        children={(field) => {
+          const isInvalid =
+            field.state.meta.isTouched && !field.state.meta.isValid;
 
-        <Button type="submit" disabled={isLoading}>
-          {isLoading && (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
-          )}
-          {isLoading ? "Modification..." : "Modifier le mot de passe"}
-        </Button>
-      </form>
-    </Form>
+          function handleChange(event: ChangeEvent<HTMLInputElement>) {
+            field.handleChange(event.target.value);
+          }
+
+          return (
+            <Field data-invalid={isInvalid}>
+              <FieldLabel htmlFor="admin-password-confirm">
+                Confirmer le nouveau mot de passe
+              </FieldLabel>
+              <Input
+                id="admin-password-confirm"
+                type="password"
+                name={field.name}
+                value={field.state.value}
+                onBlur={field.handleBlur}
+                onChange={handleChange}
+                aria-invalid={isInvalid}
+                placeholder="••••••••"
+              />
+              {isInvalid && <FieldError errors={field.state.meta.errors} />}
+            </Field>
+          );
+        }}
+      />
+
+      <form.Subscribe
+        selector={(state) => [state.canSubmit, state.isSubmitting]}
+      >
+        {([canSubmit, isSubmitting]) => (
+          <Button
+            type="submit"
+            disabled={!canSubmit || isExecuting || isSubmitting}
+          >
+            {isExecuting || isSubmitting ? (
+              <Loader2
+                className="mr-2 h-4 w-4 animate-spin"
+                aria-hidden="true"
+              />
+            ) : null}
+            {isExecuting || isSubmitting
+              ? "Modification..."
+              : "Modifier le mot de passe"}
+          </Button>
+        )}
+      </form.Subscribe>
+    </form>
   );
 }
 

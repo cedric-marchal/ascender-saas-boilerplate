@@ -1,26 +1,19 @@
+/* eslint-disable react/no-children-prop */
 "use client";
 
-import { useState } from "react";
+import type { ChangeEvent, SubmitEvent } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "@tanstack/react-form";
 import { Loader2 } from "lucide-react";
-import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 import { authClient, signIn } from "@/lib/auth-client";
 import { SignInSchema, type SignInSchemaType } from "@/lib/schemas/auth.schema";
 
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 
 import { ForgotPasswordLink } from "@/app/(public)/(auth)/connexion/_components/forgot-password-link";
@@ -28,104 +21,143 @@ import { ForgotPasswordLink } from "@/app/(public)/(auth)/connexion/_components/
 function SignInForm() {
   const router = useRouter();
 
-  const [isLoading, setIsLoading] = useState(false);
-
-  const form = useForm<SignInSchemaType>({
-    resolver: zodResolver(SignInSchema),
+  const form = useForm({
     defaultValues: {
       email: "",
       password: "",
+    } as SignInSchemaType,
+    validators: {
+      onSubmit: SignInSchema,
+    },
+    onSubmit: async ({ value }) => {
+      const { error } = await authClient.signIn.email({
+        email: value.email,
+        password: value.password,
+      });
+
+      if (error) {
+        toast.error(error.message || "Identifiants incorrects");
+        return;
+      }
+
+      router.push("/dashboard");
+      router.refresh();
     },
   });
 
-  const onSubmit = async (data: SignInSchemaType) => {
-    setIsLoading(true);
-
-    const { error } = await authClient.signIn.email({
-      email: data.email,
-      password: data.password,
-    });
-
-    if (error) {
-      toast.error(error.message || "Identifiants incorrects");
-      setIsLoading(false);
-      return;
-    }
-
-    router.push("/dashboard");
-    router.refresh();
-
-    setIsLoading(false);
-  };
-
   return (
     <>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Email</FormLabel>
-                <FormControl>
-                  <Input
-                    type="email"
-                    placeholder="jean@exemple.fr"
-                    autoComplete="email"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="password"
-            render={({ field }) => (
-              <FormItem>
+      <form
+        onSubmit={(event: SubmitEvent<HTMLFormElement>) => {
+          event.preventDefault();
+          form.handleSubmit();
+        }}
+        className="space-y-4"
+      >
+        <form.Field
+          name="email"
+          children={(field) => {
+            const isInvalid =
+              field.state.meta.isTouched && !field.state.meta.isValid;
+
+            function handleChange(event: ChangeEvent<HTMLInputElement>) {
+              field.handleChange(event.target.value);
+            }
+
+            return (
+              <Field data-invalid={isInvalid}>
+                <FieldLabel htmlFor="sign-in-email">Email</FieldLabel>
+                <Input
+                  id="sign-in-email"
+                  type="email"
+                  name={field.name}
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={handleChange}
+                  aria-invalid={isInvalid}
+                  placeholder="jean@exemple.fr"
+                  autoComplete="email"
+                />
+                {isInvalid && <FieldError errors={field.state.meta.errors} />}
+              </Field>
+            );
+          }}
+        />
+
+        <form.Field
+          name="password"
+          children={(field) => {
+            const isInvalid =
+              field.state.meta.isTouched && !field.state.meta.isValid;
+
+            function handleChange(event: ChangeEvent<HTMLInputElement>) {
+              field.handleChange(event.target.value);
+            }
+
+            return (
+              <Field data-invalid={isInvalid}>
                 <div className="flex items-center justify-between">
-                  <FormLabel>Mot de passe</FormLabel>
+                  <FieldLabel htmlFor="sign-in-password">
+                    Mot de passe
+                  </FieldLabel>
                   <ForgotPasswordLink />
                 </div>
-                <FormControl>
-                  <Input
-                    type="password"
-                    placeholder="••••••••••••"
-                    autoComplete="current-password"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <Button type="submit" disabled={isLoading} className="w-full">
-            {isLoading ? (
+                <Input
+                  id="sign-in-password"
+                  type="password"
+                  name={field.name}
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={handleChange}
+                  aria-invalid={isInvalid}
+                  placeholder="••••••••••••"
+                  autoComplete="current-password"
+                />
+                {isInvalid && <FieldError errors={field.state.meta.errors} />}
+              </Field>
+            );
+          }}
+        />
+
+        <form.Subscribe
+          selector={(state) => [state.canSubmit, state.isSubmitting]}
+        >
+          {([canSubmit, isSubmitting]) => (
+            <Button
+              type="submit"
+              disabled={!canSubmit || isSubmitting}
+              className="w-full"
+            >
+              {isSubmitting ? (
+                <Loader2
+                  className="mr-2 h-4 w-4 animate-spin"
+                  aria-hidden="true"
+                />
+              ) : null}
+              {isSubmitting ? "Connexion..." : "Se connecter"}
+            </Button>
+          )}
+        </form.Subscribe>
+      </form>
+
+      <form.Subscribe selector={(state) => state.isSubmitting}>
+        {(isSubmitting) => (
+          <Button
+            type="button"
+            disabled={isSubmitting}
+            onClick={() => signIn.social({ provider: "google" })}
+            className="w-full"
+          >
+            {isSubmitting ? (
               <Loader2
                 className="mr-2 h-4 w-4 animate-spin"
                 aria-hidden="true"
               />
-            ) : (
-              "Se connecter"
-            )}
+            ) : null}
+            {isSubmitting ? "Connexion..." : "Se connecter avec Google"}
           </Button>
-        </form>
-      </Form>
-
-      <Button
-        type="button"
-        disabled={isLoading}
-        onClick={() => signIn.social({ provider: "google" })}
-        className="w-full"
-      >
-        {isLoading ? (
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
-        ) : (
-          "Se connecter avec Google"
         )}
-      </Button>
+      </form.Subscribe>
     </>
   );
 }

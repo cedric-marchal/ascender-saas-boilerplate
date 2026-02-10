@@ -27,7 +27,11 @@ function parseDate(date: Date | string): Date | null {
   return null;
 }
 
-function formatDate({ date, format = "short", now }: FormatDateOptions): string {
+function formatDate({
+  date,
+  format = "short",
+  now,
+}: FormatDateOptions): string {
   if (!date) {
     return "";
   }
@@ -59,7 +63,8 @@ function formatRelative(date: Date, currentDate?: Date): string {
     return "";
   }
 
-  const now = currentDate && isValidDate(currentDate) ? currentDate : new Date();
+  const now =
+    currentDate && isValidDate(currentDate) ? currentDate : new Date();
 
   const diffMs = now.getTime() - date.getTime();
 

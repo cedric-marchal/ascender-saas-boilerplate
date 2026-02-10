@@ -1,27 +1,60 @@
-# Server Action Creation Rules
+# Server Action Creation Rules (next-safe-action)
 
 ## Context
 
-These rules apply exclusively to creating Server Actions in Next.js App Router. Server Actions are asynchronous functions that run on the server and can be called directly from Client Components.
+These rules apply exclusively to creating Server Actions using **next-safe-action** in Next.js App Router. Server Actions are type-safe asynchronous functions that run on the server and can be called directly from Client Components.
 
 ## Rules
 
 ### 1. File Location & Naming (P0)
 
-- All Server Actions MUST be in `app/actions/` folder
-- File naming: `{entity}-actions.ts` (kebab-case)
-- One file per entity/domain
+**Colocation Principle** : Place actions close to the components/pages that use them.
+
+- File naming: `{verb}-{entity}.action.ts` (kebab-case with `.action.ts` suffix)
+- One action per file (for clarity and maintainability)
+
+#### Organization Rules:
+
+| Action Scope       | Location                       | Example                                                                         |
+| ------------------ | ------------------------------ | ------------------------------------------------------------------------------- |
+| **Page-specific**  | `app/(group)/[page]/_actions/` | Contact form action → `app/(public)/contact/_actions/`                          |
+| **Section-shared** | `app/(group)/_actions/`        | Profile/Password shared between dashboard & admin → `app/(protected)/_actions/` |
+| **App-wide**       | `lib/actions/`                 | Global utilities (rare)                                                         |
 
 ```bash
-# ✅ Correct
-app/actions/document-actions.ts
-app/actions/user-actions.ts
-app/actions/project-actions.ts
+# ✅ Correct: Colocation
+app/(public)/contact/
+├── _actions/
+│   └── create-contact.action.ts      → createContactAction
+├── _components/
+│   └── contact-form.tsx
+└── page.tsx
 
-# ❌ Wrong
-app/actions/documentActions.ts
-app/actions/Documents.ts
-app/actions/actions.ts  # Too generic
+app/(protected)/
+├── _actions/                          # Shared between dashboard & admin
+│   ├── update-profile.action.ts      → updateProfileAction
+│   ├── update-password.action.ts     → updatePasswordAction
+│   └── delete-account.action.ts      → deleteAccountAction
+├── dashboard/
+│   └── parametres/
+│       └── _components/
+│           └── forms/                 # Uses (protected)/_actions/
+└── admin/
+    └── parametres/
+        └── _components/
+            └── forms/                 # Uses (protected)/_actions/
+
+# ❌ Wrong: Centralized (old pattern)
+app/actions/
+├── create-contact.action.ts           # Should be in contact/_actions/
+├── update-profile.action.ts           # Should be in (protected)/_actions/
+└── delete-account.action.ts
+
+# ❌ Wrong: Missing .action.ts suffix
+app/(public)/contact/_actions/contact.ts
+
+# ❌ Wrong: Multiple actions in one file
+app/(public)/contact/_actions/contact-actions.ts
 ```
 
 ### 2. File Structure (P0)
@@ -30,61 +63,37 @@ Follow this exact order:
 
 1. `"use server"` directive (MUST be first line)
 2. _(empty line)_
-3. Imports (Next.js → libs → schemas → utils)
+3. Imports (Next.js → next-safe-action → libs → schemas → components → utils)
 4. _(empty line)_
-5. Type declarations (Result types)
+5. Action definition with next-safe-action
 6. _(empty line)_
-7. Action functions
-8. _(empty line)_
-9. Exports (named exports only)
+7. Export (named export only)
 
 ```tsx
-// 1. Directive
+// 1. Directive (LINE 1 - MANDATORY)
 "use server";
 
 // 2. Imports
-import { headers } from "next/headers";
+import { revalidatePath } from "next/cache";
 
-import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { CreateDocumentSchema } from "@/lib/schemas/document.schema";
+import { sendEmail } from "@/lib/resend";
+import { authActionClient } from "@/lib/safe-action";
+import { CreateContactSchema } from "@/lib/schemas/contact.schema";
 
-import { handleActionError } from "@/utils/actions/handle-action-error";
-import { NotFoundError, UnauthorizedError } from "@/utils/errors/errors";
+import { ContactEmail } from "@/components/emails/contact-email";
 
-// 3. Type declarations
-type CreateDocumentResult =
-  | { success: true; data: { id: string; name: string } }
-  | { success: false; error: string; type: string };
+import { ConflictError } from "@/utils/errors/errors";
 
-type DeleteDocumentResult =
-  | { success: true }
-  | { success: false; error: string; type: string };
-
-// 4. Action functions
-async function createDocumentAction(
-  formData: FormData
-): Promise<CreateDocumentResult> {
-  try {
-    // Auth
-    const authSession = await auth.api.getSession({
-      headers: await headers(),
-    });
-
-    if (!authSession?.user) {
-      throw new UnauthorizedError("Vous devez être connecté");
-    }
-
-    // Validation
-    const data = CreateDocumentSchema.parse({
-      name: formData.get("name"),
-    });
-
-    // Business logic
+// 3. Action definition
+export const createContactAction = authActionClient
+  .inputSchema(CreateContactSchema)
+  .action(async ({ parsedInput, ctx }) => {
+    // Business logic here
     const document = await prisma.document.create({
       data: {
-        ...data,
-        userId: authSession.user.id,
+        ...parsedInput,
+        userId: ctx.userId,
       },
       select: {
         id: true,
@@ -92,284 +101,241 @@ async function createDocumentAction(
       },
     });
 
-    // Success
-    return {
-      success: true,
-      data: document,
-    };
-  } catch (error: unknown) {
-    return handleActionError(error);
-  }
-}
+    revalidatePath("/dashboard");
 
-async function deleteDocumentAction(
-  documentId: string
-): Promise<DeleteDocumentResult> {
-  try {
-    // Auth
-    const authSession = await auth.api.getSession({
-      headers: await headers(),
-    });
-
-    if (!authSession?.user) {
-      throw new UnauthorizedError("Vous devez être connecté");
-    }
-
-    // Check existence and ownership
-    const document = await prisma.document.findUnique({
-      where: { id: documentId },
-      select: { id: true, userId: true },
-    });
-
-    if (!document) {
-      throw new NotFoundError("Document introuvable");
-    }
-
-    if (document.userId !== authSession.user.id) {
-      throw new UnauthorizedError("Accès non autorisé");
-    }
-
-    // Delete
-    await prisma.document.delete({
-      where: { id: documentId },
-    });
-
-    // Success
-    return { success: true };
-  } catch (error: unknown) {
-    return handleActionError(error);
-  }
-}
-
-// 5. Exports (named exports only)
-export { createDocumentAction, deleteDocumentAction };
+    return { success: true, document };
+  });
 ```
 
 ### 3. Naming Conventions (P0)
 
-- Function name: `{verb}{Entity}Action`
+- Function name: `{verb}{Entity}Action` (camelCase)
+- File name: `{verb}-{entity}.action.ts` (kebab-case)
 - ALWAYS use Action suffix
 - Use descriptive verbs: `create`, `update`, `delete`, `toggle`, `archive`, etc.
 
+| Verb      | Usage                    | Example                    |
+| --------- | ------------------------ | -------------------------- |
+| `create`  | Create new resource      | `createContactAction`      |
+| `update`  | Update existing resource | `updateProfileAction`      |
+| `delete`  | Delete resource          | `deleteAccountAction`      |
+| `toggle`  | Toggle boolean state     | `toggleSubscriptionAction` |
+| `archive` | Archive resource         | `archiveProjectAction`     |
+| `send`    | Send email/notification  | `sendVerificationAction`   |
+
 ```tsx
 // ✅ Correct
-createDocumentAction
-updateDocumentAction
-deleteDocumentAction
-toggleDocumentVisibilityAction
-archiveDocumentAction
+export const createContactAction = ...
+export const updateProfileAction = ...
+export const deleteAccountAction = ...
+export const toggleSubscriptionAction = ...
 
 // ❌ Wrong
-createDocument          // Missing "Action" suffix
-documentCreate          // Wrong order
-create                  // Too generic
-handleDocumentCreation  // Use "create" not "handle"
+export const createContact = ...        // Missing "Action" suffix
+export const contactCreate = ...        // Wrong order
+export const create = ...               // Too generic
+export const handleContactCreation = ...// Use "create" not "handle"
 ```
 
-### 4. Result Types (P0)
+### 4. Action Client Selection (P0)
 
-- ALWAYS define explicit return types
-- Use discriminated union: `{ success: true, data } | { success: false, error, type }`
-- Include `type` field for error categorization
+Choose the appropriate client based on authentication requirements:
+
+| Client              | Usage                             | Context Provided                             |
+| ------------------- | --------------------------------- | -------------------------------------------- |
+| `actionClient`      | Public actions (no auth required) | None                                         |
+| `authActionClient`  | Protected actions (auth required) | `userId`, `userEmail`, `userName`            |
+| `adminActionClient` | Admin-only actions                | `userId`, `userEmail`, `userName`, `isAdmin` |
 
 ```tsx
-// ✅ Correct: Explicit result type with data
-type CreateDocumentResult =
-  | { success: true; data: { id: string; name: string } }
-  | { success: false; error: string; type: string };
+// ✅ Public action (no auth)
+export const createContactAction = actionClient
+  .inputSchema(CreateContactSchema)
+  .action(async ({ parsedInput }) => {
+    // No ctx available
+    await sendEmail({ ... });
+    return { success: true };
+  });
 
-async function createDocumentAction(
-  formData: FormData
-): Promise<CreateDocumentResult> {
-  // ...
-}
+// ✅ Protected action (auth required)
+export const updateProfileAction = authActionClient
+  .inputSchema(UpdateProfileSchema)
+  .action(async ({ parsedInput, ctx }) => {
+    // ctx.userId, ctx.userEmail, ctx.userName available
+    await prisma.user.update({
+      where: { id: ctx.userId },
+      data: parsedInput,
+    });
+    return { success: true };
+  });
 
-// ✅ Correct: Explicit result type without data
-type DeleteDocumentResult =
-  | { success: true }
-  | { success: false; error: string; type: string };
-
-async function deleteDocumentAction(
-  id: string
-): Promise<DeleteDocumentResult> {
-  // ...
-}
-
-// ❌ Wrong: No explicit return type
-async function createDocumentAction(formData: FormData) {
-  // ...
-}
-
-// ❌ Wrong: Generic return type
-async function createDocumentAction(
-  formData: FormData
-): Promise<{ success: boolean }> {
-  // ...
-}
+// ✅ Admin action (admin only)
+export const deleteUserAction = adminActionClient
+  .inputSchema(DeleteUserSchema)
+  .action(async ({ parsedInput, ctx }) => {
+    // ctx.userId, ctx.userEmail, ctx.userName, ctx.isAdmin available
+    await prisma.user.delete({
+      where: { id: parsedInput.userId },
+    });
+    return { success: true };
+  });
 ```
 
-### 5. Binary Error Handling Pattern (P0)
+### 5. Schema Validation (P0)
 
-- ALWAYS wrap action logic in `try/catch`
-- ALWAYS use custom error classes (same as API Routes)
-- ALWAYS use `handleActionError(error)` in catch block
-- ALWAYS type error as `unknown`
-- NO multiple returns in try block (except final success)
+- ALWAYS use `.inputSchema()` for input validation
+- Import schema from `@/lib/schemas/`
+- Validation is automatic, no need for manual `parse()`
+- `parsedInput` is typed and validated automatically
 
 ```tsx
-// ✅ Correct: Binary pattern
-async function createDocumentAction(
-  formData: FormData
-): Promise<CreateDocumentResult> {
-  try {
-    // Step 1: Auth - throws or continues
-    const authSession = await auth.api.getSession({
-      headers: await headers(),
+// ✅ Correct: Automatic validation
+export const createContactAction = actionClient
+  .inputSchema(CreateContactSchema) // ← Validates automatically
+  .action(async ({ parsedInput }) => {
+    // parsedInput is typed as CreateContactSchemaType
+    // and already validated ✅
+    await sendEmail({
+      to: parsedInput.email,
+      subject: parsedInput.subject,
+      message: parsedInput.message,
     });
+    return { success: true };
+  });
 
-    if (!authSession?.user) {
-      throw new UnauthorizedError("Vous devez être connecté");
-    }
-
-    // Step 2: Validation - throws or continues
-    const data = CreateDocumentSchema.parse({
-      name: formData.get("name"),
-    });
-
-    // Step 3: Business logic - throws or continues
-    const document = await prisma.document.create({ ... });
-
-    // Step 4: Success (only return in try block)
-    return { success: true, data: document };
-  } catch (error: unknown) {
-    return handleActionError(error);
-  }
-}
-
-// ❌ Wrong: Multiple returns in try block
-async function createDocumentAction(
-  formData: FormData
-): Promise<CreateDocumentResult> {
-  try {
-    const authSession = await auth.api.getSession({
-      headers: await headers(),
-    });
-
-    if (!authSession?.user) {
-      return { success: false, error: "Non autorisé" }; // Wrong
-    }
-
-    const document = await prisma.document.create({ ... });
-    return { success: true, data: document };
-  } catch (error: unknown) {
-    return handleActionError(error);
-  }
-}
+// ❌ Wrong: Manual validation (not needed)
+export const createContactAction = actionClient
+  .action(async ({ parsedInput }) => {
+    const data = CreateContactSchema.parse(parsedInput); // ❌ Redundant
+    // ...
+  });
 ```
 
-### 6. Authentication (P0)
+### 6. Error Handling (P0)
 
-- ALWAYS check authentication first
-- Throw `UnauthorizedError` if no session
-- Use `auth.api.getSession({ headers: await headers() })`
-
-```tsx
-async function createDocumentAction(
-  formData: FormData
-): Promise<CreateDocumentResult> {
-  try {
-    const authSession = await auth.api.getSession({
-      headers: await headers(),
-    });
-
-    if (!authSession?.user) {
-      throw new UnauthorizedError("Vous devez être connecté");
-    }
-
-    // Rest of logic...
-  } catch (error: unknown) {
-    return handleActionError(error);
-  }
-}
-```
-
-### 7. Data Validation (P0)
-
-- ALWAYS validate with Zod schema using `.parse()`
-- Extract data from `FormData` explicitly
-- Zod throws automatically on invalid data (caught by `handleActionError`)
+- NO try/catch needed (handled by next-safe-action)
+- Throw custom errors directly (ConflictError, NotFoundError, etc.)
+- Errors are caught and formatted by `handleServerError` in `lib/safe-action.ts`
 
 ```tsx
-async function createDocumentAction(
-  formData: FormData
-): Promise<CreateDocumentResult> {
-  try {
-    const authSession = await auth.api.getSession({
-      headers: await headers(),
+// ✅ Correct: Throw errors directly
+export const createContactAction = authActionClient
+  .inputSchema(CreateContactSchema)
+  .action(async ({ parsedInput, ctx }) => {
+    const existing = await prisma.contact.findUnique({
+      where: { email: parsedInput.email },
+      select: { id: true },
     });
 
-    if (!authSession?.user) {
-      throw new UnauthorizedError("Vous devez être connecté");
+    if (existing) {
+      throw new ConflictError("Cette adresse email est déjà enregistrée");
     }
 
-    const data = CreateDocumentSchema.parse({
-      name: formData.get("name"),
-      description: formData.get("description"),
-      file: formData.get("file"),
-    });
-
-    // Use validated data
-    const document = await prisma.document.create({
+    const contact = await prisma.contact.create({
       data: {
-        ...data,
-        userId: authSession.user.id,
+        ...parsedInput,
+        userId: ctx.userId,
       },
       select: {
         id: true,
-        name: true,
+        email: true,
       },
     });
 
-    return { success: true, data: document };
-  } catch (error: unknown) {
-    return handleActionError(error);
-  }
-}
+    return { success: true, contact };
+  });
+
+// ❌ Wrong: Manual try/catch (not needed)
+export const createContactAction = authActionClient
+  .inputSchema(CreateContactSchema)
+  .action(async ({ parsedInput, ctx }) => {
+    try {
+      // ...
+      return { success: true };
+    } catch (error: unknown) {
+      // ❌ Not needed, next-safe-action handles this
+      return handleActionError(error);
+    }
+  });
 ```
 
-### 8. Parameters (P0)
+### 7. Return Values (P0)
 
-- For single values: use typed parameters
-- For multiple values: use `FormData`
-- ALWAYS type parameters explicitly
+- Return plain objects (no NextResponse)
+- next-safe-action wraps return in `{ data: <your_return> }`
+- Keep return values simple and typed
 
 ```tsx
-// ✅ Correct: Single parameter
-async function deleteDocumentAction(
-  documentId: string
-): Promise<DeleteDocumentResult> {
-  // ...
-}
-
-// ✅ Correct: Multiple parameters via FormData
-async function updateDocumentAction(
-  formData: FormData
-): Promise<UpdateDocumentResult> {
-  const data = UpdateDocumentSchema.parse({
-    id: formData.get("id"),
-    name: formData.get("name"),
-    description: formData.get("description"),
+// ✅ Correct: Simple object return
+export const createContactAction = actionClient
+  .inputSchema(CreateContactSchema)
+  .action(async ({ parsedInput }) => {
+    await sendEmail({ ... });
+    return { success: true }; // ← Simple object
   });
-  // ...
-}
 
-// ❌ Wrong: Multiple untyped parameters
-async function updateDocumentAction(id, name, description) {
-  // ...
-}
+// ✅ Correct: Return with data
+export const updateProfileAction = authActionClient
+  .inputSchema(UpdateProfileSchema)
+  .action(async ({ parsedInput, ctx }) => {
+    const user = await prisma.user.update({
+      where: { id: ctx.userId },
+      data: parsedInput,
+      select: {
+        id: true,
+        name: true,
+        email: true,
+      },
+    });
+
+    return { success: true, user }; // ← Returns data
+  });
+
+// ❌ Wrong: NextResponse (not needed)
+return NextResponse.json({ success: true }); // ❌ Not for Server Actions
 ```
 
-### 9. Prisma Queries (P0)
+### 8. Middleware (P1)
+
+Use `.use()` for action-specific middleware (rate limiting, logging, etc.):
+
+```tsx
+export const createContactAction = actionClient
+  .use(async ({ next }) => {
+    // Rate limiting middleware
+    await checkRatelimit(contactRatelimit, "identifier");
+    return next();
+  })
+  .inputSchema(CreateContactSchema)
+  .action(async ({ parsedInput }) => {
+    await sendEmail({ ... });
+    return { success: true };
+  });
+```
+
+### 9. Revalidation (P1)
+
+- Use `revalidatePath()` or `revalidateTag()` when data changes
+- Call AFTER mutation, BEFORE return
+
+```tsx
+import { revalidatePath } from "next/cache";
+
+export const updateProfileAction = authActionClient
+  .inputSchema(UpdateProfileSchema)
+  .action(async ({ parsedInput, ctx }) => {
+    const user = await prisma.user.update({
+      where: { id: ctx.userId },
+      data: parsedInput,
+    });
+
+    revalidatePath("/dashboard/settings"); // ← Revalidate after mutation
+
+    return { success: true, user };
+  });
+```
+
+### 10. Prisma Queries (P0)
 
 - ALWAYS use `select` to specify returned fields
 - Use `Promise.all` for parallel independent queries
@@ -377,40 +343,85 @@ async function updateDocumentAction(id, name, description) {
 
 ```tsx
 // ✅ Correct: explicit select
-const document = await prisma.document.create({
-  data: { ... },
+const user = await prisma.user.update({
+  where: { id: ctx.userId },
+  data: parsedInput,
   select: {
     id: true,
     name: true,
-    createdAt: true,
+    email: true,
   },
 });
 
 // ✅ Correct: parallel queries
-const [document, relatedItems] = await Promise.all([
-  prisma.document.findUnique({
-    where: { id },
+const [user, settings] = await Promise.all([
+  prisma.user.findUnique({
+    where: { id: ctx.userId },
     select: { id: true, name: true },
   }),
-  prisma.item.findMany({
-    where: { documentId: id },
-    select: { id: true, title: true },
+  prisma.userSettings.findUnique({
+    where: { userId: ctx.userId },
+    select: { theme: true, language: true },
   }),
 ]);
 
 // ❌ Wrong: no select
-const document = await prisma.document.create({
-  data: { ... },
+const user = await prisma.user.update({
+  where: { id: ctx.userId },
+  data: parsedInput,
 });
-
-// ❌ Wrong: sequential queries that could be parallel
-const document = await prisma.document.findUnique({ where: { id } });
-const items = await prisma.item.findMany({ where: { documentId: id } });
 ```
 
-### 10. Error Classes Usage (P0)
+### 11. Client-Side Usage (P0)
 
-Same error classes as API Routes:
+Use `useAction` hook from `next-safe-action/hooks`:
+
+```tsx
+"use client";
+
+import { useAction } from "next-safe-action/hooks";
+import { toast } from "sonner";
+
+import { createContactAction } from "@/app/actions/create-contact.action";
+
+function ContactForm() {
+  const { execute, result, isExecuting } = useAction(createContactAction);
+
+  async function onSubmit(data: CreateContactSchemaType) {
+    const result = await execute(data);
+
+    // Check for server errors
+    if (result?.serverError) {
+      toast.error(result.serverError);
+      return;
+    }
+
+    // Check for validation errors (handled by FormMessage automatically)
+    if (result?.validationErrors) {
+      return;
+    }
+
+    // Success
+    if (result?.data?.success) {
+      toast.success("Message envoyé avec succès !");
+      form.reset();
+    }
+  }
+
+  return (
+    <form onSubmit={form.handleSubmit(onSubmit)}>
+      {/* form fields */}
+      <button type="submit" disabled={isExecuting}>
+        {isExecuting ? "Envoi..." : "Envoyer"}
+      </button>
+    </form>
+  );
+}
+```
+
+### 12. Error Classes Usage (P0)
+
+Use same error classes as API Routes:
 
 | Error Class                | Usage                                  |
 | -------------------------- | -------------------------------------- |
@@ -424,349 +435,266 @@ Same error classes as API Routes:
 | `TooManyRequestsError`     | Rate limit exceeded                    |
 
 ```tsx
-// Missing resource
-if (!document) {
-  throw new NotFoundError("Document introuvable");
-}
+import { ConflictError, NotFoundError } from "@/utils/errors/errors";
 
-// Wrong owner
-if (document.userId !== authSession.user.id) {
-  throw new UnauthorizedError("Accès non autorisé");
-}
+export const updateProfileAction = authActionClient
+  .inputSchema(UpdateProfileSchema)
+  .action(async ({ parsedInput, ctx }) => {
+    // Check for conflict
+    const existing = await prisma.user.findUnique({
+      where: { email: parsedInput.email },
+      select: { id: true },
+    });
 
-// Duplicate
-const existing = await prisma.document.findFirst({
-  where: { name },
-  select: { id: true },
-});
-
-if (existing) {
-  throw new ConflictError("Un document avec ce nom existe déjà");
-}
-```
-
-### 11. Client-Side Usage (P0)
-
-In components calling the action:
-
-```tsx
-"use client";
-
-import { useState } from "react";
-
-import { toast } from "sonner";
-
-import { createDocumentAction } from "@/app/actions/document-actions";
-
-function DocumentForm() {
-  const [isLoading, setIsLoading] = useState(false);
-
-  async function handleSubmit(formData: FormData) {
-    setIsLoading(true);
-
-    try {
-      const result = await createDocumentAction(formData);
-
-      if (!result.success) {
-        // Handle error based on type
-        if (result.type === "UnauthorizedError") {
-          toast.error(result.error);
-          redirect("/connexion");
-        } else if (result.type === "ConflictError") {
-          toast.error(result.error);
-        } else {
-          toast.error(result.error);
-        }
-        return;
-      }
-
-      // Handle success
-      toast.success("Document créé avec succès");
-      // Use result.data
-    } catch (error: unknown) {
-      toast.error(
-        error instanceof Error ? error.message : "Une erreur est survenue"
-      );
-    } finally {
-      setIsLoading(false);
+    if (existing && existing.id !== ctx.userId) {
+      throw new ConflictError("Cette adresse email est déjà utilisée");
     }
-  }
 
-  return (
-    <form action={handleSubmit}>
-      {/* form fields */}
-    </form>
-  );
-}
+    // Check for existence
+    const user = await prisma.user.findUnique({
+      where: { id: ctx.userId },
+      select: { id: true },
+    });
+
+    if (!user) {
+      throw new NotFoundError("Utilisateur introuvable");
+    }
+
+    // Update
+    const updatedUser = await prisma.user.update({
+      where: { id: ctx.userId },
+      data: parsedInput,
+      select: {
+        id: true,
+        name: true,
+        email: true,
+      },
+    });
+
+    revalidatePath("/dashboard/settings");
+
+    return { success: true, user: updatedUser };
+  });
 ```
 
-### 12. Revalidation (P1)
+## Complete Examples
 
-- Use `revalidatePath()` or `revalidateTag()` when data changes
-- Call BEFORE returning success
+### Example 1: Public Action (Contact Form)
+
+`app/actions/create-contact.action.ts`:
 
 ```tsx
-import { revalidatePath } from "next/cache";
+"use server";
 
-async function createDocumentAction(
-  formData: FormData
-): Promise<CreateDocumentResult> {
-  try {
-    // Auth, validation, etc.
+import { env } from "@/lib/env";
+import { sendEmail } from "@/lib/resend";
+import { actionClient } from "@/lib/safe-action";
+import { CreateContactSchema } from "@/lib/schemas/contact.schema";
 
-    const document = await prisma.document.create({ ... });
+import { ContactEmail } from "@/components/emails/contact-email";
 
-    // Revalidate before returning
-    revalidatePath("/dashboard/documents");
+export const createContactAction = actionClient
+  .inputSchema(CreateContactSchema)
+  .action(async ({ parsedInput }) => {
+    await sendEmail({
+      from: `${env.NEXT_PUBLIC_APP_NAME} <${env.RESEND_EMAIL_NOREPLY}>`,
+      to: env.RESEND_EMAIL_CONTACT,
+      replyTo: parsedInput.email,
+      subject: `[Contact] ${parsedInput.subject}`,
+      react: ContactEmail({
+        name: parsedInput.name,
+        email: parsedInput.email,
+        subject: parsedInput.subject,
+        message: parsedInput.message,
+      }),
+    });
 
-    return { success: true, data: document };
-  } catch (error: unknown) {
-    return handleActionError(error);
-  }
-}
+    return { success: true };
+  });
 ```
 
-## Complete Example
+### Example 2: Protected Action (Update Profile)
 
-`app/actions/document-actions.ts`:
+`app/actions/update-profile.action.ts`:
 
 ```tsx
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { headers } from "next/headers";
 
-import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import {
-  CreateDocumentSchema,
-  UpdateDocumentSchema,
-} from "@/lib/schemas/document.schema";
+import { authActionClient } from "@/lib/safe-action";
+import { UpdateProfileSchema } from "@/lib/schemas/profile.schema";
 
-import { handleActionError } from "@/utils/actions/handle-action-error";
-import {
-  ConflictError,
-  NotFoundError,
-  UnauthorizedError,
-} from "@/utils/errors/errors";
+import { ConflictError } from "@/utils/errors/errors";
 
-type CreateDocumentResult =
-  | { success: true; data: { id: string; name: string } }
-  | { success: false; error: string; type: string };
+export const updateProfileAction = authActionClient
+  .inputSchema(UpdateProfileSchema)
+  .action(async ({ parsedInput, ctx }) => {
+    // Check for email conflict
+    if (parsedInput.email !== ctx.userEmail) {
+      const existing = await prisma.user.findUnique({
+        where: { email: parsedInput.email },
+        select: { id: true },
+      });
 
-type UpdateDocumentResult =
-  | { success: true; data: { id: string; name: string } }
-  | { success: false; error: string; type: string };
-
-type DeleteDocumentResult =
-  | { success: true }
-  | { success: false; error: string; type: string };
-
-async function createDocumentAction(
-  formData: FormData
-): Promise<CreateDocumentResult> {
-  try {
-    const authSession = await auth.api.getSession({
-      headers: await headers(),
-    });
-
-    if (!authSession?.user) {
-      throw new UnauthorizedError("Vous devez être connecté");
+      if (existing) {
+        throw new ConflictError("Cette adresse email est déjà utilisée");
+      }
     }
 
-    const data = CreateDocumentSchema.parse({
-      name: formData.get("name"),
-      description: formData.get("description"),
-    });
-
-    const existing = await prisma.document.findFirst({
-      where: {
-        name: data.name,
-        userId: authSession.user.id,
-      },
-      select: { id: true },
-    });
-
-    if (existing) {
-      throw new ConflictError("Un document avec ce nom existe déjà");
-    }
-
-    const document = await prisma.document.create({
+    // Update user
+    const user = await prisma.user.update({
+      where: { id: ctx.userId },
       data: {
-        ...data,
-        userId: authSession.user.id,
+        name: parsedInput.name,
+        email: parsedInput.email,
       },
       select: {
         id: true,
         name: true,
+        email: true,
+        emailVerified: true,
       },
     });
 
-    revalidatePath("/dashboard/documents");
+    revalidatePath("/dashboard/settings");
 
-    return {
-      success: true,
-      data: document,
-    };
-  } catch (error: unknown) {
-    return handleActionError(error);
-  }
-}
+    return { success: true, user };
+  });
+```
 
-async function updateDocumentAction(
-  formData: FormData
-): Promise<UpdateDocumentResult> {
+### Example 3: Admin Action (Delete User)
+
+`app/actions/delete-user.action.ts`:
+
+```tsx
+"use server";
+
+import { revalidatePath } from "next/cache";
+
+import { prisma } from "@/lib/prisma";
+import { adminActionClient } from "@/lib/safe-action";
+import { DeleteUserSchema } from "@/lib/schemas/user.schema";
+
+import { ForbiddenError, NotFoundError } from "@/utils/errors/errors";
+
+export const deleteUserAction = adminActionClient
+  .inputSchema(DeleteUserSchema)
+  .action(async ({ parsedInput, ctx }) => {
+    // Cannot delete yourself
+    if (parsedInput.userId === ctx.userId) {
+      throw new ForbiddenError(
+        "Vous ne pouvez pas supprimer votre propre compte"
+      );
+    }
+
+    // Check user exists
+    const user = await prisma.user.findUnique({
+      where: { id: parsedInput.userId },
+      select: { id: true, role: true },
+    });
+
+    if (!user) {
+      throw new NotFoundError("Utilisateur introuvable");
+    }
+
+    // Cannot delete other admins
+    if (user.role === "ADMIN") {
+      throw new ForbiddenError(
+        "Vous ne pouvez pas supprimer un autre administrateur"
+      );
+    }
+
+    // Delete user
+    await prisma.user.delete({
+      where: { id: parsedInput.userId },
+    });
+
+    revalidatePath("/admin/users");
+
+    return { success: true };
+  });
+```
+
+## Anti-Patterns
+
+```tsx
+// ❌ Wrong: Missing "use server" directive
+import { authActionClient } from "@/lib/safe-action";
+export const createContactAction = ...
+
+// ❌ Wrong: "use server" not on line 1
+import { authActionClient } from "@/lib/safe-action";
+"use server";
+export const createContactAction = ...
+
+// ❌ Wrong: Using vanilla Server Action pattern
+"use server";
+async function createContactAction(formData: FormData) {
   try {
-    const authSession = await auth.api.getSession({
-      headers: await headers(),
-    });
-
-    if (!authSession?.user) {
-      throw new UnauthorizedError("Vous devez être connecté");
-    }
-
-    const data = UpdateDocumentSchema.parse({
-      id: formData.get("id"),
-      name: formData.get("name"),
-      description: formData.get("description"),
-    });
-
-    const document = await prisma.document.findUnique({
-      where: { id: data.id },
-      select: { id: true, userId: true },
-    });
-
-    if (!document) {
-      throw new NotFoundError("Document introuvable");
-    }
-
-    if (document.userId !== authSession.user.id) {
-      throw new UnauthorizedError("Accès non autorisé");
-    }
-
-    const updatedDocument = await prisma.document.update({
-      where: { id: data.id },
-      data: {
-        name: data.name,
-        description: data.description,
-      },
-      select: {
-        id: true,
-        name: true,
-      },
-    });
-
-    revalidatePath("/dashboard/documents");
-
-    return {
-      success: true,
-      data: updatedDocument,
-    };
-  } catch (error: unknown) {
-    return handleActionError(error);
-  }
-}
-
-async function deleteDocumentAction(
-  documentId: string
-): Promise<DeleteDocumentResult> {
-  try {
-    const authSession = await auth.api.getSession({
-      headers: await headers(),
-    });
-
-    if (!authSession?.user) {
-      throw new UnauthorizedError("Vous devez être connecté");
-    }
-
-    const document = await prisma.document.findUnique({
-      where: { id: documentId },
-      select: { id: true, userId: true },
-    });
-
-    if (!document) {
-      throw new NotFoundError("Document introuvable");
-    }
-
-    if (document.userId !== authSession.user.id) {
-      throw new UnauthorizedError("Accès non autorisé");
-    }
-
-    await prisma.document.delete({
-      where: { id: documentId },
-    });
-
-    revalidatePath("/dashboard/documents");
-
+    const data = Schema.parse({ ... });
     return { success: true };
   } catch (error: unknown) {
     return handleActionError(error);
   }
 }
 
-export { createDocumentAction, deleteDocumentAction, updateDocumentAction };
-```
+// ❌ Wrong: Manual try/catch
+export const createContactAction = actionClient
+  .inputSchema(CreateContactSchema)
+  .action(async ({ parsedInput }) => {
+    try {
+      // ❌ Not needed
+      return { success: true };
+    } catch (error: unknown) {
+      return handleActionError(error);
+    }
+  });
 
-## Anti-Patterns
+// ❌ Wrong: No .inputSchema() validation
+export const createContactAction = actionClient
+  .action(async ({ parsedInput }) => {
+    const data = CreateContactSchema.parse(parsedInput); // ❌ Should use .inputSchema()
+    // ...
+  });
 
-```tsx
-// ❌ Wrong: Missing "use server"
-import { headers } from "next/headers";
-
-async function createDocumentAction() { ... }
-
-// ❌ Wrong: No explicit return type
-async function createDocumentAction(formData: FormData) {
-  // ...
-}
-
-// ❌ Wrong: Multiple returns in try block
-try {
-  if (!user) {
-    return { success: false, error: "..." };
-  }
-  return { success: true, data };
-} catch { ... }
-
-// ❌ Wrong: Not using handleActionError
-catch (error: unknown) {
-  return { success: false, error: "Une erreur est survenue" };
-}
-
-// ❌ Wrong: Default export
-export default async function createDocument() { ... }
-
-// ❌ Wrong: Generic function name
-async function create() { ... }
+// ❌ Wrong: Wrong file naming
+app/actions/contact.ts           // Missing .action.ts suffix
+app/actions/create-contact.ts    // Missing .action.ts suffix
 
 // ❌ Wrong: Missing "Action" suffix
-async function createDocument() { ... }
+export const createContact = ...
 
-// ❌ Wrong: Not typing error as unknown
-catch (error) {
-  return handleActionError(error);
-}
+// ❌ Wrong: Using actionClient for protected action
+export const updateProfile = actionClient // ❌ Should be authActionClient
+  .inputSchema(UpdateProfileSchema)
+  .action(async ({ parsedInput }) => {
+    // No ctx.userId available!
+    // ...
+  });
 
 // ❌ Wrong: Prisma query without select
-const document = await prisma.document.create({
-  data: { ... },
-});
+const user = await prisma.user.update({
+  where: { id: ctx.userId },
+  data: parsedInput,
+}); // ❌ No select
 
-// ❌ Wrong: No type field in error result
-type Result =
-  | { success: true; data: T }
-  | { success: false; error: string }; // Missing type field
+// ❌ Wrong: Not using useAction hook on client
+const result = await createContactAction(data); // ❌ Should use useAction
 ```
 
 ## Key Principles
 
 1. **"use server" first**: MUST be the very first line
-2. **Binary error handling**: Either success or throw (no multiple returns)
-3. **Custom error classes**: Same as API Routes for consistency
-4. **Explicit return types**: Always define discriminated unions with `type` field
-5. **Named exports only**: No default exports
-6. **Action suffix**: All functions end with "Action"
-7. **Type error as unknown**: Always `catch (error: unknown)`
-8. **Prisma select always**: Explicitly select fields, never return all
-9. **Revalidate on mutation**: Call `revalidatePath()` or `revalidateTag()` before returning
-10. **Type field for errors**: Include `type` in error result for client-side handling
+2. **File naming**: `{verb}-{entity}.action.ts` with `.action.ts` suffix
+3. **Action naming**: `{verb}{Entity}Action` with "Action" suffix
+4. **next-safe-action**: Use `.inputSchema()` for validation, `.action()` for logic
+5. **Client selection**: `actionClient` (public), `authActionClient` (auth), `adminActionClient` (admin)
+6. **No try/catch**: next-safe-action handles errors automatically
+7. **Throw errors**: Use custom error classes directly
+8. **Simple returns**: Return plain objects, no NextResponse
+9. **Revalidate**: Call `revalidatePath()` after mutations
+10. **useAction hook**: Always use `useAction` on client-side
+11. **Type safety**: Automatic type inference from schema to return
+12. **Prisma select**: Always specify fields explicitly

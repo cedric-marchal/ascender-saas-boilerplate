@@ -1,9 +1,11 @@
+/* eslint-disable react/no-children-prop */
 "use client";
 
+import type { ChangeEvent, SubmitEvent } from "react";
 import { useState } from "react";
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { useForm } from "@tanstack/react-form";
+import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { authClient } from "@/lib/auth-client";
@@ -13,39 +15,33 @@ import {
 } from "@/lib/schemas/auth.schema";
 
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 
 function ForgotPasswordForm() {
   const [isSubmitted, setIsSubmitted] = useState(false);
 
-  const form = useForm<ForgotPasswordSchemaType>({
-    resolver: zodResolver(ForgotPasswordSchema),
+  const form = useForm({
     defaultValues: {
       email: "",
+    } as ForgotPasswordSchemaType,
+    validators: {
+      onSubmit: ForgotPasswordSchema,
+    },
+    onSubmit: async ({ value }) => {
+      const { error } = await authClient.requestPasswordReset({
+        email: value.email,
+        redirectTo: "/nouveau-mot-de-passe",
+      });
+
+      if (error) {
+        toast.error(error.message || "Une erreur est survenue");
+        return;
+      }
+
+      setIsSubmitted(true);
     },
   });
-
-  const onSubmit = async (data: ForgotPasswordSchemaType) => {
-    const { error } = await authClient.requestPasswordReset({
-      email: data.email,
-      redirectTo: "/nouveau-mot-de-passe",
-    });
-
-    if (error) {
-      toast.error(error.message || "Une erreur est survenue");
-      return;
-    }
-
-    setIsSubmitted(true);
-  };
 
   if (isSubmitted) {
     return (
@@ -62,37 +58,65 @@ function ForgotPasswordForm() {
   }
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="email"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Email</FormLabel>
-              <FormControl>
-                <Input
-                  type="email"
-                  placeholder="jean@exemple.fr"
-                  autoComplete="email"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <Button
-          type="submit"
-          className="w-full"
-          disabled={form.formState.isSubmitting}
-        >
-          {form.formState.isSubmitting
-            ? "Envoi en cours..."
-            : "Envoyer le lien de réinitialisation"}
-        </Button>
-      </form>
-    </Form>
+    <form
+      onSubmit={(event: SubmitEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        form.handleSubmit();
+      }}
+      className="space-y-4"
+    >
+      <form.Field
+        name="email"
+        children={(field) => {
+          const isInvalid =
+            field.state.meta.isTouched && !field.state.meta.isValid;
+
+          function handleChange(event: ChangeEvent<HTMLInputElement>) {
+            field.handleChange(event.target.value);
+          }
+
+          return (
+            <Field data-invalid={isInvalid}>
+              <FieldLabel htmlFor="forgot-password-email">Email</FieldLabel>
+              <Input
+                id="forgot-password-email"
+                type="email"
+                name={field.name}
+                value={field.state.value}
+                onBlur={field.handleBlur}
+                onChange={handleChange}
+                aria-invalid={isInvalid}
+                placeholder="jean@exemple.fr"
+                autoComplete="email"
+              />
+              {isInvalid && <FieldError errors={field.state.meta.errors} />}
+            </Field>
+          );
+        }}
+      />
+
+      <form.Subscribe
+        selector={(state) => [state.canSubmit, state.isSubmitting]}
+      >
+        {([canSubmit, isSubmitting]) => (
+          <Button
+            type="submit"
+            disabled={!canSubmit || isSubmitting}
+            className="w-full"
+          >
+            {isSubmitting ? (
+              <Loader2
+                className="mr-2 h-4 w-4 animate-spin"
+                aria-hidden="true"
+              />
+            ) : null}
+            {isSubmitting
+              ? "Envoi en cours..."
+              : "Envoyer le lien de réinitialisation"}
+          </Button>
+        )}
+      </form.Subscribe>
+    </form>
   );
 }
 

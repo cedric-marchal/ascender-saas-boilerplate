@@ -1,5 +1,7 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
-import { NextResponse } from "next/server";
 
 import { randomBytes } from "crypto";
 
@@ -8,17 +10,12 @@ import { env } from "@/lib/env";
 import { prisma } from "@/lib/prisma";
 import { authenticatedRatelimit } from "@/lib/ratelimit";
 import { sendEmail } from "@/lib/resend";
+import { authActionClient } from "@/lib/safe-action";
 import { UpdateProfileSchema } from "@/lib/schemas/profile.schema";
-import { getSession } from "@/lib/session";
 
 import { EmailVerificationEmail } from "@/components/emails/email-verification-email";
 
-import {
-  BadRequestError,
-  ConflictError,
-  UnauthorizedError,
-} from "@/utils/errors/errors";
-import { handleApiError } from "@/utils/errors/handle-api-error";
+import { BadRequestError, ConflictError } from "@/utils/errors/errors";
 import { checkRatelimit } from "@/utils/ratelimit/check-ratelimit";
 
 const EMAIL_VERIFICATION_EXPIRY_HOURS = 24;
@@ -58,25 +55,15 @@ async function sendEmailVerification(
   });
 }
 
-async function PATCH(request: Request) {
-  try {
-    const session = await getSession();
-
-    if (!session) {
-      throw new UnauthorizedError("Vous devez être connecté");
-    }
-
-    await checkRatelimit(authenticatedRatelimit, session.user.id);
-
-    const formData = await request.formData();
-
-    const data = UpdateProfileSchema.parse({
-      name: formData.get("name"),
-      email: formData.get("email"),
-    });
-
+export const updateProfileAction = authActionClient
+  .use(async ({ next, ctx }) => {
+    await checkRatelimit(authenticatedRatelimit, ctx.userId);
+    return next();
+  })
+  .inputSchema(UpdateProfileSchema)
+  .action(async ({ parsedInput, ctx }) => {
     const currentUser = await prisma.user.findUnique({
-      where: { id: session.user.id },
+      where: { id: ctx.userId },
       select: {
         id: true,
         name: true,
@@ -89,12 +76,12 @@ async function PATCH(request: Request) {
       throw new BadRequestError("Utilisateur introuvable");
     }
 
-    const emailChanged = currentUser.email !== data.email;
-    const nameChanged = currentUser.name !== data.name;
+    const emailChanged = currentUser.email !== parsedInput.email;
+    const nameChanged = currentUser.name !== parsedInput.name;
 
     if (emailChanged) {
       const existingUser = await prisma.user.findUnique({
-        where: { email: data.email },
+        where: { email: parsedInput.email },
         select: { id: true },
       });
 
@@ -106,33 +93,29 @@ async function PATCH(request: Request) {
     if (!emailChanged && nameChanged) {
       await auth.api.updateUser({
         body: {
-          name: data.name,
+          name: parsedInput.name,
         },
         headers: await headers(),
       });
 
-      return NextResponse.json(
-        {
-          success: true,
-          data: {
-            user: {
-              id: currentUser.id,
-              name: data.name,
-              email: currentUser.email,
-              emailVerified: currentUser.emailVerified,
-            },
-            emailChanged: false,
-          },
+      revalidatePath("/dashboard/parametres");
+
+      return {
+        user: {
+          id: currentUser.id,
+          name: parsedInput.name,
+          email: currentUser.email,
+          emailVerified: currentUser.emailVerified,
         },
-        { status: 200 }
-      );
+        emailChanged: false,
+      };
     }
 
     const updatedUser = await prisma.user.update({
-      where: { id: session.user.id },
+      where: { id: ctx.userId },
       data: {
-        name: data.name,
-        email: data.email,
+        name: parsedInput.name,
+        email: parsedInput.email,
         emailVerified: emailChanged ? false : currentUser.emailVerified,
       },
       select: {
@@ -162,19 +145,10 @@ async function PATCH(request: Request) {
       );
     }
 
-    return NextResponse.json(
-      {
-        success: true,
-        data: {
-          user: updatedUser,
-          emailChanged,
-        },
-      },
-      { status: 200 }
-    );
-  } catch (error: unknown) {
-    return handleApiError(error);
-  }
-}
+    revalidatePath("/dashboard/parametres");
 
-export { PATCH };
+    return {
+      user: updatedUser,
+      emailChanged,
+    };
+  });

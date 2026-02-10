@@ -58,7 +58,11 @@ export default async function AdminSettingsPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <AdminProfileForm user={user} />
+              <AdminProfileForm
+                name={user.name}
+                email={user.email}
+                emailVerified={user.emailVerified}
+              />
             </CardContent>
           </Card>
 

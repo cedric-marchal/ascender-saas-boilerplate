@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import type { ChangeEvent, SubmitEvent } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "@tanstack/react-form";
 import { Loader2 } from "lucide-react";
-import { useForm } from "react-hook-form";
+import { useAction } from "next-safe-action/hooks";
 import { toast } from "sonner";
 
 import {
@@ -16,16 +16,14 @@ import {
 
 import { Button } from "@/components/ui/button";
 import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+} from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 
+import { updateProfileAction } from "@/app/(protected)/_actions/update-profile.action";
 import { EmailVerificationBadge } from "@/app/(protected)/dashboard/parametres/_components/email-verification-badge";
 
 type DashboardProfileFormProps = {
@@ -40,98 +38,130 @@ function DashboardProfileForm({
   emailVerified,
 }: DashboardProfileFormProps) {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
+  const { executeAsync, isExecuting } = useAction(updateProfileAction);
 
-  const form = useForm<UpdateProfileSchemaType>({
-    resolver: zodResolver(UpdateProfileSchema),
+  const form = useForm({
     defaultValues: {
       name: name,
       email: email,
+    } as UpdateProfileSchemaType,
+    validators: {
+      onSubmit: UpdateProfileSchema,
+    },
+    onSubmit: async ({ value }) => {
+      const result = await executeAsync(value);
+
+      if (result?.serverError) {
+        toast.error(result.serverError);
+        return;
+      }
+
+      if (result?.data) {
+        toast.success(
+          result.data.emailChanged
+            ? "Profil mis à jour avec succès. Un email de vérification a été envoyé."
+            : "Profil mis à jour avec succès"
+        );
+
+        router.refresh();
+      }
     },
   });
 
-  async function onSubmit(data: UpdateProfileSchemaType) {
-    setIsLoading(true);
-
-    try {
-      const formData = new FormData();
-      formData.append("name", data.name);
-      formData.append("email", data.email);
-
-      const response = await fetch("/api/profile", {
-        method: "PATCH",
-        body: formData,
-      });
-
-      const body = await response.json();
-
-      if (!response.ok) {
-        throw new Error(body.message || "Une erreur est survenue");
-      }
-
-      toast.success(
-        body.data.emailChanged
-          ? "Profil mis à jour avec succès. Un email de vérification a été envoyé."
-          : "Profil mis à jour avec succès"
-      );
-
-      router.refresh();
-    } catch (error: unknown) {
-      toast.error(
-        error instanceof Error ? error.message : "Une erreur est survenue"
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Nom</FormLabel>
-              <FormControl>
-                <Input placeholder="Votre nom" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+    <form
+      onSubmit={(event: SubmitEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        form.handleSubmit();
+      }}
+      className="space-y-6"
+    >
+      <form.Field
+        name="name"
+        children={(field) => {
+          const isInvalid =
+            field.state.meta.isTouched && !field.state.meta.isValid;
 
-        <FormField
-          control={form.control}
-          name="email"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Email</FormLabel>
-              <FormControl>
-                <Input type="email" placeholder="votre@email.com" {...field} />
-              </FormControl>
-              <FormDescription className="flex items-center gap-2">
+          function handleChange(event: ChangeEvent<HTMLInputElement>) {
+            field.handleChange(event.target.value);
+          }
+
+          return (
+            <Field data-invalid={isInvalid}>
+              <FieldLabel htmlFor="dashboard-profile-name">Nom</FieldLabel>
+              <Input
+                id="dashboard-profile-name"
+                name={field.name}
+                value={field.state.value}
+                onBlur={field.handleBlur}
+                onChange={handleChange}
+                aria-invalid={isInvalid}
+                placeholder="Votre nom"
+              />
+              {isInvalid && <FieldError errors={field.state.meta.errors} />}
+            </Field>
+          );
+        }}
+      />
+
+      <form.Field
+        name="email"
+        children={(field) => {
+          const isInvalid =
+            field.state.meta.isTouched && !field.state.meta.isValid;
+
+          function handleChange(event: ChangeEvent<HTMLInputElement>) {
+            field.handleChange(event.target.value);
+          }
+
+          return (
+            <Field data-invalid={isInvalid}>
+              <FieldLabel htmlFor="dashboard-profile-email">Email</FieldLabel>
+              <Input
+                id="dashboard-profile-email"
+                type="email"
+                name={field.name}
+                value={field.state.value}
+                onBlur={field.handleBlur}
+                onChange={handleChange}
+                aria-invalid={isInvalid}
+                placeholder="votre@email.com"
+              />
+              <FieldDescription className="flex items-center gap-2">
                 <EmailVerificationBadge isVerified={emailVerified} />
                 {!emailVerified && (
                   <span className="text-xs text-orange-600">
                     Vérifiez votre email pour sécuriser votre compte
                   </span>
                 )}
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+              </FieldDescription>
+              {isInvalid && <FieldError errors={field.state.meta.errors} />}
+            </Field>
+          );
+        }}
+      />
 
-        <Button type="submit" disabled={isLoading}>
-          {isLoading && (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
-          )}
-          {isLoading ? "Enregistrement..." : "Enregistrer les modifications"}
-        </Button>
-      </form>
-    </Form>
+      <form.Subscribe
+        selector={(state) => [state.canSubmit, state.isSubmitting]}
+      >
+        {([canSubmit, isSubmitting]) => (
+          <Button
+            type="submit"
+            disabled={!canSubmit || isExecuting || isSubmitting}
+          >
+            {isExecuting || isSubmitting ? (
+              <Loader2
+                className="mr-2 h-4 w-4 animate-spin"
+                aria-hidden="true"
+              />
+            ) : null}
+            {isExecuting || isSubmitting
+              ? "Enregistrement..."
+              : "Enregistrer les modifications"}
+          </Button>
+        )}
+      </form.Subscribe>
+    </form>
   );
 }
 

@@ -1,9 +1,12 @@
+/* eslint-disable react/no-children-prop */
 "use client";
+
+import type { ChangeEvent, SubmitEvent } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { useForm } from "@tanstack/react-form";
+import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { authClient } from "@/lib/auth-client";
@@ -13,14 +16,7 @@ import {
 } from "@/lib/schemas/auth.schema";
 
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 
 type ResetPasswordFormProps = {
@@ -30,79 +26,124 @@ type ResetPasswordFormProps = {
 function ResetPasswordForm({ token }: ResetPasswordFormProps) {
   const router = useRouter();
 
-  const form = useForm<ResetPasswordSchemaType>({
-    resolver: zodResolver(ResetPasswordSchema),
+  const form = useForm({
     defaultValues: {
       password: "",
       confirmPassword: "",
+    } as ResetPasswordSchemaType,
+    validators: {
+      onSubmit: ResetPasswordSchema,
+    },
+    onSubmit: async ({ value }) => {
+      const { error } = await authClient.resetPassword({
+        newPassword: value.password,
+        token,
+      });
+
+      if (error) {
+        toast.error(error.message || "Une erreur est survenue");
+        return;
+      }
+
+      toast.success("Mot de passe mis à jour avec succès");
+      router.push("/connexion");
     },
   });
 
-  const onSubmit = async (data: ResetPasswordSchemaType) => {
-    const { error } = await authClient.resetPassword({
-      newPassword: data.password,
-      token,
-    });
-
-    if (error) {
-      toast.error(error.message || "Une erreur est survenue");
-      return;
-    }
-
-    toast.success("Mot de passe mis à jour avec succès");
-    router.push("/connexion");
-  };
-
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="password"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Nouveau mot de passe</FormLabel>
-              <FormControl>
-                <Input
-                  type="password"
-                  placeholder="••••••••••••"
-                  autoComplete="new-password"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="confirmPassword"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Confirmer le mot de passe</FormLabel>
-              <FormControl>
-                <Input
-                  type="password"
-                  placeholder="••••••••••••"
-                  autoComplete="new-password"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <Button
-          type="submit"
-          className="w-full"
-          disabled={form.formState.isSubmitting}
-        >
-          {form.formState.isSubmitting
-            ? "Mise à jour en cours..."
-            : "Mettre à jour le mot de passe"}
-        </Button>
-      </form>
-    </Form>
+    <form
+      onSubmit={(event: SubmitEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        form.handleSubmit();
+      }}
+      className="space-y-4"
+    >
+      <form.Field
+        name="password"
+        children={(field) => {
+          const isInvalid =
+            field.state.meta.isTouched && !field.state.meta.isValid;
+
+          function handleChange(event: ChangeEvent<HTMLInputElement>) {
+            field.handleChange(event.target.value);
+          }
+
+          return (
+            <Field data-invalid={isInvalid}>
+              <FieldLabel htmlFor="reset-password-password">
+                Nouveau mot de passe
+              </FieldLabel>
+              <Input
+                id="reset-password-password"
+                type="password"
+                name={field.name}
+                value={field.state.value}
+                onBlur={field.handleBlur}
+                onChange={handleChange}
+                aria-invalid={isInvalid}
+                placeholder="••••••••••••"
+                autoComplete="new-password"
+              />
+              {isInvalid && <FieldError errors={field.state.meta.errors} />}
+            </Field>
+          );
+        }}
+      />
+
+      <form.Field
+        name="confirmPassword"
+        children={(field) => {
+          const isInvalid =
+            field.state.meta.isTouched && !field.state.meta.isValid;
+
+          function handleChange(event: ChangeEvent<HTMLInputElement>) {
+            field.handleChange(event.target.value);
+          }
+
+          return (
+            <Field data-invalid={isInvalid}>
+              <FieldLabel htmlFor="reset-password-confirm">
+                Confirmer le mot de passe
+              </FieldLabel>
+              <Input
+                id="reset-password-confirm"
+                type="password"
+                name={field.name}
+                value={field.state.value}
+                onBlur={field.handleBlur}
+                onChange={handleChange}
+                aria-invalid={isInvalid}
+                placeholder="••••••••••••"
+                autoComplete="new-password"
+              />
+              {isInvalid && <FieldError errors={field.state.meta.errors} />}
+            </Field>
+          );
+        }}
+      />
+
+      <form.Subscribe
+        selector={(state) => [state.canSubmit, state.isSubmitting]}
+      >
+        {([canSubmit, isSubmitting]) => (
+          <Button
+            type="submit"
+            disabled={!canSubmit || isSubmitting}
+            className="w-full"
+          >
+            {isSubmitting ? (
+              <Loader2
+                className="mr-2 h-4 w-4 animate-spin"
+                aria-hidden="true"
+              />
+            ) : null}
+            {isSubmitting
+              ? "Mise à jour en cours..."
+              : "Mettre à jour le mot de passe"}
+          </Button>
+        )}
+      </form.Subscribe>
+    </form>
   );
 }
 
