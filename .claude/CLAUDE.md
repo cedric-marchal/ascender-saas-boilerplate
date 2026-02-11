@@ -827,11 +827,11 @@ export { GET, POST, DELETE };
 ```tsx
 "use client";
 
-import { type ChangeEvent, useState } from "react";
+import type { ChangeEvent, SubmitEvent } from "react";
 
-import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "@tanstack/react-form";
 import { Loader2 } from "lucide-react";
-import { useForm } from "react-hook-form";
+import { useAction } from "next-safe-action/hooks";
 import { toast } from "sonner";
 
 import {
@@ -840,81 +840,92 @@ import {
 } from "@/lib/schemas/contact.schema";
 
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 
-function ContactForm() {
-  const [isLoading, setIsLoading] = useState(false);
+import { createContactAction } from "@/app/(public)/contact/_actions/create-contact.action";
 
-  const form = useForm<CreateContactSchemaType>({
-    resolver: zodResolver(CreateContactSchema),
+function ContactForm() {
+  const { executeAsync, isExecuting } = useAction(createContactAction);
+
+  const form = useForm({
     defaultValues: {
       name: "",
       email: "",
+    } as CreateContactSchemaType,
+    validators: {
+      onSubmit: CreateContactSchema,
+    },
+    onSubmit: async ({ value }) => {
+      const result = await executeAsync(value);
+
+      if (result?.serverError) {
+        toast.error(result.serverError);
+        return;
+      }
+
+      if (result?.data?.success) {
+        toast.success("Message envoyé avec succès !");
+        form.reset();
+      }
     },
   });
 
-  async function onSubmit(data: CreateContactSchemaType) {
-    setIsLoading(true);
-
-    try {
-      const formData = new FormData();
-      formData.append("name", data.name);
-      formData.append("email", data.email);
-
-      const response = await fetch("/api/contact", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!response.ok) {
-        const body = await response.json();
-        throw new Error(body.message || "Une erreur est survenue");
-      }
-
-      toast.success("Message envoyé avec succès");
-      form.reset();
-    } catch (error: unknown) {
-      toast.error(
-        error instanceof Error ? error.message : "Une erreur est survenue"
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Nom</FormLabel>
-              <FormControl>
-                <Input placeholder="Votre nom" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+    <form
+      onSubmit={(event: SubmitEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        form.handleSubmit();
+      }}
+      className="space-y-6"
+    >
+      <form.Field
+        name="name"
+        children={(field) => {
+          const isInvalid =
+            field.state.meta.isTouched && !field.state.meta.isValid;
 
-        <Button type="submit" disabled={isLoading}>
-          {isLoading && (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
-          )}
-          {isLoading ? "Envoi..." : "Envoyer"}
-        </Button>
-      </form>
-    </Form>
+          function handleChange(event: ChangeEvent<HTMLInputElement>) {
+            field.handleChange(event.target.value);
+          }
+
+          return (
+            <Field data-invalid={isInvalid}>
+              <FieldLabel htmlFor="contact-name">Nom</FieldLabel>
+              <Input
+                id="contact-name"
+                name={field.name}
+                value={field.state.value}
+                onBlur={field.handleBlur}
+                onChange={handleChange}
+                aria-invalid={isInvalid}
+                placeholder="Votre nom"
+              />
+              {isInvalid && <FieldError errors={field.state.meta.errors} />}
+            </Field>
+          );
+        }}
+      />
+
+      <form.Subscribe
+        selector={(state) => [state.canSubmit, state.isSubmitting]}
+      >
+        {([canSubmit, isSubmitting]) => (
+          <Button
+            type="submit"
+            disabled={!canSubmit || isExecuting || isSubmitting}
+          >
+            {isExecuting || isSubmitting ? (
+              <Loader2
+                className="mr-2 h-4 w-4 animate-spin"
+                aria-hidden="true"
+              />
+            ) : null}
+            {isExecuting || isSubmitting ? "Envoi..." : "Envoyer"}
+          </Button>
+        )}
+      </form.Subscribe>
+    </form>
   );
 }
 
@@ -923,9 +934,12 @@ export { ContactForm };
 
 ### Rules
 
-- Always use `react-hook-form` with `zodResolver`
-- Always type `useForm<SchemaType>` with `defaultValues`
-- Always use `FormData` for API submission
+- Always use `@tanstack/react-form` with `useForm` (never react-hook-form)
+- Always use `validators: { onSubmit: Schema }` with imported Zod schema
+- Always use `defaultValues` with `as SchemaType` assertion
+- Always use `Field`, `FieldLabel`, `FieldError` from `@/components/ui/field`
+- Always use `form.Subscribe` for submit button state
+- Prefer Server Actions (`useAction` + `executeAsync`) over API Routes
 - File inputs MUST include drag & drop functionality
 - Use `toast` for success/error feedback
 - Reset form on success with `form.reset()`

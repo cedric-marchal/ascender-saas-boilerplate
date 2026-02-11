@@ -374,46 +374,109 @@ const user = await prisma.user.update({
 
 ### 11. Client-Side Usage (P0)
 
-Use `useAction` hook from `next-safe-action/hooks`:
+Use TanStack Form with `useAction` hook from `next-safe-action/hooks`:
 
 ```tsx
 "use client";
 
+import type { ChangeEvent, SubmitEvent } from "react";
+
+import { useForm } from "@tanstack/react-form";
+import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { toast } from "sonner";
 
-import { createContactAction } from "@/app/actions/create-contact.action";
+import {
+  CreateContactSchema,
+  type CreateContactSchemaType,
+} from "@/lib/schemas/contact.schema";
+
+import { Button } from "@/components/ui/button";
+import { Field, FieldError, FieldLabel } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+
+import { createContactAction } from "@/app/(public)/contact/_actions/create-contact.action";
 
 function ContactForm() {
-  const { execute, result, isExecuting } = useAction(createContactAction);
+  const { executeAsync, isExecuting } = useAction(createContactAction);
 
-  async function onSubmit(data: CreateContactSchemaType) {
-    const result = await execute(data);
+  const form = useForm({
+    defaultValues: {
+      name: "",
+      email: "",
+    } as CreateContactSchemaType,
+    validators: {
+      onSubmit: CreateContactSchema,
+    },
+    onSubmit: async ({ value }) => {
+      const result = await executeAsync(value);
 
-    // Check for server errors
-    if (result?.serverError) {
-      toast.error(result.serverError);
-      return;
-    }
+      if (result?.serverError) {
+        toast.error(result.serverError);
+        return;
+      }
 
-    // Check for validation errors (handled by FormMessage automatically)
-    if (result?.validationErrors) {
-      return;
-    }
-
-    // Success
-    if (result?.data?.success) {
-      toast.success("Message envoyé avec succès !");
-      form.reset();
-    }
-  }
+      if (result?.data?.success) {
+        toast.success("Message envoyé avec succès !");
+        form.reset();
+      }
+    },
+  });
 
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)}>
-      {/* form fields */}
-      <button type="submit" disabled={isExecuting}>
-        {isExecuting ? "Envoi..." : "Envoyer"}
-      </button>
+    <form
+      onSubmit={(event: SubmitEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        form.handleSubmit();
+      }}
+      className="space-y-6"
+    >
+      <form.Field
+        name="name"
+        children={(field) => {
+          const isInvalid =
+            field.state.meta.isTouched && !field.state.meta.isValid;
+
+          function handleChange(event: ChangeEvent<HTMLInputElement>) {
+            field.handleChange(event.target.value);
+          }
+
+          return (
+            <Field data-invalid={isInvalid}>
+              <FieldLabel htmlFor="contact-name">Nom</FieldLabel>
+              <Input
+                id="contact-name"
+                name={field.name}
+                value={field.state.value}
+                onBlur={field.handleBlur}
+                onChange={handleChange}
+                aria-invalid={isInvalid}
+                placeholder="Votre nom"
+              />
+              {isInvalid && <FieldError errors={field.state.meta.errors} />}
+            </Field>
+          );
+        }}
+      />
+
+      <form.Subscribe
+        selector={(state) => [state.canSubmit, state.isSubmitting]}
+      >
+        {([canSubmit, isSubmitting]) => (
+          <Button
+            type="submit"
+            disabled={!canSubmit || isExecuting || isSubmitting}
+          >
+            {isExecuting || isSubmitting ? (
+              <Loader2
+                className="mr-2 h-4 w-4 animate-spin"
+                aria-hidden="true"
+              />
+            ) : null}
+            {isExecuting || isSubmitting ? "Envoi..." : "Envoyer"}
+          </Button>
+        )}
+      </form.Subscribe>
     </form>
   );
 }

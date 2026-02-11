@@ -165,6 +165,7 @@ export type { PageSize, SortOrder };
 ```
 
 **Rules**:
+
 - Parsers MUST NOT re-export constants (consumers import directly from `query.constant.ts`)
 - `parseAsSafeSearch` MUST truncate (`.slice()`) instead of reject long strings
 - Factory functions (`createEnumParser`, `createSortByParser`) wrap `parseAsStringLiteral`
@@ -240,15 +241,11 @@ export {
   verificationLabels,
 };
 
-export type {
-  UserRole,
-  UserRoleFilter,
-  UserSortableField,
-  VerificationFilter,
-};
+export type { UserRole, UserRoleFilter, UserSortableField, VerificationFilter };
 ```
 
 **Rules**:
+
 - Enum arrays MUST use `as const` for literal types
 - `searchParams` MUST include `sortBy`, `order`, and `page` alongside filters
 - Type guards (`isUserRole`, etc.) are defined here for server-side validation
@@ -294,6 +291,7 @@ export type { FilterUsersSchemaType };
 ```
 
 **Rules**:
+
 - Schema IMPORTS enum arrays from constants (never defines them)
 - `FILTERS.maxSearchLength` comes from `query.constant.ts` (not hardcoded)
 - Schema validates form fields only (not `sortBy`/`order`/`page` — those are validated by parsers)
@@ -343,9 +341,7 @@ type GetUsersResult = {
 };
 
 async function getUsers(filters: GetUsersFilters): Promise<GetUsersResult> {
-  const safeSearch = filters.search
-    .slice(0, FILTERS.maxSearchLength)
-    .trim();
+  const safeSearch = filters.search.slice(0, FILTERS.maxSearchLength).trim();
   const safePage = Math.max(1, Math.min(filters.page, PAGINATION.maxPage));
 
   const safeRole: UserRoleFilter = isUserRoleFilter(filters.role)
@@ -364,9 +360,9 @@ async function getUsers(filters: GetUsersFilters): Promise<GetUsersResult> {
     ? (filters.sortBy as UserSortableField)
     : (SORTING.defaultSortBy as UserSortableField);
 
-  const safeOrder: SortOrder = (
-    SORTING.orders as readonly string[]
-  ).includes(filters.order)
+  const safeOrder: SortOrder = (SORTING.orders as readonly string[]).includes(
+    filters.order
+  )
     ? (filters.order as SortOrder)
     : SORTING.defaultOrder;
 
@@ -417,6 +413,7 @@ export type { GetUsersFilters, GetUsersResult };
 ```
 
 **Rules**:
+
 - MUST use `import "server-only"` at top
 - MUST re-validate ALL values server-side (defense in depth)
 - MUST use `prisma.$transaction` for parallel `findMany` + `count`
@@ -497,6 +494,7 @@ export default async function AdminUsersPage({
 ```
 
 **Rules**:
+
 - `createLoader(usersSearchParams)` is the ONLY place parsers are connected to the page
 - Page does NOT re-validate (that's the server data fetching layer's job)
 - `DataTable` receives raw data and columns — no client-side sorting/filtering
@@ -512,7 +510,7 @@ Uses TanStack Form for local state + Zod validation, and `useQueryStates` for UR
 ```tsx
 "use client";
 
-import { type ChangeEvent, useTransition } from "react";
+import { type ChangeEvent, type FormEvent, useTransition } from "react";
 
 import { useForm } from "@tanstack/react-form";
 import { Filter, Search, X } from "lucide-react";
@@ -586,7 +584,7 @@ function UsersFilters() {
   return (
     <section className="mb-6 space-y-4">
       <form
-        onSubmit={(event: React.FormEvent<HTMLFormElement>) => {
+        onSubmit={(event: FormEvent<HTMLFormElement>) => {
           event.preventDefault();
           formInstance.handleSubmit();
         }}
@@ -602,6 +600,7 @@ export { UsersFilters };
 ```
 
 **Rules**:
+
 - MUST use `useTransition` with `startTransition` passed to `useQueryStates`
 - MUST set `shallow: false` and `history: "push"`
 - MUST reset `page: 1` when filters change
@@ -711,6 +710,7 @@ export { usersColumns };
 ```
 
 **Rules**:
+
 - `SortableHeader` is defined in the columns file (co-located)
 - Uses `useQueryStates` with the SAME `usersSearchParams` (single source of truth)
 - 3-state sort toggle: `unsorted → asc → desc → reset`
@@ -730,11 +730,11 @@ Generic table renderer. NO client-side sorting, filtering, or pagination.
 import { useState } from "react";
 
 import {
+  type ColumnDef,
+  type VisibilityState,
   flexRender,
   getCoreRowModel,
   useReactTable,
-  type ColumnDef,
-  type VisibilityState,
 } from "@tanstack/react-table";
 
 import {
@@ -774,9 +774,7 @@ function DataTable<TData, TValue>({
 
   return (
     <div className="rounded-md border">
-      <Table>
-        {/* Header and body rendering */}
-      </Table>
+      <Table>{/* Header and body rendering */}</Table>
     </div>
   );
 }
@@ -785,6 +783,7 @@ export { DataTable };
 ```
 
 **Rules**:
+
 - ONLY uses `getCoreRowModel()` — no `getSortedRowModel`, `getFilteredRowModel`, `getPaginationRowModel`
 - Keeps `columnVisibility` and `rowSelection` (legitimate client-side UI state)
 - Sorting is handled server-side via `SortableHeader` → URL → server re-render
@@ -880,6 +879,7 @@ export { Pagination };
 ```
 
 **Rules**:
+
 - Uses `useQueryState` (single param) not `useQueryStates`
 - Imports `parseAsPage` from `@/lib/parsers/nuqs`
 - Hides when `totalPages <= 1`
@@ -898,23 +898,23 @@ export { Pagination };
 
 Defense in depth: validate at EVERY layer.
 
-| Layer              | Protection                       | Implementation              |
-| ------------------ | -------------------------------- | --------------------------- |
-| Parser level       | Bounds, length, enum validation  | `createParser`, `withDefault` |
-| Schema level       | Zod form validation              | `FilterUsersSchema`         |
-| Server data fetch  | Re-validate all params           | Type guards, `.slice()`, `Math.min()` |
-| Prisma level       | Parameterized queries            | Automatic                   |
-| React level        | XSS prevention                   | Auto-escaping               |
+| Layer             | Protection                      | Implementation                        |
+| ----------------- | ------------------------------- | ------------------------------------- |
+| Parser level      | Bounds, length, enum validation | `createParser`, `withDefault`         |
+| Schema level      | Zod form validation             | `FilterUsersSchema`                   |
+| Server data fetch | Re-validate all params          | Type guards, `.slice()`, `Math.min()` |
+| Prisma level      | Parameterized queries           | Automatic                             |
+| React level       | XSS prevention                  | Auto-escaping                         |
 
-| Attack Vector      | Protection                     |
-| ------------------ | ------------------------------ |
-| SQL Injection      | Prisma parameterized queries   |
-| XSS via search     | React auto-escapes             |
-| Invalid enum value | `parseAsStringLiteral` rejects |
-| Negative page      | `createParser` with min(1)     |
-| Huge page number   | `createParser` with max(1000)  |
-| Long search string | `parseAsSafeSearch` truncates  |
-| Missing params     | `withDefault()`                |
+| Attack Vector      | Protection                                     |
+| ------------------ | ---------------------------------------------- |
+| SQL Injection      | Prisma parameterized queries                   |
+| XSS via search     | React auto-escapes                             |
+| Invalid enum value | `parseAsStringLiteral` rejects                 |
+| Negative page      | `createParser` with min(1)                     |
+| Huge page number   | `createParser` with max(1000)                  |
+| Long search string | `parseAsSafeSearch` truncates                  |
+| Missing params     | `withDefault()`                                |
 | Invalid sortBy     | Server validates against `usersSortableFields` |
 
 ## SEO Configuration (P1)
