@@ -1,43 +1,122 @@
-# Nuqs Filters Creation Rules
+# Filter, Search, Sort & Pagination Rules
 
 ## Context
 
-These rules apply exclusively to creating URL-based filters and pagination using nuqs in Next.js App Router. Filters sync React state with URL query parameters for SEO-friendly, shareable, and bookmarkable filtered pages.
+These rules apply to creating URL-based filters, search, sorting, and pagination using nuqs in Next.js App Router. This is the universal pattern for all filterable/sortable pages. Every layer has a single source of truth with a domino effect: changing one layer automatically propagates to all downstream layers.
 
-## Rules
-
-### 1. File Structure (P0)
-
-- Parsers MUST be defined in the page file and exported for reuse
-- Filter components MUST be in `_components/` folder
-- Filter components MUST use the `-filters.tsx` suffix
+## Source of Truth Hierarchy (P0)
 
 ```
-app/(public)/projects/
-├── page.tsx                              # Parsers + Server Component
-├── loading.tsx                           # Loading state
+Prisma Schema / Stripe / R2        ← External sources of truth
+        ↓
+lib/constants/query.constant.ts    ← Global limits (page, search, sort)
+        ↓
+lib/parsers/nuqs.ts                ← Universal reusable parsers
+        ↓
+lib/constants/{entity}-filters.constant.ts  ← Domain enums, labels, searchParams
+        ↓
+lib/schemas/search/{entity}-filters.schema.ts  ← Zod validation (imports enums from constants)
+        ↓
+app/.../{entity}/_lib/get-{entity}.ts  ← Server data fetching (defense in depth)
+        ↓
+app/.../{entity}/page.tsx          ← Server page (createLoader + render)
+        ↓
+app/.../{entity}/_components/      ← Client components (filters, columns, pagination)
+```
+
+**Key rule**: Enums and filter values are DEFINED in constants, IMPORTED by schemas and components. Never the reverse.
+
+## File Structure (P0)
+
+```
+lib/
+├── constants/
+│   ├── query.constant.ts              # Global pagination/filter/sort limits
+│   └── {entity}-filters.constant.ts   # Domain enums, labels, searchParams
+├── parsers/
+│   └── nuqs.ts                        # Universal reusable parsers + factories
+├── schemas/
+│   └── search/
+│       └── {entity}-filters.schema.ts # Zod validation schema
+app/(protected)/admin/{entity}/
+├── _lib/
+│   └── get-{entity}.ts               # Server-only data fetching
 ├── _components/
-│   ├── project-filters.tsx               # Client Component (filters UI)
-│   ├── project-list.tsx                  # Server Component (list)
-│   ├── project-card.tsx                  # Server Component (card)
-│   ├── project-list-empty.tsx            # Server Component (empty state)
-│   └── project-pagination.tsx            # Client Component (pagination)
+│   ├── {entity}-filters.tsx           # Client filter form
+│   └── {entity}-columns.tsx           # Table columns + SortableHeader
+├── page.tsx                           # Server page
+└── loading.tsx                        # Loading skeleton
+components/
+├── ui/data-table.tsx                  # Generic dumb DataTable renderer
+└── pagination.tsx                     # Generic pagination component
 ```
 
-### 2. Parser Definitions (P0)
+## Layer 1: Global Constants (P0)
 
-- ALWAYS use `createParser` for custom validation (page, search)
-- ALWAYS use `parseAsStringLiteral` for enum values
-- ALWAYS use `withDefault()` to avoid null values
-- ALWAYS validate min/max bounds for integers
-- ALWAYS limit string length for search inputs
-- Parsers MUST be exported from page file for client component reuse
+`lib/constants/query.constant.ts`
+
+Single source of truth for ALL pagination, filter, and sort limits across the app. Changing a value here cascades everywhere.
 
 ```tsx
-import { createLoader, createParser, parseAsStringLiteral } from "nuqs/server";
+function createQueryConfig<
+  TPageSizes extends readonly number[],
+  TOrders extends readonly string[],
+>(config: {
+  pagination: {
+    maxPage: number;
+    pageSizes: TPageSizes;
+    defaultPageSize: TPageSizes[number];
+  };
+  filters: {
+    maxSearchLength: number;
+    maxArrayLength: number;
+  };
+  sorting: {
+    orders: TOrders;
+    defaultOrder: TOrders[number];
+    defaultSortBy: string;
+  };
+}) {
+  return config;
+}
 
-const MAX_PAGE = 1000;
-const MAX_SEARCH_LENGTH = 100;
+const QUERY = createQueryConfig({
+  pagination: {
+    maxPage: 1000,
+    pageSizes: [10, 12, 20, 25, 50, 100] as const,
+    defaultPageSize: 12,
+  },
+  filters: {
+    maxSearchLength: 100,
+    maxArrayLength: 50,
+  },
+  sorting: {
+    orders: ["asc", "desc"] as const,
+    defaultOrder: "desc",
+    defaultSortBy: "createdAt",
+  },
+});
+
+const PAGINATION = QUERY.pagination;
+const FILTERS = QUERY.filters;
+const SORTING = QUERY.sorting;
+
+export { FILTERS, PAGINATION, SORTING };
+```
+
+## Layer 2: Universal Parsers (P0)
+
+`lib/parsers/nuqs.ts`
+
+Reusable parsers and factories. Imports limits from `query.constant.ts`. Does NOT re-export constants.
+
+```tsx
+import { createParser, parseAsStringLiteral } from "nuqs/server";
+
+import { FILTERS, PAGINATION, SORTING } from "@/lib/constants/query.constant";
+
+type PageSize = (typeof PAGINATION.pageSizes)[number];
+type SortOrder = (typeof SORTING.orders)[number];
 
 const parseAsPage = createParser({
   parse(query) {
@@ -45,7 +124,7 @@ const parseAsPage = createParser({
     if (Number.isNaN(parsed) || parsed < 1) {
       return 1;
     }
-    return Math.min(parsed, MAX_PAGE);
+    return Math.min(parsed, PAGINATION.maxPage);
   },
   serialize(value) {
     return String(value);
@@ -54,214 +133,404 @@ const parseAsPage = createParser({
 
 const parseAsSafeSearch = createParser({
   parse(query) {
-    if (!query || query.length > MAX_SEARCH_LENGTH) {
+    if (!query) {
       return "";
     }
-    return query.trim();
+    return query.slice(0, FILTERS.maxSearchLength).trim();
   },
   serialize(value) {
     return value;
   },
 });
 
-const projectStatuses = ["all", "active", "completed", "archived"] as const;
+const parseAsOrder = parseAsStringLiteral(SORTING.orders);
 
-export const projectSearchParams = {
+function createEnumParser<T extends readonly string[]>(enumValues: T) {
+  return parseAsStringLiteral(enumValues);
+}
+
+function createSortByParser<T extends readonly string[]>(allowedFields: T) {
+  return parseAsStringLiteral(allowedFields);
+}
+
+export {
+  createEnumParser,
+  createSortByParser,
+  parseAsOrder,
+  parseAsPage,
+  parseAsSafeSearch,
+};
+
+export type { PageSize, SortOrder };
+```
+
+**Rules**:
+- Parsers MUST NOT re-export constants (consumers import directly from `query.constant.ts`)
+- `parseAsSafeSearch` MUST truncate (`.slice()`) instead of reject long strings
+- Factory functions (`createEnumParser`, `createSortByParser`) wrap `parseAsStringLiteral`
+
+## Layer 3: Domain Configuration (P0)
+
+`lib/constants/{entity}-filters.constant.ts`
+
+Domain-specific enums, labels, and searchParams. Enums are DEFINED here, sourced from Prisma types.
+
+```tsx
+import type { User } from "@/lib/generated/prisma/client";
+import {
+  createEnumParser,
+  createSortByParser,
+  parseAsOrder,
+  parseAsPage,
+  parseAsSafeSearch,
+} from "@/lib/parsers/nuqs";
+
+type UserRole = User["role"];
+type UserRoleFilter = "all" | UserRole;
+type VerificationFilter = "all" | "verified" | "unverified";
+
+const userRoleFilters = ["all", "ADMIN", "CUSTOMER"] as const;
+const verificationFilters = ["all", "verified", "unverified"] as const;
+const usersSortableFields = ["name", "email", "createdAt"] as const;
+
+type UserSortableField = (typeof usersSortableFields)[number];
+
+const roleLabels: Record<UserRoleFilter, string> = {
+  all: "Tous les rôles",
+  ADMIN: "Admin",
+  CUSTOMER: "Client",
+};
+
+const verificationLabels: Record<VerificationFilter, string> = {
+  all: "Tous",
+  verified: "Vérifiés",
+  unverified: "Non vérifiés",
+};
+
+const usersSearchParams = {
   search: parseAsSafeSearch.withDefault(""),
-  status: parseAsStringLiteral(projectStatuses).withDefault("all"),
+  role: createEnumParser(userRoleFilters).withDefault("all"),
+  verified: createEnumParser(verificationFilters).withDefault("all"),
+  sortBy: createSortByParser(usersSortableFields).withDefault("createdAt"),
+  order: parseAsOrder.withDefault("desc"),
   page: parseAsPage.withDefault(1),
 };
 
-const loadSearchParams = createLoader(projectSearchParams);
+function isUserRole(value: string): value is UserRole {
+  return value === "ADMIN" || value === "CUSTOMER";
+}
+
+function isUserRoleFilter(value: string): value is UserRoleFilter {
+  return (userRoleFilters as readonly string[]).includes(value);
+}
+
+function isVerificationFilter(value: string): value is VerificationFilter {
+  return (verificationFilters as readonly string[]).includes(value);
+}
+
+export {
+  isUserRole,
+  isUserRoleFilter,
+  isVerificationFilter,
+  roleLabels,
+  userRoleFilters,
+  usersSearchParams,
+  usersSortableFields,
+  verificationFilters,
+  verificationLabels,
+};
+
+export type {
+  UserRole,
+  UserRoleFilter,
+  UserSortableField,
+  VerificationFilter,
+};
 ```
 
-### 3. Server Component Page (P0)
+**Rules**:
+- Enum arrays MUST use `as const` for literal types
+- `searchParams` MUST include `sortBy`, `order`, and `page` alongside filters
+- Type guards (`isUserRole`, etc.) are defined here for server-side validation
+- Labels are defined here (single source for UI display)
+- Prisma types (`User["role"]`) are the source for role values
 
-- ALWAYS use `createLoader` to parse searchParams server-side
-- ALWAYS re-validate values before Prisma queries (defense in depth)
-- ALWAYS use `prisma.$transaction` for parallel count + findMany
-- ALWAYS use `select` to specify returned fields
-- ALWAYS handle edge cases (page > totalPages)
+## Layer 4: Validation Schema (P0)
+
+`lib/schemas/search/{entity}-filters.schema.ts`
+
+Zod schema for form validation. IMPORTS enums from constants (never defines them).
 
 ```tsx
-import type { Metadata } from "next";
+import { z } from "zod";
 
+import { FILTERS } from "@/lib/constants/query.constant";
 import {
-  type SearchParams,
-  createLoader,
-  createParser,
-  parseAsStringLiteral,
-} from "nuqs/server";
+  userRoleFilters,
+  verificationFilters,
+} from "@/lib/constants/users-filters.constant";
 
+const FilterUsersSchema = z.object({
+  search: z
+    .string()
+    .max(
+      FILTERS.maxSearchLength,
+      `La recherche doit contenir moins de ${FILTERS.maxSearchLength} caractères`
+    )
+    .trim(),
+  role: z.enum(userRoleFilters, {
+    message: "Rôle invalide",
+  }),
+  verified: z.enum(verificationFilters, {
+    message: "Statut de vérification invalide",
+  }),
+});
+
+type FilterUsersSchemaType = z.infer<typeof FilterUsersSchema>;
+
+export { FilterUsersSchema };
+
+export type { FilterUsersSchemaType };
+```
+
+**Rules**:
+- Schema IMPORTS enum arrays from constants (never defines them)
+- `FILTERS.maxSearchLength` comes from `query.constant.ts` (not hardcoded)
+- Schema validates form fields only (not `sortBy`/`order`/`page` — those are validated by parsers)
+
+## Layer 5: Server Data Fetching (P0)
+
+`app/.../{entity}/_lib/get-{entity}.ts`
+
+Server-only function with defense-in-depth validation. Imports constants directly from `query.constant.ts`.
+
+```tsx
+import "server-only";
+
+import { FILTERS, PAGINATION, SORTING } from "@/lib/constants/query.constant";
+import {
+  type UserRoleFilter,
+  type UserSortableField,
+  type VerificationFilter,
+  isUserRole,
+  isUserRoleFilter,
+  isVerificationFilter,
+  usersSortableFields,
+} from "@/lib/constants/users-filters.constant";
+import type { User } from "@/lib/generated/prisma/client";
+import type { SortOrder } from "@/lib/parsers/nuqs";
 import { prisma } from "@/lib/prisma";
 
-import { ProjectFilters } from "@/app/(public)/projects/_components/project-filters";
-import { ProjectList } from "@/app/(public)/projects/_components/project-list";
+const PAGE_SIZE = PAGINATION.defaultPageSize;
 
-const MAX_PAGE = 1000;
-const MAX_SEARCH_LENGTH = 100;
-const PAGE_SIZE = 12;
-
-const parseAsPage = createParser({
-  parse(query) {
-    const parsed = parseInt(query, 10);
-    if (Number.isNaN(parsed) || parsed < 1) {
-      return 1;
-    }
-    return Math.min(parsed, MAX_PAGE);
-  },
-  serialize(value) {
-    return String(value);
-  },
-});
-
-const parseAsSafeSearch = createParser({
-  parse(query) {
-    if (!query || query.length > MAX_SEARCH_LENGTH) {
-      return "";
-    }
-    return query.trim();
-  },
-  serialize(value) {
-    return value;
-  },
-});
-
-const projectStatuses = ["all", "active", "completed", "archived"] as const;
-
-export const projectSearchParams = {
-  search: parseAsSafeSearch.withDefault(""),
-  status: parseAsStringLiteral(projectStatuses).withDefault("all"),
-  page: parseAsPage.withDefault(1),
+type GetUsersFilters = {
+  search: string;
+  role: string;
+  verified: string;
+  sortBy: string;
+  order: string;
+  page: number;
 };
 
-const loadSearchParams = createLoader(projectSearchParams);
-
-export const metadata: Metadata = {
-  title: "Projets - Mon App",
-  description: "Découvrez tous nos projets en cours et terminés.",
-  alternates: {
-    canonical: "/projects",
-  },
+type GetUsersResult = {
+  users: Pick<
+    User,
+    "id" | "name" | "email" | "role" | "emailVerified" | "image" | "createdAt"
+  >[];
+  totalCount: number;
+  totalPages: number;
+  currentPage: number;
 };
 
-type ProjectsPageProps = {
-  searchParams: Promise<SearchParams>;
-};
+async function getUsers(filters: GetUsersFilters): Promise<GetUsersResult> {
+  const safeSearch = filters.search
+    .slice(0, FILTERS.maxSearchLength)
+    .trim();
+  const safePage = Math.max(1, Math.min(filters.page, PAGINATION.maxPage));
 
-export default async function ProjectsPage({
-  searchParams,
-}: ProjectsPageProps) {
-  const { search, status, page } = await loadSearchParams(searchParams);
+  const safeRole: UserRoleFilter = isUserRoleFilter(filters.role)
+    ? filters.role
+    : "all";
 
-  const safeSearch = search.slice(0, MAX_SEARCH_LENGTH).trim();
-  const safePage = Math.max(1, Math.min(page, MAX_PAGE));
-  const safeStatus = projectStatuses.includes(status) ? status : "all";
+  const safeVerified: VerificationFilter = isVerificationFilter(
+    filters.verified
+  )
+    ? filters.verified
+    : "all";
+
+  const safeSortBy: UserSortableField = (
+    usersSortableFields as readonly string[]
+  ).includes(filters.sortBy)
+    ? (filters.sortBy as UserSortableField)
+    : (SORTING.defaultSortBy as UserSortableField);
+
+  const safeOrder: SortOrder = (
+    SORTING.orders as readonly string[]
+  ).includes(filters.order)
+    ? (filters.order as SortOrder)
+    : SORTING.defaultOrder;
 
   const whereClause = {
     ...(safeSearch && {
       OR: [
         { name: { contains: safeSearch, mode: "insensitive" as const } },
-        { description: { contains: safeSearch, mode: "insensitive" as const } },
+        { email: { contains: safeSearch, mode: "insensitive" as const } },
       ],
     }),
-    ...(safeStatus !== "all" && { status: safeStatus }),
+    ...(safeRole !== "all" && isUserRole(safeRole) && { role: safeRole }),
+    ...(safeVerified === "verified" && { emailVerified: true }),
+    ...(safeVerified === "unverified" && { emailVerified: false }),
   };
 
-  const [projects, totalCount] = await prisma.$transaction([
-    prisma.project.findMany({
+  const [users, totalCount] = await prisma.$transaction([
+    prisma.user.findMany({
       where: whereClause,
       select: {
         id: true,
         name: true,
-        description: true,
-        status: true,
+        email: true,
+        role: true,
+        emailVerified: true,
+        image: true,
         createdAt: true,
-        imageUrl: true,
       },
-      orderBy: { createdAt: "desc" },
+      orderBy: { [safeSortBy]: safeOrder },
       skip: (safePage - 1) * PAGE_SIZE,
       take: PAGE_SIZE,
     }),
-    prisma.project.count({ where: whereClause }),
+    prisma.user.count({ where: whereClause }),
   ]);
 
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
 
+  return {
+    users,
+    totalCount,
+    totalPages,
+    currentPage: safePage,
+  };
+}
+
+export { getUsers };
+
+export type { GetUsersFilters, GetUsersResult };
+```
+
+**Rules**:
+- MUST use `import "server-only"` at top
+- MUST re-validate ALL values server-side (defense in depth)
+- MUST use `prisma.$transaction` for parallel `findMany` + `count`
+- MUST use `select` to specify returned fields
+- MUST use `take` (every `findMany` is internally paginated)
+- `orderBy` MUST be dynamic: `{ [safeSortBy]: safeOrder }`
+- Filter types (`GetUsersFilters`) accept `string` for all params (server validates)
+
+## Layer 6: Server Page (P0)
+
+`app/.../{entity}/page.tsx`
+
+Server Component. Uses `createLoader` to parse URL params and passes them to the data fetching function. The domino effect means adding a new param to `usersSearchParams` automatically flows through.
+
+```tsx
+import type { Metadata } from "next";
+
+import { type SearchParams, createLoader } from "nuqs/server";
+
+import { usersSearchParams } from "@/lib/constants/users-filters.constant";
+import { requireAdminVerifiedEmail } from "@/lib/session";
+
+import { Pagination } from "@/components/pagination";
+import { DataTable } from "@/components/ui/data-table";
+
+import {
+  type UserTableData,
+  usersColumns,
+} from "@/app/(protected)/admin/utilisateurs/_components/users-columns";
+import { UsersFilters } from "@/app/(protected)/admin/utilisateurs/_components/users-filters";
+import { getUsers } from "@/app/(protected)/admin/utilisateurs/_lib/get-users";
+
+const loadSearchParams = createLoader(usersSearchParams);
+
+export const metadata: Metadata = {
+  title: "Gestion des utilisateurs",
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
+
+type AdminUsersPageProps = {
+  searchParams: Promise<SearchParams>;
+};
+
+export default async function AdminUsersPage({
+  searchParams,
+}: AdminUsersPageProps) {
+  await requireAdminVerifiedEmail();
+
+  const filters = await loadSearchParams(searchParams);
+
+  const { users, totalCount, totalPages, currentPage } =
+    await getUsers(filters);
+
   return (
-    <main className="container mx-auto px-4 py-8">
-      <header className="mb-8">
-        <h1 className="text-3xl font-bold">Projets</h1>
-        <p className="mt-2 text-gray-600">
-          {totalCount} projet{totalCount > 1 ? "s" : ""} trouvé
+    <main className="flex min-h-screen w-full flex-col gap-6 p-6">
+      <header className="space-y-2">
+        <h1 className="text-3xl font-bold tracking-tight">
+          Gestion des utilisateurs
+        </h1>
+        <p className="text-muted-foreground">
+          {totalCount} utilisateur{totalCount > 1 ? "s" : ""} trouvé
           {totalCount > 1 ? "s" : ""}
         </p>
       </header>
 
-      <ProjectFilters />
+      <UsersFilters />
 
-      <ProjectList
-        projects={projects}
-        currentPage={safePage}
-        totalPages={totalPages}
-      />
+      <section className="space-y-4">
+        <DataTable columns={usersColumns} data={users as UserTableData[]} />
+        <Pagination currentPage={currentPage} totalPages={totalPages} />
+      </section>
     </main>
   );
 }
 ```
 
-### 4. Search Input Debounce (P0)
+**Rules**:
+- `createLoader(usersSearchParams)` is the ONLY place parsers are connected to the page
+- Page does NOT re-validate (that's the server data fetching layer's job)
+- `DataTable` receives raw data and columns — no client-side sorting/filtering
 
-- MUST use debounce for search inputs that trigger database queries
-- MUST use a custom `useDebounce` hook with 500ms delay (default)
-- Prevents database overload from rapid typing
-- Improves UX by reducing unnecessary queries
+## Layer 7: Client Components
 
-Create a reusable hook at `@/hooks/use-debounce.ts`:
+### 7a. Filter Component (P0)
 
-```tsx
-import { useEffect, useState } from "react";
+`_components/{entity}-filters.tsx`
 
-function useDebounce<T>(value: T, delay: number = 500): T {
-  const [debouncedValue, setDebouncedValue] = useState<T>(value);
-
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedValue(value);
-    }, delay);
-
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [value, delay]);
-
-  return debouncedValue;
-}
-
-export { useDebounce };
-```
-
-### 5. Client Component Filters (P0)
-
-- MUST be a Client Component (`"use client"`)
-- MUST use `useQueryStates` for multiple filters
-- MUST use `useTransition` for loading state
-- MUST use `useDebounce` for search inputs (500ms delay)
-- MUST set `shallow: false` to notify server
-- MUST set `history: "push"` for back button support
-- MUST reset page to 1 when filters change
-- MUST type event handlers correctly with `import type`
-- MUST use `null` to remove params from URL (not empty string)
+Uses TanStack Form for local state + Zod validation, and `useQueryStates` for URL sync on submit.
 
 ```tsx
 "use client";
 
-import { type ChangeEvent, useState, useTransition } from "react";
+import { type ChangeEvent, useTransition } from "react";
 
-import { Search, X } from "lucide-react";
-import { createParser, parseAsStringLiteral, useQueryStates } from "nuqs";
+import { useForm } from "@tanstack/react-form";
+import { Filter, Search, X } from "lucide-react";
+import { useQueryStates } from "nuqs";
+
+import {
+  type UserRoleFilter,
+  type VerificationFilter,
+  roleLabels,
+  userRoleFilters,
+  usersSearchParams,
+  verificationFilters,
+  verificationLabels,
+} from "@/lib/constants/users-filters.constant";
+import { FilterUsersSchema } from "@/lib/schemas/search/users-filters.schema";
 
 import { Button } from "@/components/ui/button";
+import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -271,156 +540,262 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import { useDebounce } from "@/hooks/use-debounce";
-
-const MAX_PAGE = 1000;
-const MAX_SEARCH_LENGTH = 100;
-
-const parseAsPage = createParser({
-  parse(query) {
-    const parsed = parseInt(query, 10);
-    if (Number.isNaN(parsed) || parsed < 1) {
-      return 1;
-    }
-    return Math.min(parsed, MAX_PAGE);
-  },
-  serialize(value) {
-    return String(value);
-  },
-});
-
-const parseAsSafeSearch = createParser({
-  parse(query) {
-    if (!query || query.length > MAX_SEARCH_LENGTH) {
-      return "";
-    }
-    return query.trim();
-  },
-  serialize(value) {
-    return value;
-  },
-});
-
-const projectStatuses = ["all", "active", "completed", "archived"] as const;
-
-type ProjectStatus = (typeof projectStatuses)[number];
-
-const statusLabels: Record<ProjectStatus, string> = {
-  all: "Tous les statuts",
-  active: "En cours",
-  completed: "Terminé",
-  archived: "Archivé",
-};
-
-function ProjectFilters() {
+function UsersFilters() {
   const [isLoading, startTransition] = useTransition();
-  const [searchInput, setSearchInput] = useState("");
-  const debouncedSearch = useDebounce(searchInput, 500);
 
-  const [filters, setFilters] = useQueryStates(
-    {
-      search: parseAsSafeSearch.withDefault(""),
-      status: parseAsStringLiteral(projectStatuses).withDefault("all"),
-      page: parseAsPage.withDefault(1),
+  const [urlFilters, setUrlFilters] = useQueryStates(usersSearchParams, {
+    shallow: false,
+    history: "push",
+    startTransition,
+  });
+
+  const formInstance = useForm({
+    defaultValues: {
+      search: urlFilters.search || "",
+      role: urlFilters.role || ("all" as UserRoleFilter),
+      verified: urlFilters.verified || ("all" as VerificationFilter),
     },
-    {
-      shallow: false,
-      startTransition,
-      history: "push",
-    }
-  );
-
-  // Update URL when debounced search changes
-  React.useEffect(() => {
-    setFilters({
-      search: debouncedSearch || null,
-      page: 1,
-    });
-  }, [debouncedSearch, setFilters]);
-
-  function handleSearchChange(event: ChangeEvent<HTMLInputElement>) {
-    setSearchInput(event.target.value);
-  }
-
-  function handleStatusChange(value: ProjectStatus) {
-    setFilters({
-      status: value === "all" ? null : value,
-      page: 1,
-    });
-  }
+    validators: {
+      onSubmit: FilterUsersSchema,
+    },
+    onSubmit: async ({ value }) => {
+      setUrlFilters({
+        search: value.search || null,
+        role: value.role === "all" ? null : value.role,
+        verified: value.verified === "all" ? null : value.verified,
+        page: 1,
+      });
+    },
+  });
 
   function handleClearFilters() {
-    setSearchInput("");
-    setFilters({
+    formInstance.reset();
+    setUrlFilters({
       search: null,
-      status: null,
+      role: null,
+      verified: null,
       page: null,
     });
   }
 
-  const hasActiveFilters = filters.search || filters.status !== "all";
+  const hasActiveFilters =
+    urlFilters.search ||
+    urlFilters.role !== "all" ||
+    urlFilters.verified !== "all";
 
   return (
     <section className="mb-6 space-y-4">
-      <div className="flex flex-col gap-4 sm:flex-row">
-        <div className="relative flex-1">
-          <Search
-            className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400"
-            aria-hidden="true"
-          />
-          <Input
-            type="search"
-            placeholder="Rechercher un projet..."
-            value={searchInput}
-            onChange={handleSearchChange}
-            className="pl-10"
-          />
-        </div>
-
-        <Select value={filters.status} onValueChange={handleStatusChange}>
-          <SelectTrigger className="w-full sm:w-48">
-            <SelectValue placeholder="Statut" />
-          </SelectTrigger>
-          <SelectContent>
-            {projectStatuses.map((status: ProjectStatus) => (
-              <SelectItem key={status} value={status}>
-                {statusLabels[status]}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        {hasActiveFilters && (
-          <Button
-            type="button"
-            variant="outline"
-            onClick={handleClearFilters}
-            className="gap-2"
-          >
-            <X className="h-4 w-4" aria-hidden="true" />
-            Effacer
-          </Button>
-        )}
-      </div>
-
-      {isLoading && (
-        <div className="flex items-center gap-2 text-sm text-gray-500">
-          <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600" />
-          Chargement...
-        </div>
-      )}
+      <form
+        onSubmit={(event: React.FormEvent<HTMLFormElement>) => {
+          event.preventDefault();
+          formInstance.handleSubmit();
+        }}
+        className="flex flex-col gap-4 sm:flex-row"
+      >
+        {/* Search, Select fields, Submit button, Clear button */}
+      </form>
     </section>
   );
 }
 
-export { ProjectFilters };
+export { UsersFilters };
 ```
 
-### 5. Pagination Component (P0)
+**Rules**:
+- MUST use `useTransition` with `startTransition` passed to `useQueryStates`
+- MUST set `shallow: false` and `history: "push"`
+- MUST reset `page: 1` when filters change
+- MUST use `null` to remove params from URL (not empty string)
+- TanStack Form handles local state + Zod validation, `onSubmit` syncs to URL
+- `handleClearFilters` resets both form and URL state
 
-- MUST use `useQueryState` for single page param
-- MUST disable buttons at boundaries
-- MUST show loading state during transition
+### 7b. SortableHeader in Columns (P0)
+
+`_components/{entity}-columns.tsx`
+
+Column definitions with URL-based server-side sorting via `SortableHeader`.
+
+```tsx
+"use client";
+
+import { useTransition } from "react";
+
+import type { ColumnDef } from "@tanstack/react-table";
+import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
+import { useQueryStates } from "nuqs";
+
+import { usersSearchParams } from "@/lib/constants/users-filters.constant";
+import type { User } from "@/lib/generated/prisma/client";
+
+import { Button } from "@/components/ui/button";
+
+export type UserTableData = Pick<
+  User,
+  "id" | "name" | "email" | "role" | "emailVerified" | "image" | "createdAt"
+>;
+
+function SortableHeader({ field, label }: { field: string; label: string }) {
+  const [isLoading, startTransition] = useTransition();
+
+  const [filters, setFilters] = useQueryStates(usersSearchParams, {
+    shallow: false,
+    history: "push",
+    startTransition,
+  });
+
+  const isActive = filters.sortBy === field;
+
+  function handleSort() {
+    if (isActive && filters.order === "desc") {
+      setFilters({
+        sortBy: null,
+        order: null,
+        page: 1,
+      });
+      return;
+    }
+
+    setFilters({
+      sortBy: field,
+      order: isActive && filters.order === "asc" ? "desc" : "asc",
+      page: 1,
+    });
+  }
+
+  const SortIcon = isActive
+    ? filters.order === "asc"
+      ? ArrowUp
+      : ArrowDown
+    : ArrowUpDown;
+
+  return (
+    <Button
+      type="button"
+      variant="ghost"
+      onClick={handleSort}
+      disabled={isLoading}
+    >
+      {label}
+      <SortIcon className="ml-2 h-4 w-4" aria-hidden="true" />
+    </Button>
+  );
+}
+
+const usersColumns: ColumnDef<UserTableData>[] = [
+  {
+    accessorKey: "name",
+    header: () => <SortableHeader field="name" label="Nom" />,
+    cell: ({ row }) => {
+      // Custom cell rendering
+    },
+  },
+  {
+    accessorKey: "email",
+    header: () => <SortableHeader field="email" label="Email" />,
+  },
+  {
+    accessorKey: "createdAt",
+    header: () => (
+      <SortableHeader field="createdAt" label="Date d'inscription" />
+    ),
+    cell: ({ row }) => {
+      const date = new Date(row.original.createdAt);
+      return new Intl.DateTimeFormat("fr-FR", {
+        dateStyle: "medium",
+      }).format(date);
+    },
+  },
+];
+
+export { usersColumns };
+```
+
+**Rules**:
+- `SortableHeader` is defined in the columns file (co-located)
+- Uses `useQueryStates` with the SAME `usersSearchParams` (single source of truth)
+- 3-state sort toggle: `unsorted → asc → desc → reset`
+- Reset sets `sortBy: null, order: null` which falls back to `withDefault()` values
+- `field` prop MUST match a value in `usersSortableFields`
+- Non-sortable columns use plain string header: `header: "Rôle"`
+
+### 7c. DataTable — Dumb Renderer (P0)
+
+`components/ui/data-table.tsx`
+
+Generic table renderer. NO client-side sorting, filtering, or pagination.
+
+```tsx
+"use client";
+
+import { useState } from "react";
+
+import {
+  flexRender,
+  getCoreRowModel,
+  useReactTable,
+  type ColumnDef,
+  type VisibilityState,
+} from "@tanstack/react-table";
+
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+
+type DataTableProps<TData, TValue> = {
+  columns: ColumnDef<TData, TValue>[];
+  data: TData[];
+  emptyMessage?: string;
+};
+
+function DataTable<TData, TValue>({
+  columns,
+  data,
+  emptyMessage = "Aucun résultat",
+}: DataTableProps<TData, TValue>) {
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+  const [rowSelection, setRowSelection] = useState({});
+
+  const table = useReactTable({
+    data,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    onColumnVisibilityChange: setColumnVisibility,
+    onRowSelectionChange: setRowSelection,
+    state: {
+      columnVisibility,
+      rowSelection,
+    },
+  });
+
+  return (
+    <div className="rounded-md border">
+      <Table>
+        {/* Header and body rendering */}
+      </Table>
+    </div>
+  );
+}
+
+export { DataTable };
+```
+
+**Rules**:
+- ONLY uses `getCoreRowModel()` — no `getSortedRowModel`, `getFilteredRowModel`, `getPaginationRowModel`
+- Keeps `columnVisibility` and `rowSelection` (legitimate client-side UI state)
+- Sorting is handled server-side via `SortableHeader` → URL → server re-render
+- Filtering is handled server-side via `UsersFilters` → URL → server re-render
+- Pagination is handled server-side via `Pagination` → URL → server re-render
+
+### 7d. Pagination Component (P0)
+
+`components/pagination.tsx`
+
+Generic reusable pagination. Uses `parseAsPage` from universal parsers.
 
 ```tsx
 "use client";
@@ -428,34 +803,18 @@ export { ProjectFilters };
 import { useTransition } from "react";
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { createParser, useQueryState } from "nuqs";
+import { useQueryState } from "nuqs";
+
+import { parseAsPage } from "@/lib/parsers/nuqs";
 
 import { Button } from "@/components/ui/button";
 
-const MAX_PAGE = 1000;
-
-const parseAsPage = createParser({
-  parse(query) {
-    const parsed = parseInt(query, 10);
-    if (Number.isNaN(parsed) || parsed < 1) {
-      return 1;
-    }
-    return Math.min(parsed, MAX_PAGE);
-  },
-  serialize(value) {
-    return String(value);
-  },
-});
-
-type ProjectPaginationProps = {
+type PaginationProps = {
   currentPage: number;
   totalPages: number;
 };
 
-function ProjectPagination({
-  currentPage,
-  totalPages,
-}: ProjectPaginationProps) {
+function Pagination({ currentPage, totalPages }: PaginationProps) {
   const [isLoading, startTransition] = useTransition();
 
   const [, setPage] = useQueryState(
@@ -477,6 +836,10 @@ function ProjectPagination({
     if (currentPage < totalPages) {
       setPage(currentPage + 1);
     }
+  }
+
+  if (totalPages <= 1) {
+    return null;
   }
 
   return (
@@ -513,87 +876,16 @@ function ProjectPagination({
   );
 }
 
-export { ProjectPagination };
+export { Pagination };
 ```
 
-### 6. SEO Configuration (P1)
+**Rules**:
+- Uses `useQueryState` (single param) not `useQueryStates`
+- Imports `parseAsPage` from `@/lib/parsers/nuqs`
+- Hides when `totalPages <= 1`
+- Disables buttons at boundaries
 
-- Public pages: Define canonical, handle pagination SEO
-- Protected pages: Set `robots: { index: false, follow: false }`
-- Use `generateMetadata` for dynamic SEO based on filters
-
-```tsx
-import type { Metadata } from "next";
-
-import {
-  type SearchParams,
-  createLoader,
-  createParser,
-  parseAsStringLiteral,
-} from "nuqs/server";
-
-import { env } from "@/lib/env";
-
-const projectStatuses = ["all", "active", "completed", "archived"] as const;
-
-const parseAsPage = createParser({
-  parse(query) {
-    const parsed = parseInt(query, 10);
-    if (Number.isNaN(parsed) || parsed < 1) {
-      return 1;
-    }
-    return Math.min(parsed, 1000);
-  },
-  serialize(value) {
-    return String(value);
-  },
-});
-
-export const projectSearchParams = {
-  status: parseAsStringLiteral(projectStatuses).withDefault("all"),
-  page: parseAsPage.withDefault(1),
-};
-
-const loadSearchParams = createLoader(projectSearchParams);
-
-type ProjectsPageProps = {
-  searchParams: Promise<SearchParams>;
-};
-
-export async function generateMetadata({
-  searchParams,
-}: ProjectsPageProps): Promise<Metadata> {
-  const { status, page } = await loadSearchParams(searchParams);
-
-  const baseUrl = env.NEXT_PUBLIC_BASE_URL;
-  const hasFilters = status !== "all" || page > 1;
-
-  const title =
-    status !== "all"
-      ? `Projets ${status} - Page ${page}`
-      : page > 1
-        ? `Projets - Page ${page}`
-        : "Projets";
-
-  return {
-    title,
-    description: "Découvrez tous nos projets en cours et terminés.",
-    alternates: {
-      canonical: hasFilters ? undefined : "/projects",
-    },
-    robots: {
-      index: page <= 10,
-      follow: true,
-    },
-    other: {
-      ...(page > 1 && { "link-prev": `${baseUrl}/projects?page=${page - 1}` }),
-      "link-next": `${baseUrl}/projects?page=${page + 1}`,
-    },
-  };
-}
-```
-
-### 7. Options Configuration (P0)
+## Nuqs Options (P0)
 
 | Option            | Value   | Reason                                      |
 | ----------------- | ------- | ------------------------------------------- |
@@ -602,95 +894,115 @@ export async function generateMetadata({
 | `startTransition` | Used    | Shows loading state during server re-render |
 | `withDefault()`   | Always  | Prevents null values, ensures type safety   |
 
-### 8. Security Validation (P0)
+## Security Validation (P0)
 
-| Attack Vector      | Protection                     | Implementation |
-| ------------------ | ------------------------------ | -------------- |
-| SQL Injection      | Prisma parameterized queries   | Automatic      |
-| XSS via search     | React auto-escapes             | Automatic      |
-| Invalid enum value | `parseAsStringLiteral` rejects | Parser level   |
-| Negative page      | `createParser` with min(1)     | Parser level   |
-| Huge page number   | `createParser` with max(1000)  | Parser level   |
-| Long search string | `createParser` with slice(100) | Parser level   |
-| Missing params     | `withDefault()`                | Parser level   |
-| Page > totalPages  | Server-side check              | Page component |
+Defense in depth: validate at EVERY layer.
 
-## Available Parsers
+| Layer              | Protection                       | Implementation              |
+| ------------------ | -------------------------------- | --------------------------- |
+| Parser level       | Bounds, length, enum validation  | `createParser`, `withDefault` |
+| Schema level       | Zod form validation              | `FilterUsersSchema`         |
+| Server data fetch  | Re-validate all params           | Type guards, `.slice()`, `Math.min()` |
+| Prisma level       | Parameterized queries            | Automatic                   |
+| React level        | XSS prevention                   | Auto-escaping               |
 
-| Parser                 | Usage                                 | Example                                     |
-| ---------------------- | ------------------------------------- | ------------------------------------------- |
-| `parseAsString`        | Basic string                          | `parseAsString.withDefault("")`             |
-| `parseAsInteger`       | Integer (use createParser for bounds) | `parseAsInteger.withDefault(1)`             |
-| `parseAsFloat`         | Float number                          | `parseAsFloat.withDefault(0)`               |
-| `parseAsBoolean`       | Boolean                               | `parseAsBoolean.withDefault(false)`         |
-| `parseAsStringLiteral` | Enum values                           | `parseAsStringLiteral(["a", "b"] as const)` |
-| `parseAsNumberLiteral` | Number enum                           | `parseAsNumberLiteral([1, 2, 3] as const)`  |
-| `parseAsArrayOf`       | Comma-separated array                 | `parseAsArrayOf(parseAsInteger)`            |
-| `parseAsIsoDate`       | Date (YYYY-MM-DD)                     | `parseAsIsoDate`                            |
-| `parseAsIsoDateTime`   | DateTime                              | `parseAsIsoDateTime`                        |
-| `parseAsTimestamp`     | Timestamp (ms)                        | `parseAsTimestamp`                          |
-| `createParser`         | Custom validation                     | See examples above                          |
+| Attack Vector      | Protection                     |
+| ------------------ | ------------------------------ |
+| SQL Injection      | Prisma parameterized queries   |
+| XSS via search     | React auto-escapes             |
+| Invalid enum value | `parseAsStringLiteral` rejects |
+| Negative page      | `createParser` with min(1)     |
+| Huge page number   | `createParser` with max(1000)  |
+| Long search string | `parseAsSafeSearch` truncates  |
+| Missing params     | `withDefault()`                |
+| Invalid sortBy     | Server validates against `usersSortableFields` |
+
+## SEO Configuration (P1)
+
+- Public pages: Define canonical, handle pagination SEO
+- Protected pages: Set `robots: { index: false, follow: false }`
+- Index pages 1-10 only for public pages
 
 ## Anti-Patterns
 
 ```tsx
-// ❌ Wrong: Using parseAsInteger without bounds
-const page = parseAsInteger.withDefault(1);
+// ❌ Wrong: Parsers defined inline in page file
+// Parsers MUST be in lib/parsers/nuqs.ts
+export const projectSearchParams = {
+  page: createParser({ ... }).withDefault(1),
+};
 
-// ❌ Wrong: Using parseAsString without length limit for search
-const search = parseAsString.withDefault("");
+// ❌ Wrong: Enums defined in schema, imported by constants
+// Enums MUST be in constants, imported by schema
+// lib/schemas/search/users-filters.schema.ts
+const userRoleFilters = ["all", "ADMIN", "CUSTOMER"] as const; // ❌ Should be in constants
 
-// ❌ Wrong: Not using debounce for search inputs (overloads database)
-function handleSearchChange(event: ChangeEvent<HTMLInputElement>) {
-  setFilters({ search: event.target.value, page: 1 });
+// ❌ Wrong: Parsers re-exporting constants
+// lib/parsers/nuqs.ts
+export const MAX_PAGE = PAGINATION.maxPage; // ❌ Consumers import from query.constant.ts
+
+// ❌ Wrong: parseAsSafeSearch rejecting long strings
+parse(query) {
+  if (!query || query.length > MAX_SEARCH_LENGTH) {
+    return ""; // ❌ Rejects. Should truncate with .slice()
+  }
 }
 
-// ❌ Wrong: shallow: true (server won't re-fetch)
-useQueryStates(parsers, { shallow: true });
+// ❌ Wrong: Client-side sorting in DataTable
+useReactTable({
+  getSortedRowModel: getSortedRowModel(), // ❌ Server handles sorting
+  getFilteredRowModel: getFilteredRowModel(), // ❌ Server handles filtering
+  getPaginationRowModel: getPaginationRowModel(), // ❌ Server handles pagination
+});
 
-// ❌ Wrong: history: "replace" for main filters (breaks back button)
-useQueryStates(parsers, { history: "replace" });
+// ❌ Wrong: Not using useTransition
+const [filters, setFilters] = useQueryStates(parsers, { shallow: false });
+// ❌ No loading feedback
+
+// ❌ Wrong: shallow: true
+useQueryStates(parsers, { shallow: true }); // ❌ Server won't re-fetch
+
+// ❌ Wrong: history: "replace"
+useQueryStates(parsers, { history: "replace" }); // ❌ Breaks back button
 
 // ❌ Wrong: Not resetting page when filters change
-function handleStatusChange(value: string) {
-  setFilters({ status: value });
-}
+setFilters({ role: value }); // ❌ Missing page: 1
 
 // ❌ Wrong: Using empty string instead of null to clear
-setFilters({ search: "" });
-
-// ❌ Wrong: Not using useTransition (no loading state)
-const [filters, setFilters] = useQueryStates(parsers, { shallow: false });
-
-// ❌ Wrong: Not typing event handlers
-function handleChange(event) {
-  setFilters({ search: event.target.value });
-}
+setFilters({ search: "" }); // ❌ Use null
 
 // ❌ Wrong: Trusting parsed values without server-side re-validation
 const { page } = await loadSearchParams(searchParams);
-prisma.project.findMany({ skip: (page - 1) * PAGE_SIZE });
+prisma.findMany({ skip: (page - 1) * PAGE_SIZE }); // ❌ Must re-validate
 
-// ❌ Wrong: Not using $transaction for count + findMany
-const projects = await prisma.project.findMany({ ... });
-const totalCount = await prisma.project.count({ ... });
+// ❌ Wrong: findMany without select or take
+prisma.user.findMany({ where: whereClause }); // ❌ Must use select + take
 
-// ❌ Wrong: Not using select in Prisma queries
-prisma.project.findMany({ where: whereClause });
+// ❌ Wrong: Sequential count + findMany
+const users = await prisma.user.findMany({ ... });
+const totalCount = await prisma.user.count({ ... }); // ❌ Use $transaction
+
+// ❌ Wrong: 2-state sort toggle (no reset)
+function handleSort() {
+  const nextOrder = isActive && filters.order === "asc" ? "desc" : "asc";
+  setFilters({ sortBy: field, order: nextOrder }); // ❌ No reset path
+}
+
+// ❌ Wrong: Data fetching imports constants from parsers
+import { MAX_PAGE } from "@/lib/parsers/nuqs"; // ❌ Import from query.constant.ts
 ```
 
 ## Key Principles
 
-1. **Defense in depth**: Validate at parser level AND server level
-2. **Type safety**: Always type event handlers with `import type`
-3. **SEO friendly**: `shallow: false` + `history: "push"` + canonical URLs
-4. **Performance**: `$transaction` for parallel queries, `select` for fields, `useDebounce` for search
-5. **Database protection**: Always debounce search inputs (500ms) to prevent query overload
-6. **UX**: `useTransition` for loading states, reset page on filter change
-7. **Clean URLs**: Use `null` to remove params, not empty strings
-8. **Bounds validation**: Always limit page numbers and string lengths
-9. **Consistent parsers**: Same parser definitions in page and components
-
-```
-
-```
+1. **Single source of truth**: Prisma → Constants → Parsers → Domain Config → Schema → Components
+2. **Domino effect**: Changing one layer propagates automatically to downstream layers
+3. **Defense in depth**: Validate at parser, schema, AND server levels
+4. **Server-side everything**: Sort, filter, paginate on server — DataTable is a dumb renderer
+5. **3-state sort toggle**: `unsorted → asc → desc → reset` (never 2-state)
+6. **`useTransition` everywhere**: All URL mutations use `startTransition` for loading feedback
+7. **Enums in constants**: Defined in `{entity}-filters.constant.ts`, imported by schemas
+8. **Parsers don't re-export**: Consumers import constants directly from `query.constant.ts`
+9. **Truncate, don't reject**: `parseAsSafeSearch` uses `.slice()` not conditional rejection
+10. **`null` to clear**: Remove params from URL with `null`, not empty strings
+11. **`select` + `take` always**: Every Prisma `findMany` must have both
+12. **`$transaction` for parallel**: Count + findMany in a single transaction

@@ -1,8 +1,12 @@
 "use client";
 
-import type { ColumnDef } from "@tanstack/react-table";
-import { ArrowUpDown } from "lucide-react";
+import { useTransition } from "react";
 
+import type { ColumnDef } from "@tanstack/react-table";
+import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
+import { useQueryStates } from "nuqs";
+
+import { usersSearchParams } from "@/lib/constants/users-filters.constant";
 import type { User } from "@/lib/generated/prisma/client";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -16,21 +20,57 @@ export type UserTableData = Pick<
   "id" | "name" | "email" | "role" | "emailVerified" | "image" | "createdAt"
 >;
 
+function SortableHeader({ field, label }: { field: string; label: string }) {
+  const [isLoading, startTransition] = useTransition();
+
+  const [filters, setFilters] = useQueryStates(usersSearchParams, {
+    shallow: false,
+    history: "push",
+    startTransition,
+  });
+
+  const isActive = filters.sortBy === field;
+
+  function handleSort() {
+    if (isActive && filters.order === "desc") {
+      setFilters({
+        sortBy: null,
+        order: null,
+        page: 1,
+      });
+      return;
+    }
+
+    setFilters({
+      sortBy: field,
+      order: isActive && filters.order === "asc" ? "desc" : "asc",
+      page: 1,
+    });
+  }
+
+  const SortIcon = isActive
+    ? filters.order === "asc"
+      ? ArrowUp
+      : ArrowDown
+    : ArrowUpDown;
+
+  return (
+    <Button
+      type="button"
+      variant="ghost"
+      onClick={handleSort}
+      disabled={isLoading}
+    >
+      {label}
+      <SortIcon className="ml-2 h-4 w-4" aria-hidden="true" />
+    </Button>
+  );
+}
+
 const usersColumns: ColumnDef<UserTableData>[] = [
   {
     accessorKey: "name",
-    header: ({ column }) => {
-      return (
-        <Button
-          type="button"
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Nom
-          <ArrowUpDown className="ml-2 h-4 w-4" aria-hidden="true" />
-        </Button>
-      );
-    },
+    header: () => <SortableHeader field="name" label="Nom" />,
     cell: ({ row }) => {
       const user = row.original;
       return (
@@ -49,24 +89,13 @@ const usersColumns: ColumnDef<UserTableData>[] = [
   },
   {
     accessorKey: "email",
-    header: ({ column }) => {
-      return (
-        <Button
-          type="button"
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Email
-          <ArrowUpDown className="ml-2 h-4 w-4" aria-hidden="true" />
-        </Button>
-      );
-    },
+    header: () => <SortableHeader field="email" label="Email" />,
   },
   {
     accessorKey: "role",
     header: "Rôle",
     cell: ({ row }) => {
-      const role = row.getValue("role") as string;
+      const role = row.original.role;
       return (
         <Badge variant={role === "ADMIN" ? "default" : "secondary"}>
           {role === "ADMIN" ? "Admin" : "Client"}
@@ -78,7 +107,7 @@ const usersColumns: ColumnDef<UserTableData>[] = [
     accessorKey: "emailVerified",
     header: "Email vérifié",
     cell: ({ row }) => {
-      const verified = row.getValue("emailVerified") as boolean;
+      const verified = row.original.emailVerified;
       return (
         <Badge variant={verified ? "default" : "outline"}>
           {verified ? "Vérifié" : "Non vérifié"}
@@ -88,20 +117,11 @@ const usersColumns: ColumnDef<UserTableData>[] = [
   },
   {
     accessorKey: "createdAt",
-    header: ({ column }) => {
-      return (
-        <Button
-          type="button"
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Date d'inscription
-          <ArrowUpDown className="ml-2 h-4 w-4" aria-hidden="true" />
-        </Button>
-      );
-    },
+    header: () => (
+      <SortableHeader field="createdAt" label="Date d'inscription" />
+    ),
     cell: ({ row }) => {
-      const date = new Date(row.getValue("createdAt"));
+      const date = new Date(row.original.createdAt);
       return new Intl.DateTimeFormat("fr-FR", {
         dateStyle: "medium",
       }).format(date);

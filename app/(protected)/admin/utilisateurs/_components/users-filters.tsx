@@ -1,11 +1,24 @@
 "use client";
 
-import { useEffect, useState, useTransition, type ChangeEvent } from "react";
+import { type ChangeEvent, type FormEvent, useTransition } from "react";
 
-import { Search, X } from "lucide-react";
-import { createParser, parseAsStringLiteral, useQueryStates } from "nuqs";
+import { useForm } from "@tanstack/react-form";
+import { Filter, Search, X } from "lucide-react";
+import { useQueryStates } from "nuqs";
+
+import {
+  type UserRoleFilter,
+  type VerificationFilter,
+  roleLabels,
+  userRoleFilters,
+  usersSearchParams,
+  verificationFilters,
+  verificationLabels,
+} from "@/lib/constants/users-filters.constant";
+import { FilterUsersSchema } from "@/lib/schemas/search/users-filters.schema";
 
 import { Button } from "@/components/ui/button";
+import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -15,102 +28,37 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import { useDebounce } from "@/hooks/use-debounce";
-
-const MAX_PAGE = 1000;
-const MAX_SEARCH_LENGTH = 100;
-
-const parseAsPage = createParser({
-  parse(query) {
-    const parsed = parseInt(query, 10);
-    if (Number.isNaN(parsed) || parsed < 1) {
-      return 1;
-    }
-    return Math.min(parsed, MAX_PAGE);
-  },
-  serialize(value) {
-    return String(value);
-  },
-});
-
-const parseAsSafeSearch = createParser({
-  parse(query) {
-    if (!query || query.length > MAX_SEARCH_LENGTH) {
-      return "";
-    }
-    return query.trim();
-  },
-  serialize(value) {
-    return value;
-  },
-});
-
-const userRoles = ["all", "ADMIN", "CUSTOMER"] as const;
-const userVerificationStatus = ["all", "verified", "unverified"] as const;
-
-type UserRole = (typeof userRoles)[number];
-type UserVerificationStatus = (typeof userVerificationStatus)[number];
-
-const roleLabels: Record<UserRole, string> = {
-  all: "Tous les rôles",
-  ADMIN: "Admin",
-  CUSTOMER: "Client",
-};
-
-const verificationLabels: Record<UserVerificationStatus, string> = {
-  all: "Tous",
-  verified: "Vérifiés",
-  unverified: "Non vérifiés",
-};
-
 function UsersFilters() {
   const [isLoading, startTransition] = useTransition();
-  const [searchInput, setSearchInput] = useState("");
 
-  const debouncedSearch = useDebounce(searchInput, 500);
+  const [urlFilters, setUrlFilters] = useQueryStates(usersSearchParams, {
+    shallow: false,
+    history: "push",
+    startTransition,
+  });
 
-  const [filters, setFilters] = useQueryStates(
-    {
-      search: parseAsSafeSearch.withDefault(""),
-      role: parseAsStringLiteral(userRoles).withDefault("all"),
-      verified: parseAsStringLiteral(userVerificationStatus).withDefault("all"),
-      page: parseAsPage.withDefault(1),
+  const formInstance = useForm({
+    defaultValues: {
+      search: urlFilters.search || "",
+      role: urlFilters.role || ("all" as UserRoleFilter),
+      verified: urlFilters.verified || ("all" as VerificationFilter),
     },
-    {
-      shallow: false,
-      startTransition,
-      history: "push",
-    }
-  );
-
-  useEffect(() => {
-    setFilters({
-      search: debouncedSearch || null,
-      page: 1,
-    });
-  }, [debouncedSearch, setFilters]);
-
-  function handleSearchChange(event: ChangeEvent<HTMLInputElement>) {
-    setSearchInput(event.target.value);
-  }
-
-  function handleRoleChange(value: UserRole) {
-    setFilters({
-      role: value === "all" ? null : value,
-      page: 1,
-    });
-  }
-
-  function handleVerifiedChange(value: UserVerificationStatus) {
-    setFilters({
-      verified: value === "all" ? null : value,
-      page: 1,
-    });
-  }
+    validators: {
+      onSubmit: FilterUsersSchema,
+    },
+    onSubmit: async ({ value }) => {
+      setUrlFilters({
+        search: value.search || null,
+        role: value.role === "all" ? null : value.role,
+        verified: value.verified === "all" ? null : value.verified,
+        page: 1,
+      });
+    },
+  });
 
   function handleClearFilters() {
-    setSearchInput("");
-    setFilters({
+    formInstance.reset();
+    setUrlFilters({
       search: null,
       role: null,
       verified: null,
@@ -119,50 +67,133 @@ function UsersFilters() {
   }
 
   const hasActiveFilters =
-    filters.search || filters.role !== "all" || filters.verified !== "all";
+    urlFilters.search ||
+    urlFilters.role !== "all" ||
+    urlFilters.verified !== "all";
 
   return (
     <section className="mb-6 space-y-4">
-      <div className="flex flex-col gap-4 sm:flex-row">
-        <div className="relative flex-1">
-          <Search
-            className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400"
-            aria-hidden="true"
-          />
-          <Input
-            type="search"
-            placeholder="Rechercher par nom ou email..."
-            value={searchInput}
-            onChange={handleSearchChange}
-            className="pl-10"
-          />
-        </div>
+      <form
+        onSubmit={(event: FormEvent<HTMLFormElement>) => {
+          event.preventDefault();
+          formInstance.handleSubmit();
+        }}
+        className="flex flex-col gap-4 sm:flex-row"
+      >
+        <formInstance.Field
+          name="search"
+          children={(field) => {
+            const isInvalid =
+              field.state.meta.isTouched && !field.state.meta.isValid;
 
-        <Select value={filters.role} onValueChange={handleRoleChange}>
-          <SelectTrigger className="w-full sm:w-48">
-            <SelectValue placeholder="Rôle" />
-          </SelectTrigger>
-          <SelectContent>
-            {userRoles.map((role: UserRole) => (
-              <SelectItem key={role} value={role}>
-                {roleLabels[role]}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+            return (
+              <Field data-invalid={isInvalid} className="relative flex-1">
+                <div className="relative">
+                  <Search
+                    className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400"
+                    aria-hidden="true"
+                  />
+                  <Input
+                    type="search"
+                    placeholder="Rechercher par nom ou email..."
+                    className="pl-10"
+                    name={field.name}
+                    value={field.state.value}
+                    onBlur={field.handleBlur}
+                    onChange={(event: ChangeEvent<HTMLInputElement>) =>
+                      field.handleChange(event.target.value)
+                    }
+                    aria-invalid={isInvalid}
+                  />
+                </div>
+                {isInvalid && <FieldError errors={field.state.meta.errors} />}
+              </Field>
+            );
+          }}
+        />
 
-        <Select value={filters.verified} onValueChange={handleVerifiedChange}>
-          <SelectTrigger className="w-full sm:w-48">
-            <SelectValue placeholder="Statut" />
-          </SelectTrigger>
-          <SelectContent>
-            {userVerificationStatus.map((status: UserVerificationStatus) => (
-              <SelectItem key={status} value={status}>
-                {verificationLabels[status]}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <formInstance.Field
+          name="role"
+          children={(field) => {
+            const isInvalid =
+              field.state.meta.isTouched && !field.state.meta.isValid;
+
+            return (
+              <Field data-invalid={isInvalid} className="w-full sm:w-48">
+                <FieldLabel htmlFor="filter-role" className="sr-only">
+                  Rôle
+                </FieldLabel>
+                <Select
+                  value={field.state.value}
+                  onValueChange={(value: string) =>
+                    field.handleChange(value as UserRoleFilter)
+                  }
+                >
+                  <SelectTrigger id="filter-role">
+                    <SelectValue placeholder="Rôle" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {userRoleFilters.map((role: UserRoleFilter) => (
+                      <SelectItem key={role} value={role}>
+                        {roleLabels[role]}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {isInvalid && <FieldError errors={field.state.meta.errors} />}
+              </Field>
+            );
+          }}
+        />
+
+        <formInstance.Field
+          name="verified"
+          children={(field) => {
+            const isInvalid =
+              field.state.meta.isTouched && !field.state.meta.isValid;
+
+            return (
+              <Field data-invalid={isInvalid} className="w-full sm:w-48">
+                <FieldLabel htmlFor="filter-verified" className="sr-only">
+                  Statut
+                </FieldLabel>
+                <Select
+                  value={field.state.value}
+                  onValueChange={(value: string) =>
+                    field.handleChange(value as VerificationFilter)
+                  }
+                >
+                  <SelectTrigger id="filter-verified">
+                    <SelectValue placeholder="Statut" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {verificationFilters.map((status: VerificationFilter) => (
+                      <SelectItem key={status} value={status}>
+                        {verificationLabels[status]}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {isInvalid && <FieldError errors={field.state.meta.errors} />}
+              </Field>
+            );
+          }}
+        />
+
+        <formInstance.Subscribe
+          selector={(state) => [state.canSubmit, state.isSubmitting]}
+        >
+          {([canSubmit, isSubmitting]) => (
+            <Button
+              type="submit"
+              disabled={!canSubmit || isSubmitting || isLoading}
+              className="gap-2"
+            >
+              <Filter className="h-4 w-4" aria-hidden="true" />
+              {isLoading ? "Chargement..." : "Appliquer"}
+            </Button>
+          )}
+        </formInstance.Subscribe>
 
         {hasActiveFilters && (
           <Button
@@ -175,14 +206,7 @@ function UsersFilters() {
             Effacer
           </Button>
         )}
-      </div>
-
-      {isLoading && (
-        <div className="flex items-center gap-2 text-sm text-gray-500">
-          <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600" />
-          Chargement...
-        </div>
-      )}
+      </form>
     </section>
   );
 }

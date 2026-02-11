@@ -3,26 +3,11 @@
 import { useTransition } from "react";
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { createParser, useQueryState } from "nuqs";
+import { useQueryState } from "nuqs";
+
+import { parseAsPage } from "@/lib/parsers/nuqs";
 
 import { Button } from "@/components/ui/button";
-
-const MAX_PAGE = 1000;
-
-const parseAsPage = createParser({
-  parse(query) {
-    const parsed = parseInt(query, 10);
-
-    if (Number.isNaN(parsed) || parsed < 1) {
-      return 1;
-    }
-
-    return Math.min(parsed, MAX_PAGE);
-  },
-  serialize(value) {
-    return String(value);
-  },
-});
 
 type PaginationProps = {
   currentPage: number;

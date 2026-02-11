@@ -629,49 +629,241 @@ export { JobListEmpty };
 
 ### Table Components
 
-`app/(protected)/admin/_components/users-columns.tsx`:
+**DataTable is a dumb renderer**: it ONLY uses `getCoreRowModel()`. No client-side sorting, filtering, or pagination. All data operations happen server-side via URL params.
+
+**SortableHeader** provides 3-state sort toggle (asc → desc → reset) via `useQueryStates`. When reset, `sortBy` and `order` are set to `null`, falling back to `withDefault()` defaults.
+
+#### Columns with SortableHeader
+
+`app/(protected)/admin/utilisateurs/_components/users-columns.tsx`:
 
 ```tsx
 "use client";
 
+import { useTransition } from "react";
+
 import type { ColumnDef } from "@tanstack/react-table";
+import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
+import { useQueryStates } from "nuqs";
 
-import type { User } from "@/types/user";
+import { usersSearchParams } from "@/lib/constants/users-filters.constant";
+import type { User } from "@/lib/generated/prisma/client";
 
-const usersColumns: ColumnDef<User>[] = [
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+
+export type UserTableData = Pick<
+  User,
+  "id" | "name" | "email" | "role" | "createdAt"
+>;
+
+function SortableHeader({ field, label }: { field: string; label: string }) {
+  const [isLoading, startTransition] = useTransition();
+
+  const [filters, setFilters] = useQueryStates(usersSearchParams, {
+    shallow: false,
+    history: "push",
+    startTransition,
+  });
+
+  const isActive = filters.sortBy === field;
+
+  function handleSort() {
+    if (isActive && filters.order === "desc") {
+      setFilters({
+        sortBy: null,
+        order: null,
+        page: 1,
+      });
+      return;
+    }
+
+    setFilters({
+      sortBy: field,
+      order: isActive && filters.order === "asc" ? "desc" : "asc",
+      page: 1,
+    });
+  }
+
+  const SortIcon = isActive
+    ? filters.order === "asc"
+      ? ArrowUp
+      : ArrowDown
+    : ArrowUpDown;
+
+  return (
+    <Button
+      type="button"
+      variant="ghost"
+      onClick={handleSort}
+      disabled={isLoading}
+    >
+      {label}
+      <SortIcon className="ml-2 h-4 w-4" aria-hidden="true" />
+    </Button>
+  );
+}
+
+const usersColumns: ColumnDef<UserTableData>[] = [
   {
     accessorKey: "name",
-    header: "Nom",
+    header: () => <SortableHeader field="name" label="Nom" />,
   },
   {
     accessorKey: "email",
-    header: "Email",
+    header: () => <SortableHeader field="email" label="Email" />,
   },
   {
     accessorKey: "role",
     header: "Rôle",
+    cell: ({ row }) => {
+      const role = row.original.role;
+      return (
+        <Badge variant={role === "ADMIN" ? "default" : "secondary"}>
+          {role === "ADMIN" ? "Admin" : "Client"}
+        </Badge>
+      );
+    },
+  },
+  {
+    accessorKey: "createdAt",
+    header: () => (
+      <SortableHeader field="createdAt" label="Date d'inscription" />
+    ),
+    cell: ({ row }) => {
+      const date = new Date(row.original.createdAt);
+      return new Intl.DateTimeFormat("fr-FR", {
+        dateStyle: "medium",
+      }).format(date);
+    },
   },
 ];
 
 export { usersColumns };
 ```
 
-`app/(protected)/admin/_components/users-table.tsx`:
+#### DataTable (Dumb Renderer)
+
+`components/ui/data-table.tsx`:
+
+```tsx
+"use client";
+
+import { useState } from "react";
+
+import {
+  flexRender,
+  getCoreRowModel,
+  useReactTable,
+  type ColumnDef,
+  type VisibilityState,
+} from "@tanstack/react-table";
+
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+
+type DataTableProps<TData, TValue> = {
+  columns: ColumnDef<TData, TValue>[];
+  data: TData[];
+  emptyMessage?: string;
+};
+
+function DataTable<TData, TValue>({
+  columns,
+  data,
+  emptyMessage = "Aucun résultat",
+}: DataTableProps<TData, TValue>) {
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+  const [rowSelection, setRowSelection] = useState({});
+
+  const table = useReactTable({
+    data,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    onColumnVisibilityChange: setColumnVisibility,
+    onRowSelectionChange: setRowSelection,
+    state: {
+      columnVisibility,
+      rowSelection,
+    },
+  });
+
+  return (
+    <div className="rounded-md border">
+      <Table>
+        <TableHeader>
+          {table.getHeaderGroups().map((headerGroup) => (
+            <TableRow key={headerGroup.id}>
+              {headerGroup.headers.map((header) => (
+                <TableHead key={header.id}>
+                  {header.isPlaceholder
+                    ? null
+                    : flexRender(
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
+                </TableHead>
+              ))}
+            </TableRow>
+          ))}
+        </TableHeader>
+        <TableBody>
+          {table.getRowModel().rows?.length ? (
+            table.getRowModel().rows.map((row) => (
+              <TableRow
+                key={row.id}
+                data-state={row.getIsSelected() && "selected"}
+              >
+                {row.getVisibleCells().map((cell) => (
+                  <TableCell key={cell.id}>
+                    {flexRender(
+                      cell.column.columnDef.cell,
+                      cell.getContext()
+                    )}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))
+          ) : (
+            <TableRow>
+              <TableCell
+                colSpan={columns.length}
+                className="h-24 text-center"
+              >
+                {emptyMessage}
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
+    </div>
+  );
+}
+
+export { DataTable };
+```
+
+#### Table Wrapper (Page-Specific)
+
+`app/(protected)/admin/utilisateurs/_components/users-table.tsx`:
 
 ```tsx
 "use client";
 
 import { DataTable } from "@/components/ui/data-table";
 
-import { usersColumns } from "@/app/(protected)/admin/_components/users-columns";
+import {
+  usersColumns,
+  type UserTableData,
+} from "@/app/(protected)/admin/utilisateurs/_components/users-columns";
 
-import type { User } from "@/types/user";
-
-type UsersTableProps = {
-  users: User[];
-};
-
-function UsersTable({ users }: UsersTableProps) {
+function UsersTable({ users }: { users: UserTableData[] }) {
   return <DataTable columns={usersColumns} data={users} />;
 }
 

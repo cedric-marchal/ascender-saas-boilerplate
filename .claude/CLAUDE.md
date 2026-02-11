@@ -26,6 +26,26 @@ Goal: maximize signal, minimize tokens, avoid unnecessary code dumps.
 - **Storage**: Cloudflare R2 + Sharp (image optimization)
 - **Deployment**: Vercel
 
+## Source of Truth Hierarchy (P0)
+
+All data flows top-down. Changing one layer cascades to all downstream layers.
+
+```
+Prisma Schema / Stripe / R2        ← External sources of truth
+        ↓
+lib/constants/query.constant.ts    ← Global limits (page, search, sort)
+        ↓
+lib/parsers/nuqs.ts                ← Universal reusable parsers
+        ↓
+lib/constants/{entity}-filters.constant.ts  ← Domain enums, labels, searchParams
+        ↓
+lib/schemas/search/{entity}-filters.schema.ts  ← Zod validation
+        ↓
+app/.../_lib/get-{entity}.ts       ← Server data fetching
+        ↓
+app/.../page.tsx → _components/    ← Page + Client components
+```
+
 ## Project Structure
 
 ```
@@ -54,12 +74,21 @@ Goal: maximize signal, minimize tokens, avoid unnecessary code dumps.
 │   │       │   ├── modals/
 │   │       │   └── forms/
 │   │       └── [page]/
+│   │           ├── _lib/            # Server-only data fetching
+│   │           └── _components/     # Page-specific components
 │   └── api/                         # API Routes
 ├── components/
-│   ├── ui/                          # Shadcn/ui components
+│   ├── ui/                          # Shadcn/ui components (DataTable = dumb renderer)
+│   ├── pagination.tsx               # Generic pagination component
 │   └── emails/                      # Email templates
 ├── lib/
+│   ├── constants/                   # Global + domain-specific constants
+│   │   ├── query.constant.ts        # Pagination, filter, sort limits
+│   │   └── {entity}-filters.constant.ts  # Domain enums, labels, searchParams
+│   ├── parsers/
+│   │   └── nuqs.ts                  # Universal reusable nuqs parsers
 │   ├── schemas/                     # Zod schemas
+│   │   └── search/                  # Filter validation schemas
 │   ├── auth.ts
 │   ├── prisma.ts
 │   ├── env.ts
@@ -903,6 +932,22 @@ export { ContactForm };
 
 ## Nuqs Filter Guidelines
 
+See `filter.md` for the complete universal pattern with 7-layer architecture.
+
+### Source of Truth
+
+- Enums DEFINED in `lib/constants/{entity}-filters.constant.ts`, IMPORTED by schemas
+- Parsers in `lib/parsers/nuqs.ts` do NOT re-export constants
+- `searchParams` object includes search, filters, `sortBy`, `order`, and `page`
+
+### DataTable
+
+- `DataTable` is a dumb renderer — ONLY uses `getCoreRowModel()`
+- NO `getSortedRowModel`, `getFilteredRowModel`, `getPaginationRowModel`
+- Sorting via `SortableHeader` component in columns (URL-based, 3-state: asc → desc → reset)
+- Filtering via filter form component (TanStack Form + Zod + `useQueryStates`)
+- Pagination via generic `Pagination` component
+
 ### Options
 
 | Option            | Value   | Reason                 |
@@ -915,6 +960,7 @@ export { ContactForm };
 
 - Use `createParser` for custom validation (page bounds, search length)
 - Use `parseAsStringLiteral` for enum values
+- `parseAsSafeSearch` truncates (`.slice()`) instead of rejecting long strings
 - Always use `withDefault()` to avoid null
 - Validate server-side too (defense in depth)
 
@@ -927,6 +973,8 @@ export { ContactForm };
 ## Prisma Guidelines
 
 - Always use `select` to specify returned fields
+- Always use `take` on `findMany` (every query is internally paginated, even without pagination UI)
+- Minimum for any `findMany`: `select` + `take`
 - Use `$transaction` for parallel count + findMany
 - Use `Promise.all` for independent parallel queries
 - Never return raw database objects
@@ -938,10 +986,21 @@ const document = await prisma.document.findUnique({ ... });
 const user = await prisma.user.findFirst({ ... });
 const [projects, totalCount] = await prisma.$transaction([...]);
 
+// ✅ Correct: findMany always has select + take
+const users = await prisma.user.findMany({
+  select: { id: true, name: true, email: true },
+  take: PAGE_SIZE,
+});
+
 // ❌ Wrong
 const doc = await prisma.document.findUnique({ ... });
 const usr = await prisma.user.findFirst({ ... });
 const [proj, count] = await prisma.$transaction([...]);
+
+// ❌ Wrong: findMany without take
+const users = await prisma.user.findMany({
+  select: { id: true, name: true },
+});
 ```
 
 ## Error Handling
@@ -1032,5 +1091,5 @@ For detailed conventions, read the appropriate skill file before implementing:
 - **Components**: `/mnt/skills/user/ascender-saas-boilerplate/rules/component.md`
 - **Zod Schemas**: `/mnt/skills/user/ascender-saas-boilerplate/rules/zod.md`
 - **API Routes**: `/mnt/skills/user/ascender-saas-boilerplate/rules/api-route.md`
-- **Nuqs Filters**: `/mnt/skills/user/ascender-saas-boilerplate/rules/nuqs-filters.md`
+- **Filters, Sort & Pagination**: `/mnt/skills/user/ascender-saas-boilerplate/rules/filter.md`
 - **Forms**: `/mnt/skills/user/ascender-saas-boilerplate/rules/form.md`
