@@ -133,6 +133,10 @@ const auth = betterAuth({
   },
   user: {
     additionalFields: {
+      role: {
+        type: "string",
+        input: false,
+      },
       slug: {
         type: "string",
         input: false,

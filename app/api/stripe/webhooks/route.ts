@@ -47,7 +47,66 @@ async function POST(request: Request) {
   try {
     switch (event.type) {
       case "customer.subscription.created":
-      case "customer.subscription.updated":
+      case "customer.subscription.updated": {
+        const subscription = event.data.object as Stripe.Subscription;
+        const customerId =
+          typeof subscription.customer === "string"
+            ? subscription.customer
+            : subscription.customer.id;
+
+        const stripeCustomer = await prisma.stripeCustomer.findUnique({
+          where: { stripeCustomerId: customerId },
+          select: { userId: true, stripeCustomerId: true },
+        });
+
+        if (!stripeCustomer) {
+          if (process.env.NODE_ENV === "development") {
+            console.error(
+              `[Webhook Error] StripeCustomer not found for ${customerId}. Event: ${event.type}`
+            );
+          }
+          break;
+        }
+
+        const priceId = subscription.items.data[0]?.price?.id ?? "";
+
+        await prisma.subscription.upsert({
+          where: { stripeSubscriptionId: subscription.id },
+          create: {
+            stripeSubscriptionId: subscription.id,
+            stripeCustomerId: stripeCustomer.stripeCustomerId,
+            stripePriceId: priceId,
+            status: subscription.status,
+            currentPeriodStart: new Date(
+              subscription.current_period_start * 1000
+            ),
+            currentPeriodEnd: new Date(
+              subscription.current_period_end * 1000
+            ),
+            cancelAtPeriodEnd: subscription.cancel_at_period_end,
+          },
+          update: {
+            stripePriceId: priceId,
+            status: subscription.status,
+            currentPeriodStart: new Date(
+              subscription.current_period_start * 1000
+            ),
+            currentPeriodEnd: new Date(
+              subscription.current_period_end * 1000
+            ),
+            cancelAtPeriodEnd: subscription.cancel_at_period_end,
+          },
+        });
+
+        if (process.env.NODE_ENV === "development") {
+          console.log(
+            `[Subscription synced] ${subscription.id} (${subscription.status}) for user ${stripeCustomer.userId}`
+          );
+        }
+
+        break;
+      }
+
       case "customer.subscription.deleted": {
         const subscription = event.data.object as Stripe.Subscription;
         const customerId =
@@ -69,11 +128,13 @@ async function POST(request: Request) {
           break;
         }
 
-        const subscriptionCacheKey = `subscription:${stripeCustomer.userId}:pro`;
-        await redis.del(subscriptionCacheKey);
+        await prisma.subscription.deleteMany({
+          where: { stripeSubscriptionId: subscription.id },
+        });
+
         if (process.env.NODE_ENV === "development") {
           console.log(
-            `[Cache invalidated] Subscription cache for user ${stripeCustomer.userId} - Event: ${event.type}`
+            `[Subscription deleted] ${subscription.id} for user ${stripeCustomer.userId}`
           );
         }
 

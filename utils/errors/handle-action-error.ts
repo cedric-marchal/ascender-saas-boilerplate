@@ -2,18 +2,7 @@ import "server-only";
 
 import { ZodError } from "zod";
 
-import {
-  BadRequestError,
-  ConflictError,
-  ForbiddenError,
-  NotFoundError,
-  PayloadTooLargeError,
-  ServiceUnavailableError,
-  TooManyRequestsError,
-  UnauthorizedError,
-  UnprocessableEntityError,
-  UnsupportedMediaTypeError,
-} from "@/utils/errors/errors";
+import { AppError } from "@/utils/errors/errors";
 
 type ActionError = {
   success: false;
@@ -31,103 +20,26 @@ function handleActionError(error: unknown): ActionError {
     };
   }
 
-  if (error instanceof BadRequestError) {
+  if (error instanceof AppError) {
     return {
       success: false,
       error: error.message,
-      type: "BadRequestError",
+      type: error.name,
     };
   }
 
-  if (error instanceof UnauthorizedError) {
-    return {
-      success: false,
-      error: error.message,
-      type: "UnauthorizedError",
-    };
-  }
-
-  if (error instanceof ForbiddenError) {
-    return {
-      success: false,
-      error: error.message,
-      type: "ForbiddenError",
-    };
-  }
-
-  if (error instanceof NotFoundError) {
-    return {
-      success: false,
-      error: error.message,
-      type: "NotFoundError",
-    };
-  }
-
-  if (error instanceof ConflictError) {
-    return {
-      success: false,
-      error: error.message,
-      type: "ConflictError",
-    };
-  }
-
-  if (error instanceof PayloadTooLargeError) {
-    return {
-      success: false,
-      error: error.message,
-      type: "PayloadTooLargeError",
-    };
-  }
-
-  if (error instanceof UnsupportedMediaTypeError) {
-    return {
-      success: false,
-      error: error.message,
-      type: "UnsupportedMediaTypeError",
-    };
-  }
-
-  if (error instanceof UnprocessableEntityError) {
-    return {
-      success: false,
-      error: error.message,
-      type: "UnprocessableEntityError",
-    };
-  }
-
-  if (error instanceof TooManyRequestsError) {
-    return {
-      success: false,
-      error: error.message,
-      type: "TooManyRequestsError",
-    };
-  }
-
-  if (error instanceof ServiceUnavailableError) {
-    return {
-      success: false,
-      error: error.message,
-      type: "ServiceUnavailableError",
-    };
-  }
-
-  if (error instanceof Error) {
-    return {
-      success: false,
-      error:
-        process.env.NODE_ENV === "development"
-          ? error.message
-          : "Une erreur inattendue s'est produite",
-      type: "ServerError",
-    };
-  }
+  const message =
+    process.env.NODE_ENV === "development" && error instanceof Error
+      ? error.message
+      : "Une erreur inattendue s'est produite";
 
   return {
     success: false,
-    error: "Une erreur inattendue s'est produite",
-    type: "UnknownError",
+    error: message,
+    type: error instanceof Error ? "ServerError" : "UnknownError",
   };
 }
 
 export { handleActionError };
+
 export type { ActionError };

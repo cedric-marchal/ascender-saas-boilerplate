@@ -98,14 +98,33 @@ model RateLimit {
 }
 
 model StripeCustomer {
-  id               String   @id @default(cuid())
-  userId           String   @unique
-  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  stripeCustomerId String   @unique
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  id               String         @id @default(cuid())
+  userId           String         @unique
+  user             User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  stripeCustomerId String         @unique
+  subscriptions    Subscription[]
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
 
   @@index([userId])
   @@index([stripeCustomerId])
   @@map("stripeCustomer")
+}
+
+model Subscription {
+  id                   String         @id @default(cuid())
+  stripeSubscriptionId String         @unique
+  stripeCustomerId     String
+  stripeCustomer       StripeCustomer @relation(fields: [stripeCustomerId], references: [stripeCustomerId], onDelete: Cascade)
+  stripePriceId        String
+  status               String
+  currentPeriodStart   DateTime
+  currentPeriodEnd     DateTime
+  cancelAtPeriodEnd    Boolean        @default(false)
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
+
+  @@index([stripeCustomerId])
+  @@index([stripeCustomerId, status])
+  @@map("subscription")
 }

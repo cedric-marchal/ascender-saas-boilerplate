@@ -4,72 +4,18 @@ import {
 } from "next-safe-action";
 
 import { auth } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
 
 import {
-  BadRequestError,
-  ConflictError,
+  AppError,
   ForbiddenError,
-  NotFoundError,
-  PayloadTooLargeError,
-  ServiceUnavailableError,
-  TooManyRequestsError,
   UnauthorizedError,
-  UnprocessableEntityError,
-  UnsupportedMediaTypeError,
 } from "@/utils/errors/errors";
 
-class ActionError extends Error {}
-
-/**
- * Base action client (public actions)
- * Use this for actions that don't require authentication
- */
 export const actionClient = createSafeActionClient({
   handleServerError(error: Error) {
     console.error("Action error:", error.message);
 
-    if (error instanceof BadRequestError) {
-      return error.message;
-    }
-
-    if (error instanceof UnauthorizedError) {
-      return error.message;
-    }
-
-    if (error instanceof ForbiddenError) {
-      return error.message;
-    }
-
-    if (error instanceof NotFoundError) {
-      return error.message;
-    }
-
-    if (error instanceof ConflictError) {
-      return error.message;
-    }
-
-    if (error instanceof PayloadTooLargeError) {
-      return error.message;
-    }
-
-    if (error instanceof UnsupportedMediaTypeError) {
-      return error.message;
-    }
-
-    if (error instanceof UnprocessableEntityError) {
-      return error.message;
-    }
-
-    if (error instanceof TooManyRequestsError) {
-      return error.message;
-    }
-
-    if (error instanceof ServiceUnavailableError) {
-      return error.message;
-    }
-
-    if (error instanceof ActionError) {
+    if (error instanceof AppError) {
       return error.message;
     }
 
@@ -100,6 +46,7 @@ export const authActionClient = actionClient.use(async ({ next }) => {
       userId: session.user.id,
       userEmail: session.user.email,
       userName: session.user.name,
+      userRole: session.user.role,
     },
   });
 });
@@ -110,12 +57,7 @@ export const authActionClient = actionClient.use(async ({ next }) => {
  * Provides userId and ensures user is admin
  */
 export const adminActionClient = authActionClient.use(async ({ next, ctx }) => {
-  const user = await prisma.user.findUnique({
-    where: { id: ctx.userId },
-    select: { role: true },
-  });
-
-  if (user?.role !== "ADMIN") {
+  if (ctx.userRole !== "ADMIN") {
     throw new ForbiddenError(
       "Accès non autorisé. Vous devez être administrateur."
     );

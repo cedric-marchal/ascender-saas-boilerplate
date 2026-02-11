@@ -1,76 +1,77 @@
 import "server-only";
 
-class NotFoundError extends Error {
-  constructor(message: string) {
+class AppError extends Error {
+  readonly statusCode: number;
+
+  constructor(message: string, statusCode: number) {
     super(message);
-    this.name = "NotFoundError";
+    this.name = this.constructor.name;
+    this.statusCode = statusCode;
   }
 }
 
-class UnauthorizedError extends Error {
+class BadRequestError extends AppError {
   constructor(message: string) {
-    super(message);
-    this.name = "UnauthorizedError";
+    super(message, 400);
   }
 }
 
-class ForbiddenError extends Error {
+class UnauthorizedError extends AppError {
   constructor(message: string) {
-    super(message);
-    this.name = "ForbiddenError";
+    super(message, 401);
   }
 }
 
-class ConflictError extends Error {
+class ForbiddenError extends AppError {
   constructor(message: string) {
-    super(message);
-    this.name = "ConflictError";
+    super(message, 403);
   }
 }
 
-class TooManyRequestsError extends Error {
+class NotFoundError extends AppError {
   constructor(message: string) {
-    super(message);
-    this.name = "TooManyRequestsError";
+    super(message, 404);
   }
 }
 
-class BadRequestError extends Error {
+class ConflictError extends AppError {
   constructor(message: string) {
-    super(message);
-    this.name = "BadRequestError";
+    super(message, 409);
   }
 }
 
-class PayloadTooLargeError extends Error {
+class PayloadTooLargeError extends AppError {
   constructor(message: string) {
-    super(message);
-    this.name = "PayloadTooLargeError";
+    super(message, 413);
   }
 }
 
-class UnprocessableEntityError extends Error {
+class UnsupportedMediaTypeError extends AppError {
   constructor(message: string) {
-    super(message);
-    this.name = "UnprocessableEntityError";
+    super(message, 415);
   }
 }
 
-class UnsupportedMediaTypeError extends Error {
+class UnprocessableEntityError extends AppError {
   constructor(message: string) {
-    super(message);
-    this.name = "UnsupportedMediaTypeError";
+    super(message, 422);
   }
 }
 
-class ServiceUnavailableError extends Error {
+class TooManyRequestsError extends AppError {
   constructor(message: string) {
-    super(message);
-    this.name = "ServiceUnavailableError";
+    super(message, 429);
+  }
+}
+
+class ServiceUnavailableError extends AppError {
+  constructor(message: string) {
+    super(message, 503);
   }
 }
 
 export {
+  AppError,
   BadRequestError,
   ConflictError,
   ForbiddenError,
