@@ -4,10 +4,18 @@ import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 
 import { auth } from "@/lib/auth";
+import { parseUserRole } from "@/lib/constants/user-role.constant";
 import { env } from "@/lib/env";
+import type { UserRole } from "@/lib/generated/prisma/enums";
 import { prisma } from "@/lib/prisma";
 
-type Session = typeof auth.$Infer.Session;
+type RawSession = typeof auth.$Infer.Session;
+
+type Session = Omit<RawSession, "user"> & {
+  user: Omit<RawSession["user"], "role"> & {
+    role: UserRole;
+  };
+};
 
 const VALID_SUBSCRIPTION_STATUSES = ["active", "trialing", "past_due"];
 
@@ -20,7 +28,17 @@ const getSession = async (): Promise<Session | null> => {
     headers: await headers(),
   });
 
-  return session;
+  if (!session) {
+    return null;
+  }
+
+  return {
+    ...session,
+    user: {
+      ...session.user,
+      role: parseUserRole(session.user.role),
+    },
+  };
 };
 
 /**

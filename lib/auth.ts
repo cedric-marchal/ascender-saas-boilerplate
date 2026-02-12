@@ -5,6 +5,7 @@ import { prismaAdapter } from "better-auth/adapters/prisma";
 import { nextCookies } from "better-auth/next-js";
 
 import { env } from "@/lib/env";
+import { UserRole } from "@/lib/generated/prisma/enums";
 import { prisma } from "@/lib/prisma";
 import { sendEmailSafe } from "@/lib/resend";
 import { stripe } from "@/lib/stripe";
@@ -135,6 +136,7 @@ const auth = betterAuth({
     additionalFields: {
       role: {
         type: "string",
+        enum: Object.values(UserRole),
         input: false,
       },
       slug: {

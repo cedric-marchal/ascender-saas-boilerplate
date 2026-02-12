@@ -1,4 +1,4 @@
-import type { UserRole } from "@/lib/generated/prisma/client";
+import { UserRole } from "@/lib/generated/prisma/client";
 
 type UserRoleConfig = {
   label: string;
@@ -15,6 +15,14 @@ const USER_ROLE_CONFIG: Record<UserRole, UserRoleConfig> = {
     color: "blue",
   },
 };
+
+export function parseUserRole(role: string): UserRole {
+  if (!Object.values(UserRole).includes(role as UserRole)) {
+    throw new Error(`Role invalide dans la session: ${role}`);
+  }
+
+  return role as UserRole;
+}
 
 export { USER_ROLE_CONFIG };
 
