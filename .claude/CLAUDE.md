@@ -142,7 +142,7 @@ ALWAYS use full, descriptive names. NEVER use abbreviations.
 
 ```tsx
 // ✅ Correct
-function handleSubmit(event: FormEvent<HTMLFormElement>) { ... }
+function handleSubmit(event: SubmitEvent<HTMLFormElement>) { ... }
 function handleChange(event: ChangeEvent<HTMLInputElement>) { ... }
 function handleClick(event: MouseEvent<HTMLButtonElement>) { ... }
 const response = await fetch("/api/users");
@@ -314,10 +314,10 @@ async function onSubmit(data: FormData) {
 ALWAYS import and use proper event types.
 
 ```tsx
-import type { ChangeEvent, FormEvent, MouseEvent, KeyboardEvent, DragEvent } from "react";
+import type { ChangeEvent, SubmitEvent, MouseEvent, KeyboardEvent, DragEvent } from "react";
 
 // ✅ Correct: Fully typed event handlers
-function handleSubmit(event: FormEvent<HTMLFormElement>) {
+function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
   event.preventDefault();
 }
 
@@ -445,7 +445,7 @@ app/(protected)/dashboard/settings/
 ```tsx
 // 1. Imports: Combine types and values from the same module
 // Use inline `type` keyword when mixing types and values
-import { type ChangeEvent, type FormEvent, useState } from "react";
+import { type ChangeEvent, type SubmitEvent, useState } from "react";
 
 // Use `import type` only when importing types exclusively
 import type { User } from "@prisma/client";
@@ -473,7 +473,7 @@ function UserForm({ user, onSubmit, isLoading }: UserFormProps) {
     setName(event.target.value);
   }
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
     await onSubmit({ name });
   }

@@ -510,7 +510,7 @@ Uses TanStack Form for local state + Zod validation, and `useQueryStates` for UR
 ```tsx
 "use client";
 
-import { type ChangeEvent, type FormEvent, useTransition } from "react";
+import { type ChangeEvent, type SubmitEvent, useTransition } from "react";
 
 import { useForm } from "@tanstack/react-form";
 import { Filter, Search, X } from "lucide-react";
@@ -584,7 +584,7 @@ function UsersFilters() {
   return (
     <section className="mb-6 space-y-4">
       <form
-        onSubmit={(event: FormEvent<HTMLFormElement>) => {
+        onSubmit={(event: SubmitEvent<HTMLFormElement>) => {
           event.preventDefault();
           formInstance.handleSubmit();
         }}

@@ -1,9 +1,9 @@
 "use client";
 
-import type { ChangeEvent, SubmitEvent } from "react";
+import { type ChangeEvent, type SubmitEvent, useState } from "react";
 
 import { useForm } from "@tanstack/react-form";
-import { Loader2 } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { toast } from "sonner";
 
@@ -24,6 +24,11 @@ import { Input } from "@/components/ui/input";
 import { updatePasswordAction } from "@/app/(protected)/_actions/update-password.action";
 
 function PasswordForm() {
+  const [isCurrentPasswordVisible, setIsCurrentPasswordVisible] =
+    useState(false);
+  const [isNewPasswordVisible, setIsNewPasswordVisible] = useState(false);
+  const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] =
+    useState(false);
   const { executeAsync, isExecuting } = useAction(updatePasswordAction);
 
   const form = useForm({
@@ -75,16 +80,39 @@ function PasswordForm() {
               <FieldLabel htmlFor="settings-password-current">
                 Mot de passe actuel
               </FieldLabel>
-              <Input
-                id="settings-password-current"
-                type="password"
-                name={field.name}
-                value={field.state.value}
-                onBlur={field.handleBlur}
-                onChange={handleChange}
-                aria-invalid={isInvalid}
-                placeholder="••••••••"
-              />
+              <div className="relative">
+                <Input
+                  id="settings-password-current"
+                  type={isCurrentPasswordVisible ? "text" : "password"}
+                  name={field.name}
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={handleChange}
+                  aria-invalid={isInvalid}
+                  placeholder="••••••••"
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() =>
+                    setIsCurrentPasswordVisible(
+                      (previous: boolean) => !previous
+                    )
+                  }
+                  className="text-muted-foreground hover:text-foreground absolute top-0 right-0 flex h-9 w-9 items-center justify-center"
+                  aria-label={
+                    isCurrentPasswordVisible
+                      ? "Masquer le mot de passe"
+                      : "Afficher le mot de passe"
+                  }
+                >
+                  {isCurrentPasswordVisible ? (
+                    <EyeOff className="h-4 w-4" aria-hidden="true" />
+                  ) : (
+                    <Eye className="h-4 w-4" aria-hidden="true" />
+                  )}
+                </button>
+              </div>
               {isInvalid && <FieldError errors={field.state.meta.errors} />}
             </Field>
           );
@@ -106,16 +134,39 @@ function PasswordForm() {
               <FieldLabel htmlFor="settings-password-new">
                 Nouveau mot de passe
               </FieldLabel>
-              <Input
-                id="settings-password-new"
-                type="password"
-                name={field.name}
-                value={field.state.value}
-                onBlur={field.handleBlur}
-                onChange={handleChange}
-                aria-invalid={isInvalid}
-                placeholder="••••••••"
-              />
+              <div className="relative">
+                <Input
+                  id="settings-password-new"
+                  type={isNewPasswordVisible ? "text" : "password"}
+                  name={field.name}
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={handleChange}
+                  aria-invalid={isInvalid}
+                  placeholder="••••••••"
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() =>
+                    setIsNewPasswordVisible(
+                      (previous: boolean) => !previous
+                    )
+                  }
+                  className="text-muted-foreground hover:text-foreground absolute top-0 right-0 flex h-9 w-9 items-center justify-center"
+                  aria-label={
+                    isNewPasswordVisible
+                      ? "Masquer le mot de passe"
+                      : "Afficher le mot de passe"
+                  }
+                >
+                  {isNewPasswordVisible ? (
+                    <EyeOff className="h-4 w-4" aria-hidden="true" />
+                  ) : (
+                    <Eye className="h-4 w-4" aria-hidden="true" />
+                  )}
+                </button>
+              </div>
               <FieldDescription>
                 Minimum 8 caractères, différent de l&apos;ancien
               </FieldDescription>
@@ -140,16 +191,39 @@ function PasswordForm() {
               <FieldLabel htmlFor="settings-password-confirm">
                 Confirmer le nouveau mot de passe
               </FieldLabel>
-              <Input
-                id="settings-password-confirm"
-                type="password"
-                name={field.name}
-                value={field.state.value}
-                onBlur={field.handleBlur}
-                onChange={handleChange}
-                aria-invalid={isInvalid}
-                placeholder="••••••••"
-              />
+              <div className="relative">
+                <Input
+                  id="settings-password-confirm"
+                  type={isConfirmPasswordVisible ? "text" : "password"}
+                  name={field.name}
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={handleChange}
+                  aria-invalid={isInvalid}
+                  placeholder="••••••••"
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() =>
+                    setIsConfirmPasswordVisible(
+                      (previous: boolean) => !previous
+                    )
+                  }
+                  className="text-muted-foreground hover:text-foreground absolute top-0 right-0 flex h-9 w-9 items-center justify-center"
+                  aria-label={
+                    isConfirmPasswordVisible
+                      ? "Masquer le mot de passe"
+                      : "Afficher le mot de passe"
+                  }
+                >
+                  {isConfirmPasswordVisible ? (
+                    <EyeOff className="h-4 w-4" aria-hidden="true" />
+                  ) : (
+                    <Eye className="h-4 w-4" aria-hidden="true" />
+                  )}
+                </button>
+              </div>
               {isInvalid && <FieldError errors={field.state.meta.errors} />}
             </Field>
           );

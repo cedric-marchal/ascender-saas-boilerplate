@@ -177,7 +177,7 @@ import type { ReactNode } from "react";
 import type { User } from "@/types/user";
 
 // ✅ Correct: Mixed imports (types + values)
-import { useState, type ChangeEvent, type FormEvent } from "react";
+import { useState, type ChangeEvent, type SubmitEvent } from "react";
 import { Button, type ButtonProps } from "@/components/ui/button";
 import {
   CreateUserSchema,
@@ -752,11 +752,11 @@ export { usersColumns };
 import { useState } from "react";
 
 import {
+  type ColumnDef,
+  type VisibilityState,
   flexRender,
   getCoreRowModel,
   useReactTable,
-  type ColumnDef,
-  type VisibilityState,
 } from "@tanstack/react-table";
 
 import {
@@ -822,20 +822,14 @@ function DataTable<TData, TValue>({
               >
                 {row.getVisibleCells().map((cell) => (
                   <TableCell key={cell.id}>
-                    {flexRender(
-                      cell.column.columnDef.cell,
-                      cell.getContext()
-                    )}
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
                 ))}
               </TableRow>
             ))
           ) : (
             <TableRow>
-              <TableCell
-                colSpan={columns.length}
-                className="h-24 text-center"
-              >
+              <TableCell colSpan={columns.length} className="h-24 text-center">
                 {emptyMessage}
               </TableCell>
             </TableRow>
@@ -859,8 +853,8 @@ export { DataTable };
 import { DataTable } from "@/components/ui/data-table";
 
 import {
-  usersColumns,
   type UserTableData,
+  usersColumns,
 } from "@/app/(protected)/admin/utilisateurs/_components/users-columns";
 
 function UsersTable({ users }: { users: UserTableData[] }) {
