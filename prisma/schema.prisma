@@ -111,18 +111,29 @@ model StripeCustomer {
   @@map("stripeCustomer")
 }
 
+enum SubscriptionStatus {
+  incomplete
+  incomplete_expired
+  trialing
+  active
+  past_due
+  canceled
+  unpaid
+  paused
+}
+
 model Subscription {
-  id                   String         @id @default(cuid())
-  stripeSubscriptionId String         @unique
+  id                   String             @id @default(cuid())
+  stripeSubscriptionId String             @unique
   stripeCustomerId     String
-  stripeCustomer       StripeCustomer @relation(fields: [stripeCustomerId], references: [stripeCustomerId], onDelete: Cascade)
+  stripeCustomer       StripeCustomer     @relation(fields: [stripeCustomerId], references: [stripeCustomerId], onDelete: Cascade)
   stripePriceId        String
-  status               String
+  status               SubscriptionStatus
   currentPeriodStart   DateTime
   currentPeriodEnd     DateTime
-  cancelAtPeriodEnd    Boolean        @default(false)
-  createdAt            DateTime       @default(now())
-  updatedAt            DateTime       @updatedAt
+  cancelAtPeriodEnd    Boolean            @default(false)
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
 
   @@index([stripeCustomerId])
   @@index([stripeCustomerId, status])

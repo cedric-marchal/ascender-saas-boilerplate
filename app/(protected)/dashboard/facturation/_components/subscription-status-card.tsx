@@ -1,7 +1,8 @@
 import { CheckCircle2, XCircle } from "lucide-react";
-import type Stripe from "stripe";
 
 import { env } from "@/lib/env";
+
+import type { BillingSubscription } from "@/app/(protected)/dashboard/facturation/_lib/get-billing";
 
 import { Badge } from "@/components/ui/badge";
 import {
@@ -13,24 +14,21 @@ import {
 } from "@/components/ui/card";
 
 type SubscriptionStatusCardProps = {
-  subscriptions: Stripe.Subscription[];
+  subscriptions: BillingSubscription[];
 };
 
 function SubscriptionStatusCard({
   subscriptions,
 }: SubscriptionStatusCardProps) {
   const activeSubscription = subscriptions.find(
-    (subscription: Stripe.Subscription) =>
+    (subscription: BillingSubscription) =>
       subscription.status === "active" ||
       subscription.status === "trialing" ||
       subscription.status === "past_due"
-  ) as (Stripe.Subscription & { current_period_end: number }) | undefined;
+  );
 
   const isProSubscription = activeSubscription
-    ? activeSubscription.items.data.some(
-        (item: Stripe.SubscriptionItem) =>
-          item.price.id === env.STRIPE_PRICE_ID_PRO
-      )
+    ? activeSubscription.priceId === env.STRIPE_PRICE_ID_PRO
     : false;
 
   const isSubscribed = !!activeSubscription;
@@ -96,7 +94,7 @@ function SubscriptionStatusCard({
                 <span className="text-muted-foreground">Renouvellement</span>
                 <span className="font-medium">
                   {new Date(
-                    activeSubscription.current_period_end * 1000
+                    activeSubscription.currentPeriodEnd * 1000
                   ).toLocaleDateString("fr-FR", {
                     day: "numeric",
                     month: "long",
@@ -104,7 +102,7 @@ function SubscriptionStatusCard({
                   })}
                 </span>
               </div>
-              {activeSubscription.cancel_at_period_end && (
+              {activeSubscription.cancelAtPeriodEnd && (
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Annulation</span>
                   <span className="text-destructive font-medium">

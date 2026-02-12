@@ -1,10 +1,10 @@
-import type Stripe from "stripe";
+import type { BillingInvoice } from "@/app/(protected)/dashboard/facturation/_lib/get-billing";
 
 import { InvoiceCard } from "@/app/(protected)/dashboard/facturation/_components/invoice-card";
 import { InvoiceListEmpty } from "@/app/(protected)/dashboard/facturation/_components/invoice-list-empty";
 
 type InvoiceListProps = {
-  invoices: Stripe.Invoice[];
+  invoices: BillingInvoice[];
 };
 
 function InvoiceList({ invoices }: InvoiceListProps) {
@@ -14,7 +14,7 @@ function InvoiceList({ invoices }: InvoiceListProps) {
 
   return (
     <div className="grid gap-4">
-      {invoices.map((invoice: Stripe.Invoice) => (
+      {invoices.map((invoice: BillingInvoice) => (
         <InvoiceCard key={invoice.id} invoice={invoice} />
       ))}
     </div>

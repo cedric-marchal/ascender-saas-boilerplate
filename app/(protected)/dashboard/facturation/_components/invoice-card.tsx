@@ -1,7 +1,8 @@
 import Link from "next/link";
 
 import { Calendar, Download, FileText } from "lucide-react";
-import type Stripe from "stripe";
+
+import type { BillingInvoice } from "@/app/(protected)/dashboard/facturation/_lib/get-billing";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,51 +14,37 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
+type InvoiceStatusConfig = {
+  label: string;
+  variant: "default" | "destructive" | "secondary";
+};
+
+const STATUS_CONFIG: Record<string, InvoiceStatusConfig> = {
+  draft: { label: "Brouillon", variant: "secondary" },
+  open: { label: "Ouverte", variant: "secondary" },
+  paid: { label: "Payée", variant: "default" },
+  uncollectible: { label: "Irrécouvrable", variant: "destructive" },
+  void: { label: "Annulée", variant: "destructive" },
+};
+
 type InvoiceCardProps = {
-  invoice: Stripe.Invoice;
+  invoice: BillingInvoice;
 };
 
 function InvoiceCard({ invoice }: InvoiceCardProps) {
-  const statusConfig: Record<
-    Stripe.Invoice.Status,
-    {
-      label: string;
-      variant: "default" | "destructive" | "secondary";
-    }
-  > = {
-    draft: {
-      label: "Brouillon",
-      variant: "secondary",
-    },
-    open: {
-      label: "Ouverte",
-      variant: "secondary",
-    },
-    paid: {
-      label: "Payée",
-      variant: "default",
-    },
-    uncollectible: {
-      label: "Irrécouvrable",
-      variant: "destructive",
-    },
-    void: {
-      label: "Annulée",
-      variant: "destructive",
-    },
-  };
-
   const config = invoice.status
-    ? statusConfig[invoice.status]
-    : statusConfig.draft;
+    ? STATUS_CONFIG[invoice.status] ?? STATUS_CONFIG.draft
+    : STATUS_CONFIG.draft;
 
-  const formatAmount = (amount: number | null) => {
-    if (amount === null) return "0,00 €";
+  function formatAmount(amount: number | null): string {
+    if (amount === null) {
+      return "0,00 €";
+    }
     return new Intl.NumberFormat("fr-FR", {
       style: "currency",
       currency: "eur",
     }).format(amount / 100);
-  };
+  }
 
   return (
     <Card>
@@ -91,30 +78,27 @@ function InvoiceCard({ invoice }: InvoiceCardProps) {
         <div className="flex items-center justify-between">
           <div className="space-y-1">
             <p className="text-2xl font-bold">
-              {formatAmount(invoice.amount_paid)}
+              {formatAmount(invoice.amountPaid)}
             </p>
-            {invoice.status === "paid" &&
-              invoice.status_transitions?.paid_at && (
-                <div className="text-muted-foreground flex items-center gap-2 text-sm">
-                  <Calendar className="h-3 w-3" aria-hidden="true" />
-                  <span>
-                    Payé le{" "}
-                    {new Date(
-                      invoice.status_transitions.paid_at * 1000
-                    ).toLocaleDateString("fr-FR", {
-                      day: "numeric",
-                      month: "long",
-                      year: "numeric",
-                    })}
-                  </span>
-                </div>
-              )}
+            {invoice.status === "paid" && invoice.paidAt && (
+              <div className="text-muted-foreground flex items-center gap-2 text-sm">
+                <Calendar className="h-3 w-3" aria-hidden="true" />
+                <span>
+                  Payé le{" "}
+                  {new Date(invoice.paidAt * 1000).toLocaleDateString("fr-FR", {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                  })}
+                </span>
+              </div>
+            )}
           </div>
 
-          {invoice.invoice_pdf && (
+          {invoice.invoicePdfUrl && (
             <Button type="button" variant="outline" size="sm" asChild>
               <Link
-                href={invoice.invoice_pdf}
+                href={invoice.invoicePdfUrl}
                 target="_blank"
                 rel="noopener noreferrer"
               >

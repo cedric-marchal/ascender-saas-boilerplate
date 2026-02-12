@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { headers } from "next/headers";
 
 import { ThemeProvider } from "next-themes";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
@@ -78,7 +79,9 @@ type RootLayoutProps = {
   children: ReactNode;
 };
 
-export default function RootLayout({ children }: RootLayoutProps) {
+export default async function RootLayout({ children }: RootLayoutProps) {
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
+
   return (
     <html lang="fr" suppressHydrationWarning>
       <body
@@ -91,6 +94,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
             defaultTheme="dark"
             enableSystem
             disableTransitionOnChange
+            nonce={nonce}
           >
             {children}
             <Toaster />

@@ -9,7 +9,7 @@ const PROTECTED_PREFIXES = ["/dashboard", "/admin"];
 
 const PUBLIC_API_PREFIXES = ["/api/auth", "/api/stripe/webhooks"];
 
-const SECURITY_HEADERS = {
+const STATIC_SECURITY_HEADERS: Record<string, string> = {
   "X-Frame-Options": "DENY",
   "X-Content-Type-Options": "nosniff",
   "Referrer-Policy": "strict-origin-when-cross-origin",
@@ -18,9 +18,12 @@ const SECURITY_HEADERS = {
   "Strict-Transport-Security":
     "max-age=63072000; includeSubDomains; preload",
   "X-DNS-Prefetch-Control": "on",
-  "Content-Security-Policy": [
+};
+
+function generateCsp(nonce: string): string {
+  return [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline'",
+    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'`,
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: blob: https://*.r2.cloudflarestorage.com",
     "font-src 'self'",
@@ -29,15 +32,19 @@ const SECURITY_HEADERS = {
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",
-  ].join("; "),
-};
+  ].join("; ");
+}
 
-function applySecurityHeaders(response: NextResponse): NextResponse {
-  Object.entries(SECURITY_HEADERS).forEach(
+function applySecurityHeaders(
+  response: NextResponse,
+  nonce: string
+): NextResponse {
+  Object.entries(STATIC_SECURITY_HEADERS).forEach(
     ([key, value]: [string, string]) => {
       response.headers.set(key, value);
     }
   );
+  response.headers.set("Content-Security-Policy", generateCsp(nonce));
   return response;
 }
 
@@ -59,6 +66,7 @@ function isProtectedApiRoute(pathname: string): boolean {
 
 export function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
+  const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
 
   if (MAINTENANCE_ENABLED) {
     const isMaintenancePage = pathname === MAINTENANCE_PATH;
@@ -66,7 +74,7 @@ export function proxy(request: NextRequest) {
       pathname.startsWith("/_next") || pathname.startsWith("/favicon");
 
     if (isMaintenancePage || isAsset) {
-      return applySecurityHeaders(NextResponse.next());
+      return applySecurityHeaders(NextResponse.next(), nonce);
     }
 
     if (pathname.startsWith("/api")) {
@@ -78,7 +86,8 @@ export function proxy(request: NextRequest) {
             message: "Service en maintenance",
           },
           { status: 503 }
-        )
+        ),
+        nonce
       );
     }
 
@@ -102,7 +111,8 @@ export function proxy(request: NextRequest) {
               message: "Vous devez être connecté",
             },
             { status: 401 }
-          )
+          ),
+          nonce
         );
       }
 
@@ -112,7 +122,14 @@ export function proxy(request: NextRequest) {
     }
   }
 
-  return applySecurityHeaders(NextResponse.next());
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-nonce", nonce);
+
+  const response = NextResponse.next({
+    request: { headers: requestHeaders },
+  });
+
+  return applySecurityHeaders(response, nonce);
 }
 
 export const config = {

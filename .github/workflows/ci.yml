@@ -67,3 +67,43 @@ jobs:
       - run: pnpm install --frozen-lockfile
 
       - run: pnpm test
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: [lint, typecheck, test]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm build
+        env:
+          NODE_ENV: production
+          BETTER_AUTH_SECRET: ci-placeholder-secret
+          GOOGLE_CLIENT_ID: ci-placeholder
+          GOOGLE_CLIENT_SECRET: ci-placeholder
+          DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
+          R2_ACCOUNT_ID: ci-placeholder
+          R2_ACCESS_KEY_ID: ci-placeholder
+          R2_SECRET_ACCESS_KEY: ci-placeholder
+          R2_BUCKET_NAME: ci-placeholder
+          RESEND_API_KEY: re_ci_placeholder
+          RESEND_EMAIL_NOREPLY: noreply@ci.example.com
+          RESEND_EMAIL_CONTACT: contact@ci.example.com
+          RESEND_EMAIL_SECURITY: security@ci.example.com
+          STRIPE_SECRET_KEY: sk_test_ci_placeholder
+          STRIPE_WEBHOOK_SECRET: whsec_ci_placeholder
+          STRIPE_PRICE_ID_PRO: price_ci_placeholder
+          NEXT_PUBLIC_APP_NAME: Ascender
+          NEXT_PUBLIC_BASE_URL: https://ci.example.com
+          NEXT_PUBLIC_R2_PUBLIC_URL: https://ci.r2.example.com

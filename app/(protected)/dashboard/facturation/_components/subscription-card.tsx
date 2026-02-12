@@ -1,5 +1,6 @@
 import { Calendar, CheckCircle2, XCircle } from "lucide-react";
-import type Stripe from "stripe";
+
+import type { BillingSubscription } from "@/app/(protected)/dashboard/facturation/_lib/get-billing";
 
 import { Badge } from "@/components/ui/badge";
 import {
@@ -10,67 +11,29 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
+type SubscriptionStatusConfig = {
+  label: string;
+  variant: "default" | "destructive" | "secondary";
+  icon: typeof CheckCircle2;
+};
+
+const STATUS_CONFIG: Record<string, SubscriptionStatusConfig> = {
+  active: { label: "Actif", variant: "default", icon: CheckCircle2 },
+  canceled: { label: "Annulé", variant: "destructive", icon: XCircle },
+  incomplete: { label: "Incomplet", variant: "secondary", icon: XCircle },
+  incomplete_expired: { label: "Expiré", variant: "secondary", icon: XCircle },
+  past_due: { label: "En retard", variant: "destructive", icon: XCircle },
+  trialing: { label: "Essai", variant: "default", icon: CheckCircle2 },
+  unpaid: { label: "Impayé", variant: "destructive", icon: XCircle },
+  paused: { label: "En pause", variant: "secondary", icon: XCircle },
+};
+
 type SubscriptionCardProps = {
-  subscription: Stripe.Subscription;
+  subscription: BillingSubscription;
 };
 
 function SubscriptionCard({ subscription }: SubscriptionCardProps) {
-  const sub = subscription as Stripe.Subscription & {
-    current_period_start: number;
-    current_period_end: number;
-  };
-
-  const statusConfig: Record<
-    Stripe.Subscription.Status,
-    {
-      label: string;
-      variant: "default" | "destructive" | "secondary";
-      icon: typeof CheckCircle2;
-    }
-  > = {
-    active: {
-      label: "Actif",
-      variant: "default",
-      icon: CheckCircle2,
-    },
-    canceled: {
-      label: "Annulé",
-      variant: "destructive",
-      icon: XCircle,
-    },
-    incomplete: {
-      label: "Incomplet",
-      variant: "secondary",
-      icon: XCircle,
-    },
-    incomplete_expired: {
-      label: "Expiré",
-      variant: "secondary",
-      icon: XCircle,
-    },
-    past_due: {
-      label: "En retard",
-      variant: "destructive",
-      icon: XCircle,
-    },
-    trialing: {
-      label: "Essai",
-      variant: "default",
-      icon: CheckCircle2,
-    },
-    unpaid: {
-      label: "Impayé",
-      variant: "destructive",
-      icon: XCircle,
-    },
-    paused: {
-      label: "En pause",
-      variant: "secondary",
-      icon: XCircle,
-    },
-  };
-
-  const config = statusConfig[sub.status];
+  const config = STATUS_CONFIG[subscription.status] ?? STATUS_CONFIG.canceled;
   const StatusIcon = config.icon;
 
   return (
@@ -79,7 +42,7 @@ function SubscriptionCard({ subscription }: SubscriptionCardProps) {
         <div className="flex items-start justify-between">
           <div className="space-y-1">
             <CardTitle className="text-base">Abonnement Pro</CardTitle>
-            <CardDescription>ID: {sub.id}</CardDescription>
+            <CardDescription>ID: {subscription.id}</CardDescription>
           </div>
           <Badge variant={config.variant} className="gap-1">
             <StatusIcon className="h-3 w-3" aria-hidden="true" />
@@ -96,15 +59,14 @@ function SubscriptionCard({ subscription }: SubscriptionCardProps) {
               <span>Début de période</span>
             </div>
             <p className="text-sm font-medium">
-              {sub.current_period_start
-                ? new Date(sub.current_period_start * 1000).toLocaleDateString(
-                    "fr-FR",
-                    {
-                      day: "numeric",
-                      month: "long",
-                      year: "numeric",
-                    }
-                  )
+              {subscription.currentPeriodStart
+                ? new Date(
+                    subscription.currentPeriodStart * 1000
+                  ).toLocaleDateString("fr-FR", {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                  })
                 : "Date inconnue"}
             </p>
           </div>
@@ -115,32 +77,34 @@ function SubscriptionCard({ subscription }: SubscriptionCardProps) {
               <span>Fin de période</span>
             </div>
             <p className="text-sm font-medium">
-              {sub.current_period_end
-                ? new Date(sub.current_period_end * 1000).toLocaleDateString(
-                    "fr-FR",
-                    {
-                      day: "numeric",
-                      month: "long",
-                      year: "numeric",
-                    }
-                  )
+              {subscription.currentPeriodEnd
+                ? new Date(
+                    subscription.currentPeriodEnd * 1000
+                  ).toLocaleDateString("fr-FR", {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                  })
                 : "Date inconnue"}
             </p>
           </div>
         </div>
 
-        {sub.canceled_at && (
+        {subscription.canceledAt && (
           <div className="space-y-1">
             <div className="text-muted-foreground flex items-center gap-2 text-sm">
               <XCircle className="h-4 w-4" aria-hidden="true" />
               <span>Annulé le</span>
             </div>
             <p className="text-sm font-medium">
-              {new Date(sub.canceled_at * 1000).toLocaleDateString("fr-FR", {
-                day: "numeric",
-                month: "long",
-                year: "numeric",
-              })}
+              {new Date(subscription.canceledAt * 1000).toLocaleDateString(
+                "fr-FR",
+                {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                }
+              )}
             </p>
           </div>
         )}

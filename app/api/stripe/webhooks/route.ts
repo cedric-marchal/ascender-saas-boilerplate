@@ -1,11 +1,26 @@
 import { NextResponse } from "next/server";
 
+import * as Sentry from "@sentry/nextjs";
 import type Stripe from "stripe";
 
 import { env } from "@/lib/env";
+import type { SubscriptionStatus } from "@/lib/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { redis } from "@/lib/redis";
 import { stripe } from "@/lib/stripe";
+
+const VALID_SUBSCRIPTION_STATUSES = new Set<string>([
+  "incomplete",
+  "incomplete_expired",
+  "trialing",
+  "active",
+  "past_due",
+  "canceled",
+  "unpaid",
+  "paused",
+]);
+
+const EVENT_TTL_SECONDS = 86400;
 
 async function POST(request: Request) {
   const body = await request.text();
@@ -44,6 +59,15 @@ async function POST(request: Request) {
     console.log(`Received Stripe event: ${event.type}`);
   }
 
+  const eventKey = `stripe:event:${event.id}`;
+  const alreadyProcessed = await redis.get(eventKey);
+
+  if (alreadyProcessed) {
+    return NextResponse.json({ success: true, received: true });
+  }
+
+  await redis.set(eventKey, 1, { ex: EVENT_TTL_SECONDS });
+
   try {
     switch (event.type) {
       case "customer.subscription.created":
@@ -60,11 +84,10 @@ async function POST(request: Request) {
         });
 
         if (!stripeCustomer) {
-          if (process.env.NODE_ENV === "development") {
-            console.error(
-              `[Webhook Error] StripeCustomer not found for ${customerId}. Event: ${event.type}`
-            );
-          }
+          Sentry.captureMessage(
+            `StripeCustomer not found for ${customerId}. Event: ${event.type}`,
+            "warning"
+          );
           break;
         }
 
@@ -72,11 +95,23 @@ async function POST(request: Request) {
         const priceId = subscriptionItem?.price?.id;
 
         if (!priceId || !subscriptionItem) {
-          console.error(
-            `[Webhook Error] Missing priceId for subscription ${subscription.id}. Event: ${event.type}`
+          Sentry.captureMessage(
+            `Missing priceId for subscription ${subscription.id}. Event: ${event.type}`,
+            "warning"
           );
           break;
         }
+
+        if (!VALID_SUBSCRIPTION_STATUSES.has(subscription.status)) {
+          Sentry.captureMessage(
+            `Unknown subscription status "${subscription.status}" for ${subscription.id}. Event: ${event.type}`,
+            "warning"
+          );
+          break;
+        }
+
+        const subscriptionStatus =
+          subscription.status as SubscriptionStatus;
 
         await prisma.subscription.upsert({
           where: { stripeSubscriptionId: subscription.id },
@@ -84,7 +119,7 @@ async function POST(request: Request) {
             stripeSubscriptionId: subscription.id,
             stripeCustomerId: stripeCustomer.stripeCustomerId,
             stripePriceId: priceId,
-            status: subscription.status,
+            status: subscriptionStatus,
             currentPeriodStart: new Date(
               subscriptionItem.current_period_start * 1000
             ),
@@ -95,7 +130,7 @@ async function POST(request: Request) {
           },
           update: {
             stripePriceId: priceId,
-            status: subscription.status,
+            status: subscriptionStatus,
             currentPeriodStart: new Date(
               subscriptionItem.current_period_start * 1000
             ),
@@ -128,11 +163,10 @@ async function POST(request: Request) {
         });
 
         if (!stripeCustomer) {
-          if (process.env.NODE_ENV === "development") {
-            console.error(
-              `[Webhook Error] StripeCustomer not found for ${customerId}. Event: ${event.type}`
-            );
-          }
+          Sentry.captureMessage(
+            `StripeCustomer not found for ${customerId}. Event: ${event.type}`,
+            "warning"
+          );
           break;
         }
 
@@ -160,8 +194,9 @@ async function POST(request: Request) {
             : invoice.customer?.id;
 
         if (!customerId) {
-          console.error(
-            `[Webhook Error] No customer ID in invoice. Event: ${event.type}`
+          Sentry.captureMessage(
+            `No customer ID in invoice. Event: ${event.type}`,
+            "warning"
           );
           break;
         }
@@ -172,8 +207,9 @@ async function POST(request: Request) {
         });
 
         if (!stripeCustomer) {
-          console.error(
-            `[Webhook Error] StripeCustomer not found for ${customerId}. Event: ${event.type}`
+          Sentry.captureMessage(
+            `StripeCustomer not found for ${customerId}. Event: ${event.type}`,
+            "warning"
           );
           break;
         }
@@ -195,9 +231,9 @@ async function POST(request: Request) {
         }
     }
   } catch (error: unknown) {
-    const errorMessage =
-      error instanceof Error ? error.message : "Erreur inconnue";
-    console.error(`Error processing webhook event: ${errorMessage}`);
+    Sentry.captureException(error, {
+      extra: { eventType: event.type, eventId: event.id },
+    });
     return NextResponse.json({ success: true, received: true });
   }
 

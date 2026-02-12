@@ -6,6 +6,7 @@ import { notFound, redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { parseUserRole } from "@/lib/constants/user-role.constant";
 import { env } from "@/lib/env";
+import type { SubscriptionStatus } from "@/lib/generated/prisma/client";
 import type { UserRole } from "@/lib/generated/prisma/enums";
 import { prisma } from "@/lib/prisma";
 
@@ -17,7 +18,11 @@ type Session = Omit<RawSession, "user"> & {
   };
 };
 
-const VALID_SUBSCRIPTION_STATUSES = ["active", "trialing", "past_due"];
+const VALID_SUBSCRIPTION_STATUSES: SubscriptionStatus[] = [
+  "active",
+  "trialing",
+  "past_due",
+];
 
 /**
  * Récupère la session (mémorisée pendant le rendu)

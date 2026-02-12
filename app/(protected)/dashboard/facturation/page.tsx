@@ -2,12 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { AlertCircle } from "lucide-react";
-import type Stripe from "stripe";
 
-import { prisma } from "@/lib/prisma";
-import { redis } from "@/lib/redis";
 import { requireCustomerVerifiedEmail } from "@/lib/session";
-import { stripe } from "@/lib/stripe";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -17,6 +13,8 @@ import { InvoiceList } from "@/app/(protected)/dashboard/facturation/_components
 import { SubscriptionCard } from "@/app/(protected)/dashboard/facturation/_components/subscription-card";
 import { SubscriptionListEmpty } from "@/app/(protected)/dashboard/facturation/_components/subscription-list-empty";
 import { SubscriptionStatusCard } from "@/app/(protected)/dashboard/facturation/_components/subscription-status-card";
+import { getBilling } from "@/app/(protected)/dashboard/facturation/_lib/get-billing";
+import type { BillingSubscription } from "@/app/(protected)/dashboard/facturation/_lib/get-billing";
 
 export const metadata: Metadata = {
   title: "Facturation",
@@ -29,12 +27,9 @@ export const metadata: Metadata = {
 export default async function DashboardBillingPage() {
   const session = await requireCustomerVerifiedEmail();
 
-  const stripeCustomer = await prisma.stripeCustomer.findUnique({
-    where: { userId: session.user.id },
-    select: { stripeCustomerId: true },
-  });
+  const billing = await getBilling(session.user.id);
 
-  if (!stripeCustomer) {
+  if (!billing) {
     return (
       <main className="flex min-h-screen flex-col gap-6 p-6">
         <header className="space-y-2">
@@ -58,35 +53,11 @@ export default async function DashboardBillingPage() {
     );
   }
 
-  const invoicesCacheKey = `invoices:${session.user.id}`;
-  const cachedInvoices = await redis.get<Stripe.Invoice[]>(invoicesCacheKey);
-
-  let invoices: Stripe.Invoice[];
-
-  if (cachedInvoices) {
-    invoices = cachedInvoices;
-  } else {
-    const { data: fetchedInvoices } = await stripe.invoices.list({
-      customer: stripeCustomer.stripeCustomerId,
-      limit: 100,
-    });
-    await redis.set(invoicesCacheKey, fetchedInvoices, { ex: 300 });
-    invoices = fetchedInvoices;
-  }
-
-  const { data: subscriptions } = await stripe.subscriptions.list({
-    customer: stripeCustomer.stripeCustomerId,
-    limit: 100,
-  });
+  const { invoices, subscriptions } = billing;
 
   const activeSubscription = subscriptions.find(
-    (subscription: Stripe.Subscription) => subscription.status === "active"
-  ) as
-    | (Stripe.Subscription & {
-        current_period_end: number;
-        cancel_at_period_end: boolean;
-      })
-    | undefined;
+    (subscription: BillingSubscription) => subscription.status === "active"
+  );
 
   return (
     <main className="flex min-h-screen flex-col gap-6 p-6">
@@ -133,14 +104,14 @@ export default async function DashboardBillingPage() {
                 <h2 className="text-xl font-semibold">Abonnement actif</h2>
                 <SubscriptionCard subscription={activeSubscription} />
 
-                {activeSubscription.cancel_at_period_end && (
+                {activeSubscription.cancelAtPeriodEnd && (
                   <Alert variant="destructive">
                     <AlertCircle className="h-4 w-4" aria-hidden="true" />
                     <AlertTitle>Abonnement en cours d'annulation</AlertTitle>
                     <AlertDescription>
                       Votre abonnement sera annulé le{" "}
                       {new Date(
-                        activeSubscription.current_period_end * 1000
+                        activeSubscription.currentPeriodEnd * 1000
                       ).toLocaleDateString("fr-FR", {
                         day: "numeric",
                         month: "long",
@@ -161,7 +132,7 @@ export default async function DashboardBillingPage() {
           </div>
 
           {subscriptions.filter(
-            (subscription: Stripe.Subscription) =>
+            (subscription: BillingSubscription) =>
               subscription.status !== "active"
           ).length > 0 && (
             <div className="space-y-4">
@@ -170,10 +141,10 @@ export default async function DashboardBillingPage() {
               <div className="grid gap-4">
                 {subscriptions
                   .filter(
-                    (subscription: Stripe.Subscription) =>
+                    (subscription: BillingSubscription) =>
                       subscription.status !== "active"
                   )
-                  .map((subscription: Stripe.Subscription) => (
+                  .map((subscription: BillingSubscription) => (
                     <SubscriptionCard
                       key={subscription.id}
                       subscription={subscription}
