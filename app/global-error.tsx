@@ -1,5 +1,8 @@
 "use client";
 
+import { useEffect } from "react";
+
+import * as Sentry from "@sentry/nextjs";
 import { AlertTriangle } from "lucide-react";
 
 type GlobalErrorProps = {
@@ -8,6 +11,9 @@ type GlobalErrorProps = {
 };
 
 export default function GlobalError({ error, reset }: GlobalErrorProps) {
+  useEffect(() => {
+    Sentry.captureException(error);
+  }, [error]);
   return (
     <html lang="fr">
       <body>

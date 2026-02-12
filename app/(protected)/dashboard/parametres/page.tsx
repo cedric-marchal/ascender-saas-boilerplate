@@ -10,11 +10,11 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
+import { AvatarForm } from "@/app/(protected)/_components/forms/avatar-form";
+import { PasswordForm } from "@/app/(protected)/_components/forms/password-form";
+import { ProfileForm } from "@/app/(protected)/_components/forms/profile-form";
+import { DeleteAccountModal } from "@/app/(protected)/_components/modals/delete-account-modal";
 import { DashboardSettingsHeader } from "@/app/(protected)/dashboard/parametres/_components/dashboard-settings-header";
-import { DashboardAvatarForm } from "@/app/(protected)/dashboard/parametres/_components/forms/dashboard-avatar-form";
-import { DashboardPasswordForm } from "@/app/(protected)/dashboard/parametres/_components/forms/dashboard-password-form";
-import { DashboardProfileForm } from "@/app/(protected)/dashboard/parametres/_components/forms/dashboard-profile-form";
-import { DashboardDeleteAccountModal } from "@/app/(protected)/dashboard/parametres/_components/modals/dashboard-delete-account-modal";
 
 export const metadata: Metadata = {
   title: "Paramètres",
@@ -41,7 +41,7 @@ export default async function DashboardSettingsPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <DashboardProfileForm
+              <ProfileForm
                 name={session.user.name}
                 email={session.user.email}
                 emailVerified={session.user.emailVerified}
@@ -57,7 +57,7 @@ export default async function DashboardSettingsPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <DashboardPasswordForm />
+              <PasswordForm />
             </CardContent>
           </Card>
         </div>
@@ -71,7 +71,7 @@ export default async function DashboardSettingsPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <DashboardAvatarForm
+              <AvatarForm
                 name={session.user.name}
                 image={session.user.image}
               />
@@ -89,7 +89,7 @@ export default async function DashboardSettingsPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <DashboardDeleteAccountModal email={session.user.email} />
+          <DeleteAccountModal email={session.user.email} showStripeWarning />
         </CardContent>
       </Card>
     </main>

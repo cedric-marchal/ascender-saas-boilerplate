@@ -1,6 +1,6 @@
 "use client";
 
-import type { SubmitEvent } from "react";
+import type { ChangeEvent, SubmitEvent } from "react";
 
 import { useForm } from "@tanstack/react-form";
 import { Loader2 } from "lucide-react";
@@ -24,15 +24,12 @@ import { Input } from "@/components/ui/input";
 
 import { deleteAccountAction } from "@/app/(protected)/_actions/delete-account.action";
 
-type DashboardDeleteAccountFormProps = {
+type DeleteAccountFormProps = {
   email: string;
   onSuccess: () => void;
 };
 
-function DashboardDeleteAccountForm({
-  email,
-  onSuccess,
-}: DashboardDeleteAccountFormProps) {
+function DeleteAccountForm({ email, onSuccess }: DeleteAccountFormProps) {
   const { executeAsync, isExecuting } = useAction(deleteAccountAction);
 
   const form = useForm({
@@ -71,17 +68,22 @@ function DashboardDeleteAccountForm({
         children={(field) => {
           const isInvalid =
             field.state.meta.isTouched && !field.state.meta.isValid;
+
+          function handleChange(event: ChangeEvent<HTMLInputElement>) {
+            field.handleChange(event.target.value);
+          }
+
           return (
             <Field data-invalid={isInvalid}>
-              <FieldLabel htmlFor="dashboard-delete-confirmation">
+              <FieldLabel htmlFor="settings-delete-confirmation">
                 Confirmation
               </FieldLabel>
               <Input
-                id="dashboard-delete-confirmation"
+                id="settings-delete-confirmation"
                 name={field.name}
                 value={field.state.value}
                 onBlur={field.handleBlur}
-                onChange={(event) => field.handleChange(event.target.value)}
+                onChange={handleChange}
                 aria-invalid={isInvalid}
                 placeholder={email}
               />
@@ -120,4 +122,4 @@ function DashboardDeleteAccountForm({
   );
 }
 
-export { DashboardDeleteAccountForm };
+export { DeleteAccountForm };

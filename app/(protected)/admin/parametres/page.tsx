@@ -12,11 +12,11 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
+import { AvatarForm } from "@/app/(protected)/_components/forms/avatar-form";
+import { PasswordForm } from "@/app/(protected)/_components/forms/password-form";
+import { ProfileForm } from "@/app/(protected)/_components/forms/profile-form";
+import { DeleteAccountModal } from "@/app/(protected)/_components/modals/delete-account-modal";
 import { AdminSettingsHeader } from "@/app/(protected)/admin/parametres/_components/admin-settings-header";
-import { AdminAvatarForm } from "@/app/(protected)/admin/parametres/_components/forms/admin-avatar-form";
-import { AdminPasswordForm } from "@/app/(protected)/admin/parametres/_components/forms/admin-password-form";
-import { AdminProfileForm } from "@/app/(protected)/admin/parametres/_components/forms/admin-profile-form";
-import { AdminDeleteAccountModal } from "@/app/(protected)/admin/parametres/_components/modals/admin-delete-account-modal";
 
 export const metadata: Metadata = {
   title: "Paramètres",
@@ -58,7 +58,7 @@ export default async function AdminSettingsPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <AdminProfileForm
+              <ProfileForm
                 name={user.name}
                 email={user.email}
                 emailVerified={user.emailVerified}
@@ -74,7 +74,7 @@ export default async function AdminSettingsPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <AdminPasswordForm />
+              <PasswordForm />
             </CardContent>
           </Card>
         </div>
@@ -88,7 +88,7 @@ export default async function AdminSettingsPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <AdminAvatarForm user={user} />
+              <AvatarForm name={user.name} image={user.image} />
             </CardContent>
           </Card>
         </div>
@@ -103,7 +103,7 @@ export default async function AdminSettingsPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <AdminDeleteAccountModal email={user.email} />
+          <DeleteAccountModal email={user.email} />
         </CardContent>
       </Card>
     </main>

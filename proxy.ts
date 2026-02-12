@@ -18,6 +18,18 @@ const SECURITY_HEADERS = {
   "Strict-Transport-Security":
     "max-age=63072000; includeSubDomains; preload",
   "X-DNS-Prefetch-Control": "on",
+  "Content-Security-Policy": [
+    "default-src 'self'",
+    "script-src 'self' 'unsafe-inline'",
+    "style-src 'self' 'unsafe-inline'",
+    "img-src 'self' data: blob: https://*.r2.cloudflarestorage.com",
+    "font-src 'self'",
+    "connect-src 'self' https://*.stripe.com https://*.sentry.io https://*.ingest.sentry.io",
+    "frame-src https://*.stripe.com",
+    "object-src 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+  ].join("; "),
 };
 
 function applySecurityHeaders(response: NextResponse): NextResponse {

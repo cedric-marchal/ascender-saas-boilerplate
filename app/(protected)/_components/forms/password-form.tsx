@@ -2,17 +2,15 @@
 
 import type { ChangeEvent, SubmitEvent } from "react";
 
-import { useRouter } from "next/navigation";
-
 import { useForm } from "@tanstack/react-form";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { toast } from "sonner";
 
 import {
-  UpdateProfileSchema,
-  type UpdateProfileSchemaType,
-} from "@/lib/schemas/profile.schema";
+  UpdatePasswordSchema,
+  type UpdatePasswordSchemaType,
+} from "@/lib/schemas/password.schema";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -23,30 +21,19 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 
-import { updateProfileAction } from "@/app/(protected)/_actions/update-profile.action";
-import { EmailVerificationBadge } from "@/app/(protected)/dashboard/parametres/_components/email-verification-badge";
+import { updatePasswordAction } from "@/app/(protected)/_actions/update-password.action";
 
-type DashboardProfileFormProps = {
-  name: string;
-  email: string;
-  emailVerified: boolean;
-};
-
-function DashboardProfileForm({
-  name,
-  email,
-  emailVerified,
-}: DashboardProfileFormProps) {
-  const router = useRouter();
-  const { executeAsync, isExecuting } = useAction(updateProfileAction);
+function PasswordForm() {
+  const { executeAsync, isExecuting } = useAction(updatePasswordAction);
 
   const form = useForm({
     defaultValues: {
-      name: name,
-      email: email,
-    } as UpdateProfileSchemaType,
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: "",
+    } as UpdatePasswordSchemaType,
     validators: {
-      onSubmit: UpdateProfileSchema,
+      onSubmit: UpdatePasswordSchema,
     },
     onSubmit: async ({ value }) => {
       const result = await executeAsync(value);
@@ -56,14 +43,11 @@ function DashboardProfileForm({
         return;
       }
 
-      if (result?.data) {
+      if (result?.data?.success) {
         toast.success(
-          result.data.emailChanged
-            ? "Profil mis à jour avec succès. Un email de vérification a été envoyé."
-            : "Profil mis à jour avec succès"
+          "Mot de passe modifié avec succès. Un email de confirmation a été envoyé."
         );
-
-        router.refresh();
+        form.reset();
       }
     },
   });
@@ -77,7 +61,7 @@ function DashboardProfileForm({
       className="space-y-6"
     >
       <form.Field
-        name="name"
+        name="currentPassword"
         children={(field) => {
           const isInvalid =
             field.state.meta.isTouched && !field.state.meta.isValid;
@@ -88,15 +72,18 @@ function DashboardProfileForm({
 
           return (
             <Field data-invalid={isInvalid}>
-              <FieldLabel htmlFor="dashboard-profile-name">Nom</FieldLabel>
+              <FieldLabel htmlFor="settings-password-current">
+                Mot de passe actuel
+              </FieldLabel>
               <Input
-                id="dashboard-profile-name"
+                id="settings-password-current"
+                type="password"
                 name={field.name}
                 value={field.state.value}
                 onBlur={field.handleBlur}
                 onChange={handleChange}
                 aria-invalid={isInvalid}
-                placeholder="Votre nom"
+                placeholder="••••••••"
               />
               {isInvalid && <FieldError errors={field.state.meta.errors} />}
             </Field>
@@ -105,7 +92,7 @@ function DashboardProfileForm({
       />
 
       <form.Field
-        name="email"
+        name="newPassword"
         children={(field) => {
           const isInvalid =
             field.state.meta.isTouched && !field.state.meta.isValid;
@@ -116,25 +103,53 @@ function DashboardProfileForm({
 
           return (
             <Field data-invalid={isInvalid}>
-              <FieldLabel htmlFor="dashboard-profile-email">Email</FieldLabel>
+              <FieldLabel htmlFor="settings-password-new">
+                Nouveau mot de passe
+              </FieldLabel>
               <Input
-                id="dashboard-profile-email"
-                type="email"
+                id="settings-password-new"
+                type="password"
                 name={field.name}
                 value={field.state.value}
                 onBlur={field.handleBlur}
                 onChange={handleChange}
                 aria-invalid={isInvalid}
-                placeholder="votre@email.com"
+                placeholder="••••••••"
               />
-              <FieldDescription className="flex items-center gap-2">
-                <EmailVerificationBadge isVerified={emailVerified} />
-                {!emailVerified && (
-                  <span className="text-xs text-orange-600">
-                    Vérifiez votre email pour sécuriser votre compte
-                  </span>
-                )}
+              <FieldDescription>
+                Minimum 8 caractères, différent de l&apos;ancien
               </FieldDescription>
+              {isInvalid && <FieldError errors={field.state.meta.errors} />}
+            </Field>
+          );
+        }}
+      />
+
+      <form.Field
+        name="confirmPassword"
+        children={(field) => {
+          const isInvalid =
+            field.state.meta.isTouched && !field.state.meta.isValid;
+
+          function handleChange(event: ChangeEvent<HTMLInputElement>) {
+            field.handleChange(event.target.value);
+          }
+
+          return (
+            <Field data-invalid={isInvalid}>
+              <FieldLabel htmlFor="settings-password-confirm">
+                Confirmer le nouveau mot de passe
+              </FieldLabel>
+              <Input
+                id="settings-password-confirm"
+                type="password"
+                name={field.name}
+                value={field.state.value}
+                onBlur={field.handleBlur}
+                onChange={handleChange}
+                aria-invalid={isInvalid}
+                placeholder="••••••••"
+              />
               {isInvalid && <FieldError errors={field.state.meta.errors} />}
             </Field>
           );
@@ -156,8 +171,8 @@ function DashboardProfileForm({
               />
             ) : null}
             {isExecuting || isSubmitting
-              ? "Enregistrement..."
-              : "Enregistrer les modifications"}
+              ? "Modification..."
+              : "Modifier le mot de passe"}
           </Button>
         )}
       </form.Subscribe>
@@ -165,4 +180,4 @@ function DashboardProfileForm({
   );
 }
 
-export { DashboardProfileForm };
+export { PasswordForm };

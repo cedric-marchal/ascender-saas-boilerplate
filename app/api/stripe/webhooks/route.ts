@@ -68,7 +68,15 @@ async function POST(request: Request) {
           break;
         }
 
-        const priceId = subscription.items.data[0]?.price?.id ?? "";
+        const subscriptionItem = subscription.items.data[0];
+        const priceId = subscriptionItem?.price?.id;
+
+        if (!priceId || !subscriptionItem) {
+          console.error(
+            `[Webhook Error] Missing priceId for subscription ${subscription.id}. Event: ${event.type}`
+          );
+          break;
+        }
 
         await prisma.subscription.upsert({
           where: { stripeSubscriptionId: subscription.id },
@@ -78,10 +86,10 @@ async function POST(request: Request) {
             stripePriceId: priceId,
             status: subscription.status,
             currentPeriodStart: new Date(
-              subscription.current_period_start * 1000
+              subscriptionItem.current_period_start * 1000
             ),
             currentPeriodEnd: new Date(
-              subscription.current_period_end * 1000
+              subscriptionItem.current_period_end * 1000
             ),
             cancelAtPeriodEnd: subscription.cancel_at_period_end,
           },
@@ -89,10 +97,10 @@ async function POST(request: Request) {
             stripePriceId: priceId,
             status: subscription.status,
             currentPeriodStart: new Date(
-              subscription.current_period_start * 1000
+              subscriptionItem.current_period_start * 1000
             ),
             currentPeriodEnd: new Date(
-              subscription.current_period_end * 1000
+              subscriptionItem.current_period_end * 1000
             ),
             cancelAtPeriodEnd: subscription.cancel_at_period_end,
           },
@@ -190,10 +198,7 @@ async function POST(request: Request) {
     const errorMessage =
       error instanceof Error ? error.message : "Erreur inconnue";
     console.error(`Error processing webhook event: ${errorMessage}`);
-    return NextResponse.json(
-      { success: false, message: `Processing Error: ${errorMessage}` },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: true, received: true });
   }
 
   return NextResponse.json({ success: true, received: true });

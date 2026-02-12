@@ -1,6 +1,11 @@
 "use client";
 
-import { useState, type ChangeEvent, type DragEvent, type SubmitEvent } from "react";
+import {
+  type ChangeEvent,
+  type DragEvent,
+  type SubmitEvent,
+  useState,
+} from "react";
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -18,16 +23,18 @@ import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 
 import { getInitials } from "@/utils/string/get-initials";
 
-type DashboardAvatarFormProps = {
+type AvatarFormProps = {
   name: string;
   image: string | null | undefined;
 };
 
-function DashboardAvatarForm({ name, image }: DashboardAvatarFormProps) {
+function AvatarForm({ name, image }: AvatarFormProps) {
   const router = useRouter();
 
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+
+  const initials = getInitials(name);
 
   function handleFileChange(file: File | null) {
     if (!file) {
@@ -82,10 +89,11 @@ function DashboardAvatarForm({ name, image }: DashboardAvatarFormProps) {
     >
       <div className="flex items-center gap-6">
         <Avatar className="h-20 w-20">
-          <AvatarImage src={previewUrl || image || undefined} alt={name} />
-          <AvatarFallback className="text-lg">
-            {getInitials(name)}
-          </AvatarFallback>
+          <AvatarImage
+            src={previewUrl || image || undefined}
+            alt={name}
+          />
+          <AvatarFallback className="text-lg">{initials}</AvatarFallback>
         </Avatar>
 
         <div className="flex-1">
@@ -117,7 +125,6 @@ function DashboardAvatarForm({ name, image }: DashboardAvatarFormProps) {
             setIsDragging(false);
 
             const droppedFile = event.dataTransfer.files[0];
-
             if (droppedFile) {
               field.handleChange(droppedFile);
               handleFileChange(droppedFile);
@@ -126,7 +133,6 @@ function DashboardAvatarForm({ name, image }: DashboardAvatarFormProps) {
 
           function handleInputChange(event: ChangeEvent<HTMLInputElement>) {
             const selectedFile = event.target.files?.[0];
-
             if (selectedFile) {
               field.handleChange(selectedFile);
               handleFileChange(selectedFile);
@@ -142,7 +148,7 @@ function DashboardAvatarForm({ name, image }: DashboardAvatarFormProps) {
 
           return (
             <Field data-invalid={isInvalid}>
-              <FieldLabel htmlFor="dashboard-avatar-input">
+              <FieldLabel htmlFor="settings-avatar-input">
                 Changer l&apos;avatar
               </FieldLabel>
               <div
@@ -199,7 +205,7 @@ function DashboardAvatarForm({ name, image }: DashboardAvatarFormProps) {
                       <label className="text-primary cursor-pointer font-medium hover:underline">
                         parcourir
                         <input
-                          id="dashboard-avatar-input"
+                          id="settings-avatar-input"
                           type="file"
                           accept="image/jpeg,image/png,image/webp"
                           onChange={handleInputChange}
@@ -245,4 +251,4 @@ function DashboardAvatarForm({ name, image }: DashboardAvatarFormProps) {
   );
 }
 
-export { DashboardAvatarForm };
+export { AvatarForm };

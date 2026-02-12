@@ -2,15 +2,17 @@
 
 import type { ChangeEvent, SubmitEvent } from "react";
 
+import { useRouter } from "next/navigation";
+
 import { useForm } from "@tanstack/react-form";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { toast } from "sonner";
 
 import {
-  UpdatePasswordSchema,
-  type UpdatePasswordSchemaType,
-} from "@/lib/schemas/password.schema";
+  UpdateProfileSchema,
+  type UpdateProfileSchemaType,
+} from "@/lib/schemas/profile.schema";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -21,19 +23,26 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 
-import { updatePasswordAction } from "@/app/(protected)/_actions/update-password.action";
+import { updateProfileAction } from "@/app/(protected)/_actions/update-profile.action";
+import { EmailVerificationBadge } from "@/app/(protected)/_components/email-verification-badge";
 
-function AdminPasswordForm() {
-  const { executeAsync, isExecuting } = useAction(updatePasswordAction);
+type ProfileFormProps = {
+  name: string;
+  email: string;
+  emailVerified: boolean;
+};
+
+function ProfileForm({ name, email, emailVerified }: ProfileFormProps) {
+  const router = useRouter();
+  const { executeAsync, isExecuting } = useAction(updateProfileAction);
 
   const form = useForm({
     defaultValues: {
-      currentPassword: "",
-      newPassword: "",
-      confirmPassword: "",
-    } as UpdatePasswordSchemaType,
+      name: name,
+      email: email,
+    } as UpdateProfileSchemaType,
     validators: {
-      onSubmit: UpdatePasswordSchema,
+      onSubmit: UpdateProfileSchema,
     },
     onSubmit: async ({ value }) => {
       const result = await executeAsync(value);
@@ -43,11 +52,14 @@ function AdminPasswordForm() {
         return;
       }
 
-      if (result?.data?.success) {
+      if (result?.data) {
         toast.success(
-          "Mot de passe modifié avec succès. Un email de confirmation a été envoyé."
+          result.data.emailChanged
+            ? "Profil mis à jour avec succès. Un email de vérification a été envoyé."
+            : "Profil mis à jour avec succès"
         );
-        form.reset();
+
+        router.refresh();
       }
     },
   });
@@ -61,7 +73,7 @@ function AdminPasswordForm() {
       className="space-y-6"
     >
       <form.Field
-        name="currentPassword"
+        name="name"
         children={(field) => {
           const isInvalid =
             field.state.meta.isTouched && !field.state.meta.isValid;
@@ -72,18 +84,15 @@ function AdminPasswordForm() {
 
           return (
             <Field data-invalid={isInvalid}>
-              <FieldLabel htmlFor="admin-password-current">
-                Mot de passe actuel
-              </FieldLabel>
+              <FieldLabel htmlFor="settings-profile-name">Nom</FieldLabel>
               <Input
-                id="admin-password-current"
-                type="password"
+                id="settings-profile-name"
                 name={field.name}
                 value={field.state.value}
                 onBlur={field.handleBlur}
                 onChange={handleChange}
                 aria-invalid={isInvalid}
-                placeholder="••••••••"
+                placeholder="Votre nom"
               />
               {isInvalid && <FieldError errors={field.state.meta.errors} />}
             </Field>
@@ -92,7 +101,7 @@ function AdminPasswordForm() {
       />
 
       <form.Field
-        name="newPassword"
+        name="email"
         children={(field) => {
           const isInvalid =
             field.state.meta.isTouched && !field.state.meta.isValid;
@@ -103,53 +112,25 @@ function AdminPasswordForm() {
 
           return (
             <Field data-invalid={isInvalid}>
-              <FieldLabel htmlFor="admin-password-new">
-                Nouveau mot de passe
-              </FieldLabel>
+              <FieldLabel htmlFor="settings-profile-email">Email</FieldLabel>
               <Input
-                id="admin-password-new"
-                type="password"
+                id="settings-profile-email"
+                type="email"
                 name={field.name}
                 value={field.state.value}
                 onBlur={field.handleBlur}
                 onChange={handleChange}
                 aria-invalid={isInvalid}
-                placeholder="••••••••"
+                placeholder="votre@email.com"
               />
-              <FieldDescription>
-                Minimum 8 caractères, différent de l&apos;ancien
+              <FieldDescription className="flex items-center gap-2">
+                <EmailVerificationBadge isVerified={emailVerified} />
+                {!emailVerified && (
+                  <span className="text-xs text-orange-600">
+                    Vérifiez votre email pour sécuriser votre compte
+                  </span>
+                )}
               </FieldDescription>
-              {isInvalid && <FieldError errors={field.state.meta.errors} />}
-            </Field>
-          );
-        }}
-      />
-
-      <form.Field
-        name="confirmPassword"
-        children={(field) => {
-          const isInvalid =
-            field.state.meta.isTouched && !field.state.meta.isValid;
-
-          function handleChange(event: ChangeEvent<HTMLInputElement>) {
-            field.handleChange(event.target.value);
-          }
-
-          return (
-            <Field data-invalid={isInvalid}>
-              <FieldLabel htmlFor="admin-password-confirm">
-                Confirmer le nouveau mot de passe
-              </FieldLabel>
-              <Input
-                id="admin-password-confirm"
-                type="password"
-                name={field.name}
-                value={field.state.value}
-                onBlur={field.handleBlur}
-                onChange={handleChange}
-                aria-invalid={isInvalid}
-                placeholder="••••••••"
-              />
               {isInvalid && <FieldError errors={field.state.meta.errors} />}
             </Field>
           );
@@ -171,8 +152,8 @@ function AdminPasswordForm() {
               />
             ) : null}
             {isExecuting || isSubmitting
-              ? "Modification..."
-              : "Modifier le mot de passe"}
+              ? "Enregistrement..."
+              : "Enregistrer les modifications"}
           </Button>
         )}
       </form.Subscribe>
@@ -180,4 +161,4 @@ function AdminPasswordForm() {
   );
 }
 
-export { AdminPasswordForm };
+export { ProfileForm };

@@ -10,7 +10,10 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 import { env } from "@/lib/env";
 
-import { BadRequestError } from "@/utils/errors/errors";
+import {
+  BadRequestError,
+  ServiceUnavailableError,
+} from "@/utils/errors/errors";
 
 const r2 = new S3Client({
   region: "auto",
@@ -85,7 +88,10 @@ async function uploadFile(
       })
     );
   } catch (error: unknown) {
-    throw new BadRequestError("Échec de l'upload du fichier vers le stockage");
+    console.error("R2 upload error:", error);
+    throw new ServiceUnavailableError(
+      "Le service de stockage est temporairement indisponible"
+    );
   }
 }
 
@@ -100,7 +106,10 @@ async function deleteFile(key: string): Promise<void> {
       })
     );
   } catch (error: unknown) {
-    throw new BadRequestError("Échec de la suppression du fichier");
+    console.error("R2 delete error:", error);
+    throw new ServiceUnavailableError(
+      "Le service de stockage est temporairement indisponible"
+    );
   }
 }
 
@@ -139,8 +148,9 @@ async function getPrivateUrl(
 
     return url;
   } catch (error: unknown) {
-    throw new BadRequestError(
-      "Échec de la génération de l'URL de téléchargement"
+    console.error("R2 signed URL error:", error);
+    throw new ServiceUnavailableError(
+      "Le service de stockage est temporairement indisponible"
     );
   }
 }

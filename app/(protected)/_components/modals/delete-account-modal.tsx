@@ -16,13 +16,17 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 
-import { AdminDeleteAccountForm } from "@/app/(protected)/admin/parametres/_components/forms/admin-delete-account-form";
+import { DeleteAccountForm } from "@/app/(protected)/_components/forms/delete-account-form";
 
-type AdminDeleteAccountModalProps = {
+type DeleteAccountModalProps = {
   email: string;
+  showStripeWarning?: boolean;
 };
 
-function AdminDeleteAccountModal({ email }: AdminDeleteAccountModalProps) {
+function DeleteAccountModal({
+  email,
+  showStripeWarning = false,
+}: DeleteAccountModalProps) {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
 
@@ -43,14 +47,15 @@ function AdminDeleteAccountModal({ email }: AdminDeleteAccountModalProps) {
         <AlertDialogHeader>
           <AlertDialogTitle>Supprimer votre compte</AlertDialogTitle>
           <AlertDialogDescription>
-            Cette action est irréversible. Votre compte et vos données seront
-            définitivement supprimés.
+            {showStripeWarning
+              ? "Cette action est irréversible. Votre compte, vos données et votre abonnement Stripe seront définitivement supprimés."
+              : "Cette action est irréversible. Votre compte et vos données seront définitivement supprimés."}
           </AlertDialogDescription>
         </AlertDialogHeader>
-        <AdminDeleteAccountForm email={email} onSuccess={handleSuccess} />
+        <DeleteAccountForm email={email} onSuccess={handleSuccess} />
       </AlertDialogContent>
     </AlertDialog>
   );
 }
 
-export { AdminDeleteAccountModal };
+export { DeleteAccountModal };
