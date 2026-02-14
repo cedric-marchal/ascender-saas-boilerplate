@@ -2,8 +2,6 @@ import Link from "next/link";
 
 import { Calendar, Download, FileText } from "lucide-react";
 
-import type { BillingInvoice } from "@/app/(protected)/dashboard/facturation/_lib/get-billing";
-
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,6 +11,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+
+import type { BillingInvoice } from "@/app/(protected)/dashboard/facturation/_lib/get-billing";
 
 type InvoiceStatusConfig = {
   label: string;
@@ -33,7 +33,7 @@ type InvoiceCardProps = {
 
 function InvoiceCard({ invoice }: InvoiceCardProps) {
   const config = invoice.status
-    ? STATUS_CONFIG[invoice.status] ?? STATUS_CONFIG.draft
+    ? (STATUS_CONFIG[invoice.status] ?? STATUS_CONFIG.draft)
     : STATUS_CONFIG.draft;
 
   function formatAmount(amount: number | null): string {

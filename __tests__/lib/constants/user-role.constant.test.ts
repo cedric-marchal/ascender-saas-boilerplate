@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  parseUserRole,
   USER_ROLE_CONFIG,
+  parseUserRole,
 } from "@/lib/constants/user-role.constant";
 
 describe("USER_ROLE_CONFIG", () => {
@@ -48,9 +48,7 @@ describe("parseUserRole", () => {
   });
 
   it("throws for empty string", () => {
-    expect(() => parseUserRole("")).toThrow(
-      "Role invalide dans la session: "
-    );
+    expect(() => parseUserRole("")).toThrow("Role invalide dans la session: ");
   });
 
   it("throws for lowercase role", () => {

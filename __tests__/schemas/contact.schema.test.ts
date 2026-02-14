@@ -7,7 +7,8 @@ describe("CreateContactSchema", () => {
     name: "Jean Dupont",
     email: "jean@exemple.fr",
     subject: "Demande de renseignements",
-    message: "Bonjour, je souhaite obtenir plus d'informations sur vos services.",
+    message:
+      "Bonjour, je souhaite obtenir plus d'informations sur vos services.",
   };
 
   it("accepts valid data", () => {

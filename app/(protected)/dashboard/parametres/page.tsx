@@ -71,10 +71,7 @@ export default async function DashboardSettingsPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <AvatarForm
-                name={session.user.name}
-                image={session.user.image}
-              />
+              <AvatarForm name={session.user.name} image={session.user.image} />
             </CardContent>
           </Card>
         </div>

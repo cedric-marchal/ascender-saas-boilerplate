@@ -62,9 +62,4 @@ export {
   verificationLabels,
 };
 
-export type {
-  UserRole,
-  UserRoleFilter,
-  UserSortableField,
-  VerificationFilter,
-};
+export type { UserRole, UserRoleFilter, UserSortableField, VerificationFilter };

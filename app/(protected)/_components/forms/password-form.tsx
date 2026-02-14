@@ -149,9 +149,7 @@ function PasswordForm() {
                 <button
                   type="button"
                   onClick={() =>
-                    setIsNewPasswordVisible(
-                      (previous: boolean) => !previous
-                    )
+                    setIsNewPasswordVisible((previous: boolean) => !previous)
                   }
                   className="text-muted-foreground hover:text-foreground absolute top-0 right-0 flex h-9 w-9 items-center justify-center"
                   aria-label={

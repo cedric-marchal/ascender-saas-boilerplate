@@ -1,10 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import {
-  FILTERS,
-  PAGINATION,
-  SORTING,
-} from "@/lib/constants/query.constant";
+import { FILTERS, PAGINATION, SORTING } from "@/lib/constants/query.constant";
 
 describe("PAGINATION constants", () => {
   it("has a maxPage of 1000", () => {

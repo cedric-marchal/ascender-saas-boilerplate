@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { passwordSchema, UpdatePasswordSchema } from "@/lib/schemas/password.schema";
+import {
+  UpdatePasswordSchema,
+  passwordSchema,
+} from "@/lib/schemas/password.schema";
 
 describe("passwordSchema", () => {
   it("accepts valid password with lowercase, uppercase, and digit", () => {
@@ -71,8 +74,8 @@ describe("UpdatePasswordSchema", () => {
     });
     expect(result.success).toBe(false);
     if (!result.success) {
-      const confirmErrors = result.error.issues.filter(
-        (issue) => issue.path.includes("confirmPassword")
+      const confirmErrors = result.error.issues.filter((issue) =>
+        issue.path.includes("confirmPassword")
       );
       expect(confirmErrors.length).toBeGreaterThan(0);
     }
@@ -86,8 +89,8 @@ describe("UpdatePasswordSchema", () => {
     });
     expect(result.success).toBe(false);
     if (!result.success) {
-      const newPasswordErrors = result.error.issues.filter(
-        (issue) => issue.path.includes("newPassword")
+      const newPasswordErrors = result.error.issues.filter((issue) =>
+        issue.path.includes("newPassword")
       );
       expect(newPasswordErrors.length).toBeGreaterThan(0);
     }

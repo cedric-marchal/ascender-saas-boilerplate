@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-
 import { ZodError } from "zod";
 
 import {
@@ -36,9 +35,7 @@ describe("handleActionError", () => {
       const zodError = new ZodError([]);
 
       const result = handleActionError(zodError);
-      expect(result.error).toBe(
-        "Une erreur de validation s'est produite"
-      );
+      expect(result.error).toBe("Une erreur de validation s'est produite");
     });
   });
 

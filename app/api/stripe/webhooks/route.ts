@@ -110,8 +110,7 @@ async function POST(request: Request) {
           break;
         }
 
-        const subscriptionStatus =
-          subscription.status as SubscriptionStatus;
+        const subscriptionStatus = subscription.status as SubscriptionStatus;
 
         await prisma.subscription.upsert({
           where: { stripeSubscriptionId: subscription.id },

@@ -196,8 +196,8 @@ describe("ResetPasswordSchema", () => {
     });
     expect(result.success).toBe(false);
     if (!result.success) {
-      const confirmErrors = result.error.issues.filter(
-        (issue) => issue.path.includes("confirmPassword")
+      const confirmErrors = result.error.issues.filter((issue) =>
+        issue.path.includes("confirmPassword")
       );
       expect(confirmErrors.length).toBeGreaterThan(0);
     }

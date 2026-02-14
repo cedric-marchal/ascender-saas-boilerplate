@@ -1,15 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-
 import { ZodError } from "zod";
-
-vi.mock("next/server", () => ({
-  NextResponse: {
-    json: vi.fn(
-      (body: unknown, init: { status: number }) =>
-        ({ body, status: init.status }) as any
-    ),
-  },
-}));
 
 import {
   AppError,
@@ -20,6 +10,15 @@ import {
   UnauthorizedError,
 } from "@/utils/errors/errors";
 import { handleApiError } from "@/utils/errors/handle-api-error";
+
+vi.mock("next/server", () => ({
+  NextResponse: {
+    json: vi.fn(
+      (body: unknown, init: { status: number }) =>
+        ({ body, status: init.status }) as any
+    ),
+  },
+}));
 
 describe("handleApiError", () => {
   describe("ZodError handling", () => {

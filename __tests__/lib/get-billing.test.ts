@@ -1,5 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
 
+import { prisma } from "@/lib/prisma";
+import { redis } from "@/lib/redis";
+import { stripe } from "@/lib/stripe";
+
+import { getBilling } from "@/app/(protected)/dashboard/facturation/_lib/get-billing";
+
 vi.mock("@/lib/prisma", () => ({
   prisma: {
     stripeCustomer: {
@@ -25,12 +31,6 @@ vi.mock("@/lib/redis", () => ({
     set: vi.fn(),
   },
 }));
-
-import { prisma } from "@/lib/prisma";
-import { redis } from "@/lib/redis";
-import { stripe } from "@/lib/stripe";
-
-import { getBilling } from "@/app/(protected)/dashboard/facturation/_lib/get-billing";
 
 describe("getBilling", () => {
   const mockUserId = "user-123";

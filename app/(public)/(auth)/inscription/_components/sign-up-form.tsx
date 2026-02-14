@@ -142,9 +142,7 @@ function SignUpForm() {
                   <button
                     type="button"
                     onClick={() =>
-                      setIsPasswordVisible(
-                        (previous: boolean) => !previous
-                      )
+                      setIsPasswordVisible((previous: boolean) => !previous)
                     }
                     className="text-muted-foreground hover:text-foreground absolute top-0 right-0 flex h-9 w-9 items-center justify-center"
                     aria-label={

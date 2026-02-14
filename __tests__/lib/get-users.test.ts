@@ -1,5 +1,9 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import { prisma } from "@/lib/prisma";
+
+import { getUsers } from "@/app/(protected)/admin/utilisateurs/_lib/get-users";
+
 vi.mock("@/lib/prisma", () => {
   const mockFindMany = vi.fn();
   const mockCount = vi.fn();
@@ -15,10 +19,6 @@ vi.mock("@/lib/prisma", () => {
     },
   };
 });
-
-import { prisma } from "@/lib/prisma";
-
-import { getUsers } from "@/app/(protected)/admin/utilisateurs/_lib/get-users";
 
 const defaultFilters = {
   search: "",

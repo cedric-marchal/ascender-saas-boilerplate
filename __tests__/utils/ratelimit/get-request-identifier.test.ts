@@ -1,15 +1,15 @@
-import { describe, expect, it, vi } from "vitest";
-
-vi.mock("next/headers", () => ({
-  headers: vi.fn(),
-}));
-
 import { headers } from "next/headers";
+
+import { describe, expect, it, vi } from "vitest";
 
 import {
   getActionIdentifier,
   getRequestIdentifier,
 } from "@/utils/ratelimit/get-request-identifier";
+
+vi.mock("next/headers", () => ({
+  headers: vi.fn(),
+}));
 
 function createMockRequest(headerMap: Record<string, string>): Request {
   return {

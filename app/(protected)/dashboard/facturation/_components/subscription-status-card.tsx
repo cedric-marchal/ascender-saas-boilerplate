@@ -2,8 +2,6 @@ import { CheckCircle2, XCircle } from "lucide-react";
 
 import { env } from "@/lib/env";
 
-import type { BillingSubscription } from "@/app/(protected)/dashboard/facturation/_lib/get-billing";
-
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -12,6 +10,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+
+import type { BillingSubscription } from "@/app/(protected)/dashboard/facturation/_lib/get-billing";
 
 type SubscriptionStatusCardProps = {
   subscriptions: BillingSubscription[];

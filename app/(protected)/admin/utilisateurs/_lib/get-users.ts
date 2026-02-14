@@ -36,9 +36,7 @@ type GetUsersResult = {
 };
 
 async function getUsers(filters: GetUsersFilters): Promise<GetUsersResult> {
-  const safeSearch = filters.search
-    .slice(0, FILTERS.maxSearchLength)
-    .trim();
+  const safeSearch = filters.search.slice(0, FILTERS.maxSearchLength).trim();
   const safePage = Math.max(1, Math.min(filters.page, PAGINATION.maxPage));
 
   const safeRole: UserRoleFilter = isUserRoleFilter(filters.role)
@@ -57,9 +55,9 @@ async function getUsers(filters: GetUsersFilters): Promise<GetUsersResult> {
     ? (filters.sortBy as UserSortableField)
     : (SORTING.defaultSortBy as UserSortableField);
 
-  const safeOrder: SortOrder = (
-    SORTING.orders as readonly string[]
-  ).includes(filters.order)
+  const safeOrder: SortOrder = (SORTING.orders as readonly string[]).includes(
+    filters.order
+  )
     ? (filters.order as SortOrder)
     : SORTING.defaultOrder;
 

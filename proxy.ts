@@ -15,8 +15,7 @@ const STATIC_SECURITY_HEADERS: Record<string, string> = {
   "Referrer-Policy": "strict-origin-when-cross-origin",
   "Permissions-Policy":
     "camera=(), microphone=(), geolocation=(), browsing-topics=()",
-  "Strict-Transport-Security":
-    "max-age=63072000; includeSubDomains; preload",
+  "Strict-Transport-Security": "max-age=63072000; includeSubDomains; preload",
   "X-DNS-Prefetch-Control": "on",
 };
 

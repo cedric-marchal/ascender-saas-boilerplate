@@ -233,8 +233,7 @@ function AvatarForm({ user }: AvatarFormProps) {
 <form.Field
   name="name"
   children={(field) => {
-    const isInvalid =
-      field.state.meta.isTouched && !field.state.meta.isValid;
+    const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
 
     function handleChange(event: ChangeEvent<HTMLInputElement>) {
       field.handleChange(event.target.value);
@@ -267,23 +266,13 @@ function AvatarForm({ user }: AvatarFormProps) {
 - For Server Action forms, combine `isExecuting` (from `useAction`) and `isSubmitting` (from form)
 
 ```tsx
-<form.Subscribe
-  selector={(state) => [state.canSubmit, state.isSubmitting]}
->
+<form.Subscribe selector={(state) => [state.canSubmit, state.isSubmitting]}>
   {([canSubmit, isSubmitting]) => (
-    <Button
-      type="submit"
-      disabled={!canSubmit || isExecuting || isSubmitting}
-    >
+    <Button type="submit" disabled={!canSubmit || isExecuting || isSubmitting}>
       {isExecuting || isSubmitting ? (
-        <Loader2
-          className="mr-2 h-4 w-4 animate-spin"
-          aria-hidden="true"
-        />
+        <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
       ) : null}
-      {isExecuting || isSubmitting
-        ? "Envoi en cours..."
-        : "Envoyer"}
+      {isExecuting || isSubmitting ? "Envoi en cours..." : "Envoyer"}
     </Button>
   )}
 </form.Subscribe>
@@ -292,19 +281,11 @@ function AvatarForm({ user }: AvatarFormProps) {
 For API Route forms (no `isExecuting`):
 
 ```tsx
-<form.Subscribe
-  selector={(state) => [state.canSubmit, state.isSubmitting]}
->
+<form.Subscribe selector={(state) => [state.canSubmit, state.isSubmitting]}>
   {([canSubmit, isSubmitting]) => (
-    <Button
-      type="submit"
-      disabled={!canSubmit || isSubmitting}
-    >
+    <Button type="submit" disabled={!canSubmit || isSubmitting}>
       {isSubmitting ? (
-        <Loader2
-          className="mr-2 h-4 w-4 animate-spin"
-          aria-hidden="true"
-        />
+        <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
       ) : null}
       {isSubmitting ? "Envoi en cours..." : "Envoyer"}
     </Button>
@@ -320,8 +301,7 @@ For API Route forms (no `isExecuting`):
 <form.Field
   name="name"
   children={(field) => {
-    const isInvalid =
-      field.state.meta.isTouched && !field.state.meta.isValid;
+    const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
 
     function handleChange(event: ChangeEvent<HTMLInputElement>) {
       field.handleChange(event.target.value);
@@ -352,8 +332,7 @@ For API Route forms (no `isExecuting`):
 <form.Field
   name="email"
   children={(field) => {
-    const isInvalid =
-      field.state.meta.isTouched && !field.state.meta.isValid;
+    const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
 
     function handleChange(event: ChangeEvent<HTMLInputElement>) {
       field.handleChange(event.target.value);
@@ -385,8 +364,7 @@ For API Route forms (no `isExecuting`):
 <form.Field
   name="password"
   children={(field) => {
-    const isInvalid =
-      field.state.meta.isTouched && !field.state.meta.isValid;
+    const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
 
     function handleChange(event: ChangeEvent<HTMLInputElement>) {
       field.handleChange(event.target.value);
@@ -419,8 +397,7 @@ For API Route forms (no `isExecuting`):
 <form.Field
   name="message"
   children={(field) => {
-    const isInvalid =
-      field.state.meta.isTouched && !field.state.meta.isValid;
+    const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
 
     function handleChange(event: ChangeEvent<HTMLTextAreaElement>) {
       field.handleChange(event.target.value);
@@ -452,8 +429,7 @@ For API Route forms (no `isExecuting`):
 <form.Field
   name="role"
   children={(field) => {
-    const isInvalid =
-      field.state.meta.isTouched && !field.state.meta.isValid;
+    const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
 
     return (
       <Field data-invalid={isInvalid}>
@@ -486,8 +462,7 @@ For API Route forms (no `isExecuting`):
 <form.Field
   name="acceptTerms"
   children={(field) => {
-    const isInvalid =
-      field.state.meta.isTouched && !field.state.meta.isValid;
+    const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
 
     return (
       <Field data-invalid={isInvalid} orientation="horizontal">
@@ -512,10 +487,15 @@ For API Route forms (no `isExecuting`):
 <form.Field
   name="notifications"
   children={(field) => (
-    <Field orientation="horizontal" className="justify-between rounded-lg border p-4">
+    <Field
+      orientation="horizontal"
+      className="justify-between rounded-lg border p-4"
+    >
       <div className="space-y-0.5">
         <FieldLabel htmlFor="form-notifications">Notifications</FieldLabel>
-        <FieldDescription>Recevoir des notifications par email.</FieldDescription>
+        <FieldDescription>
+          Recevoir des notifications par email.
+        </FieldDescription>
       </div>
       <Switch
         id="form-notifications"
@@ -539,8 +519,7 @@ For API Route forms (no `isExecuting`):
 <form.Field
   name="avatar"
   children={(field) => {
-    const isInvalid =
-      field.state.meta.isTouched && !field.state.meta.isValid;
+    const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
 
     function handleDragOver(event: DragEvent<HTMLDivElement>) {
       event.preventDefault();
@@ -1091,16 +1070,16 @@ export { ContactForm };
 
 ### Field Components (`@/components/ui/field`)
 
-| Component          | Usage                                   |
-| ------------------ | --------------------------------------- |
-| `Field`            | Wrapper with `data-invalid` support     |
-| `FieldLabel`       | Label with `htmlFor` attribute          |
-| `FieldDescription` | Helper text below input                 |
+| Component          | Usage                                        |
+| ------------------ | -------------------------------------------- |
+| `Field`            | Wrapper with `data-invalid` support          |
+| `FieldLabel`       | Label with `htmlFor` attribute               |
+| `FieldDescription` | Helper text below input                      |
 | `FieldError`       | Error display from `field.state.meta.errors` |
-| `FieldSet`         | Groups multiple fields                  |
-| `FieldGroup`       | Container for field groups              |
-| `FieldLegend`      | Legend for fieldsets                     |
-| `FieldSeparator`   | Visual separator between fields         |
+| `FieldSet`         | Groups multiple fields                       |
+| `FieldGroup`       | Container for field groups                   |
+| `FieldLegend`      | Legend for fieldsets                         |
+| `FieldSeparator`   | Visual separator between fields              |
 
 ### TanStack Form API Reference
 
