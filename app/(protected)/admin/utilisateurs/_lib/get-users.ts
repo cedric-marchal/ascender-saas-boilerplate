@@ -11,6 +11,7 @@ import {
   usersSortableFields,
 } from "@/lib/constants/users-filters.constant";
 import type { User } from "@/lib/generated/prisma/client";
+import type { UserWhereInput } from "@/lib/generated/prisma/models";
 import type { SortOrder } from "@/lib/parsers/nuqs";
 import { prisma } from "@/lib/prisma";
 
@@ -61,7 +62,7 @@ async function getUsers(filters: GetUsersFilters): Promise<GetUsersResult> {
     ? (filters.order as SortOrder)
     : SORTING.defaultOrder;
 
-  const whereClause = {
+  const whereClause: UserWhereInput = {
     ...(safeSearch && {
       OR: [
         { name: { contains: safeSearch, mode: "insensitive" as const } },
