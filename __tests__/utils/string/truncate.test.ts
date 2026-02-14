@@ -4,6 +4,7 @@ import {
   truncate,
   truncateDescription,
   truncateExcerpt,
+  truncateName,
   truncatePreview,
   truncateTitle,
 } from "@/utils/string/truncate";
@@ -110,5 +111,24 @@ describe("truncateExcerpt", () => {
   it("returns original when under 300 characters", () => {
     const shortExcerpt = "Short excerpt";
     expect(truncateExcerpt(shortExcerpt)).toBe("Short excerpt");
+  });
+});
+
+describe("truncateName", () => {
+  it("truncates at 20 characters", () => {
+    const longName = "Jean-François Dupont de la Tour";
+    const result = truncateName(longName);
+    expect(result.length).toBe(20);
+    expect(result.endsWith("...")).toBe(true);
+  });
+
+  it("returns original when under 20 characters", () => {
+    const shortName = "Jean Dupont";
+    expect(truncateName(shortName)).toBe("Jean Dupont");
+  });
+
+  it("returns original when exactly 20 characters", () => {
+    const exactName = "a".repeat(20);
+    expect(truncateName(exactName)).toBe(exactName);
   });
 });

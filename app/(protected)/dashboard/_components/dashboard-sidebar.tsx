@@ -35,6 +35,7 @@ import {
 } from "@/components/ui/sidebar";
 
 import { getInitials } from "@/utils/string/get-initials";
+import { truncateName } from "@/utils/string/truncate";
 
 type MenuItem = {
   title: string;
@@ -108,7 +109,7 @@ function DashboardSidebar({ image, name }: DashboardSidebarProps) {
                       <AvatarFallback>{getInitials(name)}</AvatarFallback>
                     )}
                   </Avatar>
-                  <span>{name}</span>
+                  <span>{truncateName(name)}</span>
                   <ChevronUp className="ml-auto" aria-hidden="true" />
                 </SidebarMenuButton>
               </DropdownMenuTrigger>

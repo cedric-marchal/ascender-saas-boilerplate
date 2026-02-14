@@ -3,6 +3,7 @@ const TITLE_LENGTH = 60; // Titles: Google SEO (~60), Open Graph (~70), Cards (1
 const DESCRIPTION_LENGTH = 160; // Descriptions: Google SEO (~160), Open Graph, Cards (3-4 lines)
 const PREVIEW_LENGTH = 200; // Preview text: 4-5 lines (article preview, content excerpt)
 const EXCERPT_LENGTH = 300; // Long excerpt: 6-8 lines (blog post preview on homepage)
+const NAME_LENGTH = 20; // Names: sidebar, avatar labels, badges, navigation (1 line)
 
 function truncate(text: string, maxLength: number): string {
   if (!text || typeof text !== "string") {
@@ -38,10 +39,15 @@ function truncateExcerpt(text: string): string {
   return truncate(text, EXCERPT_LENGTH);
 }
 
+function truncateName(text: string): string {
+  return truncate(text, NAME_LENGTH);
+}
+
 export {
   truncate,
   truncateTitle,
   truncateDescription,
   truncatePreview,
   truncateExcerpt,
+  truncateName,
 };
