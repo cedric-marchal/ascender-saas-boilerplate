@@ -1,19 +1,18 @@
 import type { Metadata } from "next";
 
+import {
+  type UserTableData,
+  UsersFilters,
+  getUsers,
+  usersColumns,
+  usersSearchParams,
+} from "@/features/users";
 import { type SearchParams, createLoader } from "nuqs/server";
 
-import { usersSearchParams } from "@/lib/constants/users-filters.constant";
 import { requireAdminVerifiedEmail } from "@/lib/session";
 
 import { Pagination } from "@/components/pagination";
 import { DataTable } from "@/components/ui/data-table";
-
-import {
-  type UserTableData,
-  usersColumns,
-} from "@/app/(protected)/admin/utilisateurs/_components/users-columns";
-import { UsersFilters } from "@/app/(protected)/admin/utilisateurs/_components/users-filters";
-import { getUsers } from "@/app/(protected)/admin/utilisateurs/_lib/get-users";
 
 const loadSearchParams = createLoader(usersSearchParams);
 

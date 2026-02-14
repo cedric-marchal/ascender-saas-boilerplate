@@ -1,12 +1,13 @@
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 
+import { UpdateAvatarSchema } from "@/features/account/schemas/avatar.schema";
+
 import { auth } from "@/lib/auth";
 import { optimizeAvatar } from "@/lib/optimize";
 import { prisma } from "@/lib/prisma";
 import { deleteFile, getPublicUrl, uploadFile } from "@/lib/r2";
 import { authenticatedRatelimit } from "@/lib/ratelimit";
-import { UpdateAvatarSchema } from "@/lib/schemas/avatar.schema";
 import { getSession } from "@/lib/session";
 
 import { UnauthorizedError } from "@/utils/errors/errors";

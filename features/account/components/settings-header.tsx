@@ -1,6 +1,6 @@
 import { Settings } from "lucide-react";
 
-function DashboardSettingsHeader() {
+function SettingsHeader() {
   return (
     <header className="space-y-2">
       <div className="flex items-center gap-3">
@@ -18,4 +18,4 @@ function DashboardSettingsHeader() {
   );
 }
 
-export { DashboardSettingsHeader };
+export { SettingsHeader };

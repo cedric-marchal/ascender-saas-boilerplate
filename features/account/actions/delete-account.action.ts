@@ -7,7 +7,7 @@ import { authenticatedRatelimit } from "@/lib/ratelimit";
 import { redis } from "@/lib/redis";
 import { sendEmail } from "@/lib/resend";
 import { authActionClient } from "@/lib/safe-action";
-import { DeleteAccountSchema } from "@/lib/schemas/account.schema";
+import { DeleteAccountSchema } from "@/features/account/schemas/account.schema";
 import { stripe } from "@/lib/stripe";
 
 import { AccountDeletedEmail } from "@/components/emails/account-deleted-email";

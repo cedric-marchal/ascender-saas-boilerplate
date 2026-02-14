@@ -11,7 +11,7 @@ import { signOut } from "@/lib/auth-client";
 import {
   DeleteAccountSchema,
   type DeleteAccountSchemaType,
-} from "@/lib/schemas/account.schema";
+} from "@/features/account/schemas/account.schema";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 
-import { deleteAccountAction } from "@/app/(protected)/_actions/delete-account.action";
+import { deleteAccountAction } from "@/features/account/actions/delete-account.action";
 
 type DeleteAccountFormProps = {
   email: string;

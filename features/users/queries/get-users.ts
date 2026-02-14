@@ -9,7 +9,7 @@ import {
   isUserRoleFilter,
   isVerificationFilter,
   usersSortableFields,
-} from "@/lib/constants/users-filters.constant";
+} from "@/features/users/constants";
 import type { User } from "@/lib/generated/prisma/client";
 import type { UserWhereInput } from "@/lib/generated/prisma/models";
 import type { SortOrder } from "@/lib/parsers/nuqs";

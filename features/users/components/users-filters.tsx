@@ -14,8 +14,8 @@ import {
   usersSearchParams,
   verificationFilters,
   verificationLabels,
-} from "@/lib/constants/users-filters.constant";
-import { FilterUsersSchema } from "@/lib/schemas/search/users-filters.schema";
+} from "@/features/users/constants";
+import { FilterUsersSchema } from "@/features/users/schemas/users-filter.schema";
 
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";

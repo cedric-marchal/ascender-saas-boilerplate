@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 
-import { updatePasswordAction } from "@/app/(protected)/_actions/update-password.action";
+import { updatePasswordAction } from "@/features/account/actions/update-password.action";
 
 function PasswordForm() {
   const [isCurrentPasswordVisible, setIsCurrentPasswordVisible] =

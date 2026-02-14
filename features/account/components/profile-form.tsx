@@ -12,7 +12,7 @@ import { toast } from "sonner";
 import {
   UpdateProfileSchema,
   type UpdateProfileSchemaType,
-} from "@/lib/schemas/profile.schema";
+} from "@/features/account/schemas/profile.schema";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -23,8 +23,8 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 
-import { updateProfileAction } from "@/app/(protected)/_actions/update-profile.action";
-import { EmailVerificationBadge } from "@/app/(protected)/_components/email-verification-badge";
+import { updateProfileAction } from "@/features/account/actions/update-profile.action";
+import { EmailVerificationBadge } from "@/features/account/components/email-verification-badge";
 
 type ProfileFormProps = {
   name: string;

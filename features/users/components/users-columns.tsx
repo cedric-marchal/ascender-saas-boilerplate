@@ -6,7 +6,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import { useQueryStates } from "nuqs";
 
-import { usersSearchParams } from "@/lib/constants/users-filters.constant";
+import { usersSearchParams } from "@/features/users/constants";
 import type { User } from "@/lib/generated/prisma/client";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";

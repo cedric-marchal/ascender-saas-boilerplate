@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 
-import { DeleteAccountForm } from "@/app/(protected)/_components/forms/delete-account-form";
+import { DeleteAccountForm } from "@/features/account/components/delete-account-form";
 
 type DeleteAccountModalProps = {
   email: string;

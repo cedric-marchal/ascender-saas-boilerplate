@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { DeleteAccountSchema } from "@/lib/schemas/account.schema";
+import { DeleteAccountSchema } from "@/features/account/schemas/account.schema";
 
 describe("DeleteAccountSchema", () => {
   it("accepts valid email as confirmation", () => {

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { UpdateProfileSchema } from "@/lib/schemas/profile.schema";
+import { UpdateProfileSchema } from "@/features/account/schemas/profile.schema";
 
 describe("UpdateProfileSchema", () => {
   const validData = {

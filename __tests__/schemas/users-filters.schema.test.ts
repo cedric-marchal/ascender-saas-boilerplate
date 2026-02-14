@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { FilterUsersSchema } from "@/lib/schemas/search/users-filters.schema";
+import { FilterUsersSchema } from "@/features/users/schemas/users-filter.schema";
 
 describe("FilterUsersSchema", () => {
   const validData = {

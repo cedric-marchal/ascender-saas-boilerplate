@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { prisma } from "@/lib/prisma";
 
-import { getUsers } from "@/app/(protected)/admin/utilisateurs/_lib/get-users";
+import { getUsers } from "@/features/users/queries/get-users";
 
 vi.mock("@/lib/prisma", () => {
   const mockFindMany = vi.fn();

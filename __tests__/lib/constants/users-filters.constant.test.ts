@@ -10,7 +10,7 @@ import {
   usersSortableFields,
   verificationFilters,
   verificationLabels,
-} from "@/lib/constants/users-filters.constant";
+} from "@/features/users/constants";
 
 describe("userRoleFilters", () => {
   it("contains 'all', 'ADMIN', and 'CUSTOMER'", () => {

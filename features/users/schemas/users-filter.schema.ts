@@ -4,7 +4,7 @@ import { FILTERS } from "@/lib/constants/query.constant";
 import {
   userRoleFilters,
   verificationFilters,
-} from "@/lib/constants/users-filters.constant";
+} from "@/features/users/constants";
 
 const FilterUsersSchema = z.object({
   search: z
