@@ -4,15 +4,16 @@ import type { ChangeEvent, SubmitEvent } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { useForm } from "@tanstack/react-form";
-import { Loader2 } from "lucide-react";
-import { useAction } from "next-safe-action/hooks";
-import { toast } from "sonner";
-
+import { updateProfileAction } from "@/features/account/actions/update-profile.action";
+import { EmailVerificationBadge } from "@/features/account/components/email-verification-badge";
 import {
   UpdateProfileSchema,
   type UpdateProfileSchemaType,
 } from "@/features/account/schemas/profile.schema";
+import { useForm } from "@tanstack/react-form";
+import { Loader2 } from "lucide-react";
+import { useAction } from "next-safe-action/hooks";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -22,9 +23,6 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-
-import { updateProfileAction } from "@/features/account/actions/update-profile.action";
-import { EmailVerificationBadge } from "@/features/account/components/email-verification-badge";
 
 type ProfileFormProps = {
   name: string;

@@ -1,6 +1,5 @@
 import "server-only";
 
-import { FILTERS, PAGINATION, SORTING } from "@/lib/constants/query.constant";
 import {
   type UserRoleFilter,
   type UserSortableField,
@@ -10,6 +9,8 @@ import {
   isVerificationFilter,
   usersSortableFields,
 } from "@/features/users/constants";
+
+import { FILTERS, PAGINATION, SORTING } from "@/lib/constants/query.constant";
 import type { User } from "@/lib/generated/prisma/client";
 import type { UserWhereInput } from "@/lib/generated/prisma/models";
 import type { SortOrder } from "@/lib/parsers/nuqs";

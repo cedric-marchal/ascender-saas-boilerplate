@@ -1,5 +1,13 @@
 import type { Metadata } from "next";
 
+import {
+  AvatarForm,
+  DeleteAccountModal,
+  PasswordForm,
+  ProfileForm,
+  SettingsHeader,
+} from "@/features/account";
+
 import { requireCustomer } from "@/lib/session";
 
 import {
@@ -9,14 +17,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-
-import {
-  AvatarForm,
-  DeleteAccountModal,
-  PasswordForm,
-  ProfileForm,
-  SettingsHeader,
-} from "@/features/account";
 
 export const metadata: Metadata = {
   title: "Paramètres",

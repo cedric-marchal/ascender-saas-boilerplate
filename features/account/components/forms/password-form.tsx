@@ -2,6 +2,7 @@
 
 import { type ChangeEvent, type SubmitEvent, useState } from "react";
 
+import { updatePasswordAction } from "@/features/account/actions/update-password.action";
 import { useForm } from "@tanstack/react-form";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
@@ -20,8 +21,6 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-
-import { updatePasswordAction } from "@/features/account/actions/update-password.action";
 
 function PasswordForm() {
   const [isCurrentPasswordVisible, setIsCurrentPasswordVisible] =

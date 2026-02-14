@@ -1,10 +1,10 @@
-import { z } from "zod";
-
-import { FILTERS } from "@/lib/constants/query.constant";
 import {
   userRoleFilters,
   verificationFilters,
 } from "@/features/users/constants";
+import { z } from "zod";
+
+import { FILTERS } from "@/lib/constants/query.constant";
 
 const FilterUsersSchema = z.object({
   search: z

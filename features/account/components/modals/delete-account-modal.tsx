@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import { useRouter } from "next/navigation";
 
+import { DeleteAccountForm } from "@/features/account/components/forms/delete-account-form";
 import { Trash2 } from "lucide-react";
 
 import {
@@ -15,8 +16,6 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-
-import { DeleteAccountForm } from "@/features/account/components/delete-account-form";
 
 type DeleteAccountModalProps = {
   email: string;

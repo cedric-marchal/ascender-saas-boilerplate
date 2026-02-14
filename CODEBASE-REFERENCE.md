@@ -49,29 +49,29 @@ Ascender est un **boilerplate SaaS** production-ready construit avec Next.js 16 
 
 ## 2. Stack technique
 
-| Catégorie | Technologie | Version |
-|-----------|------------|---------|
-| Framework | Next.js (App Router) | 16.1.x |
-| Runtime | React | 19.x |
-| Langage | TypeScript (strict mode) | 5.9.x |
-| Styling | Tailwind CSS | 4.x |
-| UI Components | Shadcn/ui (Radix UI) | — |
-| ORM | Prisma | 7.x |
-| Base de données | PostgreSQL (Neon) | — |
-| Auth | Better Auth | 1.4.x |
-| Paiements | Stripe (subscriptions) | 20.x |
-| Formulaires | @tanstack/react-form | 1.28.x |
-| Tables | @tanstack/react-table | 8.x |
-| URL State | nuqs | 2.8.x |
-| Server Actions | next-safe-action | 8.x |
-| Validation | Zod | 4.x |
-| Emails | Resend + @react-email/components | — |
-| Env validation | T3 Env (@t3-oss/env-nextjs) | — |
-| Storage | Cloudflare R2 (AWS S3 SDK) + Sharp | — |
-| Rate limiting | @upstash/ratelimit + @upstash/redis | — |
-| Monitoring | @sentry/nextjs | — |
-| Package manager | pnpm | — |
-| Déploiement | Vercel | — |
+| Catégorie       | Technologie                         | Version |
+| --------------- | ----------------------------------- | ------- |
+| Framework       | Next.js (App Router)                | 16.1.x  |
+| Runtime         | React                               | 19.x    |
+| Langage         | TypeScript (strict mode)            | 5.9.x   |
+| Styling         | Tailwind CSS                        | 4.x     |
+| UI Components   | Shadcn/ui (Radix UI)                | —       |
+| ORM             | Prisma                              | 7.x     |
+| Base de données | PostgreSQL (Neon)                   | —       |
+| Auth            | Better Auth                         | 1.4.x   |
+| Paiements       | Stripe (subscriptions)              | 20.x    |
+| Formulaires     | @tanstack/react-form                | 1.28.x  |
+| Tables          | @tanstack/react-table               | 8.x     |
+| URL State       | nuqs                                | 2.8.x   |
+| Server Actions  | next-safe-action                    | 8.x     |
+| Validation      | Zod                                 | 4.x     |
+| Emails          | Resend + @react-email/components    | —       |
+| Env validation  | T3 Env (@t3-oss/env-nextjs)         | —       |
+| Storage         | Cloudflare R2 (AWS S3 SDK) + Sharp  | —       |
+| Rate limiting   | @upstash/ratelimit + @upstash/redis | —       |
+| Monitoring      | @sentry/nextjs                      | —       |
+| Package manager | pnpm                                | —       |
+| Déploiement     | Vercel                              | —       |
 
 ### Dépendances UI (Shadcn/ui / Radix)
 
@@ -200,13 +200,13 @@ ascender-saas-boilerplate/
 
 ### Règle de placement des composants ("Bubble Up")
 
-| Utilisé dans... | Placer dans... |
-|---|---|
-| Une seule page | `app/(group)/[page]/_components/` |
-| Plusieurs pages publiques | `app/(public)/_components/` |
-| Plusieurs pages protégées | `app/(protected)/_components/` |
-| Dashboard ET Admin | `app/(protected)/_components/` |
-| Public ET Protected | `components/` |
+| Utilisé dans...           | Placer dans...                    |
+| ------------------------- | --------------------------------- |
+| Une seule page            | `app/(group)/[page]/_components/` |
+| Plusieurs pages publiques | `app/(public)/_components/`       |
+| Plusieurs pages protégées | `app/(protected)/_components/`    |
+| Dashboard ET Admin        | `app/(protected)/_components/`    |
+| Public ET Protected       | `components/`                     |
 
 ### Sous-dossiers obligatoires
 
@@ -300,9 +300,13 @@ Soit succès, soit throw. Pas de multiples returns dans un bloc try. Chaque éta
 async function getDocument(id: string, userId: string) {
   if (!id) throw new BadRequestError("ID requis");
 
-  const document = await prisma.document.findUnique({ where: { id }, select: { id: true, userId: true } });
+  const document = await prisma.document.findUnique({
+    where: { id },
+    select: { id: true, userId: true },
+  });
   if (!document) throw new NotFoundError("Document introuvable");
-  if (document.userId !== userId) throw new ForbiddenError("Accès non autorisé");
+  if (document.userId !== userId)
+    throw new ForbiddenError("Accès non autorisé");
 
   return document;
 }
@@ -337,14 +341,19 @@ Pour les formulaires et opérations async, utiliser throw au lieu de return dans
 ```typescript
 async function onSubmit(data) {
   try {
-    const response = await fetch("/api/endpoint", { method: "POST", body: data });
+    const response = await fetch("/api/endpoint", {
+      method: "POST",
+      body: data,
+    });
     if (!response.ok) {
       const body = await response.json();
       throw new Error(body.message || "Une erreur est survenue");
     }
     toast.success("Succès !");
   } catch (error: unknown) {
-    toast.error(error instanceof Error ? error.message : "Une erreur est survenue");
+    toast.error(
+      error instanceof Error ? error.message : "Une erreur est survenue"
+    );
   }
 }
 ```
@@ -356,6 +365,7 @@ Les composants sont Server Components par défaut. `"use client"` uniquement pou
 ### 5.6 Protection server-only
 
 Tout fichier contenant des fonctions exclusivement serveur DOIT commencer par `import "server-only"`. Cela inclut :
+
 - Fonctions de requête base de données
 - Helpers d'authentification (requireSession, requireAdmin)
 - Utilitaires de data fetching
@@ -383,25 +393,25 @@ Le code doit être auto-documenté via des noms explicites. Pas de commentaires,
 
 ### 6.1 Noms explicites (JAMAIS d'abréviations)
 
-| Contexte | CORRECT | INTERDIT |
-|---|---|---|
-| Event handlers | `event` | `e`, `evt` |
-| Fetch response | `response` | `res`, `r` |
-| Response body | `body` | `result`, `data` |
-| Résultat DB | `document`, `user`, `project` | `doc`, `usr`, `proj` |
-| Index de tableau | `index` | `i`, `idx`, `_` |
-| Erreur | `error` | `err`, `e` |
-| Requête | `request` | `req` |
-| Configuration | `config` | `cfg` |
-| Paramètres | `params` | `p` |
-| Options | `options` | `opts` |
-| Référence | `reference` | `ref` (sauf React refs) |
-| Propriétés | `properties` | `props` (sauf React props) |
-| Temporaire | `temporary` | `temp`, `tmp` |
-| Précédent | `previous` | `prev` |
-| Courant | `current` | `curr` |
-| Bouton | `button` | `btn` |
-| Nombre | `count`, `total`, `quantity` | `num`, `n` |
+| Contexte         | CORRECT                       | INTERDIT                   |
+| ---------------- | ----------------------------- | -------------------------- |
+| Event handlers   | `event`                       | `e`, `evt`                 |
+| Fetch response   | `response`                    | `res`, `r`                 |
+| Response body    | `body`                        | `result`, `data`           |
+| Résultat DB      | `document`, `user`, `project` | `doc`, `usr`, `proj`       |
+| Index de tableau | `index`                       | `i`, `idx`, `_`            |
+| Erreur           | `error`                       | `err`, `e`                 |
+| Requête          | `request`                     | `req`                      |
+| Configuration    | `config`                      | `cfg`                      |
+| Paramètres       | `params`                      | `p`                        |
+| Options          | `options`                     | `opts`                     |
+| Référence        | `reference`                   | `ref` (sauf React refs)    |
+| Propriétés       | `properties`                  | `props` (sauf React props) |
+| Temporaire       | `temporary`                   | `temp`, `tmp`              |
+| Précédent        | `previous`                    | `prev`                     |
+| Courant          | `current`                     | `curr`                     |
+| Bouton           | `button`                      | `btn`                      |
+| Nombre           | `count`, `total`, `quantity`  | `num`, `n`                 |
 
 ### 6.2 Nommage des fichiers
 
@@ -415,34 +425,34 @@ Le code doit être auto-documenté via des noms explicites. Pas de commentaires,
 
 ### 6.3 Suffixes de composants
 
-| Suffixe | Usage | Emplacement |
-|---|---|---|
-| `-card.tsx` | Affiche UNE ressource | `_components/` |
-| `-list.tsx` | Itère sur des cards | `_components/` |
-| `-table.tsx` | Table de données | `_components/` |
-| `-columns.tsx` | Définitions de colonnes | `_components/` |
-| `-row.tsx` | Ligne de table | `_components/` |
-| `-form.tsx` | Formulaire | `_components/forms/` |
-| `-modal.tsx` | Dialog/Modal | `_components/modals/` |
-| `-button.tsx` | Bouton avec logique | `_components/` |
-| `-header.tsx` | En-tête de section/page | `_components/` |
-| `-tabs.tsx` | Navigation par onglets | `_components/` |
-| `-filters.tsx` | Filtres (Nuqs) | `_components/` |
-| `-skeleton.tsx` | État de chargement | `_components/` |
-| `-empty.tsx` | État vide (TOUJOURS fichier séparé) | `_components/` |
-| `-error.tsx` | État d'erreur | `_components/` |
+| Suffixe         | Usage                               | Emplacement           |
+| --------------- | ----------------------------------- | --------------------- |
+| `-card.tsx`     | Affiche UNE ressource               | `_components/`        |
+| `-list.tsx`     | Itère sur des cards                 | `_components/`        |
+| `-table.tsx`    | Table de données                    | `_components/`        |
+| `-columns.tsx`  | Définitions de colonnes             | `_components/`        |
+| `-row.tsx`      | Ligne de table                      | `_components/`        |
+| `-form.tsx`     | Formulaire                          | `_components/forms/`  |
+| `-modal.tsx`    | Dialog/Modal                        | `_components/modals/` |
+| `-button.tsx`   | Bouton avec logique                 | `_components/`        |
+| `-header.tsx`   | En-tête de section/page             | `_components/`        |
+| `-tabs.tsx`     | Navigation par onglets              | `_components/`        |
+| `-filters.tsx`  | Filtres (Nuqs)                      | `_components/`        |
+| `-skeleton.tsx` | État de chargement                  | `_components/`        |
+| `-empty.tsx`    | État vide (TOUJOURS fichier séparé) | `_components/`        |
+| `-error.tsx`    | État d'erreur                       | `_components/`        |
 
 ### 6.4 Nommage des fonctions de pages
 
 Les noms de fonctions de pages utilisent l'anglais en PascalCase + `Page`, même si l'URL est en français :
 
-| Chemin URL (français) | Nom de fonction (anglais) |
-|---|---|
-| `app/(public)/tarifs/page.tsx` | `PricingPage` |
-| `app/(public)/(auth)/connexion/page.tsx` | `SignInPage` |
-| `app/(protected)/dashboard/parametres/page.tsx` | `DashboardSettingsPage` |
-| `app/(protected)/dashboard/facturation/page.tsx` | `DashboardBillingPage` |
-| `app/(protected)/admin/utilisateurs/page.tsx` | `AdminUsersPage` |
+| Chemin URL (français)                            | Nom de fonction (anglais) |
+| ------------------------------------------------ | ------------------------- |
+| `app/(public)/tarifs/page.tsx`                   | `PricingPage`             |
+| `app/(public)/(auth)/connexion/page.tsx`         | `SignInPage`              |
+| `app/(protected)/dashboard/parametres/page.tsx`  | `DashboardSettingsPage`   |
+| `app/(protected)/dashboard/facturation/page.tsx` | `DashboardBillingPage`    |
+| `app/(protected)/admin/utilisateurs/page.tsx`    | `AdminUsersPage`          |
 
 Même logique pour les loading : `AdminUsersLoading`, `DashboardSettingsLoading`, etc.
 
@@ -462,16 +472,21 @@ Toujours combiner les imports du même module. Utiliser `import type` pour les t
 
 ```typescript
 // CORRECT : types seuls
-import type { Metadata } from "next";
-import type { User } from "@/lib/generated/prisma/client";
-
 // CORRECT : mixte (types + valeurs)
-import { useState, type ChangeEvent, type SubmitEvent } from "react";
-import { CreateUserSchema, type CreateUserSchemaType } from "@/lib/schemas/user.schema";
+import { type ChangeEvent, type SubmitEvent, useState } from "react";
 
+import type { Metadata } from "next";
 // INTERDIT : imports séparés du même module
 import type { Metadata } from "next";
-import { cookies } from "next"; // Devrait être combiné
+import { cookies } from "next";
+
+import type { User } from "@/lib/generated/prisma/client";
+import {
+  CreateUserSchema,
+  type CreateUserSchemaType,
+} from "@/lib/schemas/user.schema";
+
+// Devrait être combiné
 ```
 
 ### 7.2 Ordre des imports
@@ -488,14 +503,32 @@ import { cookies } from "next"; // Devrait être combiné
 TOUJOURS importer et utiliser les types d'événements React :
 
 ```typescript
-import type { ChangeEvent, SubmitEvent, MouseEvent, KeyboardEvent, DragEvent } from "react";
+import type {
+  ChangeEvent,
+  DragEvent,
+  KeyboardEvent,
+  MouseEvent,
+  SubmitEvent,
+} from "react";
 
-function handleSubmit(event: SubmitEvent<HTMLFormElement>) { event.preventDefault(); }
-function handleInputChange(event: ChangeEvent<HTMLInputElement>) { /* ... */ }
-function handleTextareaChange(event: ChangeEvent<HTMLTextAreaElement>) { /* ... */ }
-function handleButtonClick(event: MouseEvent<HTMLButtonElement>) { /* ... */ }
-function handleKeyDown(event: KeyboardEvent<HTMLInputElement>) { /* ... */ }
-function handleDragOver(event: DragEvent<HTMLDivElement>) { /* ... */ }
+function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
+  event.preventDefault();
+}
+function handleInputChange(event: ChangeEvent<HTMLInputElement>) {
+  /* ... */
+}
+function handleTextareaChange(event: ChangeEvent<HTMLTextAreaElement>) {
+  /* ... */
+}
+function handleButtonClick(event: MouseEvent<HTMLButtonElement>) {
+  /* ... */
+}
+function handleKeyDown(event: KeyboardEvent<HTMLInputElement>) {
+  /* ... */
+}
+function handleDragOver(event: DragEvent<HTMLDivElement>) {
+  /* ... */
+}
 ```
 
 ### 7.4 Typage des callbacks de map/filter/forEach
@@ -557,7 +590,7 @@ className={`rounded-md ${variant === "primary" ? "bg-blue-600" : ""}`}
 
 ```typescript
 // lib/utils.ts
-import { clsx, type ClassValue } from "clsx";
+import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
 function cn(...inputs: ClassValue[]) {
@@ -885,11 +918,13 @@ Chaque champ suit exactement ce pattern :
 ### 11.4 Deux patterns de soumission
 
 **Pattern A : Server Actions (préféré)**
+
 - `useAction` de `next-safe-action/hooks`
 - `executeAsync(value)` dans `onSubmit`
 - Pas de try/catch nécessaire
 
 **Pattern B : API Routes (pour uploads de fichiers)**
+
 - `fetch` avec `FormData`
 - Early return sur erreur
 - `router.refresh()` après succès
@@ -897,6 +932,7 @@ Chaque champ suit exactement ce pattern :
 ### 11.5 Inputs fichier
 
 Les inputs fichier DOIVENT TOUJOURS inclure le drag & drop avec :
+
 - `onDragOver`, `onDragLeave`, `onDrop`
 - Prévisualisation du fichier sélectionné
 - Bouton de suppression du fichier
@@ -905,6 +941,7 @@ Les inputs fichier DOIVENT TOUJOURS inclure le drag & drop avec :
 ### 11.6 Séparation Form/Modal
 
 Les formulaires et modals sont TOUJOURS dans des fichiers séparés :
+
 - Formulaire : `_components/forms/delete-account-form.tsx`
 - Modal : `_components/modals/delete-account-modal.tsx`
 
@@ -932,12 +969,20 @@ const CreateDocumentSchema = z.object({
     .string()
     .min(1, "Le nom est requis")
     .max(200, "Le nom doit contenir moins de 200 caractères")
-    .trim(),                             // TOUJOURS .min() → .max() → .trim()
+    .trim(), // TOUJOURS .min() → .max() → .trim()
 });
 
 const UpdateDocumentSchema = z.object({
-  id: z.string().min(1, "L'identifiant est requis").max(36, "L'identifiant est invalide").trim(),
-  name: z.string().min(1, "Le nom est requis").max(200, "Le nom doit contenir moins de 200 caractères").trim(),
+  id: z
+    .string()
+    .min(1, "L'identifiant est requis")
+    .max(36, "L'identifiant est invalide")
+    .trim(),
+  name: z
+    .string()
+    .min(1, "Le nom est requis")
+    .max(200, "Le nom doit contenir moins de 200 caractères")
+    .trim(),
 });
 
 // 3. Types inférés (même ordre que les schémas)
@@ -973,31 +1018,43 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { CreateDocumentSchema } from "@/lib/schemas/document.schema";
 
-import { BadRequestError, ForbiddenError, NotFoundError, UnauthorizedError, handleApiError } from "@/utils/api/handle-api-error";
+import {
+  BadRequestError,
+  ForbiddenError,
+  NotFoundError,
+  UnauthorizedError,
+  handleApiError,
+} from "@/utils/api/handle-api-error";
 
 type RouteParams = {
-  params: Promise<{ id: string }>;    // TOUJOURS Promise
+  params: Promise<{ id: string }>; // TOUJOURS Promise
 };
 
 // Fonctions dans l'ordre HTTP : GET → POST → PUT → PATCH → DELETE
 
 async function GET(request: Request, { params }: RouteParams) {
   try {
-    const { id } = await params;       // TOUJOURS await params
+    const { id } = await params; // TOUJOURS await params
     if (!id) throw new BadRequestError("ID requis");
 
     const authSession = await auth.api.getSession({ headers: await headers() });
-    if (!authSession?.user) throw new UnauthorizedError("Vous devez être connecté");
+    if (!authSession?.user)
+      throw new UnauthorizedError("Vous devez être connecté");
 
     const document = await prisma.document.findUnique({
       where: { id },
-      select: { id: true, name: true, userId: true },  // TOUJOURS select
+      select: { id: true, name: true, userId: true }, // TOUJOURS select
     });
     if (!document) throw new NotFoundError("Document introuvable");
-    if (document.userId !== authSession.user.id) throw new ForbiddenError("Accès non autorisé");
+    if (document.userId !== authSession.user.id)
+      throw new ForbiddenError("Accès non autorisé");
 
-    return NextResponse.json({ success: true, data: document }, { status: 200 });
-  } catch (error: unknown) {           // TOUJOURS error: unknown
+    return NextResponse.json(
+      { success: true, data: document },
+      { status: 200 }
+    );
+  } catch (error: unknown) {
+    // TOUJOURS error: unknown
     return handleApiError(error);
   }
 }
@@ -1005,9 +1062,10 @@ async function GET(request: Request, { params }: RouteParams) {
 async function POST(request: Request) {
   try {
     const authSession = await auth.api.getSession({ headers: await headers() });
-    if (!authSession?.user) throw new UnauthorizedError("Vous devez être connecté");
+    if (!authSession?.user)
+      throw new UnauthorizedError("Vous devez être connecté");
 
-    const formData = await request.formData();  // TOUJOURS formData(), JAMAIS .json()
+    const formData = await request.formData(); // TOUJOURS formData(), JAMAIS .json()
 
     const data = CreateDocumentSchema.parse({
       name: formData.get("name"),
@@ -1018,7 +1076,10 @@ async function POST(request: Request) {
       select: { id: true, name: true },
     });
 
-    return NextResponse.json({ success: true, data: document }, { status: 201 });
+    return NextResponse.json(
+      { success: true, data: document },
+      { status: 201 }
+    );
   } catch (error: unknown) {
     return handleApiError(error);
   }
@@ -1028,7 +1089,7 @@ async function DELETE(request: Request, { params }: RouteParams) {
   try {
     // ... validation, auth, ownership check ...
     await prisma.document.delete({ where: { id } });
-    return new NextResponse(null, { status: 204 });  // DELETE = 204, pas de body
+    return new NextResponse(null, { status: 204 }); // DELETE = 204, pas de body
   } catch (error: unknown) {
     return handleApiError(error);
   }
@@ -1040,12 +1101,12 @@ export { GET, POST, DELETE };
 
 ### Codes de statut HTTP
 
-| Méthode | Succès | Code |
-|---|---|---|
-| GET | Ressource(s) récupérée(s) | 200 |
-| POST | Ressource créée | 201 |
-| PUT/PATCH | Ressource mise à jour | 200 |
-| DELETE | Ressource supprimée | 204 (pas de body) |
+| Méthode   | Succès                    | Code              |
+| --------- | ------------------------- | ----------------- |
+| GET       | Ressource(s) récupérée(s) | 200               |
+| POST      | Ressource créée           | 201               |
+| PUT/PATCH | Ressource mise à jour     | 200               |
+| DELETE    | Ressource supprimée       | 204 (pas de body) |
 
 ### Règles clés
 
@@ -1063,16 +1124,17 @@ export { GET, POST, DELETE };
 ### 14.1 Structure
 
 ```typescript
-"use server";  // DOIT être la première ligne
-
+"use server"; // DOIT être la première ligne
 import { revalidatePath } from "next/cache";
+
 import { prisma } from "@/lib/prisma";
 import { authActionClient } from "@/lib/safe-action";
 import { UpdateProfileSchema } from "@/lib/schemas/profile.schema";
+
 import { ConflictError } from "@/utils/errors/errors";
 
 export const updateProfileAction = authActionClient
-  .inputSchema(UpdateProfileSchema)        // Validation automatique via Zod
+  .inputSchema(UpdateProfileSchema) // Validation automatique via Zod
   .action(async ({ parsedInput, ctx }) => {
     // parsedInput est typé et validé automatiquement
     // ctx contient userId, userEmail, userName (fourni par authActionClient)
@@ -1100,11 +1162,11 @@ export const updateProfileAction = authActionClient
 
 ### 14.2 Trois clients disponibles
 
-| Client | Usage | Contexte fourni |
-|---|---|---|
-| `actionClient` | Actions publiques (pas d'auth) | Aucun |
-| `authActionClient` | Actions protégées (auth requise) | `userId`, `userEmail`, `userName` |
-| `adminActionClient` | Actions admin uniquement | `userId`, `userEmail`, `userName`, `isAdmin` |
+| Client              | Usage                            | Contexte fourni                              |
+| ------------------- | -------------------------------- | -------------------------------------------- |
+| `actionClient`      | Actions publiques (pas d'auth)   | Aucun                                        |
+| `authActionClient`  | Actions protégées (auth requise) | `userId`, `userEmail`, `userName`            |
+| `adminActionClient` | Actions admin uniquement         | `userId`, `userEmail`, `userName`, `isAdmin` |
 
 ### 14.3 Règles clés
 
@@ -1117,11 +1179,11 @@ export const updateProfileAction = authActionClient
 
 ### 14.4 Emplacement des fichiers
 
-| Scope | Emplacement |
-|---|---|
-| Spécifique à une page | `app/(group)/[page]/_actions/` |
-| Partagé entre sections | `app/(group)/_actions/` |
-| Global (rare) | `lib/actions/` |
+| Scope                  | Emplacement                    |
+| ---------------------- | ------------------------------ |
+| Spécifique à une page  | `app/(group)/[page]/_actions/` |
+| Partagé entre sections | `app/(group)/_actions/`        |
+| Global (rare)          | `lib/actions/`                 |
 
 ---
 
@@ -1135,9 +1197,9 @@ Tout le système de filtres/tri/pagination est **URL-based** et **côté serveur
 
 ```typescript
 const [filters, setFilters] = useQueryStates(searchParams, {
-  shallow: false,      // Le serveur re-fetch les données
-  history: "push",     // Le bouton retour fonctionne
-  startTransition,     // Affiche un état de chargement
+  shallow: false, // Le serveur re-fetch les données
+  history: "push", // Le bouton retour fonctionne
+  startTransition, // Affiche un état de chargement
 });
 ```
 
@@ -1174,13 +1236,13 @@ function handleSort() {
 
 Chaque couche valide indépendamment :
 
-| Couche | Protection |
-|---|---|
-| Parser nuqs | Bornes, longueur, enum |
-| Schéma Zod | Validation de formulaire |
-| Server data fetch | Re-validation de TOUS les paramètres |
-| Prisma | Requêtes paramétrées (anti-SQL injection) |
-| React | Échappement automatique (anti-XSS) |
+| Couche            | Protection                                |
+| ----------------- | ----------------------------------------- |
+| Parser nuqs       | Bornes, longueur, enum                    |
+| Schéma Zod        | Validation de formulaire                  |
+| Server data fetch | Re-validation de TOUS les paramètres      |
+| Prisma            | Requêtes paramétrées (anti-SQL injection) |
+| React             | Échappement automatique (anti-XSS)        |
 
 ---
 
@@ -1189,6 +1251,7 @@ Chaque couche valide indépendamment :
 ### 16.1 Better Auth
 
 Le projet utilise **Better Auth** avec :
+
 - Email/password avec vérification d'email obligatoire
 - OAuth Google
 - Sessions avec cookie cache (5 min)
@@ -1241,28 +1304,44 @@ class AppError extends Error {
   readonly statusCode: number;
 }
 
-class BadRequestError extends AppError { statusCode = 400; }
-class UnauthorizedError extends AppError { statusCode = 401; }
-class ForbiddenError extends AppError { statusCode = 403; }
-class NotFoundError extends AppError { statusCode = 404; }
-class ConflictError extends AppError { statusCode = 409; }
-class PayloadTooLargeError extends AppError { statusCode = 413; }
-class UnprocessableEntityError extends AppError { statusCode = 422; }
-class TooManyRequestsError extends AppError { statusCode = 429; }
+class BadRequestError extends AppError {
+  statusCode = 400;
+}
+class UnauthorizedError extends AppError {
+  statusCode = 401;
+}
+class ForbiddenError extends AppError {
+  statusCode = 403;
+}
+class NotFoundError extends AppError {
+  statusCode = 404;
+}
+class ConflictError extends AppError {
+  statusCode = 409;
+}
+class PayloadTooLargeError extends AppError {
+  statusCode = 413;
+}
+class UnprocessableEntityError extends AppError {
+  statusCode = 422;
+}
+class TooManyRequestsError extends AppError {
+  statusCode = 429;
+}
 ```
 
 ### 17.2 Usage
 
-| Classe | Usage |
-|---|---|
-| `BadRequestError` | Input invalide, param manquant |
-| `UnauthorizedError` | Pas de session |
-| `ForbiddenError` | Authentifié mais pas autorisé |
-| `NotFoundError` | Ressource introuvable |
-| `ConflictError` | Doublon, conflit d'état |
-| `PayloadTooLargeError` | Fichier trop gros |
+| Classe                     | Usage                                 |
+| -------------------------- | ------------------------------------- |
+| `BadRequestError`          | Input invalide, param manquant        |
+| `UnauthorizedError`        | Pas de session                        |
+| `ForbiddenError`           | Authentifié mais pas autorisé         |
+| `NotFoundError`            | Ressource introuvable                 |
+| `ConflictError`            | Doublon, conflit d'état               |
+| `PayloadTooLargeError`     | Fichier trop gros                     |
 | `UnprocessableEntityError` | Syntaxe valide mais erreur sémantique |
-| `TooManyRequestsError` | Rate limit dépassé |
+| `TooManyRequestsError`     | Rate limit dépassé                    |
 
 ### 17.3 Handlers
 
@@ -1385,7 +1464,7 @@ export { prisma };
 
 ```typescript
 // INTERDIT : abréviations
-e, evt, res, req, doc, usr, btn, cfg, opts, prev, curr, temp, idx, i
+(e, evt, res, req, doc, usr, btn, cfg, opts, prev, curr, temp, idx, i);
 ```
 
 ### Imports
@@ -1394,6 +1473,7 @@ e, evt, res, req, doc, usr, btn, cfg, opts, prev, curr, temp, idx, i
 // INTERDIT : imports séparés du même module
 import type { Type } from "module";
 import { value } from "module";
+
 // CORRECT : import { value, type Type } from "module";
 ```
 
@@ -1465,8 +1545,8 @@ const user = await prisma.user.findUnique({ where: { id } });
 ```typescript
 // INTERDIT : tri/filtre/pagination côté client
 useReactTable({
-  getSortedRowModel: getSortedRowModel(),       // INTERDIT
-  getFilteredRowModel: getFilteredRowModel(),   // INTERDIT
+  getSortedRowModel: getSortedRowModel(), // INTERDIT
+  getFilteredRowModel: getFilteredRowModel(), // INTERDIT
   getPaginationRowModel: getPaginationRowModel(), // INTERDIT
 });
 ```
@@ -1504,11 +1584,11 @@ import { ... } from "...";
 
 ```typescript
 // INTERDIT : trim avant max
-name: z.string().min(1).trim().max(200)
+name: z.string().min(1).trim().max(200);
 // CORRECT : .min() → .max() → .trim()
 
 // INTERDIT : pas de messages d'erreur
-name: z.string().min(1).max(200).trim()
+name: z.string().min(1).max(200).trim();
 // CORRECT : .min(1, "Le nom est requis").max(200, "...").trim()
 
 // INTERDIT : exporter les constantes internes

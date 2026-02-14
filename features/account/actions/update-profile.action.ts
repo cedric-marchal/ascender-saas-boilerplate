@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 
+import { UpdateProfileSchema } from "@/features/account/schemas/profile.schema";
 import { randomBytes } from "crypto";
 
 import { auth } from "@/lib/auth";
@@ -11,7 +12,6 @@ import { prisma } from "@/lib/prisma";
 import { authenticatedRatelimit } from "@/lib/ratelimit";
 import { sendEmail } from "@/lib/resend";
 import { authActionClient } from "@/lib/safe-action";
-import { UpdateProfileSchema } from "@/features/account/schemas/profile.schema";
 
 import { EmailVerificationEmail } from "@/components/emails/email-verification-email";
 

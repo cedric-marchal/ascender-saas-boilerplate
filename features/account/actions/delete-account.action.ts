@@ -1,5 +1,7 @@
 "use server";
 
+import { DeleteAccountSchema } from "@/features/account/schemas/account.schema";
+
 import { env } from "@/lib/env";
 import { prisma } from "@/lib/prisma";
 import { deleteFile } from "@/lib/r2";
@@ -7,7 +9,6 @@ import { authenticatedRatelimit } from "@/lib/ratelimit";
 import { redis } from "@/lib/redis";
 import { sendEmail } from "@/lib/resend";
 import { authActionClient } from "@/lib/safe-action";
-import { DeleteAccountSchema } from "@/features/account/schemas/account.schema";
 import { stripe } from "@/lib/stripe";
 
 import { AccountDeletedEmail } from "@/components/emails/account-deleted-email";

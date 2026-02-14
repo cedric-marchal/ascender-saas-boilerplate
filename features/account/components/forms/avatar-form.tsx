@@ -10,11 +10,11 @@ import {
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
+import { UpdateAvatarSchema } from "@/features/account/schemas/avatar.schema";
 import { useForm } from "@tanstack/react-form";
 import { Loader2, Upload, X } from "lucide-react";
 import { toast } from "sonner";
 
-import { UpdateAvatarSchema } from "@/features/account/schemas/avatar.schema";
 import { cn } from "@/lib/utils";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
