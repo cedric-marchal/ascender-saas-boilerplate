@@ -24,6 +24,9 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 
+import { getActionResult } from "@/utils/errors/get-action-result";
+import { getErrorMessage } from "@/utils/errors/get-error-message";
+
 type ProfileFormProps = {
   name: string;
   email: string;
@@ -43,21 +46,18 @@ function ProfileForm({ name, email, emailVerified }: ProfileFormProps) {
       onSubmit: UpdateProfileSchema,
     },
     onSubmit: async ({ value }) => {
-      const result = await executeAsync(value);
+      try {
+        const data = getActionResult(await executeAsync(value));
 
-      if (result?.serverError) {
-        toast.error(result.serverError);
-        return;
-      }
-
-      if (result?.data) {
         toast.success(
-          result.data.emailChanged
+          data.emailChanged
             ? "Profil mis à jour avec succès. Un email de vérification a été envoyé."
             : "Profil mis à jour avec succès"
         );
 
         router.refresh();
+      } catch (error: unknown) {
+        toast.error(getErrorMessage(error));
       }
     },
   });

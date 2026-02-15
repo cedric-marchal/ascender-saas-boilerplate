@@ -23,6 +23,9 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 
+import { getActionResult } from "@/utils/errors/get-action-result";
+import { getErrorMessage } from "@/utils/errors/get-error-message";
+
 type DeleteAccountFormProps = {
   email: string;
   onSuccess: () => void;
@@ -39,17 +42,15 @@ function DeleteAccountForm({ email, onSuccess }: DeleteAccountFormProps) {
       onSubmit: DeleteAccountSchema,
     },
     onSubmit: async ({ value }) => {
-      const result = await executeAsync(value);
+      try {
+        getActionResult(await executeAsync(value));
 
-      if (result?.serverError) {
-        toast.error(result.serverError);
-        return;
-      }
-
-      if (result?.data?.success) {
         toast.success("Votre compte a été supprimé avec succès");
         await signOut().catch(() => {});
+
         onSuccess();
+      } catch (error: unknown) {
+        toast.error(getErrorMessage(error));
       }
     },
   });

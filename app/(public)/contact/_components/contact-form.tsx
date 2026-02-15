@@ -19,6 +19,9 @@ import { Textarea } from "@/components/ui/textarea";
 
 import { createContactAction } from "@/app/(public)/contact/_actions/create-contact.action";
 
+import { getActionResult } from "@/utils/errors/get-action-result";
+import { getErrorMessage } from "@/utils/errors/get-error-message";
+
 function ContactForm() {
   const { executeAsync, isExecuting } = useAction(createContactAction);
 
@@ -33,16 +36,14 @@ function ContactForm() {
       onSubmit: CreateContactSchema,
     },
     onSubmit: async ({ value }) => {
-      const result = await executeAsync(value);
+      try {
+        getActionResult(await executeAsync(value));
 
-      if (result?.serverError) {
-        toast.error(result.serverError);
-        return;
-      }
-
-      if (result?.data?.success) {
         toast.success("Message envoyé avec succès !");
+
         form.reset();
+      } catch (error: unknown) {
+        toast.error(getErrorMessage(error));
       }
     },
   });

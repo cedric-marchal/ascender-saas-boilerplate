@@ -154,6 +154,7 @@ export const createContactAction = actionClient
   .action(async ({ parsedInput }) => {
     // No ctx available
     await sendEmail({ ... });
+
     return { success: true };
   });
 
@@ -166,6 +167,7 @@ export const updateProfileAction = authActionClient
       where: { id: ctx.userId },
       data: parsedInput,
     });
+
     return { success: true };
   });
 
@@ -177,6 +179,7 @@ export const deleteUserAction = adminActionClient
     await prisma.user.delete({
       where: { id: parsedInput.userId },
     });
+
     return { success: true };
   });
 ```
@@ -200,6 +203,7 @@ export const createContactAction = actionClient
       subject: parsedInput.subject,
       message: parsedInput.message,
     });
+
     return { success: true };
   });
 
@@ -304,11 +308,13 @@ export const createContactAction = actionClient
   .use(async ({ next }) => {
     // Rate limiting middleware
     await checkRatelimit(contactRatelimit, "identifier");
+
     return next();
   })
   .inputSchema(CreateContactSchema)
   .action(async ({ parsedInput }) => {
     await sendEmail({ ... });
+
     return { success: true };
   });
 ```
@@ -374,7 +380,7 @@ const user = await prisma.user.update({
 
 ### 11. Client-Side Usage (P0)
 
-Use TanStack Form with `useAction` hook from `next-safe-action/hooks`:
+Use TanStack Form with `useAction` hook from `next-safe-action/hooks`. Use `getActionResult` to convert the server action result into a throw-on-error pattern, and `getErrorMessage` for centralized error extraction. This ensures a unified `try/catch` pattern across all forms.
 
 ```tsx
 "use client";
@@ -397,6 +403,9 @@ import { Input } from "@/components/ui/input";
 
 import { createContactAction } from "@/app/(public)/contact/_actions/create-contact.action";
 
+import { getActionResult } from "@/utils/errors/get-action-result";
+import { getErrorMessage } from "@/utils/errors/get-error-message";
+
 function ContactForm() {
   const { executeAsync, isExecuting } = useAction(createContactAction);
 
@@ -409,16 +418,14 @@ function ContactForm() {
       onSubmit: CreateContactSchema,
     },
     onSubmit: async ({ value }) => {
-      const result = await executeAsync(value);
+      try {
+        getActionResult(await executeAsync(value));
 
-      if (result?.serverError) {
-        toast.error(result.serverError);
-        return;
-      }
-
-      if (result?.data?.success) {
         toast.success("Message envoyé avec succès !");
+
         form.reset();
+      } catch (error: unknown) {
+        toast.error(getErrorMessage(error));
       }
     },
   });
@@ -480,6 +487,21 @@ function ContactForm() {
     </form>
   );
 }
+```
+
+When the action returns data you need to use:
+
+```tsx
+onSubmit: async ({ value }) => {
+  try {
+    const data = getActionResult(await executeAsync(value));
+    // data is typed from the server action return type
+    toast.success(data.emailChanged ? "Email mis à jour" : "Profil mis à jour");
+    router.refresh();
+  } catch (error: unknown) {
+    toast.error(getErrorMessage(error));
+  }
+},
 ```
 
 ### 12. Error Classes Usage (P0)
@@ -745,6 +767,17 @@ const user = await prisma.user.update({
 
 // ❌ Wrong: Not using useAction hook on client
 const result = await createContactAction(data); // ❌ Should use useAction
+
+// ❌ Wrong: Manual if/else for server action results on client
+const result = await executeAsync(value);
+if (result?.serverError) {
+  toast.error(result.serverError);
+  return;
+}
+if (result?.data?.success) {
+  toast.success("Succès !");
+}
+// ✅ Use: getActionResult(await executeAsync(value)) in try/catch + getErrorMessage
 ```
 
 ## Key Principles
@@ -754,10 +787,12 @@ const result = await createContactAction(data); // ❌ Should use useAction
 3. **Action naming**: `{verb}{Entity}Action` with "Action" suffix
 4. **next-safe-action**: Use `.inputSchema()` for validation, `.action()` for logic
 5. **Client selection**: `actionClient` (public), `authActionClient` (auth), `adminActionClient` (admin)
-6. **No try/catch**: next-safe-action handles errors automatically
+6. **No try/catch in actions**: next-safe-action handles errors automatically on server
 7. **Throw errors**: Use custom error classes directly
 8. **Simple returns**: Return plain objects, no NextResponse
 9. **Revalidate**: Call `revalidatePath()` after mutations
 10. **useAction hook**: Always use `useAction` on client-side
-11. **Type safety**: Automatic type inference from schema to return
-12. **Prisma select**: Always specify fields explicitly
+11. **getActionResult on client**: Use `getActionResult(await executeAsync(value))` in try/catch for type-safe result extraction
+12. **getErrorMessage on client**: Use `getErrorMessage(error)` in catch block for centralized error display
+13. **Type safety**: Automatic type inference from schema to return
+14. **Prisma select**: Always specify fields explicitly

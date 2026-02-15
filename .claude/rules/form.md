@@ -37,7 +37,7 @@ app/(protected)/dashboard/settings/_components/forms/settings-forms.tsx
 ### 2. Imports Structure (P0)
 
 - ALWAYS use `import type` for type-only imports
-- Import order: React types → React → Next.js → external libs → internal libs → components → actions
+- Import order: React types → React → Next.js → external libs → internal libs → components → actions → utils
 
 ```tsx
 "use client";
@@ -60,6 +60,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
 import { createContactAction } from "@/app/(public)/contact/_actions/create-contact.action";
+
+import { getActionResult } from "@/utils/errors/get-action-result";
+import { getErrorMessage } from "@/utils/errors/get-error-message";
 ```
 
 ### 3. Form Hook Setup (P0)
@@ -111,9 +114,12 @@ const form = useForm({
 
 #### Pattern A: Server Actions (preferred)
 
-Use `useAction` from `next-safe-action/hooks`. NO try/catch needed — next-safe-action handles errors automatically.
+Use `useAction` from `next-safe-action/hooks` with `getActionResult` from `@/utils/errors/get-action-result` for type-safe result extraction, and `getErrorMessage` from `@/utils/errors/get-error-message` for centralized error handling. This follows the binary pattern: either success or throw.
 
 ```tsx
+import { getActionResult } from "@/utils/errors/get-action-result";
+import { getErrorMessage } from "@/utils/errors/get-error-message";
+
 function ContactForm() {
   const { executeAsync, isExecuting } = useAction(createContactAction);
 
@@ -127,16 +133,14 @@ function ContactForm() {
       onSubmit: CreateContactSchema,
     },
     onSubmit: async ({ value }) => {
-      const result = await executeAsync(value);
+      try {
+        getActionResult(await executeAsync(value));
 
-      if (result?.serverError) {
-        toast.error(result.serverError);
-        return;
-      }
-
-      if (result?.data?.success) {
         toast.success("Message envoyé avec succès !");
+
         form.reset();
+      } catch (error: unknown) {
+        toast.error(getErrorMessage(error));
       }
     },
   });
@@ -145,14 +149,34 @@ function ContactForm() {
 }
 ```
 
-#### Pattern B: API Routes (for file uploads)
-
-Use `upfetch` from `@/lib/up-fetch` with `FormData`. upfetch auto-parses JSON and throws `ResponseError` on non-ok responses. Use `isResponseError` from `up-fetch` for typed error handling.
+When the action returns data you need:
 
 ```tsx
-import { isResponseError } from "up-fetch";
+onSubmit: async ({ value }) => {
+  try {
+    const data = getActionResult(await executeAsync(value));
 
+    toast.success(
+      data.emailChanged
+        ? "Profil mis à jour. Un email de vérification a été envoyé."
+        : "Profil mis à jour avec succès"
+    );
+
+    router.refresh();
+  } catch (error: unknown) {
+    toast.error(getErrorMessage(error));
+  }
+},
+```
+
+#### Pattern B: API Routes (for file uploads)
+
+Use `upfetch` from `@/lib/up-fetch` with `FormData`. upfetch auto-parses JSON and throws `ResponseError` on non-ok responses. Use `getErrorMessage` from `@/utils/errors/get-error-message` for centralized error extraction.
+
+```tsx
 import { upfetch } from "@/lib/up-fetch";
+
+import { getErrorMessage } from "@/utils/errors/get-error-message";
 
 function AvatarForm({ user }: AvatarFormProps) {
   const router = useRouter();
@@ -179,15 +203,11 @@ function AvatarForm({ user }: AvatarFormProps) {
         });
 
         toast.success("Avatar mis à jour avec succès");
+
         form.reset();
         router.refresh();
       } catch (error: unknown) {
-        if (isResponseError(error)) {
-          const body = error.data as { message?: string };
-          toast.error(body?.message || "Une erreur est survenue");
-          return;
-        }
-        toast.error("Une erreur est survenue");
+        toast.error(getErrorMessage(error));
       }
     },
   });
@@ -703,6 +723,9 @@ import { Input } from "@/components/ui/input";
 
 import { deleteAccountAction } from "@/app/(protected)/_actions/delete-account.action";
 
+import { getActionResult } from "@/utils/errors/get-action-result";
+import { getErrorMessage } from "@/utils/errors/get-error-message";
+
 type AdminDeleteAccountFormProps = {
   email: string;
   onSuccess: () => void;
@@ -722,17 +745,15 @@ function AdminDeleteAccountForm({
       onSubmit: DeleteAccountSchema,
     },
     onSubmit: async ({ value }) => {
-      const result = await executeAsync(value);
+      try {
+        getActionResult(await executeAsync(value));
 
-      if (result?.serverError) {
-        toast.error(result.serverError);
-        return;
-      }
-
-      if (result?.data?.success) {
         toast.success("Votre compte a été supprimé avec succès");
         await signOut().catch(() => {});
+
         onSuccess();
+      } catch (error: unknown) {
+        toast.error(getErrorMessage(error));
       }
     },
   });
@@ -893,6 +914,9 @@ import { Textarea } from "@/components/ui/textarea";
 
 import { createContactAction } from "@/app/(public)/contact/_actions/create-contact.action";
 
+import { getActionResult } from "@/utils/errors/get-action-result";
+import { getErrorMessage } from "@/utils/errors/get-error-message";
+
 function ContactForm() {
   const { executeAsync, isExecuting } = useAction(createContactAction);
 
@@ -907,16 +931,14 @@ function ContactForm() {
       onSubmit: CreateContactSchema,
     },
     onSubmit: async ({ value }) => {
-      const result = await executeAsync(value);
+      try {
+        getActionResult(await executeAsync(value));
 
-      if (result?.serverError) {
-        toast.error(result.serverError);
-        return;
-      }
-
-      if (result?.data?.success) {
         toast.success("Message envoyé avec succès !");
+
         form.reset();
+      } catch (error: unknown) {
+        toast.error(getErrorMessage(error));
       }
     },
   });
@@ -1169,6 +1191,17 @@ const response = await fetch("/api/endpoint", { ... });
 const body = await response.json();
 // Use: const result = await upfetch("/api/endpoint", { ... });
 
+// ❌ Wrong: Manual if/else for server action results
+const result = await executeAsync(value);
+if (result?.serverError) {
+  toast.error(result.serverError);
+  return;
+}
+if (result?.data?.success) {
+  toast.success("Succès !");
+}
+// Use: getActionResult(await executeAsync(value)) in try/catch
+
 // ❌ Wrong: Abbreviated variable names
 function handleDrop(e: DragEvent) { ... }
 const res = await upfetch(...);
@@ -1194,11 +1227,12 @@ const [isLoading, setIsLoading] = useState(false);
 3. **Zod validators**: Use `validators: { onSubmit: Schema }`, never `zodResolver`
 4. **Separation**: Form and Modal always in separate files, forms in `_components/forms/`
 5. **Schema import**: Always import Zod schema from `@/lib/schemas/`
-6. **Server Actions preferred**: Use `useAction` + `executeAsync` for most forms
-7. **API Routes for files**: Use `upfetch` from `@/lib/up-fetch` with `FormData` for file uploads (never native `fetch`)
-8. **isInvalid pattern**: Always compute `field.state.meta.isTouched && !field.state.meta.isValid`
-9. **form.Subscribe**: Always use for submit button state (`canSubmit`, `isSubmitting`)
-10. **Drag & Drop**: File inputs must always include drag & drop
-11. **Accessibility**: `aria-invalid` on inputs, `aria-hidden` on icons, `sr-only` for screen readers
-12. **Reset on success**: Call `form.reset()` after successful submission
-13. **Explicit naming**: Full variable names, typed callbacks, typed events
+6. **Server Actions preferred**: Use `useAction` + `executeAsync` + `getActionResult` + `getErrorMessage` in try/catch
+7. **API Routes for files**: Use `upfetch` from `@/lib/up-fetch` with `getErrorMessage` in try/catch (never native `fetch`)
+8. **Unified error handling**: Both patterns use `try/catch` + `getErrorMessage` for consistent error display
+9. **isInvalid pattern**: Always compute `field.state.meta.isTouched && !field.state.meta.isValid`
+10. **form.Subscribe**: Always use for submit button state (`canSubmit`, `isSubmitting`)
+11. **Drag & Drop**: File inputs must always include drag & drop
+12. **Accessibility**: `aria-invalid` on inputs, `aria-hidden` on icons, `sr-only` for screen readers
+13. **Reset on success**: Call `form.reset()` after successful submission
+14. **Explicit naming**: Full variable names, typed callbacks, typed events

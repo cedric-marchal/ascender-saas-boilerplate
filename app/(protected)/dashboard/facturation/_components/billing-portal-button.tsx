@@ -4,11 +4,12 @@ import { useState } from "react";
 
 import { ExternalLink, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { isResponseError } from "up-fetch";
 
 import { upfetch } from "@/lib/up-fetch";
 
 import { Button } from "@/components/ui/button";
+
+import { getErrorMessage } from "@/utils/errors/get-error-message";
 
 function BillingPortalButton() {
   const [isLoading, setIsLoading] = useState(false);
@@ -23,12 +24,7 @@ function BillingPortalButton() {
 
       window.location.href = result.data.url;
     } catch (error: unknown) {
-      if (isResponseError(error)) {
-        const body = error.data as { message?: string };
-        toast.error(body?.message || "Une erreur est survenue");
-      } else {
-        toast.error("Une erreur est survenue");
-      }
+      toast.error(getErrorMessage(error));
     } finally {
       setIsLoading(false);
     }

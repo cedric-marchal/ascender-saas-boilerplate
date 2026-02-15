@@ -22,6 +22,9 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 
+import { getActionResult } from "@/utils/errors/get-action-result";
+import { getErrorMessage } from "@/utils/errors/get-error-message";
+
 function PasswordForm() {
   const [isCurrentPasswordVisible, setIsCurrentPasswordVisible] =
     useState(false);
@@ -40,18 +43,16 @@ function PasswordForm() {
       onSubmit: UpdatePasswordSchema,
     },
     onSubmit: async ({ value }) => {
-      const result = await executeAsync(value);
+      try {
+        getActionResult(await executeAsync(value));
 
-      if (result?.serverError) {
-        toast.error(result.serverError);
-        return;
-      }
-
-      if (result?.data?.success) {
         toast.success(
           "Mot de passe modifié avec succès. Un email de confirmation a été envoyé."
         );
+
         form.reset();
+      } catch (error: unknown) {
+        toast.error(getErrorMessage(error));
       }
     },
   });
