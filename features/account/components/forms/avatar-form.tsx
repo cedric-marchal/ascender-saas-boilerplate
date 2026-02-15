@@ -14,7 +14,9 @@ import { UpdateAvatarSchema } from "@/features/account/schemas/avatar.schema";
 import { useForm } from "@tanstack/react-form";
 import { Loader2, Upload, X } from "lucide-react";
 import { toast } from "sonner";
+import { isResponseError } from "up-fetch";
 
+import { upfetch } from "@/lib/up-fetch";
 import { cn } from "@/lib/utils";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -61,21 +63,24 @@ function AvatarForm({ name, image }: AvatarFormProps) {
       const formData = new FormData();
       formData.append("avatar", value.avatar);
 
-      const response = await fetch("/api/avatar", {
-        method: "POST",
-        body: formData,
-      });
+      try {
+        await upfetch("/api/avatar", {
+          method: "POST",
+          body: formData,
+        });
 
-      if (!response.ok) {
-        const body = await response.json();
-        toast.error(body.message || "Une erreur est survenue");
-        return;
+        toast.success("Avatar mis à jour avec succès");
+        setPreviewUrl(null);
+        form.reset();
+        router.refresh();
+      } catch (error: unknown) {
+        if (isResponseError(error)) {
+          const body = error.data as { message?: string };
+          toast.error(body?.message || "Une erreur est survenue");
+          return;
+        }
+        toast.error("Une erreur est survenue");
       }
-
-      toast.success("Avatar mis à jour avec succès");
-      setPreviewUrl(null);
-      form.reset();
-      router.refresh();
     },
   });
 

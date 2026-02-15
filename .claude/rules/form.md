@@ -147,9 +147,13 @@ function ContactForm() {
 
 #### Pattern B: API Routes (for file uploads)
 
-Use `fetch` with `FormData`. Early return on error (no throw needed since `onSubmit` is not in a try/catch).
+Use `upfetch` from `@/lib/up-fetch` with `FormData`. upfetch auto-parses JSON and throws `ResponseError` on non-ok responses. Use `isResponseError` from `up-fetch` for typed error handling.
 
 ```tsx
+import { isResponseError } from "up-fetch";
+
+import { upfetch } from "@/lib/up-fetch";
+
 function AvatarForm({ user }: AvatarFormProps) {
   const router = useRouter();
 
@@ -168,20 +172,23 @@ function AvatarForm({ user }: AvatarFormProps) {
       const formData = new FormData();
       formData.append("avatar", value.avatar);
 
-      const response = await fetch("/api/avatar", {
-        method: "POST",
-        body: formData,
-      });
+      try {
+        await upfetch("/api/avatar", {
+          method: "POST",
+          body: formData,
+        });
 
-      if (!response.ok) {
-        const body = await response.json();
-        toast.error(body.message || "Une erreur est survenue");
-        return;
+        toast.success("Avatar mis à jour avec succès");
+        form.reset();
+        router.refresh();
+      } catch (error: unknown) {
+        if (isResponseError(error)) {
+          const body = error.data as { message?: string };
+          toast.error(body?.message || "Une erreur est survenue");
+          return;
+        }
+        toast.error("Une erreur est survenue");
       }
-
-      toast.success("Avatar mis à jour avec succès");
-      form.reset();
-      router.refresh();
     },
   });
 
@@ -1157,9 +1164,14 @@ const form = useForm({
   onChange={handleChange}
 />
 
+// ❌ Wrong: Using native fetch instead of upfetch
+const response = await fetch("/api/endpoint", { ... });
+const body = await response.json();
+// Use: const result = await upfetch("/api/endpoint", { ... });
+
 // ❌ Wrong: Abbreviated variable names
 function handleDrop(e: DragEvent) { ... }
-const res = await fetch(...);
+const res = await upfetch(...);
 
 // ❌ Wrong: Missing type in callback
 {options.map((option) => ...)}
@@ -1183,7 +1195,7 @@ const [isLoading, setIsLoading] = useState(false);
 4. **Separation**: Form and Modal always in separate files, forms in `_components/forms/`
 5. **Schema import**: Always import Zod schema from `@/lib/schemas/`
 6. **Server Actions preferred**: Use `useAction` + `executeAsync` for most forms
-7. **API Routes for files**: Use `fetch` with `FormData` only when needed (file uploads to API)
+7. **API Routes for files**: Use `upfetch` from `@/lib/up-fetch` with `FormData` for file uploads (never native `fetch`)
 8. **isInvalid pattern**: Always compute `field.state.meta.isTouched && !field.state.meta.isValid`
 9. **form.Subscribe**: Always use for submit button state (`canSubmit`, `isSubmitting`)
 10. **Drag & Drop**: File inputs must always include drag & drop

@@ -6,6 +6,9 @@ import { useRouter } from "next/navigation";
 
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { isResponseError } from "up-fetch";
+
+import { upfetch } from "@/lib/up-fetch";
 
 import { Button } from "@/components/ui/button";
 
@@ -56,21 +59,19 @@ function PricingCheckoutButton({
       const formData = new FormData();
       formData.append("priceId", priceId);
 
-      const response = await fetch("/api/stripe/checkout", {
+      const result = await upfetch("/api/stripe/checkout", {
         method: "POST",
         body: formData,
       });
 
-      const result = await response.json();
-
-      if (!response.ok) {
-        toast.error(result.message || "Une erreur est survenue");
-        return;
-      }
-
       window.location.href = result.data.url;
     } catch (error: unknown) {
-      toast.error("Une erreur est survenue");
+      if (isResponseError(error)) {
+        const body = error.data as { message?: string };
+        toast.error(body?.message || "Une erreur est survenue");
+      } else {
+        toast.error("Une erreur est survenue");
+      }
     } finally {
       setIsLoading(false);
     }

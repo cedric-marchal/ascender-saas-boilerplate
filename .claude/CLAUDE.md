@@ -24,6 +24,7 @@ Goal: maximize signal, minimize tokens, avoid unnecessary code dumps.
 - **Emails**: Resend + React Email
 - **Environment**: T3 Env
 - **Storage**: Cloudflare R2 + Sharp (image optimization)
+- **HTTP Client**: up-fetch (upfetch wrapper around native fetch)
 - **Deployment**: Vercel
 
 ## Source of Truth Hierarchy (P0)
@@ -145,8 +146,7 @@ ALWAYS use full, descriptive names. NEVER use abbreviations.
 function handleSubmit(event: SubmitEvent<HTMLFormElement>) { ... }
 function handleChange(event: ChangeEvent<HTMLInputElement>) { ... }
 function handleClick(event: MouseEvent<HTMLButtonElement>) { ... }
-const response = await fetch("/api/users");
-const body = await response.json();
+const result = await upfetch("/api/users");
 const document = await prisma.document.findUnique({ ... });
 const user = await prisma.user.findUnique({ ... });
 items.map((item: Item, index: number) => ...)
@@ -155,7 +155,7 @@ users.forEach((user: User) => ...)
 // ❌ Wrong: abbreviated names
 function handleSubmit(e) { ... }
 function handleChange(evt) { ... }
-const res = await fetch("/api/users");
+const res = await upfetch("/api/users");
 const doc = await prisma.document.findUnique({ ... });
 const usr = await prisma.user.findUnique({ ... });
 items.map((item, i) => ...)
@@ -168,8 +168,7 @@ items.map((_, i) => ...)
 | Context         | Correct                       | Wrong                        |
 | --------------- | ----------------------------- | ---------------------------- |
 | Event handlers  | `event`                       | `e`, `evt`                   |
-| Fetch response  | `response`                    | `res`, `r`                   |
-| Response body   | `body`                        | `result`, `data`             |
+| upfetch result  | `result`                      | `res`, `r`                   |
 | Database result | `document`, `user`, `project` | `doc`, `usr`, `proj`         |
 | Array index     | `index`                       | `i`, `idx`, `_`              |
 | Error           | `error`                       | `err`, `e`                   |
@@ -250,25 +249,23 @@ async function getDocument(id: string, userId: string) {
   return document;
 }
 
-// ✅ Correct: Throw pattern in try/catch (forms)
+// ✅ Correct: Throw pattern in try/catch (forms with upfetch)
 async function onSubmit(data: FormData) {
   try {
-    const response = await fetch("/api/endpoint", {
+    await upfetch("/api/endpoint", {
       method: "POST",
       body: data,
     });
 
-    if (!response.ok) {
-      const body = await response.json();
-      throw new Error(body.message || "Une erreur est survenue");
-    }
-
-    // Only one success path
+    // Only one success path (upfetch throws on non-ok responses)
     toast.success("Succès !");
   } catch (error: unknown) {
-    toast.error(
-      error instanceof Error ? error.message : "Une erreur est survenue"
-    );
+    if (isResponseError(error)) {
+      const body = error.data as { message?: string };
+      toast.error(body?.message || "Une erreur est survenue");
+      return;
+    }
+    toast.error("Une erreur est survenue");
   }
 }
 
@@ -289,7 +286,7 @@ function UserProfile({ user }: UserProfileProps) {
   }
 }
 
-// ❌ Wrong: Early return in try block (forms)
+// ❌ Wrong: Using native fetch instead of upfetch
 async function onSubmit(data: FormData) {
   try {
     const response = await fetch("/api/endpoint", {
@@ -1065,15 +1062,14 @@ if (data) {
   return null;
 }
 
-// ❌ NEVER use early return in try/catch blocks (forms, async operations)
-try {
-  const response = await fetch("/api/endpoint", { ... });
-  if (!response.ok) {
-    toast.error("Erreur");
-    return; // Should throw instead
-  }
-  toast.success("Succès");
-} catch (error) { ... }
+// ❌ NEVER use native fetch (use upfetch from @/lib/up-fetch instead)
+const response = await fetch("/api/endpoint", { ... });
+const body = await response.json();
+// upfetch auto-parses JSON and throws on errors
+
+// ❌ NEVER check response.ok with upfetch (it throws automatically)
+const response = await upfetch("/api/endpoint", { ... });
+if (!response.ok) { ... } // upfetch returns parsed data, not Response
 
 // ❌ NEVER use default exports
 export default function Component() { ... }
