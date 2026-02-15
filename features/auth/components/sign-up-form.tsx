@@ -9,37 +9,38 @@ import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { authClient, signIn } from "@/lib/auth-client";
-import { SignInSchema, type SignInSchemaType } from "@/lib/schemas/auth.schema";
+import { SignUpSchema, type SignUpSchemaType } from "@/features/auth/schemas/auth.schema";
 
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 
-import { ForgotPasswordLink } from "@/app/(public)/(auth)/connexion/_components/forgot-password-link";
-
-function SignInForm() {
+function SignUpForm() {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const router = useRouter();
 
   const form = useForm({
     defaultValues: {
+      name: "",
       email: "",
       password: "",
-    } as SignInSchemaType,
+    } as SignUpSchemaType,
     validators: {
-      onSubmit: SignInSchema,
+      onSubmit: SignUpSchema,
     },
     onSubmit: async ({ value }) => {
-      const { error } = await authClient.signIn.email({
+      const { error } = await authClient.signUp.email({
+        name: value.name,
         email: value.email,
         password: value.password,
       });
 
       if (error) {
-        toast.error(error.message || "Identifiants incorrects");
+        toast.error(error.message || "Erreur lors de l'inscription");
         return;
       }
 
+      toast.success("Compte créé avec succès");
       router.push("/dashboard");
       router.refresh();
     },
@@ -55,6 +56,34 @@ function SignInForm() {
         className="space-y-4"
       >
         <form.Field
+          name="name"
+          children={(field) => {
+            const isInvalid =
+              field.state.meta.isTouched && !field.state.meta.isValid;
+
+            function handleChange(event: ChangeEvent<HTMLInputElement>) {
+              field.handleChange(event.target.value);
+            }
+
+            return (
+              <Field data-invalid={isInvalid}>
+                <FieldLabel htmlFor="sign-up-name">Nom</FieldLabel>
+                <Input
+                  id="sign-up-name"
+                  name={field.name}
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={handleChange}
+                  aria-invalid={isInvalid}
+                  placeholder="Jean Dupont"
+                />
+                {isInvalid && <FieldError errors={field.state.meta.errors} />}
+              </Field>
+            );
+          }}
+        />
+
+        <form.Field
           name="email"
           children={(field) => {
             const isInvalid =
@@ -66,9 +95,9 @@ function SignInForm() {
 
             return (
               <Field data-invalid={isInvalid}>
-                <FieldLabel htmlFor="sign-in-email">Email</FieldLabel>
+                <FieldLabel htmlFor="sign-up-email">Email</FieldLabel>
                 <Input
-                  id="sign-in-email"
+                  id="sign-up-email"
                   type="email"
                   name={field.name}
                   value={field.state.value}
@@ -96,15 +125,10 @@ function SignInForm() {
 
             return (
               <Field data-invalid={isInvalid}>
-                <div className="flex items-center justify-between">
-                  <FieldLabel htmlFor="sign-in-password">
-                    Mot de passe
-                  </FieldLabel>
-                  <ForgotPasswordLink />
-                </div>
+                <FieldLabel htmlFor="sign-up-password">Mot de passe</FieldLabel>
                 <div className="relative">
                   <Input
-                    id="sign-in-password"
+                    id="sign-up-password"
                     type={isPasswordVisible ? "text" : "password"}
                     name={field.name}
                     value={field.state.value}
@@ -112,7 +136,7 @@ function SignInForm() {
                     onChange={handleChange}
                     aria-invalid={isInvalid}
                     placeholder="••••••••••••"
-                    autoComplete="current-password"
+                    autoComplete="new-password"
                     className="pr-10"
                   />
                   <button
@@ -155,7 +179,7 @@ function SignInForm() {
                   aria-hidden="true"
                 />
               ) : null}
-              {isSubmitting ? "Connexion..." : "Se connecter"}
+              {isSubmitting ? "Création en cours..." : "Créer un compte"}
             </Button>
           )}
         </form.Subscribe>
@@ -175,7 +199,9 @@ function SignInForm() {
                 aria-hidden="true"
               />
             ) : null}
-            {isSubmitting ? "Connexion..." : "Se connecter avec Google"}
+            {isSubmitting
+              ? "Inscription en cours..."
+              : "Créer un compte avec Google"}
           </Button>
         )}
       </form.Subscribe>
@@ -183,4 +209,4 @@ function SignInForm() {
   );
 }
 
-export { SignInForm };
+export { SignUpForm };

@@ -12,7 +12,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-import type { BillingInvoice } from "@/app/(protected)/dashboard/facturation/_lib/get-billing";
+import type { BillingInvoice } from "@/features/billing/queries/get-billing";
 
 type InvoiceStatusConfig = {
   label: string;

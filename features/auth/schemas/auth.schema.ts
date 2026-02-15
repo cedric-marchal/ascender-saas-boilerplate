@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { passwordSchema } from "@/lib/schemas/password.schema";
+import { passwordSchema } from "@/features/auth/schemas/password.schema";
 
 const emailSchema = z
   .string()

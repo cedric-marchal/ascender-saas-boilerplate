@@ -6,7 +6,7 @@ import type { WebPage, WithContext } from "schema-dts";
 import { env } from "@/lib/env";
 import { getSession } from "@/lib/session";
 
-import { ResetPasswordForm } from "@/app/(public)/(auth)/nouveau-mot-de-passe/_components/reset-password-form";
+import { ResetPasswordForm } from "@/features/auth";
 
 const APP_NAME = env.NEXT_PUBLIC_APP_NAME;
 const BASE_URL = env.NEXT_PUBLIC_BASE_URL;

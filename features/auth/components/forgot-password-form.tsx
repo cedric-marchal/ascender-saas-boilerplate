@@ -10,7 +10,7 @@ import { authClient } from "@/lib/auth-client";
 import {
   ForgotPasswordSchema,
   type ForgotPasswordSchemaType,
-} from "@/lib/schemas/auth.schema";
+} from "@/features/auth/schemas/auth.schema";
 
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";

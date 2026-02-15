@@ -9,38 +9,37 @@ import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { authClient, signIn } from "@/lib/auth-client";
-import { SignUpSchema, type SignUpSchemaType } from "@/lib/schemas/auth.schema";
+import { SignInSchema, type SignInSchemaType } from "@/features/auth/schemas/auth.schema";
 
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 
-function SignUpForm() {
+import { ForgotPasswordLink } from "@/features/auth/components/forgot-password-link";
+
+function SignInForm() {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const router = useRouter();
 
   const form = useForm({
     defaultValues: {
-      name: "",
       email: "",
       password: "",
-    } as SignUpSchemaType,
+    } as SignInSchemaType,
     validators: {
-      onSubmit: SignUpSchema,
+      onSubmit: SignInSchema,
     },
     onSubmit: async ({ value }) => {
-      const { error } = await authClient.signUp.email({
-        name: value.name,
+      const { error } = await authClient.signIn.email({
         email: value.email,
         password: value.password,
       });
 
       if (error) {
-        toast.error(error.message || "Erreur lors de l'inscription");
+        toast.error(error.message || "Identifiants incorrects");
         return;
       }
 
-      toast.success("Compte créé avec succès");
       router.push("/dashboard");
       router.refresh();
     },
@@ -56,34 +55,6 @@ function SignUpForm() {
         className="space-y-4"
       >
         <form.Field
-          name="name"
-          children={(field) => {
-            const isInvalid =
-              field.state.meta.isTouched && !field.state.meta.isValid;
-
-            function handleChange(event: ChangeEvent<HTMLInputElement>) {
-              field.handleChange(event.target.value);
-            }
-
-            return (
-              <Field data-invalid={isInvalid}>
-                <FieldLabel htmlFor="sign-up-name">Nom</FieldLabel>
-                <Input
-                  id="sign-up-name"
-                  name={field.name}
-                  value={field.state.value}
-                  onBlur={field.handleBlur}
-                  onChange={handleChange}
-                  aria-invalid={isInvalid}
-                  placeholder="Jean Dupont"
-                />
-                {isInvalid && <FieldError errors={field.state.meta.errors} />}
-              </Field>
-            );
-          }}
-        />
-
-        <form.Field
           name="email"
           children={(field) => {
             const isInvalid =
@@ -95,9 +66,9 @@ function SignUpForm() {
 
             return (
               <Field data-invalid={isInvalid}>
-                <FieldLabel htmlFor="sign-up-email">Email</FieldLabel>
+                <FieldLabel htmlFor="sign-in-email">Email</FieldLabel>
                 <Input
-                  id="sign-up-email"
+                  id="sign-in-email"
                   type="email"
                   name={field.name}
                   value={field.state.value}
@@ -125,10 +96,15 @@ function SignUpForm() {
 
             return (
               <Field data-invalid={isInvalid}>
-                <FieldLabel htmlFor="sign-up-password">Mot de passe</FieldLabel>
+                <div className="flex items-center justify-between">
+                  <FieldLabel htmlFor="sign-in-password">
+                    Mot de passe
+                  </FieldLabel>
+                  <ForgotPasswordLink />
+                </div>
                 <div className="relative">
                   <Input
-                    id="sign-up-password"
+                    id="sign-in-password"
                     type={isPasswordVisible ? "text" : "password"}
                     name={field.name}
                     value={field.state.value}
@@ -136,7 +112,7 @@ function SignUpForm() {
                     onChange={handleChange}
                     aria-invalid={isInvalid}
                     placeholder="••••••••••••"
-                    autoComplete="new-password"
+                    autoComplete="current-password"
                     className="pr-10"
                   />
                   <button
@@ -179,7 +155,7 @@ function SignUpForm() {
                   aria-hidden="true"
                 />
               ) : null}
-              {isSubmitting ? "Création en cours..." : "Créer un compte"}
+              {isSubmitting ? "Connexion..." : "Se connecter"}
             </Button>
           )}
         </form.Subscribe>
@@ -199,9 +175,7 @@ function SignUpForm() {
                 aria-hidden="true"
               />
             ) : null}
-            {isSubmitting
-              ? "Inscription en cours..."
-              : "Créer un compte avec Google"}
+            {isSubmitting ? "Connexion..." : "Se connecter avec Google"}
           </Button>
         )}
       </form.Subscribe>
@@ -209,4 +183,4 @@ function SignUpForm() {
   );
 }
 
-export { SignUpForm };
+export { SignInForm };

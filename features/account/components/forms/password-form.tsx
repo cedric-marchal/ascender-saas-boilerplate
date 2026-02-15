@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import {
   UpdatePasswordSchema,
   type UpdatePasswordSchemaType,
-} from "@/lib/schemas/password.schema";
+} from "@/features/auth/schemas/password.schema";
 
 import { Button } from "@/components/ui/button";
 import {

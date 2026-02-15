@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   UpdatePasswordSchema,
   passwordSchema,
-} from "@/lib/schemas/password.schema";
+} from "@/features/auth/schemas/password.schema";
 
 describe("passwordSchema", () => {
   it("accepts valid password with lowercase, uppercase, and digit", () => {

@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-import type { BillingSubscription } from "@/app/(protected)/dashboard/facturation/_lib/get-billing";
+import type { BillingSubscription } from "@/features/billing/queries/get-billing";
 
 type SubscriptionStatusConfig = {
   label: string;

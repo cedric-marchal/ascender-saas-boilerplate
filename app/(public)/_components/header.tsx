@@ -5,7 +5,7 @@ import { Menu } from "lucide-react";
 import { env } from "@/lib/env";
 import { getSession } from "@/lib/session";
 
-import { SignOutButton } from "@/components/sign-out-button";
+import { SignOutButton } from "@/features/auth";
 import { Button } from "@/components/ui/button";
 import {
   NavigationMenu,

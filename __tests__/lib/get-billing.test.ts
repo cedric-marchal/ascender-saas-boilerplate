@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { redis } from "@/lib/redis";
 import { stripe } from "@/lib/stripe";
 
-import { getBilling } from "@/app/(protected)/dashboard/facturation/_lib/get-billing";
+import { getBilling } from "@/features/billing";
 
 vi.mock("@/lib/prisma", () => ({
   prisma: {

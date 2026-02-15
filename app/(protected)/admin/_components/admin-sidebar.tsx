@@ -14,7 +14,7 @@ import {
 
 import { env } from "@/lib/env";
 
-import { SignOutButton } from "@/components/sign-out-button";
+import { SignOutButton } from "@/features/auth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,

@@ -5,7 +5,7 @@ import {
   ResetPasswordSchema,
   SignInSchema,
   SignUpSchema,
-} from "@/lib/schemas/auth.schema";
+} from "@/features/auth/schemas/auth.schema";
 
 describe("SignUpSchema", () => {
   const validData = {

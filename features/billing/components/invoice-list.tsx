@@ -1,6 +1,6 @@
-import { InvoiceCard } from "@/app/(protected)/dashboard/facturation/_components/invoice-card";
-import { InvoiceListEmpty } from "@/app/(protected)/dashboard/facturation/_components/invoice-list-empty";
-import type { BillingInvoice } from "@/app/(protected)/dashboard/facturation/_lib/get-billing";
+import { InvoiceCard } from "@/features/billing/components/invoice-card";
+import { InvoiceListEmpty } from "@/features/billing/components/invoice-list-empty";
+import type { BillingInvoice } from "@/features/billing/queries/get-billing";
 
 type InvoiceListProps = {
   invoices: BillingInvoice[];
