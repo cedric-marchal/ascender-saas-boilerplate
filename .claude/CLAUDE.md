@@ -249,7 +249,7 @@ async function getDocument(id: string, userId: string) {
   return document;
 }
 
-// ✅ Correct: Throw pattern in try/catch (forms with upfetch)
+// ✅ Correct: Throw pattern in try/catch (upfetch + getErrorMessage)
 async function onSubmit(data: FormData) {
   try {
     await upfetch("/api/endpoint", {
@@ -260,12 +260,7 @@ async function onSubmit(data: FormData) {
     // Only one success path (upfetch throws on non-ok responses)
     toast.success("Succès !");
   } catch (error: unknown) {
-    if (isResponseError(error)) {
-      const body = error.data as { message?: string };
-      toast.error(body?.message || "Une erreur est survenue");
-      return;
-    }
-    toast.error("Une erreur est survenue");
+    toast.error(getErrorMessage(error));
   }
 }
 
@@ -842,6 +837,9 @@ import { Input } from "@/components/ui/input";
 
 import { createContactAction } from "@/app/(public)/contact/_actions/create-contact.action";
 
+import { getActionResult } from "@/utils/errors/get-action-result";
+import { getErrorMessage } from "@/utils/errors/get-error-message";
+
 function ContactForm() {
   const { executeAsync, isExecuting } = useAction(createContactAction);
 
@@ -854,16 +852,14 @@ function ContactForm() {
       onSubmit: CreateContactSchema,
     },
     onSubmit: async ({ value }) => {
-      const result = await executeAsync(value);
+      try {
+        getActionResult(await executeAsync(value));
 
-      if (result?.serverError) {
-        toast.error(result.serverError);
-        return;
-      }
-
-      if (result?.data?.success) {
         toast.success("Message envoyé avec succès !");
+
         form.reset();
+      } catch (error: unknown) {
+        toast.error(getErrorMessage(error));
       }
     },
   });
