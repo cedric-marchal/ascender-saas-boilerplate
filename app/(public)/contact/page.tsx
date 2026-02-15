@@ -5,7 +5,7 @@ import type { ContactPage as ContactPageSchema, WithContext } from "schema-dts";
 
 import { env } from "@/lib/env";
 
-import { ContactForm } from "@/app/(public)/contact/_components/contact-form";
+import { ContactForm } from "@/features/contact";
 
 const APP_NAME = env.NEXT_PUBLIC_APP_NAME;
 const BASE_URL = env.NEXT_PUBLIC_BASE_URL;

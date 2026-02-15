@@ -4,9 +4,9 @@ import { env } from "@/lib/env";
 import { contactRatelimit } from "@/lib/ratelimit";
 import { sendEmail } from "@/lib/resend";
 import { actionClient } from "@/lib/safe-action";
-import { CreateContactSchema } from "@/lib/schemas/contact.schema";
+import { CreateContactSchema } from "@/features/contact/schemas/contact.schema";
 
-import { ContactEmail } from "@/components/emails/contact-email";
+import { ContactEmail } from "@/features/contact/emails/contact-email";
 
 import { checkRatelimit } from "@/utils/ratelimit/check-ratelimit";
 import { getActionIdentifier } from "@/utils/ratelimit/get-request-identifier";

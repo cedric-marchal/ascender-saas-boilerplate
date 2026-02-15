@@ -10,14 +10,14 @@ import { toast } from "sonner";
 import {
   CreateContactSchema,
   type CreateContactSchemaType,
-} from "@/lib/schemas/contact.schema";
+} from "@/features/contact/schemas/contact.schema";
 
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
-import { createContactAction } from "@/app/(public)/contact/_actions/create-contact.action";
+import { createContactAction } from "@/features/contact/actions/create-contact.action";
 
 import { getActionResult } from "@/utils/errors/get-action-result";
 import { getErrorMessage } from "@/utils/errors/get-error-message";
