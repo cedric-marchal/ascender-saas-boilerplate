@@ -1,11 +1,10 @@
-import { describe, expect, it } from "vitest";
-
 import {
   ForgotPasswordSchema,
   ResetPasswordSchema,
   SignInSchema,
   SignUpSchema,
 } from "@/features/auth/schemas/auth.schema";
+import { describe, expect, it } from "vitest";
 
 describe("SignUpSchema", () => {
   const validData = {

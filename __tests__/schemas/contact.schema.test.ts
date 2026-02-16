@@ -1,6 +1,5 @@
-import { describe, expect, it } from "vitest";
-
 import { CreateContactSchema } from "@/features/contact/schemas/contact.schema";
+import { describe, expect, it } from "vitest";
 
 describe("CreateContactSchema", () => {
   const validData = {

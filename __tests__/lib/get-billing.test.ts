@@ -1,10 +1,9 @@
+import { getBilling } from "@/features/billing";
 import { describe, expect, it, vi } from "vitest";
 
 import { prisma } from "@/lib/prisma";
 import { redis } from "@/lib/redis";
 import { stripe } from "@/lib/stripe";
-
-import { getBilling } from "@/features/billing";
 
 vi.mock("@/lib/prisma", () => ({
   prisma: {

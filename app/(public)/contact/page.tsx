@@ -1,11 +1,10 @@
 import type { Metadata } from "next";
 
+import { ContactForm } from "@/features/contact";
 import { Mail, MapPin } from "lucide-react";
 import type { ContactPage as ContactPageSchema, WithContext } from "schema-dts";
 
 import { env } from "@/lib/env";
-
-import { ContactForm } from "@/features/contact";
 
 const APP_NAME = env.NEXT_PUBLIC_APP_NAME;
 const BASE_URL = env.NEXT_PUBLIC_BASE_URL;

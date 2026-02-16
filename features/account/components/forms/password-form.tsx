@@ -3,15 +3,14 @@
 import { type ChangeEvent, type SubmitEvent, useState } from "react";
 
 import { updatePasswordAction } from "@/features/account/actions/update-password.action";
-import { useForm } from "@tanstack/react-form";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
-import { useAction } from "next-safe-action/hooks";
-import { toast } from "sonner";
-
 import {
   UpdatePasswordSchema,
   type UpdatePasswordSchemaType,
 } from "@/features/auth/schemas/password.schema";
+import { useForm } from "@tanstack/react-form";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { useAction } from "next-safe-action/hooks";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import {

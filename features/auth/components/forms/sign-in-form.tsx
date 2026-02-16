@@ -4,18 +4,20 @@ import { type ChangeEvent, type SubmitEvent, useState } from "react";
 
 import { useRouter } from "next/navigation";
 
+import { ForgotPasswordLink } from "@/features/auth/components/forgot-password-link";
+import {
+  SignInSchema,
+  type SignInSchemaType,
+} from "@/features/auth/schemas/auth.schema";
 import { useForm } from "@tanstack/react-form";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { authClient, signIn } from "@/lib/auth-client";
-import { SignInSchema, type SignInSchemaType } from "@/features/auth/schemas/auth.schema";
 
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-
-import { ForgotPasswordLink } from "@/features/auth/components/forgot-password-link";
 
 function SignInForm() {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);

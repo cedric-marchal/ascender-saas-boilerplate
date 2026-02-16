@@ -4,12 +4,15 @@ import { type ChangeEvent, type SubmitEvent, useState } from "react";
 
 import { useRouter } from "next/navigation";
 
+import {
+  SignUpSchema,
+  type SignUpSchemaType,
+} from "@/features/auth/schemas/auth.schema";
 import { useForm } from "@tanstack/react-form";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { authClient, signIn } from "@/lib/auth-client";
-import { SignUpSchema, type SignUpSchemaType } from "@/features/auth/schemas/auth.schema";
 
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";

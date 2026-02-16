@@ -4,6 +4,7 @@ import type { ComponentType } from "react";
 
 import Link from "next/link";
 
+import { SignOutButton } from "@/features/auth";
 import {
   ChevronUp,
   LayoutDashboard,
@@ -14,7 +15,6 @@ import {
 
 import { env } from "@/lib/env";
 
-import { SignOutButton } from "@/features/auth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,

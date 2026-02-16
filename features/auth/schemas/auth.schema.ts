@@ -1,6 +1,5 @@
-import { z } from "zod";
-
 import { passwordSchema } from "@/features/auth/schemas/password.schema";
+import { z } from "zod";
 
 const emailSchema = z
   .string()

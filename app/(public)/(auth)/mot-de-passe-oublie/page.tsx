@@ -2,13 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { ForgotPasswordForm } from "@/features/auth";
 import { ArrowLeft } from "lucide-react";
 import type { WebPage, WithContext } from "schema-dts";
 
 import { env } from "@/lib/env";
 import { getSession } from "@/lib/session";
-
-import { ForgotPasswordForm } from "@/features/auth";
 
 const APP_NAME = env.NEXT_PUBLIC_APP_NAME;
 const BASE_URL = env.NEXT_PUBLIC_BASE_URL;

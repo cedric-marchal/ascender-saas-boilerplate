@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import type { BillingInvoice } from "@/features/billing/queries/get-billing";
 import { Calendar, Download, FileText } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -11,8 +12,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-
-import type { BillingInvoice } from "@/features/billing/queries/get-billing";
 
 type InvoiceStatusConfig = {
   label: string;

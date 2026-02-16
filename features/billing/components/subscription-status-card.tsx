@@ -1,3 +1,4 @@
+import type { BillingSubscription } from "@/features/billing/queries/get-billing";
 import { CheckCircle2, XCircle } from "lucide-react";
 
 import { env } from "@/lib/env";
@@ -10,8 +11,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-
-import type { BillingSubscription } from "@/features/billing/queries/get-billing";
 
 type SubscriptionStatusCardProps = {
   subscriptions: BillingSubscription[];

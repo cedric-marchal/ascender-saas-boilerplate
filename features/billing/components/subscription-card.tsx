@@ -1,3 +1,4 @@
+import type { BillingSubscription } from "@/features/billing/queries/get-billing";
 import { Calendar, CheckCircle2, XCircle } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -8,8 +9,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-
-import type { BillingSubscription } from "@/features/billing/queries/get-billing";
 
 type SubscriptionStatusConfig = {
   label: string;

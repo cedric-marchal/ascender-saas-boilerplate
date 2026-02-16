@@ -2,12 +2,13 @@
 
 import { headers } from "next/headers";
 
+import { UpdatePasswordSchema } from "@/features/auth/schemas/password.schema";
+
 import { auth } from "@/lib/auth";
 import { env } from "@/lib/env";
 import { authenticatedRatelimit } from "@/lib/ratelimit";
 import { sendEmail } from "@/lib/resend";
 import { authActionClient } from "@/lib/safe-action";
-import { UpdatePasswordSchema } from "@/features/auth/schemas/password.schema";
 
 import { PasswordChangedEmail } from "@/components/emails/password-changed-email";
 

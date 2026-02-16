@@ -2,12 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { SignUpForm } from "@/features/auth";
 import type { WebPage, WithContext } from "schema-dts";
 
 import { env } from "@/lib/env";
 import { getSession } from "@/lib/session";
-
-import { SignUpForm } from "@/features/auth";
 
 const APP_NAME = env.NEXT_PUBLIC_APP_NAME;
 const BASE_URL = env.NEXT_PUBLIC_BASE_URL;

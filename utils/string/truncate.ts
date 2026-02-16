@@ -1,4 +1,3 @@
-// Universal limits for SEO & UX (based on Google, social media, and interface best practices)
 const TITLE_LENGTH = 60; // Titles: Google SEO (~60), Open Graph (~70), Cards (1-2 lines) → 60 is optimal for all
 const DESCRIPTION_LENGTH = 160; // Descriptions: Google SEO (~160), Open Graph, Cards (3-4 lines)
 const PREVIEW_LENGTH = 200; // Preview text: 4-5 lines (article preview, content excerpt)
@@ -45,9 +44,9 @@ function truncateName(text: string): string {
 
 export {
   truncate,
-  truncateTitle,
   truncateDescription,
-  truncatePreview,
   truncateExcerpt,
   truncateName,
+  truncatePreview,
+  truncateTitle,
 };

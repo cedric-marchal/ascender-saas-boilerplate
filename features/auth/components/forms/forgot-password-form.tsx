@@ -2,15 +2,15 @@
 
 import { type ChangeEvent, type SubmitEvent, useState } from "react";
 
+import {
+  ForgotPasswordSchema,
+  type ForgotPasswordSchemaType,
+} from "@/features/auth/schemas/auth.schema";
 import { useForm } from "@tanstack/react-form";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { authClient } from "@/lib/auth-client";
-import {
-  ForgotPasswordSchema,
-  type ForgotPasswordSchemaType,
-} from "@/features/auth/schemas/auth.schema";
 
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";

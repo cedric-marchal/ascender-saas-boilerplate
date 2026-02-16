@@ -4,15 +4,15 @@ import { type ChangeEvent, type SubmitEvent, useState } from "react";
 
 import { useRouter } from "next/navigation";
 
+import {
+  ResetPasswordSchema,
+  type ResetPasswordSchemaType,
+} from "@/features/auth/schemas/auth.schema";
 import { useForm } from "@tanstack/react-form";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { authClient } from "@/lib/auth-client";
-import {
-  ResetPasswordSchema,
-  type ResetPasswordSchemaType,
-} from "@/features/auth/schemas/auth.schema";
 
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
