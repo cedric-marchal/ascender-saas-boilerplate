@@ -8,7 +8,7 @@ import {
   usersSortableFields,
   verificationFilters,
   verificationLabels,
-} from "@/features/users/constants";
+} from "@/features/users/constants/users-filters.constant";
 import { describe, expect, it } from "vitest";
 
 describe("userRoleFilters", () => {

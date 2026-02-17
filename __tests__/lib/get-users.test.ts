@@ -1,4 +1,4 @@
-import { getUsers } from "@/features/users/queries/get-users";
+import { getUsers } from "@/features/users/services/get-users.service";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { prisma } from "@/lib/prisma";

@@ -1,6 +1,6 @@
 import { InvoiceCard } from "@/features/billing/components/invoice-card";
 import { InvoiceListEmpty } from "@/features/billing/components/invoice-list-empty";
-import type { BillingInvoice } from "@/features/billing/queries/get-billing";
+import type { BillingInvoice } from "@/features/billing/services/get-billing.service";
 
 type InvoiceListProps = {
   invoices: BillingInvoice[];

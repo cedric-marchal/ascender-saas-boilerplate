@@ -10,7 +10,7 @@ import {
   usersSearchParams,
   verificationFilters,
   verificationLabels,
-} from "@/features/users/constants";
+} from "@/features/users/constants/users-filters.constant";
 import { FilterUsersSchema } from "@/features/users/schemas/users-filter.schema";
 import { useForm } from "@tanstack/react-form";
 import { Filter, Search, X } from "lucide-react";

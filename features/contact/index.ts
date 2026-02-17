@@ -1,4 +1,4 @@
-export { ContactForm } from "@/features/contact/components/contact-form";
+export { ContactForm } from "@/features/contact/components/forms/contact-form";
 
 export { createContactAction } from "@/features/contact/actions/create-contact.action";
 

@@ -2,7 +2,7 @@
 
 import { useTransition } from "react";
 
-import { usersSearchParams } from "@/features/users/constants";
+import { usersSearchParams } from "@/features/users/constants/users-filters.constant";
 import type { ColumnDef } from "@tanstack/react-table";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import { useQueryStates } from "nuqs";

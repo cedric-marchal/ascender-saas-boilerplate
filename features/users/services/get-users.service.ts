@@ -8,7 +8,7 @@ import {
   isUserRoleFilter,
   isVerificationFilter,
   usersSortableFields,
-} from "@/features/users/constants";
+} from "@/features/users/constants/users-filters.constant";
 
 import { FILTERS, PAGINATION, SORTING } from "@/lib/constants/query.constant";
 import type { User } from "@/lib/generated/prisma/client";

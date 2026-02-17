@@ -8,7 +8,7 @@ import { SubscriptionStatusCard } from "@/features/billing/components/subscripti
 import type {
   BillingSubscription,
   GetBillingResult,
-} from "@/features/billing/queries/get-billing";
+} from "@/features/billing/services/get-billing.service";
 import { AlertCircle } from "lucide-react";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";

@@ -1,4 +1,4 @@
-import type { BillingSubscription } from "@/features/billing/queries/get-billing";
+import type { BillingSubscription } from "@/features/billing/services/get-billing.service";
 import { CheckCircle2, XCircle } from "lucide-react";
 
 import { env } from "@/lib/env";

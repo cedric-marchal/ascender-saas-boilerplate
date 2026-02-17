@@ -1,11 +1,9 @@
 "use server";
 
-import { ContactEmail } from "@/features/contact/emails/contact-email";
 import { CreateContactSchema } from "@/features/contact/schemas/contact.schema";
+import { createContact } from "@/features/contact/services/create-contact.service";
 
-import { env } from "@/lib/env";
 import { contactRatelimit } from "@/lib/ratelimit";
-import { sendEmail } from "@/lib/resend";
 import { actionClient } from "@/lib/safe-action";
 
 import { checkRatelimit } from "@/utils/ratelimit/check-ratelimit";
@@ -19,18 +17,7 @@ export const createContactAction = actionClient
   })
   .inputSchema(CreateContactSchema)
   .action(async ({ parsedInput }) => {
-    await sendEmail({
-      from: `${env.NEXT_PUBLIC_APP_NAME} <${env.RESEND_EMAIL_NOREPLY}>`,
-      to: env.RESEND_EMAIL_CONTACT,
-      replyTo: parsedInput.email,
-      subject: `[Contact] ${parsedInput.subject}`,
-      react: ContactEmail({
-        name: parsedInput.name,
-        email: parsedInput.email,
-        subject: parsedInput.subject,
-        message: parsedInput.message,
-      }),
-    });
+    await createContact(parsedInput);
 
     return { success: true };
   });

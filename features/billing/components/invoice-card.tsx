@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import type { BillingInvoice } from "@/features/billing/queries/get-billing";
+import type { BillingInvoice } from "@/features/billing/services/get-billing.service";
 import { Calendar, Download, FileText } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";

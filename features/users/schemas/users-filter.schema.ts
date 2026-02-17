@@ -1,7 +1,7 @@
 import {
   userRoleFilters,
   verificationFilters,
-} from "@/features/users/constants";
+} from "@/features/users/constants/users-filters.constant";
 import { z } from "zod";
 
 import { FILTERS } from "@/lib/constants/query.constant";

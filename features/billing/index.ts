@@ -2,19 +2,19 @@ export { CreateCheckoutSessionSchema } from "@/features/billing/schemas/checkout
 
 export type { CreateCheckoutSessionSchemaType } from "@/features/billing/schemas/checkout.schema";
 
-export { getBilling } from "@/features/billing/queries/get-billing";
+export { getBilling } from "@/features/billing/services/get-billing.service";
 
 export type {
   BillingInvoice,
   BillingSubscription,
   GetBillingResult,
-} from "@/features/billing/queries/get-billing";
+} from "@/features/billing/services/get-billing.service";
 
 export {
   createCheckoutSession,
   createPortalSession,
   handleStripeWebhook,
-} from "@/features/billing/stripe";
+} from "@/features/billing/services/stripe";
 
 export type {
   CreateCheckoutSessionInput,
@@ -22,7 +22,7 @@ export type {
   CreatePortalSessionInput,
   CreatePortalSessionResult,
   WebhookResult,
-} from "@/features/billing/stripe";
+} from "@/features/billing/services/stripe";
 
 export { BillingPortalButton } from "@/features/billing/components/billing-portal-button";
 export { BillingView } from "@/features/billing/components/billing-view";
