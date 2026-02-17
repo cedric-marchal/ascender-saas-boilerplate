@@ -1,9 +1,9 @@
-export { updateAvatar } from "@/features/account/avatar/update-avatar";
+export { updateAvatar } from "@/features/account/services/update-avatar.service";
 
 export type {
   UpdateAvatarInput,
   UpdateAvatarResult,
-} from "@/features/account/avatar/update-avatar";
+} from "@/features/account/services/update-avatar.service";
 
 export { AccountDeletedEmail } from "@/features/account/emails/account-deleted-email";
 

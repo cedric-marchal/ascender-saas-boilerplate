@@ -5,7 +5,7 @@ import { UpdateAvatarSchema } from "@/features/account/schemas/avatar.schema";
 import { authenticatedRatelimit } from "@/lib/ratelimit";
 import { getSession } from "@/lib/session";
 
-import { updateAvatar } from "@/features/account/avatar/update-avatar";
+import { updateAvatar } from "@/features/account/services/update-avatar.service";
 
 import { UnauthorizedError } from "@/utils/errors/errors";
 import { handleApiError } from "@/utils/errors/handle-api-error";
