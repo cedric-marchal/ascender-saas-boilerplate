@@ -6,6 +6,20 @@ export type {
   GetBillingResult,
 } from "@/features/billing/queries/get-billing";
 
+export {
+  createCheckoutSession,
+  createPortalSession,
+  handleStripeWebhook,
+} from "@/features/billing/stripe";
+
+export type {
+  CreateCheckoutSessionInput,
+  CreateCheckoutSessionResult,
+  CreatePortalSessionInput,
+  CreatePortalSessionResult,
+  WebhookResult,
+} from "@/features/billing/stripe";
+
 export { BillingPortalButton } from "@/features/billing/components/billing-portal-button";
 export { BillingView } from "@/features/billing/components/billing-view";
 export { InvoiceCard } from "@/features/billing/components/invoice-card";

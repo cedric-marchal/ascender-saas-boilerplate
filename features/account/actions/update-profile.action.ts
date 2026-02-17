@@ -13,7 +13,7 @@ import { authenticatedRatelimit } from "@/lib/ratelimit";
 import { sendEmail } from "@/lib/resend";
 import { authActionClient } from "@/lib/safe-action";
 
-import { EmailVerificationEmail } from "@/components/emails/email-verification-email";
+import { EmailVerificationEmail } from "@/features/auth/emails/email-verification-email";
 
 import { BadRequestError, ConflictError } from "@/utils/errors/errors";
 import { checkRatelimit } from "@/utils/ratelimit/check-ratelimit";

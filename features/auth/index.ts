@@ -1,3 +1,9 @@
+export { EmailChangeNotificationEmail } from "@/features/auth/emails/email-change-notification-email";
+export { EmailVerificationEmail } from "@/features/auth/emails/email-verification-email";
+export { PasswordChangedEmail } from "@/features/auth/emails/password-changed-email";
+export { ResetPasswordEmail } from "@/features/auth/emails/reset-password-email";
+export { WelcomeEmail } from "@/features/auth/emails/welcome-email";
+
 export { ForgotPasswordLink } from "@/features/auth/components/forgot-password-link";
 export { ForgotPasswordForm } from "@/features/auth/components/forms/forgot-password-form";
 export { ResetPasswordForm } from "@/features/auth/components/forms/reset-password-form";

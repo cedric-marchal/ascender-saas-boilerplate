@@ -10,7 +10,7 @@ import { authenticatedRatelimit } from "@/lib/ratelimit";
 import { sendEmail } from "@/lib/resend";
 import { authActionClient } from "@/lib/safe-action";
 
-import { PasswordChangedEmail } from "@/components/emails/password-changed-email";
+import { PasswordChangedEmail } from "@/features/auth/emails/password-changed-email";
 
 import { checkRatelimit } from "@/utils/ratelimit/check-ratelimit";
 

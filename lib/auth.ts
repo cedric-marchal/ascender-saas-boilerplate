@@ -10,10 +10,10 @@ import { prisma } from "@/lib/prisma";
 import { sendEmailSafe } from "@/lib/resend";
 import { stripe } from "@/lib/stripe";
 
-import { EmailChangeNotificationEmail } from "@/components/emails/email-change-notification-email";
-import { PasswordChangedEmail } from "@/components/emails/password-changed-email";
-import { ResetPasswordEmail } from "@/components/emails/reset-password-email";
-import { WelcomeEmail } from "@/components/emails/welcome-email";
+import { EmailChangeNotificationEmail } from "@/features/auth/emails/email-change-notification-email";
+import { PasswordChangedEmail } from "@/features/auth/emails/password-changed-email";
+import { ResetPasswordEmail } from "@/features/auth/emails/reset-password-email";
+import { WelcomeEmail } from "@/features/auth/emails/welcome-email";
 
 import { slugify } from "@/utils/string/slugify";
 

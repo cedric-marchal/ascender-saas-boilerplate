@@ -1,46 +1,15 @@
-import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 
 import { UpdateAvatarSchema } from "@/features/account/schemas/avatar.schema";
 
-import { auth } from "@/lib/auth";
-import { optimizeAvatar } from "@/lib/optimize";
-import { prisma } from "@/lib/prisma";
-import { deleteFile, getPublicUrl, uploadFile } from "@/lib/r2";
 import { authenticatedRatelimit } from "@/lib/ratelimit";
 import { getSession } from "@/lib/session";
+
+import { updateAvatar } from "@/features/account/avatar/update-avatar";
 
 import { UnauthorizedError } from "@/utils/errors/errors";
 import { handleApiError } from "@/utils/errors/handle-api-error";
 import { checkRatelimit } from "@/utils/ratelimit/check-ratelimit";
-
-const AVATAR_FOLDER = "avatars";
-
-async function deleteOldAvatar(userId: string): Promise<void> {
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: {
-      id: true,
-      image: true,
-    },
-  });
-
-  if (!user?.image) {
-    return;
-  }
-
-  const oldKey = user.image;
-
-  if (!oldKey.startsWith(AVATAR_FOLDER)) {
-    return;
-  }
-
-  try {
-    await deleteFile(oldKey);
-  } catch (error: unknown) {
-    console.error("Failed to delete old avatar:", error);
-  }
-}
 
 async function POST(request: Request) {
   try {
@@ -58,37 +27,13 @@ async function POST(request: Request) {
       avatar: formData.get("avatar"),
     });
 
-    const arrayBuffer = await data.avatar.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-
-    const optimizedImage = await optimizeAvatar(buffer);
-
-    const fileExtension = "webp";
-    const sanitizedUserId = session.user.id.replace(/[^a-zA-Z0-9-]/g, "_");
-    const fileName = `${sanitizedUserId}-${Date.now()}.${fileExtension}`;
-    const fileKey = `${AVATAR_FOLDER}/${fileName}`;
-
-    await uploadFile(fileKey, optimizedImage.buffer, "image/webp");
-
-    await deleteOldAvatar(session.user.id);
-
-    await auth.api.updateUser({
-      body: {
-        image: fileKey,
-      },
-      headers: await headers(),
+    const result = await updateAvatar({
+      userId: session.user.id,
+      avatar: data.avatar,
     });
 
-    const avatarUrl = getPublicUrl(fileKey);
-
     return NextResponse.json(
-      {
-        success: true,
-        data: {
-          avatarUrl,
-          size: optimizedImage.size,
-        },
-      },
+      { success: true, data: result },
       { status: 201 }
     );
   } catch (error: unknown) {

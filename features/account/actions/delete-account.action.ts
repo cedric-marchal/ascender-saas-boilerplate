@@ -11,7 +11,7 @@ import { sendEmail } from "@/lib/resend";
 import { authActionClient } from "@/lib/safe-action";
 import { stripe } from "@/lib/stripe";
 
-import { AccountDeletedEmail } from "@/components/emails/account-deleted-email";
+import { AccountDeletedEmail } from "@/features/account/emails/account-deleted-email";
 
 import { BadRequestError, ForbiddenError } from "@/utils/errors/errors";
 import { checkRatelimit } from "@/utils/ratelimit/check-ratelimit";
