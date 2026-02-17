@@ -102,7 +102,7 @@ function DashboardSidebar({ image, name }: DashboardSidebarProps) {
                   <Avatar>
                     {image ? (
                       <AvatarImage
-                        src={`https://pub-72962e5431d34da686d4c668ceaaf669.r2.dev${image}`}
+                        src={`${env.NEXT_PUBLIC_R2_PUBLIC_URL}/${image}`}
                         alt={`${name} avatar`}
                       />
                     ) : (

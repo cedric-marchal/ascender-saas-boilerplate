@@ -15,6 +15,7 @@ import { useForm } from "@tanstack/react-form";
 import { Loader2, Upload, X } from "lucide-react";
 import { toast } from "sonner";
 
+import { env } from "@/lib/env";
 import { upfetch } from "@/lib/up-fetch";
 import { cn } from "@/lib/utils";
 
@@ -90,7 +91,7 @@ function AvatarForm({ name, image }: AvatarFormProps) {
     >
       <div className="flex items-center gap-6">
         <Avatar className="h-20 w-20">
-          <AvatarImage src={previewUrl || image || undefined} alt={name} />
+          <AvatarImage src={previewUrl || (image ? `${env.NEXT_PUBLIC_R2_PUBLIC_URL}/${image}` : undefined)} alt={name} />
           <AvatarFallback className="text-lg">{initials}</AvatarFallback>
         </Avatar>
 

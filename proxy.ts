@@ -24,7 +24,7 @@ function generateCsp(nonce: string): string {
     "default-src 'self'",
     `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'`,
     "style-src 'self' 'unsafe-inline'",
-    "img-src 'self' data: blob: https://*.r2.cloudflarestorage.com",
+    "img-src 'self' data: blob: https://*.r2.cloudflarestorage.com https://*.r2.dev",
     "font-src 'self'",
     "connect-src 'self' https://*.stripe.com https://*.sentry.io https://*.ingest.sentry.io",
     "frame-src https://*.stripe.com",
