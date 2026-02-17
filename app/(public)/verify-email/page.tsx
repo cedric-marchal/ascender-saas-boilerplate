@@ -1,19 +1,17 @@
 import type { Metadata } from "next";
-import { headers } from "next/headers";
+
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { CheckCircle2, XCircle } from "lucide-react";
 import { type SearchParams } from "nuqs/server";
 
-import { auth } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { verifyEmail } from "@/features/auth/services/verify-email.service";
 import { getSession } from "@/lib/session";
 
 import { Button } from "@/components/ui/button";
 import {
   Card,
-  CardContent,
   CardDescription,
   CardFooter,
   CardHeader,
@@ -67,18 +65,12 @@ export default async function VerifyEmailPage({
     );
   }
 
-  const verification = await prisma.verification.findFirst({
-    where: {
-      value: token,
-    },
-    select: {
-      id: true,
-      identifier: true,
-      expiresAt: true,
-    },
+  const result = await verifyEmail({
+    token,
+    userId: session.user.id,
   });
 
-  if (!verification) {
+  if (result.status === "invalid_token") {
     return (
       <main className="flex min-h-screen items-center justify-center p-4">
         <Card className="w-full max-w-md">
@@ -101,11 +93,7 @@ export default async function VerifyEmailPage({
     );
   }
 
-  if (new Date() > verification.expiresAt) {
-    await prisma.verification.delete({
-      where: { id: verification.id },
-    });
-
+  if (result.status === "expired") {
     return (
       <main className="flex min-h-screen items-center justify-center p-4">
         <Card className="w-full max-w-md">
@@ -129,19 +117,7 @@ export default async function VerifyEmailPage({
     );
   }
 
-  const user = await prisma.user.findUnique({
-    where: { email: verification.identifier },
-    select: {
-      id: true,
-      email: true,
-    },
-  });
-
-  if (!user) {
-    await prisma.verification.delete({
-      where: { id: verification.id },
-    });
-
+  if (result.status === "user_not_found") {
     return (
       <main className="flex min-h-screen items-center justify-center p-4">
         <Card className="w-full max-w-md">
@@ -166,7 +142,7 @@ export default async function VerifyEmailPage({
     );
   }
 
-  if (user.id !== session.user.id) {
+  if (result.status === "unauthorized") {
     return (
       <main className="flex min-h-screen items-center justify-center p-4">
         <Card className="w-full max-w-md">
@@ -188,23 +164,6 @@ export default async function VerifyEmailPage({
       </main>
     );
   }
-
-  await Promise.all([
-    prisma.user.update({
-      where: { id: user.id },
-      data: { emailVerified: true },
-    }),
-    prisma.verification.delete({
-      where: { id: verification.id },
-    }),
-  ]);
-
-  await auth.api.getSession({
-    headers: await headers(),
-    query: {
-      disableCookieCache: true,
-    },
-  });
 
   return (
     <main className="flex min-h-screen items-center justify-center p-4">

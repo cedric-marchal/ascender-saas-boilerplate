@@ -31,3 +31,9 @@ export {
 } from "@/features/auth/schemas/password.schema";
 
 export type { UpdatePasswordSchemaType } from "@/features/auth/schemas/password.schema";
+
+export { verifyEmail } from "@/features/auth/services/verify-email.service";
+export type {
+  VerifyEmailInput,
+  VerifyEmailResult,
+} from "@/features/auth/services/verify-email.service";
