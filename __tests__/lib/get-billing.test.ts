@@ -1,4 +1,4 @@
-import { getBilling } from "@/features/billing";
+import { getBilling } from "@/features/billing/services/get-billing.service";
 import { describe, expect, it, vi } from "vitest";
 
 import { prisma } from "@/lib/prisma";

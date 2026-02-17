@@ -1,12 +1,10 @@
 import type { Metadata } from "next";
 
-import {
-  AvatarForm,
-  DeleteAccountModal,
-  PasswordForm,
-  ProfileForm,
-  SettingsHeader,
-} from "@/features/account";
+import { AvatarForm } from "@/features/account/components/forms/avatar-form";
+import { PasswordForm } from "@/features/account/components/forms/password-form";
+import { ProfileForm } from "@/features/account/components/forms/profile-form";
+import { DeleteAccountModal } from "@/features/account/components/modals/delete-account-modal";
+import { SettingsHeader } from "@/features/account/components/settings-header";
 
 import { requireAdmin } from "@/lib/session";
 

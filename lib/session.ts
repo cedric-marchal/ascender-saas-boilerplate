@@ -4,10 +4,11 @@ import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 
 import { auth } from "@/lib/auth";
-import { parseUserRole } from "@/lib/constants/user-role.constant";
 import { env } from "@/lib/env";
-import type { SubscriptionStatus } from "@/lib/generated/prisma/client";
-import type { UserRole } from "@/lib/generated/prisma/enums";
+import {
+  type SubscriptionStatus,
+  UserRole,
+} from "@/lib/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 
 type RawSession = typeof auth.$Infer.Session;
@@ -17,6 +18,14 @@ type Session = Omit<RawSession, "user"> & {
     role: UserRole;
   };
 };
+
+function parseUserRole(role: string): UserRole {
+  if (!Object.values(UserRole).includes(role as UserRole)) {
+    throw new Error(`Role invalide dans la session: ${role}`);
+  }
+
+  return role as UserRole;
+}
 
 const VALID_SUBSCRIPTION_STATUSES: SubscriptionStatus[] = [
   "active",

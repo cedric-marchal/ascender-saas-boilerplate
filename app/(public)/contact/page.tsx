@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { ContactForm } from "@/features/contact";
+import { ContactForm } from "@/features/contact/components/forms/contact-form";
 import { Mail, MapPin } from "lucide-react";
 import type { ContactPage as ContactPageSchema, WithContext } from "schema-dts";
 

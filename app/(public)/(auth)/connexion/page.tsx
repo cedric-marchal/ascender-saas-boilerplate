@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { SignInForm } from "@/features/auth";
+import { SignInForm } from "@/features/auth/components/forms/sign-in-form";
 import type { WebPage, WithContext } from "schema-dts";
 
 import { env } from "@/lib/env";

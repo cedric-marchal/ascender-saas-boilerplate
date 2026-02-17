@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 import { getSession } from "@/lib/session";
 
-import { createPortalSession } from "@/features/billing/services/stripe";
+import { createPortalSession } from "@/features/billing/services/stripe/create-portal-session.service";
 
 import { UnauthorizedError } from "@/utils/errors/errors";
 import { handleApiError } from "@/utils/errors/handle-api-error";

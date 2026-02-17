@@ -4,7 +4,7 @@ import type { ComponentType } from "react";
 
 import Link from "next/link";
 
-import { SignOutButton } from "@/features/auth";
+import { SignOutButton } from "@/features/auth/components/sign-out-button";
 import {
   ChevronUp,
   LayoutDashboard,

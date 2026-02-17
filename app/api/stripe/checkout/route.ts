@@ -2,10 +2,8 @@ import { NextResponse } from "next/server";
 
 import { getSession } from "@/lib/session";
 
-import {
-  CreateCheckoutSessionSchema,
-  createCheckoutSession,
-} from "@/features/billing";
+import { CreateCheckoutSessionSchema } from "@/features/billing/schemas/checkout.schema";
+import { createCheckoutSession } from "@/features/billing/services/stripe/create-checkout-session.service";
 
 import { UnauthorizedError } from "@/utils/errors/errors";
 import { handleApiError } from "@/utils/errors/handle-api-error";

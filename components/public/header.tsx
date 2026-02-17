@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { SignOutButton } from "@/features/auth";
+import { SignOutButton } from "@/features/auth/components/sign-out-button";
 import { Menu } from "lucide-react";
 
 import { env } from "@/lib/env";

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
-import { BillingView, getBilling } from "@/features/billing";
+import { BillingView } from "@/features/billing/components/billing-view";
+import { getBilling } from "@/features/billing/services/get-billing.service";
 
 import { requireCustomerVerifiedEmail } from "@/lib/session";
 

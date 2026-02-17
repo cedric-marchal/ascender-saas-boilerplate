@@ -1,9 +1,10 @@
 import { createParser, parseAsStringLiteral } from "nuqs/server";
 
-import { FILTERS, PAGINATION, SORTING } from "@/lib/constants/query.constant";
+const MAX_PAGE = 1000;
+const MAX_SEARCH_LENGTH = 100;
+const SORT_ORDERS = ["asc", "desc"] as const;
 
-type PageSize = (typeof PAGINATION.pageSizes)[number];
-type SortOrder = (typeof SORTING.orders)[number];
+type SortOrder = (typeof SORT_ORDERS)[number];
 
 const parseAsPage = createParser({
   parse(query) {
@@ -13,7 +14,7 @@ const parseAsPage = createParser({
       return 1;
     }
 
-    return Math.min(parsed, PAGINATION.maxPage);
+    return Math.min(parsed, MAX_PAGE);
   },
   serialize(value) {
     return String(value);
@@ -26,14 +27,14 @@ const parseAsSafeSearch = createParser({
       return "";
     }
 
-    return query.slice(0, FILTERS.maxSearchLength).trim();
+    return query.slice(0, MAX_SEARCH_LENGTH).trim();
   },
   serialize(value) {
     return value;
   },
 });
 
-const parseAsOrder = parseAsStringLiteral(SORTING.orders);
+const parseAsOrder = parseAsStringLiteral(SORT_ORDERS);
 
 function createEnumParser<T extends readonly string[]>(enumValues: T) {
   return parseAsStringLiteral(enumValues);
@@ -51,4 +52,4 @@ export {
   parseAsSafeSearch,
 };
 
-export type { PageSize, SortOrder };
+export type { SortOrder };
