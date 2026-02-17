@@ -4,7 +4,7 @@ import { requireSession } from "@/lib/session";
 
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 
-import { DashboardSidebar } from "@/app/(protected)/dashboard/_components/dashboard-sidebar";
+import { DashboardSidebar } from "@/components/protected/dashboard/dashboard-sidebar";
 
 type ProtectedLayoutProps = {
   children: ReactNode;

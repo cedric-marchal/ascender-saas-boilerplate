@@ -4,7 +4,7 @@ import { requireAdmin } from "@/lib/session";
 
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 
-import { AdminSidebar } from "@/app/(protected)/admin/_components/admin-sidebar";
+import { AdminSidebar } from "@/components/protected/admin/admin-sidebar";
 
 type ProtectedAdminLayoutProps = {
   children: ReactNode;
