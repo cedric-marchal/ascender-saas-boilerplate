@@ -6,10 +6,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-import { PricingCheckoutButton } from "@/app/(public)/tarifs/_components/pricing-checkout-button";
-import { PricingContactButton } from "@/app/(public)/tarifs/_components/pricing-contact-button";
-import { PricingFreeButton } from "@/app/(public)/tarifs/_components/pricing-free-button";
-import { type Plan } from "@/app/(public)/tarifs/_components/pricing-plans";
+import { PricingCheckoutButton } from "@/features/pricing/components/pricing-checkout-button";
+import { PricingContactButton } from "@/features/pricing/components/pricing-contact-button";
+import { PricingFreeButton } from "@/features/pricing/components/pricing-free-button";
+import { type Plan } from "@/features/pricing/constants/pricing-plans";
 
 type PricingCardProps = {
   plan: Plan;

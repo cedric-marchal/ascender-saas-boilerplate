@@ -1,3 +1,7 @@
+export { CreateCheckoutSessionSchema } from "@/features/billing/schemas/checkout.schema";
+
+export type { CreateCheckoutSessionSchemaType } from "@/features/billing/schemas/checkout.schema";
+
 export { getBilling } from "@/features/billing/queries/get-billing";
 
 export type {

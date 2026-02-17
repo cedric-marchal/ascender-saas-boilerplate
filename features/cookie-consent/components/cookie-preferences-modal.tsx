@@ -16,7 +16,7 @@ import {
   COOKIE_CATEGORIES,
   type CookieCategoryId,
   useCookieConsent,
-} from "@/hooks/use-cookie-consent";
+} from "@/features/cookie-consent/hooks/use-cookie-consent";
 
 function CookiePreferencesModal() {
   const isPreferencesOpen = useCookieConsent(

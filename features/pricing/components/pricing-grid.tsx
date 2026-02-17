@@ -1,8 +1,8 @@
-import { PricingCard } from "@/app/(public)/tarifs/_components/pricing-card";
+import { PricingCard } from "@/features/pricing/components/pricing-card";
 import {
   PLANS,
   type Plan,
-} from "@/app/(public)/tarifs/_components/pricing-plans";
+} from "@/features/pricing/constants/pricing-plans";
 
 type PricingGridProps = {
   isAuthenticated: boolean;

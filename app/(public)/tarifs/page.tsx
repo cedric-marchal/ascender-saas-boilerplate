@@ -6,11 +6,7 @@ import { env } from "@/lib/env";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
 
-import { PricingGrid } from "@/app/(public)/tarifs/_components/pricing-grid";
-import {
-  PLANS,
-  type Plan,
-} from "@/app/(public)/tarifs/_components/pricing-plans";
+import { PLANS, type Plan, PricingGrid } from "@/features/pricing";
 
 const APP_NAME = env.NEXT_PUBLIC_APP_NAME;
 const BASE_URL = env.NEXT_PUBLIC_BASE_URL;

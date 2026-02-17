@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
 
-import { CreateCheckoutSessionSchema } from "@/lib/schemas/checkout.schema";
 import { getSession } from "@/lib/session";
 
-import { createCheckoutSession } from "@/features/billing/stripe";
+import {
+  CreateCheckoutSessionSchema,
+  createCheckoutSession,
+} from "@/features/billing";
 
 import { UnauthorizedError } from "@/utils/errors/errors";
 import { handleApiError } from "@/utils/errors/handle-api-error";

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { CreateCheckoutSessionSchema } from "@/lib/schemas/checkout.schema";
+import { CreateCheckoutSessionSchema } from "@/features/billing";
 
 describe("CreateCheckoutSessionSchema", () => {
   it("accepts valid priceId", () => {

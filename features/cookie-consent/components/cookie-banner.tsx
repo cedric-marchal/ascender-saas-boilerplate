@@ -7,10 +7,10 @@ import { usePathname } from "next/navigation";
 
 import { Cookie, Shield } from "lucide-react";
 
-import { CookiePreferencesModal } from "@/components/cookie-preferences-modal";
 import { Button } from "@/components/ui/button";
 
-import { useCookieConsent } from "@/hooks/use-cookie-consent";
+import { CookiePreferencesModal } from "@/features/cookie-consent/components/cookie-preferences-modal";
+import { useCookieConsent } from "@/features/cookie-consent/hooks/use-cookie-consent";
 
 function CookieBanner() {
   const [isHydrated, setIsHydrated] = useState(false);
