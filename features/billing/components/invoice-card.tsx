@@ -3,6 +3,11 @@ import Link from "next/link";
 import type { BillingInvoice } from "@/features/billing/services/get-billing.service";
 import { Calendar, Download, FileText } from "lucide-react";
 
+import {
+  invoiceStatusLabels,
+  type InvoiceStatus,
+} from "@/lib/constants/invoice-status.constant";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,12 +23,15 @@ type InvoiceStatusConfig = {
   variant: "default" | "destructive" | "secondary";
 };
 
-const STATUS_CONFIG: Record<string, InvoiceStatusConfig> = {
-  draft: { label: "Brouillon", variant: "secondary" },
-  open: { label: "Ouverte", variant: "secondary" },
-  paid: { label: "Payée", variant: "default" },
-  uncollectible: { label: "Irrécouvrable", variant: "destructive" },
-  void: { label: "Annulée", variant: "destructive" },
+const STATUS_CONFIG: Record<InvoiceStatus, InvoiceStatusConfig> = {
+  draft: { label: invoiceStatusLabels.draft, variant: "secondary" },
+  open: { label: invoiceStatusLabels.open, variant: "secondary" },
+  paid: { label: invoiceStatusLabels.paid, variant: "default" },
+  uncollectible: {
+    label: invoiceStatusLabels.uncollectible,
+    variant: "destructive",
+  },
+  void: { label: invoiceStatusLabels.void, variant: "destructive" },
 };
 
 type InvoiceCardProps = {

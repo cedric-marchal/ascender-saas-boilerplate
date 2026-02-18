@@ -7,24 +7,31 @@ These rules apply to creating URL-based filters, search, sorting, and pagination
 ## Source of Truth Hierarchy (P0)
 
 ```
-Prisma Schema / Stripe / R2        ← External sources of truth
+Prisma Schema (UserRole, SubscriptionStatus enums)  ← Ultimate SSOT for domain enums
         ↓
-lib/constants/query.constant.ts    ← Global limits (page, search, sort)
+lib/generated/prisma/client                         ← Auto-generated types
         ↓
-lib/parsers/nuqs.ts                ← Universal reusable parsers
+lib/constants/*.constant.ts                         ← Business logic constants
+    ├── query.constant.ts                           → Global limits (page, search, sort)
+    ├── roles.constant.ts                           → UserRole + roleLabels
+    ├── subscription-status.constant.ts             → SubscriptionStatus + labels + active statuses
+    └── invoice-status.constant.ts                  → InvoiceStatus + labels (Stripe-only)
         ↓
-lib/constants/{entity}-filters.constant.ts  ← Domain enums, labels, searchParams
+lib/parsers/nuqs.ts                                 ← Universal reusable parsers (imports from constants)
         ↓
-lib/schemas/search/{entity}-filters.schema.ts  ← Zod validation (imports enums from constants)
+lib/constants/{entity}-filters.constant.ts          ← Domain-specific filters (searchParams, type guards)
         ↓
-app/.../{entity}/_lib/get-{entity}.ts  ← Server data fetching (defense in depth)
+lib/schemas/search/{entity}-filters.schema.ts       ← Zod validation (imports from constants)
         ↓
-app/.../{entity}/page.tsx          ← Server page (createLoader + render)
+features/*/services/*.service.ts                    ← Server data fetching (defense-in-depth validation)
         ↓
-app/.../{entity}/_components/      ← Client components (filters, columns, pagination)
+features/*/components/*.tsx                         ← Client components (filters, columns, pagination)
 ```
 
-**Key rule**: Enums and filter values are DEFINED in constants, IMPORTED by schemas and components. Never the reverse.
+**Key rules**:
+1. Enums are DEFINED in Prisma, RE-EXPORTED by `lib/constants/*.constant.ts`, IMPORTED by application code
+2. NEVER import enums directly from Prisma — always from constants for centralization
+3. Filter values and labels are DEFINED in constants, IMPORTED by schemas and components
 
 ## File Structure (P0)
 
@@ -32,20 +39,21 @@ app/.../{entity}/_components/      ← Client components (filters, columns, pagi
 lib/
 ├── constants/
 │   ├── query.constant.ts              # Global pagination/filter/sort limits
-│   └── {entity}-filters.constant.ts   # Domain enums, labels, searchParams
+│   ├── roles.constant.ts              # UserRole enum + roleLabels (re-exported from Prisma)
+│   ├── subscription-status.constant.ts # SubscriptionStatus + labels + ACTIVE_SUBSCRIPTION_STATUSES
+│   ├── invoice-status.constant.ts     # InvoiceStatus + labels (Stripe-only, not in DB)
+│   └── {entity}-filters.constant.ts   # Domain-specific filters (searchParams, type guards)
 ├── parsers/
-│   └── nuqs.ts                        # Universal reusable parsers + factories
+│   └── nuqs.ts                        # Universal reusable parsers + factories (imports from constants)
 ├── schemas/
 │   └── search/
-│       └── {entity}-filters.schema.ts # Zod validation schema
-app/(protected)/admin/{entity}/
-├── _lib/
-│   └── get-{entity}.ts               # Server-only data fetching
-├── _components/
+│       └── {entity}-filters.schema.ts # Zod validation schema (imports from constants)
+features/{module}/
+├── services/
+│   └── get-{entity}.service.ts        # Server-only data fetching (defense-in-depth validation)
+├── components/
 │   ├── {entity}-filters.tsx           # Client filter form
 │   └── {entity}-columns.tsx           # Table columns + SortableHeader
-├── page.tsx                           # Server page
-└── loading.tsx                        # Loading skeleton
 components/
 ├── ui/data-table.tsx                  # Generic dumb DataTable renderer
 └── pagination.tsx                     # Generic pagination component
@@ -174,10 +182,14 @@ export type { PageSize, SortOrder };
 
 `lib/constants/{entity}-filters.constant.ts`
 
-Domain-specific enums, labels, and searchParams. Enums are DEFINED here, sourced from Prisma types.
+Domain-specific filters (searchParams, type guards). Imports enums from centralized constants.
 
 ```tsx
-import type { User } from "@/lib/generated/prisma/client";
+// Import enum from centralized constant (NEVER from Prisma directly)
+import {
+  roleLabels as baseRoleLabels,
+  UserRole,
+} from "@/lib/constants/roles.constant";
 import {
   createEnumParser,
   createSortByParser,
@@ -186,20 +198,19 @@ import {
   parseAsSafeSearch,
 } from "@/lib/parsers/nuqs";
 
-type UserRole = User["role"];
 type UserRoleFilter = "all" | UserRole;
 type VerificationFilter = "all" | "verified" | "unverified";
 
-const userRoleFilters = ["all", "ADMIN", "CUSTOMER"] as const;
+const userRoleFilters = ["all", UserRole.ADMIN, UserRole.CUSTOMER] as const;
 const verificationFilters = ["all", "verified", "unverified"] as const;
 const usersSortableFields = ["name", "email", "createdAt"] as const;
 
 type UserSortableField = (typeof usersSortableFields)[number];
 
+// Extend centralized labels with filter-specific "all" option
 const roleLabels: Record<UserRoleFilter, string> = {
   all: "Tous les rôles",
-  ADMIN: "Admin",
-  CUSTOMER: "Client",
+  ...baseRoleLabels,  // Reuse SSOT labels from roles.constant.ts
 };
 
 const verificationLabels: Record<VerificationFilter, string> = {
@@ -218,7 +229,7 @@ const usersSearchParams = {
 };
 
 function isUserRole(value: string): value is UserRole {
-  return value === "ADMIN" || value === "CUSTOMER";
+  return value === UserRole.ADMIN || value === UserRole.CUSTOMER;
 }
 
 function isUserRoleFilter(value: string): value is UserRoleFilter {

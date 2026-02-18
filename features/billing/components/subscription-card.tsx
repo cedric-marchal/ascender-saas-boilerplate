@@ -1,6 +1,11 @@
 import type { BillingSubscription } from "@/features/billing/services/get-billing.service";
 import { Calendar, CheckCircle2, XCircle } from "lucide-react";
 
+import {
+  type SubscriptionStatus,
+  subscriptionStatusLabels,
+} from "@/lib/constants/subscription-status.constant";
+
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -16,15 +21,47 @@ type SubscriptionStatusConfig = {
   icon: typeof CheckCircle2;
 };
 
-const STATUS_CONFIG: Record<string, SubscriptionStatusConfig> = {
-  active: { label: "Actif", variant: "default", icon: CheckCircle2 },
-  canceled: { label: "Annulé", variant: "destructive", icon: XCircle },
-  incomplete: { label: "Incomplet", variant: "secondary", icon: XCircle },
-  incomplete_expired: { label: "Expiré", variant: "secondary", icon: XCircle },
-  past_due: { label: "En retard", variant: "destructive", icon: XCircle },
-  trialing: { label: "Essai", variant: "default", icon: CheckCircle2 },
-  unpaid: { label: "Impayé", variant: "destructive", icon: XCircle },
-  paused: { label: "En pause", variant: "secondary", icon: XCircle },
+const STATUS_CONFIG: Record<SubscriptionStatus, SubscriptionStatusConfig> = {
+  active: {
+    label: subscriptionStatusLabels.active,
+    variant: "default",
+    icon: CheckCircle2,
+  },
+  canceled: {
+    label: subscriptionStatusLabels.canceled,
+    variant: "destructive",
+    icon: XCircle,
+  },
+  incomplete: {
+    label: subscriptionStatusLabels.incomplete,
+    variant: "secondary",
+    icon: XCircle,
+  },
+  incomplete_expired: {
+    label: subscriptionStatusLabels.incomplete_expired,
+    variant: "secondary",
+    icon: XCircle,
+  },
+  past_due: {
+    label: subscriptionStatusLabels.past_due,
+    variant: "destructive",
+    icon: XCircle,
+  },
+  trialing: {
+    label: subscriptionStatusLabels.trialing,
+    variant: "default",
+    icon: CheckCircle2,
+  },
+  unpaid: {
+    label: subscriptionStatusLabels.unpaid,
+    variant: "destructive",
+    icon: XCircle,
+  },
+  paused: {
+    label: subscriptionStatusLabels.paused,
+    variant: "secondary",
+    icon: XCircle,
+  },
 };
 
 type SubscriptionCardProps = {

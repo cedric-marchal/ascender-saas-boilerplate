@@ -1,5 +1,6 @@
 import "server-only";
 
+import { UserRole } from "@/lib/constants/roles.constant";
 import { env } from "@/lib/env";
 import { prisma } from "@/lib/prisma";
 import { deleteFile } from "@/lib/r2";
@@ -70,9 +71,9 @@ async function deleteAccount(input: DeleteAccountInput): Promise<void> {
     );
   }
 
-  if (user.role === "ADMIN") {
+  if (user.role === UserRole.ADMIN) {
     const adminCount = await prisma.user.count({
-      where: { role: "ADMIN" },
+      where: { role: UserRole.ADMIN },
     });
 
     if (adminCount <= 1) {
@@ -82,7 +83,7 @@ async function deleteAccount(input: DeleteAccountInput): Promise<void> {
     }
   }
 
-  if (user.role === "CUSTOMER") {
+  if (user.role === UserRole.CUSTOMER) {
     await deleteStripeData(user.id);
   }
 

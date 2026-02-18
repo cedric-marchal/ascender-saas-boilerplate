@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
+import { UserRole } from "@/lib/constants/roles.constant";
 import { requireSession } from "@/lib/session";
 
 export const metadata: Metadata = {
@@ -14,7 +15,7 @@ export const metadata: Metadata = {
 export default async function DashboardPage() {
   const session = await requireSession();
 
-  if (session.user.role === "ADMIN") {
+  if (session.user.role === UserRole.ADMIN) {
     return redirect("/admin");
   }
 

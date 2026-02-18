@@ -1,3 +1,7 @@
+import {
+  roleLabels as baseRoleLabels,
+  UserRole,
+} from "@/lib/constants/roles.constant";
 import type { User } from "@/lib/generated/prisma/client";
 import {
   createEnumParser,
@@ -7,11 +11,10 @@ import {
   parseAsSafeSearch,
 } from "@/lib/parsers/nuqs";
 
-type UserRole = User["role"];
 type UserRoleFilter = "all" | UserRole;
 type VerificationFilter = "all" | "verified" | "unverified";
 
-const userRoleFilters = ["all", "ADMIN", "CUSTOMER"] as const;
+const userRoleFilters = ["all", UserRole.ADMIN, UserRole.CUSTOMER] as const;
 const verificationFilters = ["all", "verified", "unverified"] as const;
 const usersSortableFields = ["name", "email", "createdAt"] as const;
 
@@ -19,8 +22,7 @@ type UserSortableField = (typeof usersSortableFields)[number];
 
 const roleLabels: Record<UserRoleFilter, string> = {
   all: "Tous les rôles",
-  ADMIN: "Admin",
-  CUSTOMER: "Client",
+  ...baseRoleLabels,
 };
 
 const verificationLabels: Record<VerificationFilter, string> = {
@@ -39,7 +41,7 @@ const usersSearchParams = {
 };
 
 function isUserRole(value: string): value is UserRole {
-  return value === "ADMIN" || value === "CUSTOMER";
+  return value === UserRole.ADMIN || value === UserRole.CUSTOMER;
 }
 
 function isUserRoleFilter(value: string): value is UserRoleFilter {

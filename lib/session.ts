@@ -4,11 +4,9 @@ import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 
 import { auth } from "@/lib/auth";
+import { UserRole } from "@/lib/constants/roles.constant";
 import { env } from "@/lib/env";
-import {
-  type SubscriptionStatus,
-  UserRole,
-} from "@/lib/generated/prisma/client";
+import type { SubscriptionStatus } from "@/lib/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 
 type RawSession = typeof auth.$Infer.Session;
@@ -76,7 +74,7 @@ const requireSession = async (): Promise<Session> => {
 const requireCustomer = async (): Promise<Session> => {
   const session = await requireSession();
 
-  if (session.user.role !== "CUSTOMER") {
+  if (session.user.role !== UserRole.CUSTOMER) {
     return notFound();
   }
 
@@ -130,7 +128,7 @@ const requireCustomerProSubscription = async (): Promise<Session> => {
 const requireAdmin = async (): Promise<Session> => {
   const session = await requireSession();
 
-  if (session.user.role !== "ADMIN") {
+  if (session.user.role !== UserRole.ADMIN) {
     return notFound();
   }
 

@@ -1,8 +1,10 @@
 import { createParser, parseAsStringLiteral } from "nuqs/server";
 
-export const MAX_PAGE = 1000;
-export const MAX_SEARCH_LENGTH = 100;
-export const SORT_ORDERS = ["asc", "desc"] as const;
+import { FILTERS, PAGINATION, SORTING } from "@/lib/constants/query.constant";
+
+const MAX_PAGE = PAGINATION.maxPage;
+const MAX_SEARCH_LENGTH = FILTERS.maxSearchLength;
+const SORT_ORDERS = SORTING.orders;
 
 type SortOrder = (typeof SORT_ORDERS)[number];
 

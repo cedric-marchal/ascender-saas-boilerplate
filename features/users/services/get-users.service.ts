@@ -12,12 +12,8 @@ import {
 
 import type { User } from "@/lib/generated/prisma/client";
 import type { UserWhereInput } from "@/lib/generated/prisma/models";
-import {
-  MAX_PAGE,
-  MAX_SEARCH_LENGTH,
-  SORT_ORDERS,
-  type SortOrder,
-} from "@/lib/parsers/nuqs";
+import { FILTERS, PAGINATION, SORTING } from "@/lib/constants/query.constant";
+import type { SortOrder } from "@/lib/parsers/nuqs";
 import { prisma } from "@/lib/prisma";
 
 const PAGE_SIZE = 12;
@@ -45,8 +41,8 @@ type GetUsersResult = {
 };
 
 async function getUsers(filters: GetUsersFilters): Promise<GetUsersResult> {
-  const safeSearch = filters.search.slice(0, MAX_SEARCH_LENGTH).trim();
-  const safePage = Math.max(1, Math.min(filters.page, MAX_PAGE));
+  const safeSearch = filters.search.slice(0, FILTERS.maxSearchLength).trim();
+  const safePage = Math.max(1, Math.min(filters.page, PAGINATION.maxPage));
 
   const safeRole: UserRoleFilter = isUserRoleFilter(filters.role)
     ? filters.role
@@ -64,7 +60,7 @@ async function getUsers(filters: GetUsersFilters): Promise<GetUsersResult> {
     ? (filters.sortBy as UserSortableField)
     : (DEFAULT_SORT_BY as UserSortableField);
 
-  const safeOrder: SortOrder = (SORT_ORDERS as readonly string[]).includes(
+  const safeOrder: SortOrder = (SORTING.orders as readonly string[]).includes(
     filters.order
   )
     ? (filters.order as SortOrder)

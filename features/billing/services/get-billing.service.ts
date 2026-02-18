@@ -2,14 +2,18 @@ import "server-only";
 
 import type Stripe from "stripe";
 
+import type { InvoiceStatus } from "@/lib/constants/invoice-status.constant";
+import type { SubscriptionStatus } from "@/lib/constants/subscription-status.constant";
 import { prisma } from "@/lib/prisma";
 import { redis } from "@/lib/redis";
 import { stripe } from "@/lib/stripe";
 
+type BillingInvoiceStatus = InvoiceStatus | null;
+
 type BillingInvoice = {
   id: string;
   number: string | null;
-  status: "draft" | "open" | "paid" | "uncollectible" | "void" | null;
+  status: BillingInvoiceStatus;
   created: number;
   amountPaid: number | null;
   paidAt: number | null;
@@ -18,7 +22,7 @@ type BillingInvoice = {
 
 type BillingSubscription = {
   id: string;
-  status: Stripe.Subscription.Status;
+  status: SubscriptionStatus;
   currentPeriodStart: number;
   currentPeriodEnd: number;
   cancelAtPeriodEnd: boolean;

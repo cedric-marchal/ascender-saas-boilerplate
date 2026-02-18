@@ -1,5 +1,6 @@
 import "server-only";
 
+import { UserRole } from "@/lib/constants/roles.constant";
 import { env } from "@/lib/env";
 import { prisma } from "@/lib/prisma";
 import { stripe } from "@/lib/stripe";
@@ -120,7 +121,7 @@ async function createCheckoutSession(
     );
   }
 
-  if (user.role !== "CUSTOMER") {
+  if (user.role !== UserRole.CUSTOMER) {
     throw new ForbiddenError(
       "Seuls les utilisateurs avec le rôle CUSTOMER peuvent souscrire à un abonnement"
     );

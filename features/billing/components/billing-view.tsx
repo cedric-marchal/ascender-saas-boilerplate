@@ -11,6 +11,8 @@ import type {
 } from "@/features/billing/services/get-billing.service";
 import { AlertCircle } from "lucide-react";
 
+import { ACTIVE_SUBSCRIPTION_STATUSES } from "@/lib/constants/subscription-status.constant";
+
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 
@@ -46,7 +48,8 @@ function BillingView({ billing }: BillingViewProps) {
   const { invoices, subscriptions } = billing;
 
   const activeSubscription = subscriptions.find(
-    (subscription: BillingSubscription) => subscription.status === "active"
+    (subscription: BillingSubscription) =>
+      ACTIVE_SUBSCRIPTION_STATUSES.includes(subscription.status)
   );
 
   return (
@@ -123,7 +126,7 @@ function BillingView({ billing }: BillingViewProps) {
 
           {subscriptions.filter(
             (subscription: BillingSubscription) =>
-              subscription.status !== "active"
+              !ACTIVE_SUBSCRIPTION_STATUSES.includes(subscription.status)
           ).length > 0 && (
             <div className="space-y-4">
               <h2 className="text-xl font-semibold">Anciens abonnements</h2>
@@ -132,7 +135,7 @@ function BillingView({ billing }: BillingViewProps) {
                 {subscriptions
                   .filter(
                     (subscription: BillingSubscription) =>
-                      subscription.status !== "active"
+                      !ACTIVE_SUBSCRIPTION_STATUSES.includes(subscription.status)
                   )
                   .map((subscription: BillingSubscription) => (
                     <SubscriptionCard

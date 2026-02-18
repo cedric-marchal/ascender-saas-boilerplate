@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 
 import type { Product, WebPage, WithContext } from "schema-dts";
 
+import { UserRole } from "@/lib/constants/roles.constant";
 import { env } from "@/lib/env";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
@@ -94,7 +95,7 @@ export default async function PricingPage() {
 
   const isAuthenticated = !!session;
   const isEmailVerified = user?.emailVerified ?? false;
-  const isCustomer = user?.role === "CUSTOMER";
+  const isCustomer = user?.role === UserRole.CUSTOMER;
 
   const webPageSchema = getWebPageSchema();
   const pricingSchemas = getPricingSchemas();

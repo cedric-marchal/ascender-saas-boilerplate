@@ -1,6 +1,10 @@
 import type { BillingSubscription } from "@/features/billing/services/get-billing.service";
 import { CheckCircle2, XCircle } from "lucide-react";
 
+import {
+  ACTIVE_SUBSCRIPTION_STATUSES,
+  subscriptionStatusLabels,
+} from "@/lib/constants/subscription-status.constant";
 import { env } from "@/lib/env";
 
 import { Badge } from "@/components/ui/badge";
@@ -21,9 +25,7 @@ function SubscriptionStatusCard({
 }: SubscriptionStatusCardProps) {
   const activeSubscription = subscriptions.find(
     (subscription: BillingSubscription) =>
-      subscription.status === "active" ||
-      subscription.status === "trialing" ||
-      subscription.status === "past_due"
+      ACTIVE_SUBSCRIPTION_STATUSES.includes(subscription.status)
   );
 
   const isProSubscription = activeSubscription
@@ -82,11 +84,7 @@ function SubscriptionStatusCard({
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Type</span>
                 <span className="font-medium">
-                  {activeSubscription.status === "trialing"
-                    ? "Période d'essai"
-                    : activeSubscription.status === "past_due"
-                      ? "Paiement en retard"
-                      : "Actif"}
+                  {subscriptionStatusLabels[activeSubscription.status]}
                 </span>
               </div>
               <div className="flex justify-between">

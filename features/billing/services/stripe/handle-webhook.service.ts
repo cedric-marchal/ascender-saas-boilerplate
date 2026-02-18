@@ -3,22 +3,18 @@ import "server-only";
 import * as Sentry from "@sentry/nextjs";
 import type Stripe from "stripe";
 
+import {
+  ALL_SUBSCRIPTION_STATUSES,
+  type SubscriptionStatus,
+} from "@/lib/constants/subscription-status.constant";
 import { env } from "@/lib/env";
-import type { SubscriptionStatus } from "@/lib/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { redis } from "@/lib/redis";
 import { stripe } from "@/lib/stripe";
 
-const VALID_SUBSCRIPTION_STATUSES = new Set<string>([
-  "incomplete",
-  "incomplete_expired",
-  "trialing",
-  "active",
-  "past_due",
-  "canceled",
-  "unpaid",
-  "paused",
-]);
+const VALID_SUBSCRIPTION_STATUSES = new Set<SubscriptionStatus>(
+  ALL_SUBSCRIPTION_STATUSES
+);
 
 const EVENT_TTL_SECONDS = 86400;
 

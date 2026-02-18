@@ -32,20 +32,28 @@ Goal: maximize signal, minimize tokens, avoid unnecessary code dumps.
 All data flows top-down. Changing one layer cascades to all downstream layers.
 
 ```
-Prisma Schema / Stripe / R2        ← External sources of truth
+Prisma Schema (UserRole, SubscriptionStatus enums)  ← Ultimate SSOT for domain enums
         ↓
-lib/constants/query.constant.ts    ← Global limits (page, search, sort)
+lib/generated/prisma/client                         ← Auto-generated types
         ↓
-lib/parsers/nuqs.ts                ← Universal reusable parsers
+lib/constants/*.constant.ts                         ← Business logic constants
+    ├── query.constant.ts                           → Pagination, filters, sorting limits
+    ├── roles.constant.ts                           → UserRole + roleLabels
+    ├── subscription-status.constant.ts             → SubscriptionStatus + labels + active statuses
+    └── invoice-status.constant.ts                  → InvoiceStatus + labels (Stripe-only, not in DB)
         ↓
-lib/constants/{entity}-filters.constant.ts  ← Domain enums, labels, searchParams
+lib/parsers/nuqs.ts                                 ← Universal reusable parsers
         ↓
-lib/schemas/search/{entity}-filters.schema.ts  ← Zod validation
+lib/constants/{entity}-filters.constant.ts          ← Domain-specific filters (searchParams, type guards)
         ↓
-app/.../_lib/get-{entity}.ts       ← Server data fetching
+lib/schemas/search/{entity}-filters.schema.ts       ← Zod validation (imports from constants)
         ↓
-app/.../page.tsx → _components/    ← Page + Client components
+features/*/services/*.service.ts                    ← Server data fetching (defense-in-depth validation)
+        ↓
+features/*/components/*.tsx                         ← UI components (import from constants/services)
 ```
+
+**Key Principle**: NEVER import enums directly from Prisma. Always import from `lib/constants/*.constant.ts` for centralization and abstraction.
 
 ## Project Structure
 
@@ -83,13 +91,16 @@ app/.../page.tsx → _components/    ← Page + Client components
 │   ├── pagination.tsx               # Generic pagination component
 │   └── emails/                      # Email templates
 ├── lib/
-│   ├── constants/                   # Global + domain-specific constants
-│   │   ├── query.constant.ts        # Pagination, filter, sort limits
-│   │   └── {entity}-filters.constant.ts  # Domain enums, labels, searchParams
+│   ├── constants/                   # SSOT for business logic constants
+│   │   ├── query.constant.ts        # Pagination, filter, sort limits (global)
+│   │   ├── roles.constant.ts        # UserRole enum + roleLabels (re-exported from Prisma)
+│   │   ├── subscription-status.constant.ts  # SubscriptionStatus + labels + ACTIVE_SUBSCRIPTION_STATUSES
+│   │   ├── invoice-status.constant.ts       # InvoiceStatus + labels (Stripe-only, not in DB)
+│   │   └── {entity}-filters.constant.ts     # Domain-specific filters (searchParams, type guards)
 │   ├── parsers/
-│   │   └── nuqs.ts                  # Universal reusable nuqs parsers
+│   │   └── nuqs.ts                  # Universal reusable nuqs parsers (imports from constants)
 │   ├── schemas/                     # Zod schemas
-│   │   └── search/                  # Filter validation schemas
+│   │   └── search/                  # Filter validation schemas (import from constants)
 │   ├── auth.ts
 │   ├── prisma.ts
 │   ├── env.ts
@@ -134,6 +145,142 @@ Files that MUST use `server-only`:
 - Authentication helpers (e.g., `requireSession`, `requireAdmin`)
 - Server-side data fetching utilities
 - Any file with direct Prisma access outside of API routes
+
+## Enum & Constant Usage (P0)
+
+### SSOT Architecture for Domain Enums
+
+All domain enums (UserRole, SubscriptionStatus, InvoiceStatus) follow a strict SSOT hierarchy:
+
+```
+Prisma Schema → lib/generated/prisma/client → lib/constants/*.constant.ts → Application Code
+```
+
+**NEVER import enums directly from Prisma.** Always import from centralized constants.
+
+### UserRole Enum
+
+```tsx
+// ✅ CORRECT: Import from constants
+import { UserRole } from "@/lib/constants/roles.constant";
+
+// Usage in comparisons
+if (user.role === UserRole.ADMIN) { ... }
+if (user.role !== UserRole.CUSTOMER) { ... }
+
+// Usage in labels
+import { roleLabels } from "@/lib/constants/roles.constant";
+const label = roleLabels[user.role];  // Type-safe, exhaustive
+
+// ❌ WRONG: Import from Prisma
+import { UserRole } from "@/lib/generated/prisma/client";
+
+// ❌ WRONG: Magic strings
+if (user.role === "ADMIN") { ... }  // No fail-fast if enum changes
+```
+
+### SubscriptionStatus Enum
+
+```tsx
+// ✅ CORRECT: Import from constants
+import {
+  ACTIVE_SUBSCRIPTION_STATUSES,
+  subscriptionStatusLabels,
+  type SubscriptionStatus,
+} from "@/lib/constants/subscription-status.constant";
+
+// Check if subscription is active
+if (ACTIVE_SUBSCRIPTION_STATUSES.includes(subscription.status)) { ... }
+
+// Get label
+const label = subscriptionStatusLabels[subscription.status];  // Exhaustive
+
+// ❌ WRONG: Hardcoded checks
+if (subscription.status === "active" || subscription.status === "trialing") { ... }
+```
+
+### InvoiceStatus Type
+
+```tsx
+// ✅ CORRECT: Import from constants
+import {
+  invoiceStatusLabels,
+  type InvoiceStatus,
+} from "@/lib/constants/invoice-status.constant";
+
+// Get label
+const label = invoiceStatusLabels[invoice.status];  // Exhaustive
+
+// ❌ WRONG: Inline type definition
+type InvoiceStatus = "draft" | "open" | "paid" | "uncollectible" | "void";
+```
+
+### Type-Safe Exhaustive Records
+
+ALWAYS use `Record<Enum, T>` instead of `Record<string, T>` for domain enums:
+
+```tsx
+// ✅ CORRECT: Exhaustive type checking
+import { type SubscriptionStatus } from "@/lib/constants/subscription-status.constant";
+
+const STATUS_CONFIG: Record<SubscriptionStatus, StatusConfig> = {
+  incomplete: { icon: Clock, variant: "secondary" },
+  incomplete_expired: { icon: XCircle, variant: "destructive" },
+  trialing: { icon: Sparkles, variant: "default" },
+  active: { icon: CheckCircle, variant: "default" },
+  past_due: { icon: AlertCircle, variant: "warning" },
+  canceled: { icon: XCircle, variant: "secondary" },
+  unpaid: { icon: Ban, variant: "destructive" },
+  paused: { icon: Pause, variant: "secondary" },
+};
+// TypeScript will error if any status is missing → fail-fast guarantee
+
+// ❌ WRONG: Non-exhaustive type
+const STATUS_CONFIG: Record<string, StatusConfig> = {
+  active: { ... },
+  trialing: { ... },
+};
+// No error if statuses are missing → silent bugs
+```
+
+### Fail-Fast Guarantee
+
+When a new enum value is added to Prisma:
+
+1. Run `pnpm exec prisma generate`
+2. TypeScript **immediately fails** on all incomplete `Record<Enum, ...>`
+3. You are **forced** to update all mappings (labels, configs, etc.)
+4. **Impossible to deploy** incomplete code
+
+Example:
+```ts
+// Prisma: Add new role
+enum UserRole {
+  ADMIN
+  CUSTOMER
+  MODERATOR  // ← New
+}
+
+// After prisma generate → TypeScript error:
+lib/constants/roles.constant.ts(3,7): error TS2741:
+Property 'MODERATOR' is missing in type '{ ADMIN: string; CUSTOMER: string; }'
+but required in type 'Record<UserRole, string>'.
+
+// Fix by adding label:
+const roleLabels: Record<UserRole, string> = {
+  ADMIN: "Administrateur",
+  CUSTOMER: "Client",
+  MODERATOR: "Modérateur",  // ← Required by TypeScript
+};
+```
+
+### Benefits of This Architecture
+
+1. **Fail-fast**: Impossible to deploy code with missing enum mappings
+2. **Single source of truth**: Change label in 1 place → updates everywhere
+3. **Type safety**: IntelliSense autocomplete, no typos possible
+4. **Maintainability**: Refactoring is safe (TypeScript guides you)
+5. **Onboarding**: New devs know exactly where to find/update labels
 
 ## Naming Conventions
 
@@ -1078,6 +1225,26 @@ const data = await request.json();
 
 // ❌ NEVER omit select in Prisma
 const user = await prisma.user.findUnique({ where: { id } });
+
+// ❌ NEVER import enums directly from Prisma (use constants)
+import { UserRole } from "@/lib/generated/prisma/client";
+// ✅ Use: import { UserRole } from "@/lib/constants/roles.constant";
+
+// ❌ NEVER use magic strings for enums
+if (user.role === "ADMIN") { ... }
+// ✅ Use: if (user.role === UserRole.ADMIN) { ... }
+
+// ❌ NEVER use Record<string, ...> for domain enums
+const labels: Record<string, string> = { ADMIN: "Admin", CUSTOMER: "Client" };
+// ✅ Use: const labels: Record<UserRole, string> = { ... };
+
+// ❌ NEVER define enum labels inline
+role === "ADMIN" ? "Admin" : "Client"
+// ✅ Use: roleLabels[role]
+
+// ❌ NEVER hardcode status checks
+if (status === "active" || status === "trialing") { ... }
+// ✅ Use: if (ACTIVE_SUBSCRIPTION_STATUSES.includes(status)) { ... }
 
 // ❌ NEVER put forms outside of _components/forms/
 app/(public)/contact/_components/contact-form.tsx

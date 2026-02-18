@@ -7,6 +7,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import { useQueryStates } from "nuqs";
 
+import { roleLabels, UserRole } from "@/lib/constants/roles.constant";
 import { env } from "@/lib/env";
 import type { User } from "@/lib/generated/prisma/client";
 
@@ -98,8 +99,8 @@ const usersColumns: ColumnDef<UserTableData>[] = [
     cell: ({ row }) => {
       const role = row.original.role;
       return (
-        <Badge variant={role === "ADMIN" ? "default" : "secondary"}>
-          {role === "ADMIN" ? "Admin" : "Client"}
+        <Badge variant={role === UserRole.ADMIN ? "default" : "secondary"}>
+          {roleLabels[role]}
         </Badge>
       );
     },

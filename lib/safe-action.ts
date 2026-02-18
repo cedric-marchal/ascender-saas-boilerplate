@@ -4,12 +4,20 @@ import {
 } from "next-safe-action";
 
 import { auth } from "@/lib/auth";
+import { UserRole } from "@/lib/constants/roles.constant";
 
 import {
   AppError,
   ForbiddenError,
   UnauthorizedError,
 } from "@/utils/errors/errors";
+
+function parseUserRole(role: string): UserRole {
+  if (!Object.values(UserRole).includes(role as UserRole)) {
+    throw new Error(`Role invalide dans la session: ${role}`);
+  }
+  return role as UserRole;
+}
 
 export const actionClient = createSafeActionClient({
   handleServerError(error: Error) {
@@ -46,7 +54,7 @@ export const authActionClient = actionClient.use(async ({ next }) => {
       userId: session.user.id,
       userEmail: session.user.email,
       userName: session.user.name,
-      userRole: session.user.role,
+      userRole: parseUserRole(session.user.role),
     },
   });
 });
@@ -57,7 +65,7 @@ export const authActionClient = actionClient.use(async ({ next }) => {
  * Provides userId and ensures user is admin
  */
 export const adminActionClient = authActionClient.use(async ({ next, ctx }) => {
-  if (ctx.userRole !== "ADMIN") {
+  if (ctx.userRole !== UserRole.ADMIN) {
     throw new ForbiddenError(
       "Accès non autorisé. Vous devez être administrateur."
     );
