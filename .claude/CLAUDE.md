@@ -334,6 +334,60 @@ function ContactForm() {
 - `type="button"` on all non-submit buttons
 - Empty states: always separate `-empty.tsx` file
 
+## Data Display Conventions (P0)
+
+### DB Data Truncation
+
+ALWAYS truncate data received from database using `utils/string/truncate.ts` helpers. Apply with good judgment based on context.
+
+| Helper                 | Length | Usage                                         |
+| ---------------------- | ------ | --------------------------------------------- |
+| `truncateTitle()`      | 60     | SEO titles, Open Graph, cards                 |
+| `truncateDescription()`| 160    | Meta descriptions, Open Graph descriptions    |
+| `truncatePreview()`    | 200    | 4-5 line article/post preview                 |
+| `truncateExcerpt()`    | 300    | 6-8 line blog post excerpt                    |
+| `truncateName()`       | 20     | Sidebar labels, avatar names, badges          |
+
+```tsx
+// ✅ Correct: Truncate DB data before display
+import { truncateTitle, truncateDescription } from "@/utils/string/truncate";
+
+const posts = await prisma.post.findMany({
+  select: { id: true, title: true, description: true },
+});
+
+return posts.map((post) => ({
+  id: post.id,
+  title: truncateTitle(post.title),
+  description: truncateDescription(post.description),
+}));
+
+// ✅ Correct: In components
+function PostCard({ title, description }: PostCardProps) {
+  return (
+    <article>
+      <h3>{truncateTitle(title)}</h3>
+      <p>{truncateDescription(description)}</p>
+    </article>
+  );
+}
+
+// ❌ Wrong: No truncation
+return posts.map((post) => ({
+  id: post.id,
+  title: post.title,  // Can overflow in card layouts
+  description: post.description,
+}));
+```
+
+**Decision guidelines:**
+
+- Cards/lists: Always truncate titles, descriptions, names
+- Full detail pages: No truncation (user wants full content)
+- Metadata/SEO: Always truncate (Google limits)
+- Admin tables: Truncate for readability, add tooltip for full text
+- Search results: Truncate preview/excerpt
+
 ## API Route Rules
 
 Location: `app/api/*/route.ts`
