@@ -1,5 +1,9 @@
 import "server-only";
 
+import { EmailChangeNotificationEmail } from "@/features/auth/emails/email-change-notification-email";
+import { PasswordChangedEmail } from "@/features/auth/emails/password-changed-email";
+import { ResetPasswordEmail } from "@/features/auth/emails/reset-password-email";
+import { WelcomeEmail } from "@/features/auth/emails/welcome-email";
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { nextCookies } from "better-auth/next-js";
@@ -9,11 +13,6 @@ import { env } from "@/lib/env";
 import { prisma } from "@/lib/prisma";
 import { sendEmailSafe } from "@/lib/resend";
 import { stripe } from "@/lib/stripe";
-
-import { EmailChangeNotificationEmail } from "@/features/auth/emails/email-change-notification-email";
-import { PasswordChangedEmail } from "@/features/auth/emails/password-changed-email";
-import { ResetPasswordEmail } from "@/features/auth/emails/reset-password-email";
-import { WelcomeEmail } from "@/features/auth/emails/welcome-email";
 
 import { slugify } from "@/utils/string/slugify";
 

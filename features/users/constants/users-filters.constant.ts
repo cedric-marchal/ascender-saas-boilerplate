@@ -1,6 +1,6 @@
 import {
-  roleLabels as baseRoleLabels,
   UserRole,
+  roleLabels as baseRoleLabels,
 } from "@/lib/constants/roles.constant";
 import type { User } from "@/lib/generated/prisma/client";
 import {

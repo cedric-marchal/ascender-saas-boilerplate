@@ -4,8 +4,8 @@ import type { BillingInvoice } from "@/features/billing/services/get-billing.ser
 import { Calendar, Download, FileText } from "lucide-react";
 
 import {
-  invoiceStatusLabels,
   type InvoiceStatus,
+  invoiceStatusLabels,
 } from "@/lib/constants/invoice-status.constant";
 
 import { Badge } from "@/components/ui/badge";

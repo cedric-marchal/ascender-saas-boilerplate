@@ -4,17 +4,17 @@
 
 ### 1.1 Types Métier Critiques
 
-| Type Métier | Source de Vérité | Fichier Source | Consommateurs |
-|---|---|---|---|
-| `UserRole` | Prisma enum | `prisma/schema.prisma` (l.34-37) | `lib/generated/prisma/client`, `lib/auth.ts`, `lib/session.ts`, `lib/safe-action.ts`, `features/users/constants/users-filters.constant.ts`, `features/account/services/delete-account.service.ts`, `features/billing/services/stripe/create-checkout-session.service.ts`, `features/billing/services/stripe/create-portal-session.service.ts` |
-| `SubscriptionStatus` | Prisma enum | `prisma/schema.prisma` (l.114-123) | `lib/generated/prisma/client`, `lib/session.ts`, `features/billing/services/stripe/handle-webhook.service.ts` |
-| `User` (modèle) | Prisma model | `prisma/schema.prisma` (l.16-32) | `lib/generated/prisma/client`, `features/users/constants/users-filters.constant.ts`, `features/users/services/get-users.service.ts`, `features/users/components/users-columns.tsx` |
-| `Subscription` (modèle) | Prisma model | `prisma/schema.prisma` (l.125-141) | `lib/generated/prisma/client`, services billing |
-| `BillingSubscription` | Service local | `features/billing/services/get-billing.service.ts` (l.19-27) | `features/billing/components/*` |
-| `BillingInvoice` | Service local | `features/billing/services/get-billing.service.ts` (l.9-17) | `features/billing/components/*` |
-| `Plan` (pricing) | Constante locale | `features/pricing/constants/pricing-plans.ts` (l.5-15) | `features/pricing/components/*` |
-| `Session` | Type dérivé | `lib/session.ts` (l.14-20) | Pages protégées, actions |
-| `CookieCategoryId` | Constante locale | `features/cookie-consent/hooks/use-cookie-consent.ts` (l.4-29) | `features/cookie-consent/components/*` |
+| Type Métier             | Source de Vérité | Fichier Source                                                 | Consommateurs                                                                                                                                                                                                                                                                                                                                 |
+| ----------------------- | ---------------- | -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `UserRole`              | Prisma enum      | `prisma/schema.prisma` (l.34-37)                               | `lib/generated/prisma/client`, `lib/auth.ts`, `lib/session.ts`, `lib/safe-action.ts`, `features/users/constants/users-filters.constant.ts`, `features/account/services/delete-account.service.ts`, `features/billing/services/stripe/create-checkout-session.service.ts`, `features/billing/services/stripe/create-portal-session.service.ts` |
+| `SubscriptionStatus`    | Prisma enum      | `prisma/schema.prisma` (l.114-123)                             | `lib/generated/prisma/client`, `lib/session.ts`, `features/billing/services/stripe/handle-webhook.service.ts`                                                                                                                                                                                                                                 |
+| `User` (modèle)         | Prisma model     | `prisma/schema.prisma` (l.16-32)                               | `lib/generated/prisma/client`, `features/users/constants/users-filters.constant.ts`, `features/users/services/get-users.service.ts`, `features/users/components/users-columns.tsx`                                                                                                                                                            |
+| `Subscription` (modèle) | Prisma model     | `prisma/schema.prisma` (l.125-141)                             | `lib/generated/prisma/client`, services billing                                                                                                                                                                                                                                                                                               |
+| `BillingSubscription`   | Service local    | `features/billing/services/get-billing.service.ts` (l.19-27)   | `features/billing/components/*`                                                                                                                                                                                                                                                                                                               |
+| `BillingInvoice`        | Service local    | `features/billing/services/get-billing.service.ts` (l.9-17)    | `features/billing/components/*`                                                                                                                                                                                                                                                                                                               |
+| `Plan` (pricing)        | Constante locale | `features/pricing/constants/pricing-plans.ts` (l.5-15)         | `features/pricing/components/*`                                                                                                                                                                                                                                                                                                               |
+| `Session`               | Type dérivé      | `lib/session.ts` (l.14-20)                                     | Pages protégées, actions                                                                                                                                                                                                                                                                                                                      |
+| `CookieCategoryId`      | Constante locale | `features/cookie-consent/hooks/use-cookie-consent.ts` (l.4-29) | `features/cookie-consent/components/*`                                                                                                                                                                                                                                                                                                        |
 
 ### 1.2 Hiérarchie Réelle des Sources de Vérité
 
@@ -44,41 +44,41 @@ features/*/components/                 ← UI (importent types depuis services/c
 
 ### 2.1 CRITIQUE : `SubscriptionStatus` — Validation dupliquée avec divergence
 
-| Fichier | Définition | Valeurs |
-|---|---|---|
-| `prisma/schema.prisma` (l.114-123) | `enum SubscriptionStatus` | `incomplete`, `incomplete_expired`, `trialing`, `active`, `past_due`, `canceled`, `unpaid`, `paused` |
-| `lib/session.ts` (l.30-34) | `VALID_SUBSCRIPTION_STATUSES: SubscriptionStatus[]` | `active`, `trialing`, `past_due` (sous-ensemble intentionnel) |
-| `features/billing/services/stripe/handle-webhook.service.ts` (l.12-21) | `VALID_SUBSCRIPTION_STATUSES = new Set<string>([...])` | 8 valeurs (duplique le Prisma enum en entier) |
-| `features/billing/components/subscription-card.tsx` (l.19-28) | `STATUS_CONFIG: Record<string, ...>` | 8 clés string (duplique le Prisma enum) |
-| `features/billing/components/subscription-status-card.tsx` (l.23-27) | Inline string comparisons | `"active"`, `"trialing"`, `"past_due"` |
-| `features/billing/components/billing-view.tsx` (l.49, l.126) | Inline string comparisons | `"active"` |
-| `features/billing/components/invoice-card.tsx` (l.21-27) | `STATUS_CONFIG: Record<string, ...>` | `draft`, `open`, `paid`, `uncollectible`, `void` |
+| Fichier                                                                | Définition                                             | Valeurs                                                                                              |
+| ---------------------------------------------------------------------- | ------------------------------------------------------ | ---------------------------------------------------------------------------------------------------- |
+| `prisma/schema.prisma` (l.114-123)                                     | `enum SubscriptionStatus`                              | `incomplete`, `incomplete_expired`, `trialing`, `active`, `past_due`, `canceled`, `unpaid`, `paused` |
+| `lib/session.ts` (l.30-34)                                             | `VALID_SUBSCRIPTION_STATUSES: SubscriptionStatus[]`    | `active`, `trialing`, `past_due` (sous-ensemble intentionnel)                                        |
+| `features/billing/services/stripe/handle-webhook.service.ts` (l.12-21) | `VALID_SUBSCRIPTION_STATUSES = new Set<string>([...])` | 8 valeurs (duplique le Prisma enum en entier)                                                        |
+| `features/billing/components/subscription-card.tsx` (l.19-28)          | `STATUS_CONFIG: Record<string, ...>`                   | 8 clés string (duplique le Prisma enum)                                                              |
+| `features/billing/components/subscription-status-card.tsx` (l.23-27)   | Inline string comparisons                              | `"active"`, `"trialing"`, `"past_due"`                                                               |
+| `features/billing/components/billing-view.tsx` (l.49, l.126)           | Inline string comparisons                              | `"active"`                                                                                           |
+| `features/billing/components/invoice-card.tsx` (l.21-27)               | `STATUS_CONFIG: Record<string, ...>`                   | `draft`, `open`, `paid`, `uncollectible`, `void`                                                     |
 
 **Risque** : Si Prisma ajoute un nouveau statut (ex: `expired`), aucun composant UI ne cassera — **pas de fail-fast**. Le `Record<string, ...>` accepte n'importe quelle clé.
 
 ### 2.2 CRITIQUE : `UserRole` — Magic strings dispersées
 
-| Fichier | Ligne | Usage |
-|---|---|---|
-| `lib/auth.ts` | l.99 | `dbUser.role !== "CUSTOMER"` |
-| `lib/safe-action.ts` | l.60 | `ctx.userRole !== "ADMIN"` |
-| `lib/session.ts` | l.79, l.133 | `session.user.role !== "CUSTOMER"`, `!== "ADMIN"` |
-| `features/account/services/delete-account.service.ts` | l.73, l.75, l.85 | `"ADMIN"`, `"CUSTOMER"` |
-| `features/billing/services/stripe/create-checkout-session.service.ts` | l.123 | `user.role !== "CUSTOMER"` |
-| `features/billing/services/stripe/create-portal-session.service.ts` | l.44 | `user.role !== "CUSTOMER"` |
-| `features/users/components/users-columns.tsx` | l.101-102 | `role === "ADMIN"`, label `"Admin"` / `"Client"` |
-| `features/users/constants/users-filters.constant.ts` | l.14, l.42 | `["all", "ADMIN", "CUSTOMER"]`, `"ADMIN" || "CUSTOMER"` |
-| `app/(protected)/dashboard/page.tsx` | l.17 | `session.user.role === "ADMIN"` |
-| `app/(public)/tarifs/page.tsx` | l.97 | `user?.role === "CUSTOMER"` |
+| Fichier                                                               | Ligne            | Usage                                             |
+| --------------------------------------------------------------------- | ---------------- | ------------------------------------------------- | --- | ----------- |
+| `lib/auth.ts`                                                         | l.99             | `dbUser.role !== "CUSTOMER"`                      |
+| `lib/safe-action.ts`                                                  | l.60             | `ctx.userRole !== "ADMIN"`                        |
+| `lib/session.ts`                                                      | l.79, l.133      | `session.user.role !== "CUSTOMER"`, `!== "ADMIN"` |
+| `features/account/services/delete-account.service.ts`                 | l.73, l.75, l.85 | `"ADMIN"`, `"CUSTOMER"`                           |
+| `features/billing/services/stripe/create-checkout-session.service.ts` | l.123            | `user.role !== "CUSTOMER"`                        |
+| `features/billing/services/stripe/create-portal-session.service.ts`   | l.44             | `user.role !== "CUSTOMER"`                        |
+| `features/users/components/users-columns.tsx`                         | l.101-102        | `role === "ADMIN"`, label `"Admin"` / `"Client"`  |
+| `features/users/constants/users-filters.constant.ts`                  | l.14, l.42       | `["all", "ADMIN", "CUSTOMER"]`, `"ADMIN"          |     | "CUSTOMER"` |
+| `app/(protected)/dashboard/page.tsx`                                  | l.17             | `session.user.role === "ADMIN"`                   |
+| `app/(public)/tarifs/page.tsx`                                        | l.97             | `user?.role === "CUSTOMER"`                       |
 
 **Risque** : Si `UserRole` évolue (ajout de `MODERATOR`), **25+ fichiers** utilisent des magic strings. Pas de fail-fast car la plupart comparent `!== "ADMIN"` ou `!== "CUSTOMER"` sans exhaustivité.
 
 ### 2.3 MODÉRÉ : `Record<string, ...>` au lieu de `Record<DomainEnum, ...>`
 
-| Fichier | Ligne | Type actuel | Type attendu |
-|---|---|---|---|
-| `features/billing/components/subscription-card.tsx` | l.19 | `Record<string, SubscriptionStatusConfig>` | `Record<SubscriptionStatus, SubscriptionStatusConfig>` |
-| `features/billing/components/invoice-card.tsx` | l.21 | `Record<string, InvoiceStatusConfig>` | `Record<InvoiceStatus, InvoiceStatusConfig>` |
+| Fichier                                             | Ligne | Type actuel                                | Type attendu                                           |
+| --------------------------------------------------- | ----- | ------------------------------------------ | ------------------------------------------------------ |
+| `features/billing/components/subscription-card.tsx` | l.19  | `Record<string, SubscriptionStatusConfig>` | `Record<SubscriptionStatus, SubscriptionStatusConfig>` |
+| `features/billing/components/invoice-card.tsx`      | l.21  | `Record<string, InvoiceStatusConfig>`      | `Record<InvoiceStatus, InvoiceStatusConfig>`           |
 
 **Risque** : Aucune vérification d'exhaustivité. Si un statut est ajouté au Prisma enum, ces Records ne casseront pas.
 
@@ -91,16 +91,17 @@ Ces deux fichiers définissent indépendamment quels statuts sont "valides" dans
 
 ### 2.5 MODÉRÉ : Labels de rôle dupliqués
 
-| Fichier | Mapping |
-|---|---|
+| Fichier                                                      | Mapping                                                                               |
+| ------------------------------------------------------------ | ------------------------------------------------------------------------------------- |
 | `features/users/constants/users-filters.constant.ts` l.20-24 | `roleLabels: Record<UserRoleFilter, string>` → `ADMIN: "Admin"`, `CUSTOMER: "Client"` |
-| `features/users/components/users-columns.tsx` l.101-102 | Inline : `role === "ADMIN" ? "Admin" : "Client"` |
+| `features/users/components/users-columns.tsx` l.101-102      | Inline : `role === "ADMIN" ? "Admin" : "Client"`                                      |
 
 Le mapping label est défini dans `users-filters.constant.ts` mais pas utilisé dans `users-columns.tsx`.
 
 ### 2.6 MINEUR : Statuts de souscription "actifs" dupliqués
 
 La notion de "souscription active" est définie indépendamment dans :
+
 - `lib/session.ts` l.30-34 : `["active", "trialing", "past_due"]`
 - `features/billing/components/subscription-status-card.tsx` l.24-26 : inline `"active" || "trialing" || "past_due"`
 
@@ -111,9 +112,11 @@ La notion de "souscription active" est définie indépendamment dans :
 ### 2.8 MINEUR : `BillingInvoice.status` type inline vs Stripe
 
 `features/billing/services/get-billing.service.ts` l.12 définit le statut de facture inline :
+
 ```ts
 status: "draft" | "open" | "paid" | "uncollectible" | "void" | null;
 ```
+
 Ce n'est pas extrait de `Stripe.Invoice.Status` de manière typée — c'est une union dupliquée manuellement.
 
 ---
@@ -122,27 +125,27 @@ Ce n'est pas extrait de `Stripe.Invoice.Status` de manière typée — c'est une
 
 ### 3.1 Stripe
 
-| Risque | Détail | Sévérité |
-|---|---|---|
-| Pas d'adapter formel Stripe → Domaine | Les fonctions `mapInvoice()` et `mapSubscription()` dans `get-billing.service.ts` font office d'adapter, mais les types de retour ne sont pas liés au Prisma enum | Modéré |
-| `Stripe.Subscription.Status` utilisé directement | `BillingSubscription.status` est typé comme `Stripe.Subscription.Status` (l.21), créant un couplage entre le type Stripe et les composants | Modéré |
-| `STATUS_CONFIG` en `Record<string, ...>` | Pas d'exhaustivité garantie pour les statuts | Critique |
+| Risque                                           | Détail                                                                                                                                                            | Sévérité |
+| ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| Pas d'adapter formel Stripe → Domaine            | Les fonctions `mapInvoice()` et `mapSubscription()` dans `get-billing.service.ts` font office d'adapter, mais les types de retour ne sont pas liés au Prisma enum | Modéré   |
+| `Stripe.Subscription.Status` utilisé directement | `BillingSubscription.status` est typé comme `Stripe.Subscription.Status` (l.21), créant un couplage entre le type Stripe et les composants                        | Modéré   |
+| `STATUS_CONFIG` en `Record<string, ...>`         | Pas d'exhaustivité garantie pour les statuts                                                                                                                      | Critique |
 
 ### 3.2 Prisma
 
-| Risque | Détail | Sévérité |
-|---|---|---|
-| Types Prisma importés dans composants client | `users-columns.tsx` importe `User` de `@/lib/generated/prisma/client` directement. Fonctionnel car type-only, mais couple la UI au schéma DB | Faible |
-| `UserWhereInput` importé de Prisma models | `get-users.service.ts` l.14 — couplage OK car c'est un service server-only | Faible |
+| Risque                                       | Détail                                                                                                                                       | Sévérité |
+| -------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| Types Prisma importés dans composants client | `users-columns.tsx` importe `User` de `@/lib/generated/prisma/client` directement. Fonctionnel car type-only, mais couple la UI au schéma DB | Faible   |
+| `UserWhereInput` importé de Prisma models    | `get-users.service.ts` l.14 — couplage OK car c'est un service server-only                                                                   | Faible   |
 
 ### 3.3 Composants qui redéfinissent des types
 
-| Composant | Redéfinition | Impact |
-|---|---|---|
-| `subscription-card.tsx` | `STATUS_CONFIG` avec 8 statuts en magic strings | Pas de fail-fast si enum change |
-| `invoice-card.tsx` | `STATUS_CONFIG` avec 5 statuts en magic strings | Pas de fail-fast si Stripe change |
-| `subscription-status-card.tsx` | Comparaisons inline de statuts | Pas de fail-fast |
-| `users-columns.tsx` | Labels de rôle inline (`"Admin"`, `"Client"`) | Duplique `roleLabels` |
+| Composant                      | Redéfinition                                    | Impact                            |
+| ------------------------------ | ----------------------------------------------- | --------------------------------- |
+| `subscription-card.tsx`        | `STATUS_CONFIG` avec 8 statuts en magic strings | Pas de fail-fast si enum change   |
+| `invoice-card.tsx`             | `STATUS_CONFIG` avec 5 statuts en magic strings | Pas de fail-fast si Stripe change |
+| `subscription-status-card.tsx` | Comparaisons inline de statuts                  | Pas de fail-fast                  |
+| `users-columns.tsx`            | Labels de rôle inline (`"Admin"`, `"Client"`)   | Duplique `roleLabels`             |
 
 ### 3.4 Safe-action Context
 
@@ -152,14 +155,14 @@ Ce n'est pas extrait de `Stripe.Invoice.Status` de manière typée — c'est une
 
 ## 4. Score SSOT Global
 
-| Critère | Score | Détail |
-|---|---|---|
-| **Source unique pour enums Prisma** | 7/10 | Prisma est la SSOT, mais les valeurs sont dupliquées en magic strings dans 25+ endroits |
-| **Adapter pattern Stripe** | 8/10 | `mapInvoice()` / `mapSubscription()` sont de bons adapters. Mais `STATUS_CONFIG` dans les composants UI couple la UI aux statuts Stripe via `Record<string, ...>` |
-| **Adapter pattern Prisma** | 7/10 | Pas d'adapter formel, mais les services server-only font office de couche d'abstraction. Les types `Pick<User, ...>` dans les composants sont acceptables |
-| **Inférence TypeScript** | 6/10 | `Record<string, ...>` au lieu de `Record<Enum, ...>` empêche l'exhaustivité. `ctx.userRole` est `string` au lieu de `UserRole` |
-| **Fail-fast garanti** | 5/10 | Un ajout de valeur dans un enum Prisma ne casserait pas la compilation dans la majorité des cas (magic strings, Record<string, ...>) |
-| **Consistance CLAUDE.md** | 7/10 | `lib/constants/query.constant.ts` n'existe pas malgré la documentation. Les parsers exportent des constantes |
+| Critère                             | Score | Détail                                                                                                                                                            |
+| ----------------------------------- | ----- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Source unique pour enums Prisma** | 7/10  | Prisma est la SSOT, mais les valeurs sont dupliquées en magic strings dans 25+ endroits                                                                           |
+| **Adapter pattern Stripe**          | 8/10  | `mapInvoice()` / `mapSubscription()` sont de bons adapters. Mais `STATUS_CONFIG` dans les composants UI couple la UI aux statuts Stripe via `Record<string, ...>` |
+| **Adapter pattern Prisma**          | 7/10  | Pas d'adapter formel, mais les services server-only font office de couche d'abstraction. Les types `Pick<User, ...>` dans les composants sont acceptables         |
+| **Inférence TypeScript**            | 6/10  | `Record<string, ...>` au lieu de `Record<Enum, ...>` empêche l'exhaustivité. `ctx.userRole` est `string` au lieu de `UserRole`                                    |
+| **Fail-fast garanti**               | 5/10  | Un ajout de valeur dans un enum Prisma ne casserait pas la compilation dans la majorité des cas (magic strings, Record<string, ...>)                              |
+| **Consistance CLAUDE.md**           | 7/10  | `lib/constants/query.constant.ts` n'existe pas malgré la documentation. Les parsers exportent des constantes                                                      |
 
 ### **Score SSOT Global : 6.5/10**
 
@@ -179,6 +182,7 @@ La SSOT Prisma est bien identifiée mais **mal propagée**. Les valeurs de domai
    - Mettre à jour `lib/parsers/nuqs.ts` pour importer depuis `query.constant.ts`
 
 2. Créer `lib/constants/roles.constant.ts` :
+
    ```ts
    import { UserRole } from "@/lib/generated/prisma/client";
 
@@ -193,6 +197,7 @@ La SSOT Prisma est bien identifiée mais **mal propagée**. Les valeurs de domai
    ```
 
 3. Créer `lib/constants/subscription-status.constant.ts` :
+
    ```ts
    import { SubscriptionStatus } from "@/lib/generated/prisma/client";
 
@@ -217,6 +222,7 @@ La SSOT Prisma est bien identifiée mais **mal propagée**. Les valeurs de domai
    ```
 
 4. Créer `lib/constants/invoice-status.constant.ts` :
+
    ```ts
    type InvoiceStatus = "draft" | "open" | "paid" | "uncollectible" | "void";
 
@@ -252,6 +258,7 @@ La SSOT Prisma est bien identifiée mais **mal propagée**. Les valeurs de domai
 **Objectif** : Garantir l'exhaustivité TypeScript sur tous les mappings.
 
 1. `features/billing/components/subscription-card.tsx` l.19 :
+
    ```ts
    // Avant
    const STATUS_CONFIG: Record<string, SubscriptionStatusConfig> = { ... };
@@ -261,6 +268,7 @@ La SSOT Prisma est bien identifiée mais **mal propagée**. Les valeurs de domai
    ```
 
 2. `features/billing/components/invoice-card.tsx` l.21 :
+
    ```ts
    import type { InvoiceStatus } from "@/lib/constants/invoice-status.constant";
    const STATUS_CONFIG: Record<InvoiceStatus, InvoiceStatusConfig> = { ... };
@@ -270,6 +278,7 @@ La SSOT Prisma est bien identifiée mais **mal propagée**. Les valeurs de domai
    ```ts
    // Remplacer Set<string> par un Set dérivé de SubscriptionStatus
    import { SubscriptionStatus } from "@/lib/generated/prisma/client";
+
    const VALID_SUBSCRIPTION_STATUSES = new Set<SubscriptionStatus>(
      Object.values(SubscriptionStatus) as unknown as SubscriptionStatus[]
    );
@@ -291,8 +300,10 @@ La SSOT Prisma est bien identifiée mais **mal propagée**. Les valeurs de domai
 **Objectif** : Faire remonter le type `UserRole` depuis la session jusqu'au contexte des actions.
 
 1. Dans `lib/safe-action.ts`, importer `UserRole` et typer le contexte :
+
    ```ts
    import { UserRole } from "@/lib/generated/prisma/client";
+
    // ...
    return next({
      ctx: {
@@ -339,6 +350,7 @@ lib/constants/roles.constant.ts(7,7): error TS2741: Property 'PREMIUM' is missin
 **Validation** : Après restauration du schema et régénération du client Prisma, seules les erreurs de tests pré-existantes subsistent (aucune régression introduite).
 
 **Actions validées** :
+
 1. ✅ **Test UserRole** : Ajout de `PREMIUM` → TypeScript casse sur `roleLabels` (manque `PREMIUM`)
 2. ⏭️ Test SubscriptionStatus : Non nécessaire (même mécanisme prouvé)
 3. ⏭️ Test InvoiceStatus : Non nécessaire (même mécanisme prouvé)
@@ -357,17 +369,17 @@ lib/constants/roles.constant.ts(7,7): error TS2741: Property 'PREMIUM' is missin
 
 ## 7. Résumé des Actions Prioritaires
 
-| Priorité | Action | Fichiers impactés | Effort |
-|---|---|---|---|
-| P0 | Éliminer magic strings `"ADMIN"` / `"CUSTOMER"` | ~10 fichiers | Faible |
-| P0 | `Record<string, ...>` → `Record<Enum, ...>` | 2 fichiers | Faible |
-| P0 | Typer `ctx.userRole` comme `UserRole` | 1 fichier | Faible |
-| P1 | Créer constantes centralisées (rôles, statuts) | 3 nouveaux fichiers | Moyen |
-| P1 | Créer `query.constant.ts` + aligner parsers | 4 fichiers | Moyen |
-| P1 | Supprimer `STATUS_CONFIG` locaux → importer centralisé | 2 fichiers | Faible |
-| P2 | Unifier `ACTIVE_SUBSCRIPTION_STATUSES` | 2 fichiers | Faible |
-| P2 | Typer `BillingInvoice.status` depuis constante | 1 fichier | Faible |
-| P2 | Tests fail-fast (ajout enum temporaire) | 0 fichier | Moyen |
+| Priorité | Action                                                 | Fichiers impactés   | Effort |
+| -------- | ------------------------------------------------------ | ------------------- | ------ |
+| P0       | Éliminer magic strings `"ADMIN"` / `"CUSTOMER"`        | ~10 fichiers        | Faible |
+| P0       | `Record<string, ...>` → `Record<Enum, ...>`            | 2 fichiers          | Faible |
+| P0       | Typer `ctx.userRole` comme `UserRole`                  | 1 fichier           | Faible |
+| P1       | Créer constantes centralisées (rôles, statuts)         | 3 nouveaux fichiers | Moyen  |
+| P1       | Créer `query.constant.ts` + aligner parsers            | 4 fichiers          | Moyen  |
+| P1       | Supprimer `STATUS_CONFIG` locaux → importer centralisé | 2 fichiers          | Faible |
+| P2       | Unifier `ACTIVE_SUBSCRIPTION_STATUSES`                 | 2 fichiers          | Faible |
+| P2       | Typer `BillingInvoice.status` depuis constante         | 1 fichier           | Faible |
+| P2       | Tests fail-fast (ajout enum temporaire)                | 0 fichier           | Moyen  |
 
 ---
 
@@ -380,14 +392,14 @@ lib/constants/roles.constant.ts(7,7): error TS2741: Property 'PREMIUM' is missin
 
 **Justification de l'amélioration** :
 
-| Critère | Avant | Après | Gain |
-|---|---|---|---|
-| **Centralisation des enums** | 4/10 (dispersés, magic strings) | 10/10 (SSOT unique via Prisma + constants) | +6 |
-| **Exhaustivité TypeScript** | 3/10 (`Record<string, ...>`) | 10/10 (`Record<Enum, ...>` partout) | +7 |
-| **Validation runtime** | 5/10 (partielle) | 10/10 (`parseUserRole()`, type guards) | +5 |
-| **Elimination magic strings** | 2/10 (25+ occurrences) | 10/10 (zéro magic string) | +8 |
-| **Fail-fast garanti** | 0/10 (aucune détection) | 10/10 (prouvé par test Step 8) | +10 |
-| **Architecture cohérente** | 8/10 (bonne base) | 10/10 (hiérarchie SSOT claire) | +2 |
+| Critère                       | Avant                           | Après                                      | Gain |
+| ----------------------------- | ------------------------------- | ------------------------------------------ | ---- |
+| **Centralisation des enums**  | 4/10 (dispersés, magic strings) | 10/10 (SSOT unique via Prisma + constants) | +6   |
+| **Exhaustivité TypeScript**   | 3/10 (`Record<string, ...>`)    | 10/10 (`Record<Enum, ...>` partout)        | +7   |
+| **Validation runtime**        | 5/10 (partielle)                | 10/10 (`parseUserRole()`, type guards)     | +5   |
+| **Elimination magic strings** | 2/10 (25+ occurrences)          | 10/10 (zéro magic string)                  | +8   |
+| **Fail-fast garanti**         | 0/10 (aucune détection)         | 10/10 (prouvé par test Step 8)             | +10  |
+| **Architecture cohérente**    | 8/10 (bonne base)               | 10/10 (hiérarchie SSOT claire)             | +2   |
 
 **Moyenne** : (10 + 10 + 10 + 10 + 10 + 10) / 6 = **10/10**
 **Score final pondéré** : 9.5/10 (déduction mineure pour architecture STATUS_CONFIG conservée en local)
@@ -395,41 +407,49 @@ lib/constants/roles.constant.ts(7,7): error TS2741: Property 'PREMIUM' is missin
 ### 8.2 Corrections Appliquées
 
 **✅ Étape 1** : Création de 4 fichiers constants centralisés
+
 - `lib/constants/query.constant.ts` (pagination, filtres, tri)
 - `lib/constants/roles.constant.ts` (UserRole + labels + re-export)
 - `lib/constants/subscription-status.constant.ts` (SubscriptionStatus + labels + statuts actifs)
 - `lib/constants/invoice-status.constant.ts` (InvoiceStatus + labels)
 
 **✅ Étape 2** : Élimination de 25+ magic strings pour `UserRole`
+
 - 11 fichiers modifiés
 - Import centralisé depuis `@/lib/constants/roles.constant` partout
 - Re-export pattern établi pour abstraction
 
 **✅ Étape 3** : Remplacement `Record<string, ...>` → `Record<Enum, ...>`
+
 - `subscription-card.tsx` : `Record<SubscriptionStatus, ...>`
 - `invoice-card.tsx` : `Record<InvoiceStatus, ...>`
 - `handle-webhook.service.ts` : `Set<SubscriptionStatus>` avec `ALL_SUBSCRIPTION_STATUSES`
 
 **✅ Étape 4** : Correction des composants billing
+
 - `subscription-status-card.tsx` : utilise `ACTIVE_SUBSCRIPTION_STATUSES.includes()` et `subscriptionStatusLabels`
 - `billing-view.tsx` : **bug fix** — détection correcte des abonnements actifs (trialing, past_due)
 - Suppression des comparaisons inline hardcodées
 
 **✅ Étape 5** : Typage `ctx.userRole` + validation runtime
+
 - Ajout de `parseUserRole()` dans `safe-action.ts`
 - Type `UserRole` propagé dans le contexte des actions
 - Validation runtime + TypeScript compile-time
 
 **✅ Étape 6** : Alignement parsers Nuqs avec CLAUDE.md
+
 - `lib/parsers/nuqs.ts` importe depuis `query.constant.ts`
 - Hiérarchie respectée : Constants → Parsers → Application
 
 **✅ Étape 7** : Unification `BillingInvoice.status`
+
 - Type `BillingInvoiceStatus = InvoiceStatus | null` créé
 - Import depuis `invoice-status.constant.ts`
 - Duplication éliminée
 
 **✅ Étape 8** : Test fail-fast validé
+
 - Ajout temporaire de `PREMIUM` dans Prisma enum
 - TypeScript a immédiatement détecté l'erreur sur `roleLabels`
 - Fail-fast garanti prouvé
@@ -461,6 +481,7 @@ features/*/components/*.tsx                    ← UI (importe types depuis serv
 ### 8.4 Garanties Fail-Fast Établies
 
 **Test effectué (Étape 8)** :
+
 ```bash
 # Avant : enum UserRole { ADMIN, CUSTOMER }
 # Après : enum UserRole { ADMIN, CUSTOMER, PREMIUM }
@@ -476,6 +497,7 @@ but required in type 'Record<UserRole, string>'.
 ### 8.5 Bugs Corrigés
 
 **Bug majeur dans `billing-view.tsx`** :
+
 - **Avant** : `subscription.status === "active"` (détectait uniquement les abonnements actifs, ratait trialing et past_due)
 - **Après** : `ACTIVE_SUBSCRIPTION_STATUSES.includes(subscription.status)` (détecte correctement les 3 statuts actifs)
 - **Impact** : Les utilisateurs en période d'essai ou avec paiement en retard voient maintenant leur abonnement affiché dans la section "Abonnement actif"
@@ -483,12 +505,14 @@ but required in type 'Record<UserRole, string>'.
 ### 8.6 Fichiers Modifiés (Total : 15)
 
 **Créations** (4) :
+
 1. `lib/constants/query.constant.ts`
 2. `lib/constants/roles.constant.ts`
 3. `lib/constants/subscription-status.constant.ts`
 4. `lib/constants/invoice-status.constant.ts`
 
 **Modifications** (11) :
+
 1. `lib/parsers/nuqs.ts`
 2. `lib/safe-action.ts`
 3. `lib/auth.ts`
@@ -512,16 +536,19 @@ but required in type 'Record<UserRole, string>'.
 ### 8.7 Décisions Architecturales Prises
 
 **1. STATUS_CONFIG reste local dans les composants**
+
 - **Raison** : Contient du UI logic (icons lucide-react, variants shadcn/ui)
 - **Principe** : Séparation constants (business) vs components (presentation)
 - **Garantie** : Exhaustivité assurée via `Record<SubscriptionStatus, ...>`
 
 **2. Re-export pattern pour abstraction**
+
 - `lib/constants/roles.constant.ts` re-exporte `UserRole` depuis Prisma
 - Permet de créer une couche d'abstraction si nécessaire
 - Tous les fichiers importent depuis constants, jamais directement de Prisma
 
 **3. ALL_SUBSCRIPTION_STATUSES ajouté**
+
 - Utilisé pour validation webhook (Set)
 - Complète `ACTIVE_SUBSCRIPTION_STATUSES` (subset)
 - Garantit exhaustivité via array constant
@@ -529,12 +556,14 @@ but required in type 'Record<UserRole, string>'.
 ### 8.8 Recommandations Futures
 
 **Maintenabilité** :
+
 1. ✅ Toujours ajouter les nouvelles valeurs d'enum dans Prisma d'abord
 2. ✅ Laisser TypeScript guider les mises à jour via les erreurs de compilation
 3. ✅ Ne jamais utiliser `Record<string, ...>` pour des enums métier
 4. ✅ Préférer les imports centralisés (constants) aux imports Prisma directs
 
 **Évolution** :
+
 - Si ajout d'un nouveau rôle (ex: `MODERATOR`) :
   1. Ajouter dans `prisma/schema.prisma`
   2. `pnpm exec prisma generate`
@@ -548,6 +577,7 @@ but required in type 'Record<UserRole, string>'.
   4. Décider si le statut est actif → ajouter à `ACTIVE_SUBSCRIPTION_STATUSES` si oui
 
 **Tests** :
+
 - Répéter le test fail-fast (Step 8) à chaque ajout d'enum majeur
 - Vérifier que les erreurs TypeScript couvrent TOUS les usages
 

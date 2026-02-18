@@ -135,7 +135,9 @@ function BillingView({ billing }: BillingViewProps) {
                 {subscriptions
                   .filter(
                     (subscription: BillingSubscription) =>
-                      !ACTIVE_SUBSCRIPTION_STATUSES.includes(subscription.status)
+                      !ACTIVE_SUBSCRIPTION_STATUSES.includes(
+                        subscription.status
+                      )
                   )
                   .map((subscription: BillingSubscription) => (
                     <SubscriptionCard

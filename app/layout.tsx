@@ -4,12 +4,12 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { headers } from "next/headers";
 
+import { CookieBanner } from "@/features/cookie-consent/components/cookie-banner";
 import { ThemeProvider } from "next-themes";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 
 import { env } from "@/lib/env";
 
-import { CookieBanner } from "@/features/cookie-consent/components/cookie-banner";
 import { Toaster } from "@/components/ui/sonner";
 
 import "./globals.css";

@@ -1,137 +1,90 @@
-# Page Creation Rules
+# Page & Loading Page Rules
 
 ## Context
 
-These rules apply exclusively to creating new `page.tsx` files in the Next.js App Router structure.
+Rules for `page.tsx` and `loading.tsx` files in Next.js App Router.
 
-## Rules
+## Page Rules
 
-### 1. Function Naming (P0)
+### Naming (P0)
 
-- The exported function name MUST use English semantic names in PascalCase + `Page`
-- For French URL paths, use the English equivalent for the function name
-- Protected pages MUST include their section prefix (`Dashboard`, `Admin`)
-- Examples:
-  - `app/(public)/blog/page.tsx` → `BlogPage`
-  - `app/(public)/tarifs/page.tsx` → `PricingPage`
-  - `app/(public)/(auth)/connexion/page.tsx` → `SignInPage`
-  - `app/(public)/(auth)/inscription/page.tsx` → `SignUpPage`
-  - `app/(public)/(auth)/mot-de-passe-oublie/page.tsx` → `ForgotPasswordPage`
-  - `app/(public)/(legal)/mentions-legales/page.tsx` → `LegalNoticePage`
-  - `app/(protected)/dashboard/page.tsx` → `DashboardPage`
-  - `app/(protected)/dashboard/parametres/page.tsx` → `DashboardSettingsPage`
-  - `app/(protected)/dashboard/facturation/page.tsx` → `DashboardBillingPage`
-  - `app/(protected)/dashboard/projets/page.tsx` → `DashboardProjectsPage`
-  - `app/(protected)/admin/utilisateurs/page.tsx` → `AdminUsersPage`
+Function: `{Path}Page` (English PascalCase + `Page`)
 
-### 2. Page Structure (P0)
+For French URLs, use English equivalent:
 
-- The top-level returned element MUST be a `<main>` tag
-- Pages MUST be responsive for three screen types: desktop, tablet, mobile
-- Use semantic HTML, proper heading hierarchy (`h1` → `h2` → `h3`), and `aria-*` attributes for accessibility
+- `app/(public)/tarifs/page.tsx` → `PricingPage`
+- `app/(public)/(auth)/connexion/page.tsx` → `SignInPage`
+- `app/(protected)/dashboard/parametres/page.tsx` → `DashboardSettingsPage`
+- `app/(protected)/admin/utilisateurs/page.tsx` → `AdminUsersPage`
 
-### 3. Type Imports (P0)
+### Structure (P0)
 
-- ALWAYS combine imports from the same module (never separate them)
-- Use `import type {}` when importing ONLY types
-- Use inline `type` keyword when mixing types and values
-- NEVER have multiple import statements from the same module
+- Top-level element: `<main>`
+- Responsive: desktop, tablet, mobile
+- Semantic HTML: `h1` → `h2` → `h3`, `aria-*` attributes
+- Import types: combine from same module (`import { value, type Type } from "module"`)
 
-```tsx
-// ✅ Correct: Type-only imports
-import type { Metadata } from "next";
-import type { WebSite, WithContext } from "schema-dts";
+### Metadata (P1)
 
-// ✅ Correct: Mixed imports (if importing values too)
-import { cookies, type Metadata } from "next";
-
-// ❌ Wrong: Separate imports from the same module
-import type { Metadata } from "next";
-import { cookies } from "next";  // Should be combined above
-
-// ❌ Wrong: Not using inline `type` keyword
-import { Metadata, cookies } from "next";  // Metadata should have `type` prefix
-```
-
-### 4. Metadata Configuration (P1)
-
-#### Public Pages (`app/(public)/**/page.tsx`)
-
-Define ALL fields:
+**Public pages** — ALL fields:
 
 ```tsx
 export const metadata: Metadata = {
   title: `${APP_NAME} - [Tagline]`,
   description: DESCRIPTION,
   keywords: [APP_NAME.toLowerCase(), "keyword-1", "keyword-2"],
-  alternates: {
-    canonical: "/path",
-  },
-  openGraph: {
-    title: `${APP_NAME} - [Tagline]`,
-    description: DESCRIPTION,
-    url: "/path",
-  },
-  twitter: {
-    title: `${APP_NAME} - [Tagline]`,
-    description: DESCRIPTION,
-  },
+  alternates: { canonical: "/path" },
+  openGraph: { title: "...", description: "...", url: "/path" },
+  twitter: { title: "...", description: "..." },
 };
 ```
 
-#### Protected Pages (`app/(protected)/**/page.tsx`)
-
-Define ONLY `title` and `robots`:
+**Protected pages** — ONLY `title` + `robots`:
 
 ```tsx
 export const metadata: Metadata = {
   title: "Page Title",
-  robots: {
-    index: false,
-    follow: false,
-  },
+  robots: { index: false, follow: false },
 };
 ```
 
-### 5. Structured Data / JSON-LD (P1)
+### Structured Data (P1)
 
-#### Public Pages
-
-- MUST include `<script type="application/ld+json">` with schema.org data
-- Choose schema type based on content: `WebSite`, `WebPage`, `Article`, `Product`, `Organization`, etc.
-
-#### Protected Pages
-
-- MUST NOT include any structured data
-
-### 6. Authentication Guards (P0)
-
-#### Dashboard Pages (`app/(protected)/dashboard/**/page.tsx`)
+**Public pages** — MUST include JSON-LD:
 
 ```tsx
-import { requireSession } from "@/lib/session";
+const pageSchema: WithContext<WebPage> = {
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": `${BASE_URL}/path/#webpage`,
+  name: "Page Title",
+  url: `${BASE_URL}/path`,
+  description: DESCRIPTION,
+  inLanguage: "fr-FR",
+};
 
-export default async function DashboardExamplePage() {
-  await requireSession();
-  // ...
-}
+return (
+  <>
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(pageSchema) }}
+    />
+    <main>{/* content */}</main>
+  </>
+);
 ```
 
-#### Admin Pages (`app/(protected)/admin/**/page.tsx`)
+**Protected pages** — MUST NOT include structured data.
 
-```tsx
-import { requireAdmin } from "@/lib/session";
+### Auth Guards (P0)
 
-export default async function AdminExamplePage() {
-  await requireAdmin();
-  // ...
-}
-```
+Dashboard: `await requireSession()`
 
-### 7. Environment Variables (P2)
+Admin: `await requireAdmin()`
 
-- Use `env` from `@/lib/env` for `APP_NAME` and `BASE_URL`
-- NEVER hardcode these values
+### Environment Variables (P2)
+
+Use `env` from `@/lib/env`:
 
 ```tsx
 import { env } from "@/lib/env";
@@ -140,11 +93,9 @@ const APP_NAME = env.NEXT_PUBLIC_APP_NAME;
 const BASE_URL = env.NEXT_PUBLIC_BASE_URL;
 ```
 
-## Examples
+### Examples
 
-### Public Page
-
-`app/(public)/pricing/page.tsx`:
+**Public Page**:
 
 ```tsx
 import type { Metadata } from "next";
@@ -155,57 +106,38 @@ import { env } from "@/lib/env";
 
 const APP_NAME = env.NEXT_PUBLIC_APP_NAME;
 const BASE_URL = env.NEXT_PUBLIC_BASE_URL;
-const DESCRIPTION = "Découvrez nos offres et tarifs adaptés à vos besoins.";
+const DESCRIPTION = "...";
 
 export const metadata: Metadata = {
   title: `Tarifs - ${APP_NAME}`,
   description: DESCRIPTION,
-  keywords: [APP_NAME.toLowerCase(), "pricing", "tarifs", "offres"],
-  alternates: {
-    canonical: "/pricing",
-  },
+  keywords: [APP_NAME.toLowerCase(), "pricing", "tarifs"],
+  alternates: { canonical: "/pricing" },
   openGraph: {
     title: `Tarifs - ${APP_NAME}`,
     description: DESCRIPTION,
     url: "/pricing",
   },
-  twitter: {
-    title: `Tarifs - ${APP_NAME}`,
-    description: DESCRIPTION,
-  },
+  twitter: { title: `Tarifs - ${APP_NAME}`, description: DESCRIPTION },
 };
 
 export default function PricingPage() {
   const pageSchema: WithContext<WebPage> = {
-    "@context": "https://schema.org",
-    "@type": "WebPage",
-    "@id": `${BASE_URL}/pricing/#webpage`,
-    name: `Tarifs - ${APP_NAME}`,
-    url: `${BASE_URL}/pricing`,
-    description: DESCRIPTION,
-    inLanguage: "fr-FR",
+    /* ... */
   };
-
   return (
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(pageSchema),
-        }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(pageSchema) }}
       />
-
-      <main className="flex min-h-screen flex-col items-center">
-        {/* Page content */}
-      </main>
+      <main>{/* content */}</main>
     </>
   );
 }
 ```
 
-### Dashboard Page
-
-`app/(protected)/dashboard/settings/page.tsx`:
+**Protected Page**:
 
 ```tsx
 import type { Metadata } from "next";
@@ -214,80 +146,122 @@ import { requireSession } from "@/lib/session";
 
 export const metadata: Metadata = {
   title: "Paramètres",
-  robots: {
-    index: false,
-    follow: false,
-  },
+  robots: { index: false, follow: false },
 };
 
 export default async function DashboardSettingsPage() {
   await requireSession();
-
-  return (
-    <main className="flex min-h-screen flex-col">{/* Page content */}</main>
-  );
+  return <main>{/* content */}</main>;
 }
 ```
 
-### Admin Page
+## Loading Page Rules
 
-`app/(protected)/admin/users/page.tsx`:
+### Naming (P0)
+
+Function: `{Path}Loading` (English PascalCase + `Loading`)
+
+Examples:
+
+- `app/(public)/blog/loading.tsx` → `BlogLoading`
+- `app/(protected)/dashboard/parametres/loading.tsx` → `DashboardSettingsLoading`
+- `app/(protected)/admin/utilisateurs/loading.tsx` → `AdminUsersLoading`
+
+### Structure (P0)
+
+- Top-level element: `<main>` with `aria-busy="true"` + `aria-label="Chargement..."`
+- Use `Skeleton` from `@/components/ui/skeleton`
+- Mirror the layout structure of corresponding `page.tsx`
 
 ```tsx
-import type { Metadata } from "next";
+import { Skeleton } from "@/components/ui/skeleton";
 
-import { requireAdmin } from "@/lib/session";
-
-export const metadata: Metadata = {
-  title: "Gestion des utilisateurs",
-  robots: {
-    index: false,
-    follow: false,
-  },
-};
-
-export default async function AdminUsersPage() {
-  await requireAdmin();
-
+export default function ExampleLoading() {
   return (
-    <main className="flex min-h-screen flex-col">{/* Page content */}</main>
+    <main
+      aria-busy="true"
+      aria-label="Chargement..."
+      className="container mx-auto px-4 py-8"
+    >
+      {Array.from({ length: 6 }).map((_, index: number) => (
+        <Skeleton key={index} className="h-32 w-full" />
+      ))}
+    </main>
   );
 }
 ```
+
+### Rules (P0)
+
+- NO data fetching
+- NO async/await
+- NO server-only imports
+- NO metadata export
+- MUST mirror page layout with Skeleton components
 
 ## Anti-Patterns
 
 ```tsx
-// ❌ Wrong: Missing `type` keyword
+// ❌ Pages
+
+// Wrong: Missing `type` keyword
 import { Metadata } from "next";
 
-// ❌ Wrong: Function name doesn't match path
+// Wrong: Generic function name
 export default function Page() { ... }
 
-// ❌ Wrong: Top-level element is not <main>
+// Wrong: Top-level element not <main>
 export default function BlogPage() {
   return <div>...</div>;
 }
 
-// ❌ Wrong: Protected page with full metadata
+// Wrong: Protected page with full metadata
 export const metadata: Metadata = {
   title: "Dashboard",
-  description: "User dashboard", // ❌ Not allowed
-  keywords: ["dashboard"],       // ❌ Not allowed
+  description: "...", // ❌
+  keywords: ["..."],  // ❌
 };
 
-// ❌ Wrong: Protected page with JSON-LD
+// Wrong: Protected page with JSON-LD
 export default async function DashboardPage() {
   return (
     <>
-      <script type="application/ld+json">...</script> {/* ❌ Not allowed */}
+      <script type="application/ld+json">...</script> {/* ❌ */}
       <main>...</main>
     </>
   );
 }
 
-// ❌ Wrong: Admin page using requireSession instead of requireAdmin
+// Wrong: Admin page using requireSession
 export default async function AdminUsersPage() {
   await requireSession(); // ❌ Should be requireAdmin()
+}
+
+// ❌ Loading
+
+// Wrong: Async function
+export default async function DashboardLoading() {
+  return <main>...</main>;
+}
+
+// Wrong: Missing accessibility
+export default function BlogLoading() {
+  return <main>{/* ❌ No aria-busy/aria-label */}</main>;
+}
+
+// Wrong: Not using Shadcn/ui Skeleton
+export default function BlogLoading() {
+  return (
+    <main>
+      <div className="h-4 w-32 animate-pulse bg-gray-200" /> {/* ❌ */}
+    </main>
+  );
+}
+
+// Wrong: Exporting metadata
+export const metadata = { title: "Loading..." }; // ❌
+
+export default function DashboardLoading() {
+  return <main>...</main>;
 }
 ```

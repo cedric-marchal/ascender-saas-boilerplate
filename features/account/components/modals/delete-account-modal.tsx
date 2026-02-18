@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import { useRouter } from "next/navigation";
 
+import { DeleteAccountForm } from "@/features/account/components/forms/delete-account-form";
 import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog";
 import { Trash2, X } from "lucide-react";
 
@@ -16,8 +17,6 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-
-import { DeleteAccountForm } from "@/features/account/components/forms/delete-account-form";
 
 type DeleteAccountModalProps = {
   email: string;
@@ -50,7 +49,7 @@ function DeleteAccountModal({
             type="button"
             variant="ghost"
             size="icon"
-            className="absolute top-4 right-4 h-6 w-6 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none"
+            className="ring-offset-background focus:ring-ring absolute top-4 right-4 h-6 w-6 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-none disabled:pointer-events-none"
             aria-label="Fermer"
           >
             <X className="h-4 w-4" aria-hidden="true" />

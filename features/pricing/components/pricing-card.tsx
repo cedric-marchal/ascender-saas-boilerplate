@@ -1,3 +1,8 @@
+import { PricingCheckoutButton } from "@/features/pricing/components/pricing-checkout-button";
+import { PricingContactButton } from "@/features/pricing/components/pricing-contact-button";
+import { PricingFreeButton } from "@/features/pricing/components/pricing-free-button";
+import { type Plan } from "@/features/pricing/constants/pricing-plans";
+
 import {
   Card,
   CardContent,
@@ -5,11 +10,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-
-import { PricingCheckoutButton } from "@/features/pricing/components/pricing-checkout-button";
-import { PricingContactButton } from "@/features/pricing/components/pricing-contact-button";
-import { PricingFreeButton } from "@/features/pricing/components/pricing-free-button";
-import { type Plan } from "@/features/pricing/constants/pricing-plans";
 
 type PricingCardProps = {
   plan: Plan;

@@ -1,5 +1,7 @@
 import "server-only";
 
+import { AccountDeletedEmail } from "@/features/account/emails/account-deleted-email";
+
 import { UserRole } from "@/lib/constants/roles.constant";
 import { env } from "@/lib/env";
 import { prisma } from "@/lib/prisma";
@@ -7,8 +9,6 @@ import { deleteFile } from "@/lib/r2";
 import { redis } from "@/lib/redis";
 import { sendEmail } from "@/lib/resend";
 import { stripe } from "@/lib/stripe";
-
-import { AccountDeletedEmail } from "@/features/account/emails/account-deleted-email";
 
 import { BadRequestError, ForbiddenError } from "@/utils/errors/errors";
 

@@ -2,11 +2,11 @@ import "server-only";
 
 import { headers } from "next/headers";
 
+import { PasswordChangedEmail } from "@/features/auth/emails/password-changed-email";
+
 import { auth } from "@/lib/auth";
 import { env } from "@/lib/env";
 import { sendEmail } from "@/lib/resend";
-
-import { PasswordChangedEmail } from "@/features/auth/emails/password-changed-email";
 
 type UpdatePasswordInput = {
   currentPassword: string;

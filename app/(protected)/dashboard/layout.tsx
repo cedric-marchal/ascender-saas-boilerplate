@@ -2,9 +2,8 @@ import type { ReactNode } from "react";
 
 import { requireSession } from "@/lib/session";
 
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-
 import { DashboardSidebar } from "@/components/protected/dashboard/dashboard-sidebar";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 
 type ProtectedLayoutProps = {
   children: ReactNode;

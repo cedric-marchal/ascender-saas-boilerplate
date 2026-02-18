@@ -1,668 +1,389 @@
-# CLAUDE.md - Ascender SaaS Boilerplate Guidelines
+# Ascender SaaS Boilerplate — Claude Rules
 
-## Project Overview
+## Overview
 
-This is a SaaS boilerplate built with Next.js 16 (App Router), TypeScript, Tailwind CSS, and Shadcn/ui, PNPM. The project follows strict conventions for consistency, maintainability, security, and SEO.
+SaaS boilerplate: Next.js 16 (App Router) + TypeScript + Tailwind CSS + Shadcn/ui + pnpm.
 
-Prefer Unix commands (ls, tree, rg, sed, head/tail, typecheck) as the primary source of truth.
-Use them first to map structure, locate relevant code, and read only minimal excerpts.
+**Goal**: Maximize signal, minimize tokens. Prefer Unix commands (`ls`, `rg`, `find`) as primary source of truth.
 
-Document search is a secondary tool, used only when commands are unavailable or for high-level conceptual context.
+## Stack
 
-Goal: maximize signal, minimize tokens, avoid unnecessary code dumps.
+| Layer       | Tech                         |
+| ----------- | ---------------------------- |
+| Framework   | Next.js 16 (App Router)      |
+| Language    | TypeScript (strict)          |
+| Styling     | Tailwind CSS 4 + Shadcn/ui   |
+| DB          | Prisma 7 + Neon (PostgreSQL) |
+| Auth        | Better Auth                  |
+| Payments    | Stripe                       |
+| URL State   | Nuqs                         |
+| Validation  | Zod 4                        |
+| Forms       | TanStack Form                |
+| Tables      | TanStack Table               |
+| Actions     | next-safe-action             |
+| Emails      | React Email + Resend         |
+| HTTP Client | up-fetch                     |
+| Rate Limit  | Upstash Redis + Ratelimit    |
+| Monitoring  | Sentry                       |
+| Tests       | Vitest                       |
 
-## Tech Stack
+## Architecture: Feature-Based (P0)
 
-- **Framework**: Next.js 16 (App Router)
-- **Language**: TypeScript (strict mode)
-- **Styling**: Tailwind CSS + Shadcn/ui
-- **Database**: Prisma ORM + Neon (PostgreSQL)
-- **Authentication**: Better Auth
-- **Payments**: Stripe (subscriptions)
-- **URL State**: Nuqs
-- **Validation**: Zod
-- **Emails**: Resend + React Email
-- **Environment**: T3 Env
-- **Storage**: Cloudflare R2 + Sharp (image optimization)
-- **HTTP Client**: up-fetch (upfetch wrapper around native fetch)
-- **Deployment**: Vercel
+```
+app/                          # Routes only
+├── (public)/                 # Public pages
+├── (protected)/              # Dashboard + Admin
+│   ├── dashboard/
+│   └── admin/
+└── api/                      # API route handlers
+
+features/                     # ALL business logic
+├── {feature}/
+│   ├── actions/              # Server Actions (next-safe-action)
+│   ├── components/           # UI (forms/, modals/ subdirs)
+│   ├── constants/            # Domain-specific constants
+│   ├── emails/               # React Email templates
+│   ├── schemas/              # Zod validation
+│   └── services/             # Server-only logic ("server-only")
+
+lib/                          # Shared infrastructure
+├── constants/                # GLOBAL constants (roles, subscription-status, invoice-status, query)
+├── parsers/                  # Nuqs parsers
+├── generated/                # Prisma client
+├── auth.ts, prisma.ts, etc.  # Core configs
+
+components/                   # Shared UI
+├── ui/                       # Shadcn/ui
+├── public/                   # Header, footer
+├── protected/                # Sidebars
+└── pagination.tsx            # Generic pagination
+
+utils/                        # Pure utilities
+├── errors/                   # Error classes, handlers
+├── date/, ratelimit/, string/
+
+hooks/                        # Shared hooks
+```
 
 ## Source of Truth Hierarchy (P0)
 
-All data flows top-down. Changing one layer cascades to all downstream layers.
-
 ```
-Prisma Schema (UserRole, SubscriptionStatus enums)  ← Ultimate SSOT for domain enums
-        ↓
-lib/generated/prisma/client                         ← Auto-generated types
-        ↓
-lib/constants/*.constant.ts                         ← Business logic constants
-    ├── query.constant.ts                           → Pagination, filters, sorting limits
-    ├── roles.constant.ts                           → UserRole + roleLabels
-    ├── subscription-status.constant.ts             → SubscriptionStatus + labels + active statuses
-    └── invoice-status.constant.ts                  → InvoiceStatus + labels (Stripe-only, not in DB)
-        ↓
-lib/parsers/nuqs.ts                                 ← Universal reusable parsers
-        ↓
-lib/constants/{entity}-filters.constant.ts          ← Domain-specific filters (searchParams, type guards)
-        ↓
-lib/schemas/search/{entity}-filters.schema.ts       ← Zod validation (imports from constants)
-        ↓
-features/*/services/*.service.ts                    ← Server data fetching (defense-in-depth validation)
-        ↓
-features/*/components/*.tsx                         ← UI components (import from constants/services)
+Prisma Schema (UserRole, SubscriptionStatus enums)
+  ↓
+lib/generated/prisma/client
+  ↓
+lib/constants/*.constant.ts (GLOBAL: roles, subscription-status, invoice-status, query)
+  ↓
+lib/parsers/nuqs.ts
+  ↓
+features/{feature}/constants/ (DOMAIN: filters, searchParams)
+  ↓
+features/{feature}/schemas/ (Zod validation)
+  ↓
+features/{feature}/services/ (server data fetching, "server-only")
+  ↓
+features/{feature}/actions/ (server actions, "use server")
+  ↓
+features/{feature}/components/ (UI)
+  ↓
+app/*/page.tsx (pages import from features)
 ```
 
-**Key Principle**: NEVER import enums directly from Prisma. Always import from `lib/constants/*.constant.ts` for centralization and abstraction.
+**Key principle**: NEVER import enums from Prisma. Always from `lib/constants/*.constant.ts`.
 
-## Project Structure
+## Core Conventions
 
-```
-├── app/
-│   ├── (public)/                    # Public pages (SEO-indexed)
-│   │   ├── _components/             # Shared public components
-│   │   │   ├── modals/              # Shared public modals
-│   │   │   └── forms/               # Shared public forms
-│   │   └── [page]/
-│   │       ├── _components/         # Page-specific components
-│   │       │   ├── modals/          # Page-specific modals
-│   │       │   └── forms/           # Page-specific forms
-│   │       ├── page.tsx
-│   │       └── loading.tsx
-│   ├── (protected)/
-│   │   ├── _components/             # Shared protected components
-│   │   │   ├── modals/              # Shared protected modals
-│   │   │   └── forms/               # Shared protected forms
-│   │   ├── dashboard/
-│   │   │   ├── _components/
-│   │   │   │   ├── modals/
-│   │   │   │   └── forms/
-│   │   │   └── [page]/
-│   │   └── admin/
-│   │       ├── _components/
-│   │       │   ├── modals/
-│   │       │   └── forms/
-│   │       └── [page]/
-│   │           ├── _lib/            # Server-only data fetching
-│   │           └── _components/     # Page-specific components
-│   └── api/                         # API Routes
-├── components/
-│   ├── ui/                          # Shadcn/ui components (DataTable = dumb renderer)
-│   ├── pagination.tsx               # Generic pagination component
-│   └── emails/                      # Email templates
-├── lib/
-│   ├── constants/                   # SSOT for business logic constants
-│   │   ├── query.constant.ts        # Pagination, filter, sort limits (global)
-│   │   ├── roles.constant.ts        # UserRole enum + roleLabels (re-exported from Prisma)
-│   │   ├── subscription-status.constant.ts  # SubscriptionStatus + labels + ACTIVE_SUBSCRIPTION_STATUSES
-│   │   ├── invoice-status.constant.ts       # InvoiceStatus + labels (Stripe-only, not in DB)
-│   │   └── {entity}-filters.constant.ts     # Domain-specific filters (searchParams, type guards)
-│   ├── parsers/
-│   │   └── nuqs.ts                  # Universal reusable nuqs parsers (imports from constants)
-│   ├── schemas/                     # Zod schemas
-│   │   └── search/                  # Filter validation schemas (import from constants)
-│   ├── auth.ts
-│   ├── prisma.ts
-│   ├── env.ts
-│   └── utils.ts
-└── utils/
-    └── api/
-        └── handle-api-error.ts
-```
+| Rule              | Convention                                                                         |
+| ----------------- | ---------------------------------------------------------------------------------- |
+| **Imports**       | Absolute paths (`@/`), combine types+values, `import { value, type Type }`         |
+| **Exports**       | Named only (never default)                                                         |
+| **Naming**        | Full words (no abbreviations: `event` not `e`, `index` not `i`)                    |
+| **Components**    | Server by default, `"use client"` only for hooks/events/browser APIs               |
+| **Props**         | Inline if ≤2, separate `{Name}Props` type if >2, use `type` (never `interface`)    |
+| **Event types**   | `SubmitEvent<HTMLFormElement>`, `ChangeEvent<HTMLInputElement>`, etc.              |
+| **Callbacks**     | Always type params: `.map((item: Item) => ...)`, `.map((_, index: number) => ...)` |
+| **Buttons**       | `type="button"` (except submit), `aria-hidden="true"` on decorative icons          |
+| **Forms**         | TanStack Form + Zod + `useAction` + `getActionResult` + `getErrorMessage`          |
+| **Error pattern** | Components: early return. Async: throw (no multiple returns in try)                |
+| **Prisma**        | Always `select` + `take` on `findMany`, `$transaction` for parallel count+findMany |
+| **Strings**       | `.min().max().trim()` (always French error messages)                               |
+| **User messages** | French. Code: English.                                                             |
+| **File naming**   | kebab-case.tsx                                                                     |
 
-## Core Principles
+## Enum Usage (P0)
 
-1. **Zero-bug tolerance**: Code must be production-ready
-2. **Binary logic**: Either success or throw (no multiple returns in try blocks)
-3. **Early return pattern**: Handle edge cases first, then main logic
-4. **Type safety**: Explicit typing everywhere, no implicit any
-5. **Explicit naming**: Full words, no abbreviations
-6. **Server-first**: Server Components by default
-7. **SEO-friendly**: Proper metadata, JSON-LD, canonical URLs
-8. **Accessible**: ARIA attributes, semantic HTML
-9. **Responsive**: Desktop, tablet, mobile
-
-## Server-Only Protection (P0)
-
-Files containing functions or variables used exclusively server-side MUST be protected with `server-only` import at the top of the file.
+### UserRole
 
 ```tsx
-// ✅ Correct: Protect server-only files
-import "server-only";
+// ✅ Import from constants
+import { UserRole, roleLabels } from "@/lib/constants/roles.constant";
 
-import { prisma } from "@/lib/prisma";
-
-export async function getUsers() {
-  return prisma.user.findMany({
-    select: { id: true, name: true, email: true },
-  });
-}
-```
-
-Files that MUST use `server-only`:
-
-- Database query functions
-- Authentication helpers (e.g., `requireSession`, `requireAdmin`)
-- Server-side data fetching utilities
-- Any file with direct Prisma access outside of API routes
-
-## Enum & Constant Usage (P0)
-
-### SSOT Architecture for Domain Enums
-
-All domain enums (UserRole, SubscriptionStatus, InvoiceStatus) follow a strict SSOT hierarchy:
-
-```
-Prisma Schema → lib/generated/prisma/client → lib/constants/*.constant.ts → Application Code
-```
-
-**NEVER import enums directly from Prisma.** Always import from centralized constants.
-
-### UserRole Enum
-
-```tsx
-// ✅ CORRECT: Import from constants
-import { UserRole } from "@/lib/constants/roles.constant";
-
-// Usage in comparisons
 if (user.role === UserRole.ADMIN) { ... }
-if (user.role !== UserRole.CUSTOMER) { ... }
+const label = roleLabels[user.role];  // Exhaustive
 
-// Usage in labels
-import { roleLabels } from "@/lib/constants/roles.constant";
-const label = roleLabels[user.role];  // Type-safe, exhaustive
-
-// ❌ WRONG: Import from Prisma
+// ❌ NEVER from Prisma
 import { UserRole } from "@/lib/generated/prisma/client";
 
-// ❌ WRONG: Magic strings
-if (user.role === "ADMIN") { ... }  // No fail-fast if enum changes
+// ❌ NEVER magic strings
+if (user.role === "ADMIN") { ... }
 ```
 
-### SubscriptionStatus Enum
+### SubscriptionStatus
 
 ```tsx
-// ✅ CORRECT: Import from constants
+// ✅ Import from constants
 import {
   ACTIVE_SUBSCRIPTION_STATUSES,
   subscriptionStatusLabels,
   type SubscriptionStatus,
 } from "@/lib/constants/subscription-status.constant";
 
-// Check if subscription is active
 if (ACTIVE_SUBSCRIPTION_STATUSES.includes(subscription.status)) { ... }
+const label = subscriptionStatusLabels[subscription.status];
 
-// Get label
-const label = subscriptionStatusLabels[subscription.status];  // Exhaustive
-
-// ❌ WRONG: Hardcoded checks
+// ❌ NEVER hardcode
 if (subscription.status === "active" || subscription.status === "trialing") { ... }
 ```
 
-### InvoiceStatus Type
+### Exhaustive Records
 
 ```tsx
-// ✅ CORRECT: Import from constants
-import {
-  invoiceStatusLabels,
-  type InvoiceStatus,
-} from "@/lib/constants/invoice-status.constant";
-
-// Get label
-const label = invoiceStatusLabels[invoice.status];  // Exhaustive
-
-// ❌ WRONG: Inline type definition
-type InvoiceStatus = "draft" | "open" | "paid" | "uncollectible" | "void";
-```
-
-### Type-Safe Exhaustive Records
-
-ALWAYS use `Record<Enum, T>` instead of `Record<string, T>` for domain enums:
-
-```tsx
-// ✅ CORRECT: Exhaustive type checking
-import { type SubscriptionStatus } from "@/lib/constants/subscription-status.constant";
-
+// ✅ Record<Enum, T> = fail-fast on missing enum values
 const STATUS_CONFIG: Record<SubscriptionStatus, StatusConfig> = {
   incomplete: { icon: Clock, variant: "secondary" },
-  incomplete_expired: { icon: XCircle, variant: "destructive" },
-  trialing: { icon: Sparkles, variant: "default" },
   active: { icon: CheckCircle, variant: "default" },
-  past_due: { icon: AlertCircle, variant: "warning" },
-  canceled: { icon: XCircle, variant: "secondary" },
-  unpaid: { icon: Ban, variant: "destructive" },
-  paused: { icon: Pause, variant: "secondary" },
+  // ... TypeScript errors if any status missing
 };
-// TypeScript will error if any status is missing → fail-fast guarantee
 
-// ❌ WRONG: Non-exhaustive type
-const STATUS_CONFIG: Record<string, StatusConfig> = {
-  active: { ... },
-  trialing: { ... },
-};
-// No error if statuses are missing → silent bugs
+// ❌ Record<string, T> = silent bugs
+const STATUS_CONFIG: Record<string, StatusConfig> = { ... };
 ```
 
-### Fail-Fast Guarantee
+## Feature Module Rules (P0)
 
-When a new enum value is added to Prisma:
+### File Locations
 
-1. Run `pnpm exec prisma generate`
-2. TypeScript **immediately fails** on all incomplete `Record<Enum, ...>`
-3. You are **forced** to update all mappings (labels, configs, etc.)
-4. **Impossible to deploy** incomplete code
+| Type      | Path                                                        | Example                                                       |
+| --------- | ----------------------------------------------------------- | ------------------------------------------------------------- |
+| Schema    | `features/{feature}/schemas/{entity}.schema.ts`             | `features/contact/schemas/contact.schema.ts`                  |
+| Action    | `features/{feature}/actions/{verb}-{entity}.action.ts`      | `features/contact/actions/create-contact.action.ts`           |
+| Service   | `features/{feature}/services/{verb}-{entity}.service.ts`    | `features/contact/services/create-contact.service.ts`         |
+| Component | `features/{feature}/components/{name}.tsx`                  | `features/contact/components/forms/contact-form.tsx`          |
+| Form      | `features/{feature}/components/forms/{entity}-form.tsx`     | `features/account/components/forms/profile-form.tsx`          |
+| Modal     | `features/{feature}/components/modals/{entity}-modal.tsx`   | `features/account/components/modals/delete-account-modal.tsx` |
+| Email     | `features/{feature}/emails/{entity}-email.tsx`              | `features/contact/emails/contact-email.tsx`                   |
+| Constant  | `features/{feature}/constants/{entity}-filters.constant.ts` | `features/users/constants/users-filters.constant.ts`          |
 
-Example:
-```ts
-// Prisma: Add new role
-enum UserRole {
-  ADMIN
-  CUSTOMER
-  MODERATOR  // ← New
-}
+### Naming Patterns
 
-// After prisma generate → TypeScript error:
-lib/constants/roles.constant.ts(3,7): error TS2741:
-Property 'MODERATOR' is missing in type '{ ADMIN: string; CUSTOMER: string; }'
-but required in type 'Record<UserRole, string>'.
+| Type      | Pattern                              | Example                            |
+| --------- | ------------------------------------ | ---------------------------------- |
+| Schema    | `{Action}{Entity}Schema`             | `CreateContactSchema`              |
+| Type      | `{SchemaName}Type`                   | `CreateContactSchemaType`          |
+| Action    | `{verb}{Entity}Action`               | `createContactAction`              |
+| Service   | `{verb}{Entity}`                     | `createContact`                    |
+| Component | PascalCase function, kebab-case file | `ContactForm` → `contact-form.tsx` |
 
-// Fix by adding label:
-const roleLabels: Record<UserRole, string> = {
-  ADMIN: "Administrateur",
-  CUSTOMER: "Client",
-  MODERATOR: "Modérateur",  // ← Required by TypeScript
-};
-```
+### Schema Rules
 
-### Benefits of This Architecture
+Location: `features/{feature}/schemas/{entity}.schema.ts`
 
-1. **Fail-fast**: Impossible to deploy code with missing enum mappings
-2. **Single source of truth**: Change label in 1 place → updates everywhere
-3. **Type safety**: IntelliSense autocomplete, no typos possible
-4. **Maintainability**: Refactoring is safe (TypeScript guides you)
-5. **Onboarding**: New devs know exactly where to find/update labels
+Order: Create → Update → Delete (matching POST → PATCH → DELETE)
 
-## Naming Conventions
+String chain: `.min() → .max() → .trim()` (always with French messages)
 
-### Explicit Names (P0)
-
-ALWAYS use full, descriptive names. NEVER use abbreviations.
+Export: schemas first, then types. Named exports only.
 
 ```tsx
-// ✅ Correct
-function handleSubmit(event: SubmitEvent<HTMLFormElement>) { ... }
-function handleChange(event: ChangeEvent<HTMLInputElement>) { ... }
-function handleClick(event: MouseEvent<HTMLButtonElement>) { ... }
-const result = await upfetch("/api/users");
-const document = await prisma.document.findUnique({ ... });
-const user = await prisma.user.findUnique({ ... });
-items.map((item: Item, index: number) => ...)
-users.forEach((user: User) => ...)
-
-// ❌ Wrong: abbreviated names
-function handleSubmit(e) { ... }
-function handleChange(evt) { ... }
-const res = await upfetch("/api/users");
-const doc = await prisma.document.findUnique({ ... });
-const usr = await prisma.user.findUnique({ ... });
-items.map((item, i) => ...)
-items.map((item, idx) => ...)
-items.map((_, i) => ...)
+const CreateContactSchema = z.object({
+  name: z
+    .string()
+    .min(1, "Le nom est requis")
+    .max(200, "Max 200 caractères")
+    .trim(),
+  email: z
+    .string()
+    .min(1, "L'email est requis")
+    .max(255, "Max 255 caractères")
+    .trim()
+    .email("Email invalide"),
+});
+type CreateContactSchemaType = z.infer<typeof CreateContactSchema>;
+export { CreateContactSchema };
+export type { CreateContactSchemaType };
 ```
 
-### Variable Naming Rules
+### Service Rules
 
-| Context         | Correct                       | Wrong                        |
-| --------------- | ----------------------------- | ---------------------------- |
-| Event handlers  | `event`                       | `e`, `evt`                   |
-| upfetch result  | `result`                      | `res`, `r`                   |
-| Database result | `document`, `user`, `project` | `doc`, `usr`, `proj`         |
-| Array index     | `index`                       | `i`, `idx`, `_`              |
-| Error           | `error`                       | `err`, `e`                   |
-| Request         | `request`                     | `req`                        |
-| Configuration   | `config`                      | `cfg`                        |
-| Parameters      | `params`                      | `p`                          |
-| Options         | `options`                     | `opts`                       |
-| Reference       | `reference`                   | `ref` (except React refs)    |
-| Properties      | `properties`                  | `props` (except React props) |
-| Temporary       | `temporary`                   | `temp`, `tmp`                |
-| Previous        | `previous`                    | `prev`                       |
-| Current         | `current`                     | `curr`                       |
-| Button          | `button`                      | `btn`                        |
-| Number          | `count`, `total`, `quantity`  | `num`, `n`                   |
-
-## Coding Conventions
-
-### General Rules
-
-- **Import types**: Combine imports from the same module
-  - Type-only imports: `import type { Type1, Type2 } from "module";`
-  - Mixed imports: `import { value, type Type1, type Type2 } from "module";`
-  - NEVER use separate imports from the same module
-- Use absolute paths with `@/` prefix (never relative)
-- No comments in code
-- French for user-facing messages, English for code
-- Use `cn()` from `@/lib/utils` for conditional Tailwind classes
-- Always add `type="button"` on button elements (except submit)
-- Add `aria-hidden="true"` on decorative icons
-- Always type event handlers with proper event types
-- Always type map/forEach callbacks explicitly
-
-### Binary Logic & Early Return Pattern (P0)
-
-**Context matters:**
-
-- **Components & synchronous functions**: Use early return pattern for edge cases
-- **Try/catch blocks (forms, async operations)**: Use throw pattern (no multiple returns in try block)
+- `import "server-only"` at top
+- Always `select` + `take` on `findMany`
+- `$transaction` for parallel count + findMany
+- Re-validate all params server-side (defense in depth)
 
 ```tsx
-// ✅ Correct: Early return pattern in components
-function UserProfile({ user }: UserProfileProps) {
-  if (!user) {
-    return <UserProfileEmpty />;
-  }
+import "server-only";
 
-  if (user.isBlocked) {
-    return <UserProfileBlocked />;
-  }
+import { FILTERS, PAGINATION, SORTING } from "@/lib/constants/query.constant";
+import { prisma } from "@/lib/prisma";
 
-  return (
-    <article>
-      <h1>{user.name}</h1>
-      <p>{user.email}</p>
-    </article>
-  );
+async function getUsers(filters: GetUsersFilters) {
+  const safeSearch = filters.search.slice(0, FILTERS.maxSearchLength).trim();
+  const safePage = Math.max(1, Math.min(filters.page, PAGINATION.maxPage));
+
+  const [users, totalCount] = await prisma.$transaction([
+    prisma.user.findMany({
+      where: whereClause,
+      select: { id: true, name: true, email: true },
+      orderBy: { [safeSortBy]: safeOrder },
+      skip: (safePage - 1) * PAGE_SIZE,
+      take: PAGE_SIZE,
+    }),
+    prisma.user.count({ where: whereClause }),
+  ]);
+
+  return { users, totalCount, totalPages, currentPage: safePage };
 }
+```
 
-// ✅ Correct: Throw pattern in server functions
-async function getDocument(id: string, userId: string) {
-  if (!id) {
-    throw new BadRequestError("ID requis");
-  }
+### Action Rules
 
-  const document = await prisma.document.findUnique({
-    where: { id },
-    select: { id: true, name: true, userId: true },
+File: `features/{feature}/actions/{verb}-{entity}.action.ts`
+
+- `"use server"` at top (line 1)
+- Use `actionClient` (public), `authActionClient` (auth), or `adminActionClient` (admin)
+- `.inputSchema(Schema)` for validation
+- No try/catch needed (next-safe-action handles it)
+- Throw custom errors directly
+
+```tsx
+"use server";
+
+import { CreateContactSchema } from "@/features/contact/schemas/contact.schema";
+import { createContact } from "@/features/contact/services/create-contact.service";
+
+import { actionClient } from "@/lib/safe-action";
+
+export const createContactAction = actionClient
+  .inputSchema(CreateContactSchema)
+  .action(async ({ parsedInput }) => {
+    await createContact(parsedInput);
+    return { success: true };
+  });
+```
+
+### Form Rules
+
+Location: `features/{feature}/components/forms/{entity}-form.tsx`
+
+- TanStack Form + Zod + `useAction` + `executeAsync`
+- Use `getActionResult` in try/catch for throw-on-error pattern
+- Use `getErrorMessage` for centralized error extraction
+
+```tsx
+"use client";
+
+import { createContactAction } from "@/features/contact/actions/create-contact.action";
+import {
+  CreateContactSchema,
+  type CreateContactSchemaType,
+} from "@/features/contact/schemas/contact.schema";
+import { useForm } from "@tanstack/react-form";
+import { useAction } from "next-safe-action/hooks";
+import { toast } from "sonner";
+
+import { getActionResult } from "@/utils/errors/get-action-result";
+import { getErrorMessage } from "@/utils/errors/get-error-message";
+
+function ContactForm() {
+  const { executeAsync, isExecuting } = useAction(createContactAction);
+
+  const form = useForm({
+    defaultValues: { name: "", email: "" } as CreateContactSchemaType,
+    validators: { onSubmit: CreateContactSchema },
+    onSubmit: async ({ value }) => {
+      try {
+        getActionResult(await executeAsync(value));
+        toast.success("Message envoyé avec succès !");
+        form.reset();
+      } catch (error: unknown) {
+        toast.error(getErrorMessage(error));
+      }
+    },
   });
 
-  if (!document) {
-    throw new NotFoundError("Document introuvable");
-  }
-
-  if (document.userId !== userId) {
-    throw new ForbiddenError("Accès non autorisé");
-  }
-
-  return document;
-}
-
-// ✅ Correct: Throw pattern in try/catch (upfetch + getErrorMessage)
-async function onSubmit(data: FormData) {
-  try {
-    await upfetch("/api/endpoint", {
-      method: "POST",
-      body: data,
-    });
-
-    // Only one success path (upfetch throws on non-ok responses)
-    toast.success("Succès !");
-  } catch (error: unknown) {
-    toast.error(getErrorMessage(error));
-  }
-}
-
-// ❌ Wrong: Nested conditionals
-function UserProfile({ user }: UserProfileProps) {
-  if (user) {
-    if (!user.isBlocked) {
-      return (
-        <article>
-          <h1>{user.name}</h1>
-        </article>
-      );
-    } else {
-      return <UserProfileBlocked />;
-    }
-  } else {
-    return <UserProfileEmpty />;
-  }
-}
-
-// ❌ Wrong: Using native fetch instead of upfetch
-async function onSubmit(data: FormData) {
-  try {
-    const response = await fetch("/api/endpoint", {
-      method: "POST",
-      body: data,
-    });
-
-    if (!response.ok) {
-      toast.error("Erreur");
-      return; // Multiple exits in try block
-    }
-
-    toast.success("Succès !");
-  } catch (error: unknown) {
-    toast.error("Erreur");
-  }
-}
-```
-
-### Event Handler Typing (P0)
-
-ALWAYS import and use proper event types.
-
-```tsx
-import type { ChangeEvent, SubmitEvent, MouseEvent, KeyboardEvent, DragEvent } from "react";
-
-// ✅ Correct: Fully typed event handlers
-function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
-  event.preventDefault();
-}
-
-function handleInputChange(event: ChangeEvent<HTMLInputElement>) {
-  const value = event.target.value;
-}
-
-function handleTextareaChange(event: ChangeEvent<HTMLTextAreaElement>) {
-  const value = event.target.value;
-}
-
-function handleSelectChange(event: ChangeEvent<HTMLSelectElement>) {
-  const value = event.target.value;
-}
-
-function handleButtonClick(event: MouseEvent<HTMLButtonElement>) {
-  event.stopPropagation();
-}
-
-function handleKeyDown(event: KeyboardEvent<HTMLInputElement>) {
-  if (event.key === "Enter") {
-    // ...
-  }
-}
-
-function handleDragOver(event: DragEvent<HTMLDivElement>) {
-  event.preventDefault();
-}
-
-// ❌ Wrong: Untyped or abbreviated
-function handleSubmit(e) { ... }
-function handleChange(evt: any) { ... }
-function onClick(event) { ... }
-```
-
-### Map & Iteration Typing (P0)
-
-ALWAYS type callback parameters explicitly.
-
-```tsx
-// ✅ Correct: Explicit typing in callbacks
-{users.map((user: User) => (
-  <UserCard key={user.id} user={user} />
-))}
-
-{items.map((item: Item, index: number) => (
-  <div key={index}>{item.name}</div>
-))}
-
-{Array.from({ length: 6 }).map((_, index: number) => (
-  <Skeleton key={index} className="h-32" />
-))}
-
-users.forEach((user: User) => {
-  console.log(user.name);
-});
-
-const names = users.filter((user: User) => user.isActive)
-  .map((user: User) => user.name);
-
-// ❌ Wrong: Implicit or abbreviated
-{users.map((user) => ...)}
-{items.map((item, i) => ...)}
-{items.map((_, idx) => ...)}
-users.forEach((u) => ...);
-```
-
-### File Naming
-
-- Components: `kebab-case.tsx` (e.g., `user-card.tsx`)
-- Schemas: `{entity}.schema.ts` (e.g., `document.schema.ts`)
-- API Routes: `route.ts` in appropriate folder
-
-### Component Suffixes
-
-| Suffix          | Usage                              | Location              |
-| --------------- | ---------------------------------- | --------------------- |
-| `-card.tsx`     | Displays ONE resource              | `_components/`        |
-| `-list.tsx`     | Maps over cards                    | `_components/`        |
-| `-table.tsx`    | Data table                         | `_components/`        |
-| `-columns.tsx`  | Table column definitions           | `_components/`        |
-| `-row.tsx`      | Single table row                   | `_components/`        |
-| `-form.tsx`     | Form component                     | `_components/forms/`  |
-| `-modal.tsx`    | Dialog/Modal                       | `_components/modals/` |
-| `-button.tsx`   | Button with specific logic         | `_components/`        |
-| `-header.tsx`   | Section/page header                | `_components/`        |
-| `-tabs.tsx`     | Tab navigation                     | `_components/`        |
-| `-filters.tsx`  | Filters (Nuqs)                     | `_components/`        |
-| `-skeleton.tsx` | Loading state                      | `_components/`        |
-| `-empty.tsx`    | Empty state (always separate file) | `_components/`        |
-| `-error.tsx`    | Error state                        | `_components/`        |
-
-### Component Location Rules (P0)
-
-- **Modals**: ALWAYS in `_components/modals/`
-- **Forms**: ALWAYS in `_components/forms/`
-- **Other components**: In `_components/` root
-
-```bash
-# ✅ Correct structure
-app/(protected)/dashboard/settings/
-├── _components/
-│   ├── modals/
-│   │   └── delete-account-modal.tsx
-│   ├── forms/
-│   │   ├── profile-form.tsx
-│   │   └── delete-account-form.tsx
-│   ├── settings-header.tsx
-│   └── settings-tabs.tsx
-├── page.tsx
-└── loading.tsx
-
-# ❌ Wrong: Modal/Form in root _components
-app/(protected)/dashboard/settings/
-├── _components/
-│   ├── delete-account-modal.tsx    # Should be in modals/
-│   ├── profile-form.tsx            # Should be in forms/
-│   └── settings-header.tsx
-```
-
-## Component Guidelines
-
-### Structure
-
-```tsx
-// 1. Imports: Combine types and values from the same module
-// Use inline `type` keyword when mixing types and values
-import { type ChangeEvent, type SubmitEvent, useState } from "react";
-
-// Use `import type` only when importing types exclusively
-import type { User } from "@prisma/client";
-
-import { cn } from "@/lib/utils";
-
-import { Button } from "@/components/ui/button";
-
-// 3. Types (if >2 props)
-type UserFormProps = {
-  user: User;
-  onSubmit: (data: UserFormData) => Promise<void>;
-  isLoading: boolean;
-};
-
-// 4. Function with early returns
-function UserForm({ user, onSubmit, isLoading }: UserFormProps) {
-  const [name, setName] = useState(user.name);
-
-  if (!user.isActive) {
-    return <UserFormDisabled />;
-  }
-
-  function handleNameChange(event: ChangeEvent<HTMLInputElement>) {
-    setName(event.target.value);
-  }
-
-  async function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
-    event.preventDefault();
-    await onSubmit({ name });
-  }
-
   return (
-    <form onSubmit={handleSubmit}>
-      <input
-        type="text"
-        value={name}
-        onChange={handleNameChange}
-        disabled={isLoading}
-      />
-      <Button type="submit" disabled={isLoading}>
-        {isLoading ? "Enregistrement..." : "Enregistrer"}
-      </Button>
+    <form
+      onSubmit={(event: SubmitEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        form.handleSubmit();
+      }}
+    >
+      {/* fields */}
     </form>
   );
 }
-
-// 5. Export (always named, never default)
-export { UserForm };
 ```
 
-### Props Typing
+### Component Rules
 
-- 2 or fewer props: inline type
-- More than 2 props: separate `{ComponentName}Props` type
+- Named export only (never default)
+- Server Component by default, `"use client"` only for hooks/events/browser APIs
+- Props: inline if ≤2, separate `{Name}Props` type if >2
+- `cn()` for conditional classes
+- `aria-hidden="true"` on decorative icons
+- `type="button"` on all non-submit buttons
+- Empty states: always separate `-empty.tsx` file
 
-### Server vs Client Components
+## API Route Rules
 
-- Server Components by default (no directive needed)
-- `"use client"` only for: event handlers, hooks, browser APIs
+Location: `app/api/*/route.ts`
 
-### Component Location (Bubble Up Principle)
+Order: GET → POST → PATCH → DELETE
 
-Place components in the `_components` folder of the closest common ancestor:
+Error imports: `@/utils/errors/errors` + `@/utils/errors/handle-api-error`
 
-| Used in...               | Place in...                        |
-| ------------------------ | ---------------------------------- |
-| Only one page            | `app/(public)/[page]/_components/` |
-| Multiple public pages    | `app/(public)/_components/`        |
-| Multiple protected pages | `app/(protected)/_components/`     |
-| Public AND protected     | `components/`                      |
+```tsx
+import { NextResponse } from "next/server";
 
-## Page Guidelines
+import { UpdateAvatarSchema } from "@/features/account/schemas/avatar.schema";
+import { updateAvatar } from "@/features/account/services/update-avatar.service";
 
-### Naming
+import { UnauthorizedError } from "@/utils/errors/errors";
+import { handleApiError } from "@/utils/errors/handle-api-error";
 
-- Function: `{Path}Page` (e.g., `BlogPage`, `DashboardSettingsPage`)
-- Top-level element: `<main>`
+async function POST(request: Request) {
+  try {
+    const session = await getSession();
+    if (!session) throw new UnauthorizedError("Vous devez être connecté");
+
+    const formData = await request.formData();
+    const data = UpdateAvatarSchema.parse({ avatar: formData.get("avatar") });
+    const result = await updateAvatar({
+      userId: session.user.id,
+      avatar: data.avatar,
+    });
+
+    return NextResponse.json({ success: true, data: result }, { status: 201 });
+  } catch (error: unknown) {
+    return handleApiError(error);
+  }
+}
+
+export { POST };
+```
+
+Rules:
+
+- Always `request.formData()` (never `.json()`)
+- Always `select` in Prisma queries
+- Status: 200 (GET/PATCH), 201 (POST), 204 (DELETE)
+- Delegate to services for business logic
+
+## Page Rules
+
+Function: `{Path}Page` (e.g., `ContactPage`, `DashboardSettingsPage`)
+
+Top-level element: `<main>`
 
 ### Public Pages
 
@@ -674,8 +395,7 @@ import type { WebPage, WithContext } from "schema-dts";
 import { env } from "@/lib/env";
 
 const APP_NAME = env.NEXT_PUBLIC_APP_NAME;
-const BASE_URL = env.NEXT_PUBLIC_BASE_URL;
-const DESCRIPTION = "Description here";
+const DESCRIPTION = "...";
 
 export const metadata: Metadata = {
   title: `${APP_NAME} - Tagline`,
@@ -690,7 +410,6 @@ export default function ExamplePage() {
   const pageSchema: WithContext<WebPage> = {
     /* ... */
   };
-
   return (
     <>
       <script
@@ -717,29 +436,20 @@ export const metadata: Metadata = {
 
 export default async function DashboardExamplePage() {
   await requireSession();
-
   return <main>{/* content */}</main>;
 }
 ```
 
-## Loading Page Guidelines
+### Loading Pages
 
-### Naming
-
-- Function: `{Path}Loading` (e.g., `BlogLoading`, `DashboardSettingsLoading`)
-
-### Structure
+Function: `{Path}Loading`
 
 ```tsx
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function ExampleLoading() {
   return (
-    <main
-      aria-busy="true"
-      aria-label="Chargement..."
-      className="container mx-auto px-4 py-8"
-    >
+    <main aria-busy="true" aria-label="Chargement...">
       {Array.from({ length: 6 }).map((_, index: number) => (
         <Skeleton key={index} className="h-32 w-full" />
       ))}
@@ -748,420 +458,25 @@ export default function ExampleLoading() {
 }
 ```
 
-## Zod Schema Guidelines
-
-### Location
-
-`@/lib/schemas/{entity}.schema.ts`
-
-### Order
-
-Read → Create → Replace → Update → Delete (matching HTTP methods)
-
-### Structure
-
-```tsx
-import { z } from "zod";
-
-const CreateDocumentSchema = z.object({
-  name: z
-    .string()
-    .min(1, "Le nom est requis")
-    .max(200, "Le nom doit contenir moins de 200 caractères")
-    .trim(),
-});
-
-const UpdateDocumentSchema = z.object({
-  id: z
-    .string()
-    .min(1, "L'identifiant est requis")
-    .max(36, "L'identifiant est invalide")
-    .trim(),
-  name: z
-    .string()
-    .min(1, "Le nom est requis")
-    .max(200, "Le nom doit contenir moins de 200 caractères")
-    .trim(),
-});
-
-type CreateDocumentSchemaType = z.infer<typeof CreateDocumentSchema>;
-type UpdateDocumentSchemaType = z.infer<typeof UpdateDocumentSchema>;
-
-export { CreateDocumentSchema, UpdateDocumentSchema };
-
-export type { CreateDocumentSchemaType, UpdateDocumentSchemaType };
-```
-
-### Rules
-
-- String: `.min()` → `.max()` → `.trim()` (in this order)
-- Number: `.min()` → `.max()` with French error messages
-- Constants: internal only (not exported)
-- Types: `{SchemaName}Type`
-
-## API Route Guidelines
-
-### Order
-
-GET → POST → PUT → PATCH → DELETE
-
-### Structure with Early Return Pattern
-
-```tsx
-import { headers } from "next/headers";
-import { NextResponse } from "next/server";
-
-import { auth } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
-import { CreateDocumentSchema } from "@/lib/schemas/document.schema";
-
-import {
-  BadRequestError,
-  ForbiddenError,
-  NotFoundError,
-  UnauthorizedError,
-  handleApiError,
-} from "@/utils/api/handle-api-error";
-
-type RouteParams = {
-  params: Promise<{ id: string }>;
-};
-
-async function GET(request: Request, { params }: RouteParams) {
-  try {
-    const { id } = await params;
-
-    if (!id) {
-      throw new BadRequestError("ID requis");
-    }
-
-    const authSession = await auth.api.getSession({
-      headers: await headers(),
-    });
-
-    if (!authSession?.user) {
-      throw new UnauthorizedError("Vous devez être connecté");
-    }
-
-    const document = await prisma.document.findUnique({
-      where: { id },
-      select: {
-        id: true,
-        name: true,
-        userId: true,
-      },
-    });
-
-    if (!document) {
-      throw new NotFoundError("Document introuvable");
-    }
-
-    if (document.userId !== authSession.user.id) {
-      throw new ForbiddenError("Accès non autorisé");
-    }
-
-    return NextResponse.json(
-      { success: true, data: document },
-      { status: 200 }
-    );
-  } catch (error: unknown) {
-    return handleApiError(error);
-  }
-}
-
-async function POST(request: Request) {
-  try {
-    const authSession = await auth.api.getSession({
-      headers: await headers(),
-    });
-
-    if (!authSession?.user) {
-      throw new UnauthorizedError("Vous devez être connecté");
-    }
-
-    const formData = await request.formData();
-
-    const data = CreateDocumentSchema.parse({
-      name: formData.get("name"),
-    });
-
-    const document = await prisma.document.create({
-      data: {
-        ...data,
-        userId: authSession.user.id,
-      },
-      select: {
-        id: true,
-        name: true,
-      },
-    });
-
-    return NextResponse.json(
-      { success: true, data: document },
-      { status: 201 }
-    );
-  } catch (error: unknown) {
-    return handleApiError(error);
-  }
-}
-
-async function DELETE(request: Request, { params }: RouteParams) {
-  try {
-    const { id } = await params;
-
-    if (!id) {
-      throw new BadRequestError("ID requis");
-    }
-
-    const authSession = await auth.api.getSession({
-      headers: await headers(),
-    });
-
-    if (!authSession?.user) {
-      throw new UnauthorizedError("Vous devez être connecté");
-    }
-
-    const document = await prisma.document.findUnique({
-      where: { id },
-      select: { id: true, userId: true },
-    });
-
-    if (!document) {
-      throw new NotFoundError("Document introuvable");
-    }
-
-    if (document.userId !== authSession.user.id) {
-      throw new ForbiddenError("Accès non autorisé");
-    }
-
-    await prisma.document.delete({ where: { id } });
-
-    return new NextResponse(null, { status: 204 });
-  } catch (error: unknown) {
-    return handleApiError(error);
-  }
-}
-
-export { GET, POST, DELETE };
-```
-
-### Rules
-
-- Always use `request.formData()` (never `.json()`)
-- Always use `select` in Prisma queries
-- Use `$transaction` or `Promise.all` for parallel queries
-- Type error as `unknown` in catch
-- Status codes: 200 (GET/PATCH), 201 (POST), 204 (DELETE)
-
-## Form Guidelines
-
-### Location
-
-- Forms MUST be in `_components/forms/`
-- Modals MUST be in `_components/modals/`
-- Forms and Modals MUST always be separate files
-
-### Structure
-
-```tsx
-"use client";
-
-import type { ChangeEvent, SubmitEvent } from "react";
-
-import { useForm } from "@tanstack/react-form";
-import { Loader2 } from "lucide-react";
-import { useAction } from "next-safe-action/hooks";
-import { toast } from "sonner";
-
-import {
-  CreateContactSchema,
-  type CreateContactSchemaType,
-} from "@/lib/schemas/contact.schema";
-
-import { Button } from "@/components/ui/button";
-import { Field, FieldError, FieldLabel } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
-
-import { createContactAction } from "@/app/(public)/contact/_actions/create-contact.action";
-
-import { getActionResult } from "@/utils/errors/get-action-result";
-import { getErrorMessage } from "@/utils/errors/get-error-message";
-
-function ContactForm() {
-  const { executeAsync, isExecuting } = useAction(createContactAction);
-
-  const form = useForm({
-    defaultValues: {
-      name: "",
-      email: "",
-    } as CreateContactSchemaType,
-    validators: {
-      onSubmit: CreateContactSchema,
-    },
-    onSubmit: async ({ value }) => {
-      try {
-        getActionResult(await executeAsync(value));
-
-        toast.success("Message envoyé avec succès !");
-
-        form.reset();
-      } catch (error: unknown) {
-        toast.error(getErrorMessage(error));
-      }
-    },
-  });
-
-  return (
-    <form
-      onSubmit={(event: SubmitEvent<HTMLFormElement>) => {
-        event.preventDefault();
-        form.handleSubmit();
-      }}
-      className="space-y-6"
-    >
-      <form.Field
-        name="name"
-        children={(field) => {
-          const isInvalid =
-            field.state.meta.isTouched && !field.state.meta.isValid;
-
-          function handleChange(event: ChangeEvent<HTMLInputElement>) {
-            field.handleChange(event.target.value);
-          }
-
-          return (
-            <Field data-invalid={isInvalid}>
-              <FieldLabel htmlFor="contact-name">Nom</FieldLabel>
-              <Input
-                id="contact-name"
-                name={field.name}
-                value={field.state.value}
-                onBlur={field.handleBlur}
-                onChange={handleChange}
-                aria-invalid={isInvalid}
-                placeholder="Votre nom"
-              />
-              {isInvalid && <FieldError errors={field.state.meta.errors} />}
-            </Field>
-          );
-        }}
-      />
-
-      <form.Subscribe
-        selector={(state) => [state.canSubmit, state.isSubmitting]}
-      >
-        {([canSubmit, isSubmitting]) => (
-          <Button
-            type="submit"
-            disabled={!canSubmit || isExecuting || isSubmitting}
-          >
-            {isExecuting || isSubmitting ? (
-              <Loader2
-                className="mr-2 h-4 w-4 animate-spin"
-                aria-hidden="true"
-              />
-            ) : null}
-            {isExecuting || isSubmitting ? "Envoi..." : "Envoyer"}
-          </Button>
-        )}
-      </form.Subscribe>
-    </form>
-  );
-}
-
-export { ContactForm };
-```
-
-### Rules
-
-- Always use `@tanstack/react-form` with `useForm` (never react-hook-form)
-- Always use `validators: { onSubmit: Schema }` with imported Zod schema
-- Always use `defaultValues` with `as SchemaType` assertion
-- Always use `Field`, `FieldLabel`, `FieldError` from `@/components/ui/field`
-- Always use `form.Subscribe` for submit button state
-- Prefer Server Actions (`useAction` + `executeAsync`) over API Routes
-- File inputs MUST include drag & drop functionality
-- Use `toast` for success/error feedback
-- Reset form on success with `form.reset()`
-
-## Nuqs Filter Guidelines
-
-See `filter.md` for the complete universal pattern with 7-layer architecture.
-
-### Source of Truth
-
-- Enums DEFINED in `lib/constants/{entity}-filters.constant.ts`, IMPORTED by schemas
-- Parsers in `lib/parsers/nuqs.ts` do NOT re-export constants
-- `searchParams` object includes search, filters, `sortBy`, `order`, and `page`
-
-### DataTable
-
-- `DataTable` is a dumb renderer — ONLY uses `getCoreRowModel()`
-- NO `getSortedRowModel`, `getFilteredRowModel`, `getPaginationRowModel`
-- Sorting via `SortableHeader` component in columns (URL-based, 3-state: asc → desc → reset)
-- Filtering via filter form component (TanStack Form + Zod + `useQueryStates`)
-- Pagination via generic `Pagination` component
-
-### Options
-
-| Option            | Value   | Reason                 |
-| ----------------- | ------- | ---------------------- |
-| `shallow`         | `false` | Server re-fetches data |
-| `history`         | `push`  | Back button works      |
-| `startTransition` | Used    | Shows loading state    |
-
-### Parser Security
-
-- Use `createParser` for custom validation (page bounds, search length)
-- Use `parseAsStringLiteral` for enum values
-- `parseAsSafeSearch` truncates (`.slice()`) instead of rejecting long strings
-- Always use `withDefault()` to avoid null
-- Validate server-side too (defense in depth)
-
-### SEO
-
-- Index pages 1-10 only
-- Set canonical on base page
-- Use `rel="prev"` / `rel="next"` for pagination
-
-## Prisma Guidelines
-
-- Always use `select` to specify returned fields
-- Always use `take` on `findMany` (every query is internally paginated, even without pagination UI)
-- Minimum for any `findMany`: `select` + `take`
-- Use `$transaction` for parallel count + findMany
-- Use `Promise.all` for independent parallel queries
-- Never return raw database objects
-- Use full variable names for results
-
-```tsx
-// ✅ Correct
-const document = await prisma.document.findUnique({ ... });
-const user = await prisma.user.findFirst({ ... });
-const [projects, totalCount] = await prisma.$transaction([...]);
-
-// ✅ Correct: findMany always has select + take
-const users = await prisma.user.findMany({
-  select: { id: true, name: true, email: true },
-  take: PAGE_SIZE,
-});
-
-// ❌ Wrong
-const doc = await prisma.document.findUnique({ ... });
-const usr = await prisma.user.findFirst({ ... });
-const [proj, count] = await prisma.$transaction([...]);
-
-// ❌ Wrong: findMany without take
-const users = await prisma.user.findMany({
-  select: { id: true, name: true },
-});
-```
+## Filter/Sort/Pagination Pattern
+
+See `filter.md` for complete 7-layer architecture.
+
+Key principles:
+
+- Enums in `features/{feature}/constants/{entity}-filters.constant.ts`
+- Schemas in `features/{feature}/schemas/{entity}-filter.schema.ts`
+- Services in `features/{feature}/services/get-{entity}.service.ts`
+- DataTable: dumb renderer, only `getCoreRowModel()`
+- Sorting: URL-based via `SortableHeader` (3-state: asc → desc → reset)
+- Filtering: TanStack Form + Zod + `useQueryStates`
+- Pagination: generic `Pagination` component
 
 ## Error Handling
 
-Binary pattern: either success or throw (early throw pattern)
+Error classes: `@/utils/errors/errors`
 
-| Error Class                | Status | Usage          |
+| Class                      | Status | Usage          |
 | -------------------------- | ------ | -------------- |
 | `BadRequestError`          | 400    | Invalid input  |
 | `UnauthorizedError`        | 401    | No session     |
@@ -1172,97 +487,54 @@ Binary pattern: either success or throw (early throw pattern)
 | `UnprocessableEntityError` | 422    | Semantic error |
 | `TooManyRequestsError`     | 429    | Rate limited   |
 
-## Anti-Patterns Summary
+## Anti-Patterns
 
 ```tsx
-// ❌ NEVER use abbreviated names
+// ❌ NEVER abbreviate
 e, evt, res, req, doc, usr, btn, cfg, opts, prev, curr, temp, idx, i
 
-// ❌ NEVER use separate imports from the same module
+// ❌ NEVER separate imports from same module
 import type { Type } from "module";
 import { value } from "module";
 // ✅ Use: import { value, type Type } from "module";
 
-// ❌ NEVER use untyped event handlers
+// ❌ NEVER untyped handlers/callbacks
 function handleChange(e) { ... }
-function handleSubmit(event) { ... }
-
-// ❌ NEVER use implicit types in callbacks
 items.map((item) => ...)
-items.map((item, i) => ...)
 
-// ❌ NEVER use nested conditionals
-if (condition1) {
-  if (condition2) {
-    // main logic
-  }
-}
-
-// ❌ NEVER use multiple returns mixed with logic
-if (data) {
-  return process(data);
-} else {
-  return null;
-}
-
-// ❌ NEVER use native fetch (use upfetch from @/lib/up-fetch instead)
-const response = await fetch("/api/endpoint", { ... });
-const body = await response.json();
-// upfetch auto-parses JSON and throws on errors
-
-// ❌ NEVER check response.ok with upfetch (it throws automatically)
-const response = await upfetch("/api/endpoint", { ... });
-if (!response.ok) { ... } // upfetch returns parsed data, not Response
-
-// ❌ NEVER use default exports
+// ❌ NEVER default export
 export default function Component() { ... }
 
-// ❌ NEVER use relative imports
+// ❌ NEVER relative imports
 import { Component } from "./component";
 
-// ❌ NEVER use request.json()
-const data = await request.json();
-
-// ❌ NEVER omit select in Prisma
-const user = await prisma.user.findUnique({ where: { id } });
-
-// ❌ NEVER import enums directly from Prisma (use constants)
+// ❌ NEVER import enums from Prisma
 import { UserRole } from "@/lib/generated/prisma/client";
 // ✅ Use: import { UserRole } from "@/lib/constants/roles.constant";
 
-// ❌ NEVER use magic strings for enums
+// ❌ NEVER magic strings for enums
 if (user.role === "ADMIN") { ... }
-// ✅ Use: if (user.role === UserRole.ADMIN) { ... }
 
-// ❌ NEVER use Record<string, ...> for domain enums
-const labels: Record<string, string> = { ADMIN: "Admin", CUSTOMER: "Client" };
-// ✅ Use: const labels: Record<UserRole, string> = { ... };
+// ❌ NEVER Record<string, ...> for domain enums
+const labels: Record<string, string> = { ... };
 
-// ❌ NEVER define enum labels inline
-role === "ADMIN" ? "Admin" : "Client"
-// ✅ Use: roleLabels[role]
+// ❌ NEVER omit select/take in Prisma
+prisma.user.findMany({ where: { ... } });
 
-// ❌ NEVER hardcode status checks
-if (status === "active" || status === "trialing") { ... }
-// ✅ Use: if (ACTIVE_SUBSCRIPTION_STATUSES.includes(status)) { ... }
+// ❌ NEVER use native fetch
+const response = await fetch("/api/endpoint", { ... });
+// ✅ Use: upfetch from @/lib/up-fetch
 
-// ❌ NEVER put forms outside of _components/forms/
-app/(public)/contact/_components/contact-form.tsx
-
-// ❌ NEVER put modals outside of _components/modals/
-app/(public)/contact/_components/contact-modal.tsx
-
-// ❌ NEVER combine form and modal in same file
+// ❌ NEVER wrong file locations
+lib/schemas/contact.schema.ts                    # → features/contact/schemas/
+app/(public)/contact/_actions/                   # → features/contact/actions/
+components/emails/contact-email.tsx              # → features/contact/emails/
 ```
 
-## Skill Files
+## Detailed Rule Files
 
-For detailed conventions, read the appropriate skill file before implementing:
-
-- **Pages**: `/mnt/skills/user/ascender-saas-boilerplate/rules/page.md`
-- **Loading**: `/mnt/skills/user/ascender-saas-boilerplate/rules/loading.md`
-- **Components**: `/mnt/skills/user/ascender-saas-boilerplate/rules/component.md`
-- **Zod Schemas**: `/mnt/skills/user/ascender-saas-boilerplate/rules/zod.md`
-- **API Routes**: `/mnt/skills/user/ascender-saas-boilerplate/rules/api-route.md`
-- **Filters, Sort & Pagination**: `/mnt/skills/user/ascender-saas-boilerplate/rules/filter.md`
-- **Forms**: `/mnt/skills/user/ascender-saas-boilerplate/rules/form.md`
+- **Filters, Sort & Pagination**: `.claude/rules/filter.md`
+- **Forms**: `.claude/rules/form.md`
+- **API Routes**: `.claude/rules/api.md`
+- **Server Actions**: `.claude/rules/server-action.md`
+- **Pages**: `.claude/rules/page.md`

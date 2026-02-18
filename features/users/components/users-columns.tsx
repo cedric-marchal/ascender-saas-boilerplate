@@ -7,7 +7,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import { useQueryStates } from "nuqs";
 
-import { roleLabels, UserRole } from "@/lib/constants/roles.constant";
+import { UserRole, roleLabels } from "@/lib/constants/roles.constant";
 import { env } from "@/lib/env";
 import type { User } from "@/lib/generated/prisma/client";
 
@@ -79,7 +79,10 @@ const usersColumns: ColumnDef<UserTableData>[] = [
         <div className="flex items-center gap-3">
           <Avatar className="h-8 w-8">
             {user.image ? (
-              <AvatarImage src={`${env.NEXT_PUBLIC_R2_PUBLIC_URL}/${user.image}`} alt={`${user.name} avatar`} />
+              <AvatarImage
+                src={`${env.NEXT_PUBLIC_R2_PUBLIC_URL}/${user.image}`}
+                alt={`${user.name} avatar`}
+              />
             ) : (
               <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
             )}

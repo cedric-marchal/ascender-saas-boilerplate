@@ -91,7 +91,13 @@ function AvatarForm({ name, image }: AvatarFormProps) {
     >
       <div className="flex items-center gap-6">
         <Avatar className="h-20 w-20">
-          <AvatarImage src={previewUrl || (image ? `${env.NEXT_PUBLIC_R2_PUBLIC_URL}/${image}` : undefined)} alt={name} />
+          <AvatarImage
+            src={
+              previewUrl ||
+              (image ? `${env.NEXT_PUBLIC_R2_PUBLIC_URL}/${image}` : undefined)
+            }
+            alt={name}
+          />
           <AvatarFallback className="text-lg">{initials}</AvatarFallback>
         </Avatar>
 

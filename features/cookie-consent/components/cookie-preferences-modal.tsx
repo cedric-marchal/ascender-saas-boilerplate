@@ -1,5 +1,11 @@
 "use client";
 
+import {
+  COOKIE_CATEGORIES,
+  type CookieCategoryId,
+  useCookieConsent,
+} from "@/features/cookie-consent/hooks/use-cookie-consent";
+
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
@@ -11,12 +17,6 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Switch } from "@/components/ui/switch";
-
-import {
-  COOKIE_CATEGORIES,
-  type CookieCategoryId,
-  useCookieConsent,
-} from "@/features/cookie-consent/hooks/use-cookie-consent";
 
 function CookiePreferencesModal() {
   const isPreferencesOpen = useCookieConsent(

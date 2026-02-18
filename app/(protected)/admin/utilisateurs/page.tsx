@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 
-import { type UserTableData, usersColumns } from "@/features/users/components/users-columns";
+import {
+  type UserTableData,
+  usersColumns,
+} from "@/features/users/components/users-columns";
 import { UsersFilters } from "@/features/users/components/users-filters";
 import { usersSearchParams } from "@/features/users/constants/users-filters.constant";
 import { getUsers } from "@/features/users/services/get-users.service";
