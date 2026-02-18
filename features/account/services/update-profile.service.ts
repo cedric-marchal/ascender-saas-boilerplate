@@ -3,18 +3,11 @@ import "server-only";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 
-import { randomBytes } from "crypto";
-
 import { auth } from "@/lib/auth";
 import { env } from "@/lib/env";
 import { prisma } from "@/lib/prisma";
-import { sendEmail } from "@/lib/resend";
-
-import { EmailVerificationEmail } from "@/features/auth/emails/email-verification-email";
 
 import { BadRequestError, ConflictError } from "@/utils/errors/errors";
-
-const EMAIL_VERIFICATION_EXPIRY_HOURS = 24;
 
 type UpdateProfileInput = {
   userId: string;
@@ -31,41 +24,6 @@ type UpdateProfileResult = {
   };
   emailChanged: boolean;
 };
-
-async function createEmailVerificationToken(email: string): Promise<string> {
-  const token = randomBytes(32).toString("hex");
-  const expiresAt = new Date();
-  expiresAt.setHours(expiresAt.getHours() + EMAIL_VERIFICATION_EXPIRY_HOURS);
-
-  await prisma.verification.create({
-    data: {
-      id: randomBytes(16).toString("hex"),
-      identifier: email,
-      value: token,
-      expiresAt,
-    },
-  });
-
-  return token;
-}
-
-async function sendEmailVerification(
-  name: string,
-  email: string,
-  token: string
-): Promise<void> {
-  const verificationLink = `${env.NEXT_PUBLIC_BASE_URL}/verify-email?token=${token}`;
-
-  await sendEmail({
-    from: `${env.NEXT_PUBLIC_APP_NAME} <${env.RESEND_EMAIL_NOREPLY}>`,
-    to: email,
-    subject: "Vérifiez votre adresse email",
-    react: EmailVerificationEmail({
-      name,
-      verificationLink,
-    }),
-  });
-}
 
 async function updateProfile(
   input: UpdateProfileInput
@@ -98,7 +56,7 @@ async function updateProfile(
     }
   }
 
-  if (!emailChanged && nameChanged) {
+  if (nameChanged && !emailChanged) {
     await auth.api.updateUser({
       body: {
         name: input.name,
@@ -119,45 +77,40 @@ async function updateProfile(
     };
   }
 
-  const updatedUser = await prisma.user.update({
-    where: { id: input.userId },
-    data: {
-      name: input.name,
-      email: input.email,
-      emailVerified: emailChanged ? false : currentUser.emailVerified,
-    },
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      emailVerified: true,
-    },
-  });
-
-  await auth.api.getSession({
-    headers: await headers(),
-    query: {
-      disableCookieCache: true,
-    },
-  });
-
   if (emailChanged) {
-    const verificationToken = await createEmailVerificationToken(
-      updatedUser.email
-    );
+    if (nameChanged) {
+      await auth.api.updateUser({
+        body: {
+          name: input.name,
+        },
+        headers: await headers(),
+      });
+    }
 
-    await sendEmailVerification(
-      updatedUser.name,
-      updatedUser.email,
-      verificationToken
-    );
+    await auth.api.changeEmail({
+      body: {
+        newEmail: input.email,
+        callbackURL: `${env.NEXT_PUBLIC_BASE_URL}/dashboard/parametres`,
+      },
+      headers: await headers(),
+    });
+
+    revalidatePath("/dashboard/parametres");
+
+    return {
+      user: {
+        id: currentUser.id,
+        name: nameChanged ? input.name : currentUser.name,
+        email: currentUser.email,
+        emailVerified: currentUser.emailVerified,
+      },
+      emailChanged: true,
+    };
   }
 
-  revalidatePath("/dashboard/parametres");
-
   return {
-    user: updatedUser,
-    emailChanged,
+    user: currentUser,
+    emailChanged: false,
   };
 }
 

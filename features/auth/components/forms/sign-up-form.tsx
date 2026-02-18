@@ -12,7 +12,7 @@ import { useForm } from "@tanstack/react-form";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
-import { authClient, signIn } from "@/lib/auth-client";
+import { signIn, signUp } from "@/lib/auth-client";
 
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
@@ -32,7 +32,7 @@ function SignUpForm() {
       onSubmit: SignUpSchema,
     },
     onSubmit: async ({ value }) => {
-      const { error } = await authClient.signUp.email({
+      const { error } = await signUp.email({
         name: value.name,
         email: value.email,
         password: value.password,

@@ -1,4 +1,7 @@
-import { passwordSchema } from "@/features/auth/schemas/password.schema";
+import {
+  MAX_PASSWORD_LENGTH,
+  passwordSchema,
+} from "@/features/auth/schemas/password.schema";
 import { z } from "zod";
 
 const emailSchema = z
@@ -21,7 +24,14 @@ const SignUpSchema = z.object({
 
 const SignInSchema = z.object({
   email: emailSchema,
-  password: z.string().min(1, "Le mot de passe est requis").trim(),
+  password: z
+    .string()
+    .min(1, "Le mot de passe est requis")
+    .max(
+      MAX_PASSWORD_LENGTH,
+      `Le nom doit contenir moins de ${MAX_PASSWORD_LENGTH} caractères`
+    )
+    .trim(),
 });
 
 const ForgotPasswordSchema = z.object({

@@ -36,11 +36,8 @@ const env = createEnv({
       .min(1)
       .pipe(z.email({ message: "Format d'email invalide pour security" })),
 
-    UPSTASH_REDIS_REST_URL: z
-      .string()
-      .optional()
-      .default("https://placeholder.upstash.io"),
-    UPSTASH_REDIS_REST_TOKEN: z.string().optional().default("placeholder"),
+    UPSTASH_REDIS_REST_URL: z.string().min(1),
+    UPSTASH_REDIS_REST_TOKEN: z.string().min(1),
 
     STRIPE_SECRET_KEY: z.string().min(1),
     STRIPE_WEBHOOK_SECRET: z.string().min(1),
@@ -64,6 +61,7 @@ const env = createEnv({
       .pipe(
         z.number({ message: "La taille maximale de fichier est de 4.5MB" })
       ),
+    NEXT_PUBLIC_SENTRY_DSN: z.string().min(1),
   },
   runtimeEnv: {
     // Server
@@ -98,6 +96,7 @@ const env = createEnv({
     NEXT_PUBLIC_R2_PUBLIC_URL: process.env.NEXT_PUBLIC_R2_PUBLIC_URL,
     NEXT_PUBLIC_VERCEL_MAX_UPLOAD_SIZE:
       process.env.NEXT_PUBLIC_VERCEL_MAX_UPLOAD_SIZE,
+    NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
   },
   emptyStringAsUndefined: true,
   skipValidation: false,

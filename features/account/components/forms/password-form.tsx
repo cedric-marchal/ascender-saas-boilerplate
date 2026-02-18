@@ -165,7 +165,7 @@ function PasswordForm() {
                 </button>
               </div>
               <FieldDescription>
-                Minimum 8 caractères, différent de l&apos;ancien
+                Minimum 12 caractères, différent de l&apos;ancien
               </FieldDescription>
               {isInvalid && <FieldError errors={field.state.meta.errors} />}
             </Field>

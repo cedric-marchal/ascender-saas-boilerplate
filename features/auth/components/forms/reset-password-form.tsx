@@ -12,7 +12,7 @@ import { useForm } from "@tanstack/react-form";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
-import { authClient } from "@/lib/auth-client";
+import { resetPassword } from "@/lib/auth-client";
 
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
@@ -37,7 +37,7 @@ function ResetPasswordForm({ token }: ResetPasswordFormProps) {
       onSubmit: ResetPasswordSchema,
     },
     onSubmit: async ({ value }) => {
-      const { error } = await authClient.resetPassword({
+      const { error } = await resetPassword({
         newPassword: value.password,
         token,
       });

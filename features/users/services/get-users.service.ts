@@ -12,13 +12,16 @@ import {
 
 import type { User } from "@/lib/generated/prisma/client";
 import type { UserWhereInput } from "@/lib/generated/prisma/models";
-import type { SortOrder } from "@/lib/parsers/nuqs";
+import {
+  MAX_PAGE,
+  MAX_SEARCH_LENGTH,
+  SORT_ORDERS,
+  type SortOrder,
+} from "@/lib/parsers/nuqs";
 import { prisma } from "@/lib/prisma";
 
 const PAGE_SIZE = 12;
-const MAX_SEARCH_LENGTH = 100;
-const MAX_PAGE = 1000;
-const SORT_ORDERS = ["asc", "desc"] as const;
+
 const DEFAULT_SORT_BY = "createdAt";
 const DEFAULT_ORDER = "desc";
 

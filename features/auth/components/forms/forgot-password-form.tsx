@@ -10,7 +10,7 @@ import { useForm } from "@tanstack/react-form";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
-import { authClient } from "@/lib/auth-client";
+import { requestPasswordReset } from "@/lib/auth-client";
 
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
@@ -27,7 +27,7 @@ function ForgotPasswordForm() {
       onSubmit: ForgotPasswordSchema,
     },
     onSubmit: async ({ value }) => {
-      const { error } = await authClient.requestPasswordReset({
+      const { error } = await requestPasswordReset({
         email: value.email,
         redirectTo: "/nouveau-mot-de-passe",
       });

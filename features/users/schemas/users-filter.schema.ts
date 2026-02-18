@@ -4,7 +4,7 @@ import {
 } from "@/features/users/constants/users-filters.constant";
 import { z } from "zod";
 
-const MAX_SEARCH_LENGTH = 100;
+import { MAX_SEARCH_LENGTH } from "@/lib/parsers/nuqs";
 
 const FilterUsersSchema = z.object({
   search: z
