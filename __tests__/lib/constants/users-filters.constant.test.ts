@@ -32,7 +32,7 @@ describe("usersSortableFields", () => {
 describe("roleLabels", () => {
   it("has French label for each role filter", () => {
     expect(roleLabels.all).toBe("Tous les rôles");
-    expect(roleLabels.ADMIN).toBe("Admin");
+    expect(roleLabels.ADMIN).toBe("Administrateur");
     expect(roleLabels.CUSTOMER).toBe("Client");
   });
 

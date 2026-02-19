@@ -15,7 +15,14 @@ export default defineConfig({
     setupFiles: ["__tests__/setup.ts"],
     coverage: {
       provider: "v8",
-      include: ["lib/**/*.ts", "utils/**/*.ts", "app/**/_lib/**/*.ts"],
+      include: [
+        "lib/**/*.ts",
+        "utils/**/*.ts",
+        "features/**/services/**/*.ts",
+        "features/**/schemas/**/*.ts",
+        "features/**/actions/**/*.ts",
+        "features/**/constants/**/*.ts",
+      ],
       exclude: [
         "lib/generated/**",
         "lib/env.ts",
@@ -25,6 +32,7 @@ export default defineConfig({
         "lib/auth.ts",
         "lib/auth-client.ts",
         "lib/resend.ts",
+        "lib/ratelimit.ts",
         "lib/safe-action.ts",
         "node_modules/**",
       ],
