@@ -103,13 +103,21 @@ export type { CreateContactSchemaType, UpdateContactSchemaType };
 
 **Protection**: MUST use `import "server-only"` at top
 
+**Security (IDOR Prevention)**:
+
+- **CRITICAL**: EVERY service MUST receive `userId: string` AND `userRole: UserRole`
+- **NEVER** use booleans (`isAdmin`, `isCustomer`, etc.) for permissions
+- **ALWAYS** import `UserRole` from `@/lib/constants/roles.constant`
+- **ALWAYS** define `UNRESTRICTED_ROLES` constant listing roles with full data access
+- **ALWAYS** filter by `userId` UNLESS user role is in `UNRESTRICTED_ROLES`
+
 **Prisma**:
 
 - Always `select` + `take` on `findMany`
 - `$transaction` for parallel count + findMany
 - Re-validate all params server-side (defense in depth)
 
-**Structure**:
+**Structure (Generic Entity)**:
 
 ```tsx
 import "server-only";
@@ -119,6 +127,7 @@ import {
   isUserRole,
 } from "@/features/users/constants/users-filters.constant";
 
+import { UserRole } from "@/lib/constants/roles.constant";
 import type { User } from "@/lib/generated/prisma/client";
 import {
   DEFAULT_PAGE_SIZE,
@@ -128,9 +137,75 @@ import {
 } from "@/lib/parsers/nuqs";
 import { prisma } from "@/lib/prisma";
 
-async function getUsers(filters: GetUsersFilters): Promise<GetUsersResult> {
+// ✅ Define roles that can access ALL data (not just their own)
+const UNRESTRICTED_ROLES: UserRole[] = [UserRole.ADMIN];
+
+async function getEntities(
+  filters: GetEntitiesFilters,
+  userId: string,     // ✅ MANDATORY: Current user ID
+  userRole: UserRole  // ✅ MANDATORY: Current user role (NEVER boolean)
+): Promise<GetEntitiesResult> {
   const safeSearch = filters.search.slice(0, MAX_SEARCH_LENGTH).trim();
   const safePage = Math.max(1, Math.min(filters.page, MAX_PAGE));
+
+  // ✅ Check if user can access all data
+  const canAccessAllData = UNRESTRICTED_ROLES.includes(userRole);
+
+  const whereClause = {
+    // ✅ Filter by userId UNLESS user is in UNRESTRICTED_ROLES
+    ...(!canAccessAllData && { userId }),
+    ...(safeSearch && {
+      name: { contains: safeSearch, mode: "insensitive" as const },
+    }),
+  };
+
+  const [entities, totalCount] = await prisma.$transaction([
+    prisma.entity.findMany({
+      where: whereClause,
+      select: { id: true, name: true, email: true },
+      orderBy: { [safeSortBy]: safeOrder },
+      skip: (safePage - 1) * DEFAULT_PAGE_SIZE,
+      take: DEFAULT_PAGE_SIZE,
+    }),
+    prisma.entity.count({ where: whereClause }),
+  ]);
+
+  return { entities, totalCount, totalPages, currentPage: safePage };
+}
+
+export { getEntities };
+```
+
+**Structure (Admin-Only Service)**:
+
+For admin-only pages (like user management), still receive `userId` for rate limiting:
+
+```tsx
+import "server-only";
+
+import { UserRole } from "@/lib/constants/roles.constant";
+import { filterRatelimit } from "@/lib/ratelimit";
+import { checkRatelimit } from "@/utils/ratelimit/check-ratelimit";
+
+async function getUsers(
+  filters: GetUsersFilters,
+  userId: string     // ✅ For rate limiting (not filtering)
+): Promise<GetUsersResult> {
+  // ✅ Rate limit per user (prevent abuse)
+  await checkRatelimit(filterRatelimit, userId);
+
+  const safeSearch = filters.search.slice(0, MAX_SEARCH_LENGTH).trim();
+  const safePage = Math.max(1, Math.min(filters.page, MAX_PAGE));
+
+  // ❌ NO userId filter (admin sees all users)
+  const whereClause = {
+    ...(safeSearch && {
+      OR: [
+        { name: { contains: safeSearch, mode: "insensitive" as const } },
+        { email: { contains: safeSearch, mode: "insensitive" as const } },
+      ],
+    }),
+  };
 
   const [users, totalCount] = await prisma.$transaction([
     prisma.user.findMany({
@@ -147,6 +222,39 @@ async function getUsers(filters: GetUsersFilters): Promise<GetUsersResult> {
 }
 
 export { getUsers };
+```
+
+**Anti-Pattern (CRITICAL - Never Do This)**:
+
+```tsx
+// ❌ WRONG: Using boolean for permissions
+async function getEntities(
+  filters: GetEntitiesFilters,
+  userId: string,
+  isAdmin: boolean = false  // ❌ NOT extensible, NOT type-safe
+) {
+  const whereClause = {
+    ...(!isAdmin && { userId }),  // ❌ What about MANAGER role?
+  };
+}
+
+// ❌ WRONG: Missing userId parameter
+async function getEntities(filters: GetEntitiesFilters) {
+  const entities = await prisma.entity.findMany({
+    where: { name: filters.search },  // ❌ IDOR vulnerability!
+  });
+}
+
+// ❌ WRONG: Not filtering by userId for non-admin
+async function getEntities(
+  filters: GetEntitiesFilters,
+  userId: string,
+  userRole: UserRole
+) {
+  const entities = await prisma.entity.findMany({
+    where: { name: filters.search },  // ❌ Missing userId check!
+  });
+}
 ```
 
 ## Action Rules (P0)

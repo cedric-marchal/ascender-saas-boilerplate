@@ -18,4 +18,11 @@ const authenticatedRatelimit = new Ratelimit({
   analytics: true,
 });
 
-export { authenticatedRatelimit, contactRatelimit };
+const filterRatelimit = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(100, "1 m"),
+  prefix: "@upstash/ratelimit/filter",
+  analytics: true,
+});
+
+export { authenticatedRatelimit, contactRatelimit, filterRatelimit };

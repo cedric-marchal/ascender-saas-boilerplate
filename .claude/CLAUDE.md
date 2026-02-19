@@ -110,6 +110,42 @@ app/*/page.tsx (pages import from features)
 | **User messages** | French. Code: English.                                                             |
 | **File naming**   | kebab-case.tsx                                                                     |
 
+## Security: IDOR Prevention (P0) 🔴
+
+| Rule                    | Convention                                                                                          |
+| ----------------------- | --------------------------------------------------------------------------------------------------- |
+| **Service params**      | ALWAYS `userId: string` + `userRole: UserRole` (NEVER booleans like `isAdmin`)                      |
+| **Authorization**       | Define `UNRESTRICTED_ROLES: UserRole[]` constant, check with `.includes(userRole)`                  |
+| **Filtering**           | Filter by `userId` by default UNLESS `userRole` in `UNRESTRICTED_ROLES`                             |
+| **Rate limiting**       | ALWAYS `await checkRatelimit(filterRatelimit, userId)` in services                                   |
+| **Type safety**         | Import `UserRole` from `@/lib/constants/roles.constant` (NEVER from Prisma, NEVER strings/booleans) |
+| **Extensibility**       | Pattern supports multiple roles (ADMIN, MANAGER, MODERATOR) without code changes                    |
+| **Full documentation**  | See `.claude/rules/security.md` for complete patterns and examples                                   |
+
+**Critical Example** :
+
+```tsx
+// ❌ WRONG: Boolean permissions (not extensible, not type-safe)
+async function getDocuments(userId: string, isAdmin: boolean = false) { }
+
+// ✅ CORRECT: UserRole permissions (extensible, type-safe)
+import { UserRole } from "@/lib/constants/roles.constant";
+
+const UNRESTRICTED_ROLES: UserRole[] = [UserRole.ADMIN];
+
+async function getDocuments(
+  filters: GetDocumentsFilters,
+  userId: string,
+  userRole: UserRole
+) {
+  await checkRatelimit(filterRatelimit, userId);
+  const canAccessAllData = UNRESTRICTED_ROLES.includes(userRole);
+  const whereClause = {
+    ...(!canAccessAllData && { userId }),  // Non-admin sees only their data
+  };
+}
+```
+
 ## Enum Usage (P0)
 
 ### UserRole
@@ -596,3 +632,4 @@ components/emails/contact-email.tsx              # → features/contact/emails/
 - **API Routes**: `.claude/rules/api.md`
 - **Server Actions**: `.claude/rules/server-action.md`
 - **Pages**: `.claude/rules/page.md`
+- **Security (IDOR & Authorization)**: `.claude/rules/security.md` — **CRITICAL: Read this**

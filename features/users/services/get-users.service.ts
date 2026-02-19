@@ -22,6 +22,9 @@ import {
   type SortOrder,
 } from "@/lib/parsers/nuqs";
 import { prisma } from "@/lib/prisma";
+import { filterRatelimit } from "@/lib/ratelimit";
+
+import { checkRatelimit } from "@/utils/ratelimit/check-ratelimit";
 
 type GetUsersFilters = {
   search: string;
@@ -42,7 +45,12 @@ type GetUsersResult = {
   currentPage: number;
 };
 
-async function getUsers(filters: GetUsersFilters): Promise<GetUsersResult> {
+async function getUsers(
+  filters: GetUsersFilters,
+  userId: string
+): Promise<GetUsersResult> {
+  await checkRatelimit(filterRatelimit, userId);
+
   const safeSearch = filters.search.slice(0, MAX_SEARCH_LENGTH).trim();
   const safePage = Math.max(1, Math.min(filters.page, MAX_PAGE));
 
