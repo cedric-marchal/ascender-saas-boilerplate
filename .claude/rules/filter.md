@@ -8,77 +8,91 @@ URL-based filters/search/sort/pagination using nuqs. Universal pattern for all f
 
 ```
 Prisma Schema (enums) → lib/generated/prisma/client → lib/constants/*.constant.ts
-  → lib/parsers/nuqs.ts → lib/constants/{entity}-filters.constant.ts
+  → lib/parsers/nuqs.ts → features/{feature}/constants/{entity}-filters.constant.ts
   → features/*/schemas/ → features/*/services/ → features/*/components/ → app/*/page.tsx
 ```
 
 **Rules**: Enums DEFINED in Prisma, RE-EXPORTED by `lib/constants/`, IMPORTED by app code. NEVER import from Prisma directly.
 
-## 7-Layer Architecture
+## 6-Layer Architecture
 
-| Layer | File                                            | Responsibility                                                         |
-| ----- | ----------------------------------------------- | ---------------------------------------------------------------------- |
-| 1     | `lib/constants/query.constant.ts`               | Global limits (maxPage, maxSearchLength, pageSizes, orders)            |
-| 2     | `lib/parsers/nuqs.ts`                           | Universal parsers (`parseAsPage`, `parseAsSafeSearch`, `parseAsOrder`) |
-| 3     | `lib/constants/{entity}-filters.constant.ts`    | Domain config (searchParams, type guards, labels)                      |
-| 4     | `features/*/schemas/{entity}-filters.schema.ts` | Zod validation (imports from constants)                                |
-| 5     | `features/*/services/get-{entity}.service.ts`   | Server data fetch (`"server-only"`, re-validate ALL params)            |
-| 6     | `app/*/page.tsx`                                | Server Component (uses `createLoader(searchParams)`)                   |
-| 7     | `features/*/components/`                        | Client components (filters, columns, pagination)                       |
+| Layer | File                                                | Responsibility                                                  |
+| ----- | --------------------------------------------------- | --------------------------------------------------------------- |
+| 1     | `lib/parsers/nuqs.ts`                               | Global constants + Universal parsers (all query-related logic) |
+| 2     | `features/{feature}/constants/{entity}-filters.constant.ts` | Domain config (searchParams, type guards, labels)               |
+| 3     | `features/*/schemas/{entity}-filters.schema.ts`     | Zod validation (imports from constants)                         |
+| 4     | `features/*/services/get-{entity}.service.ts`       | Server data fetch (`"server-only"`, re-validate ALL params)     |
+| 5     | `app/*/page.tsx`                                    | Server Component (uses `createLoader(searchParams)`)            |
+| 6     | `features/*/components/`                            | Client components (filters, columns, pagination)                |
 
-## Layer 1: Global Constants (P0)
-
-`lib/constants/query.constant.ts`
-
-```tsx
-const QUERY = createQueryConfig({
-  pagination: {
-    maxPage: 1000,
-    pageSizes: [10, 12, 20, 25, 50, 100] as const,
-    defaultPageSize: 12,
-  },
-  filters: { maxSearchLength: 100, maxArrayLength: 50 },
-  sorting: {
-    orders: ["asc", "desc"] as const,
-    defaultOrder: "desc",
-    defaultSortBy: "createdAt",
-  },
-});
-
-const PAGINATION = QUERY.pagination;
-const FILTERS = QUERY.filters;
-const SORTING = QUERY.sorting;
-
-export { FILTERS, PAGINATION, SORTING };
-```
-
-## Layer 2: Universal Parsers (P0)
+## Layer 1: Global Constants + Parsers (P0)
 
 `lib/parsers/nuqs.ts`
+
+**All query-related constants and parsers are centralized here.**
 
 ```tsx
 import { createParser, parseAsStringLiteral } from "nuqs/server";
 
-import { FILTERS, PAGINATION, SORTING } from "@/lib/constants/query.constant";
+// Global limits
+const MAX_PAGE = 1000;
+const MAX_SEARCH_LENGTH = 100;
+const MAX_ARRAY_LENGTH = 50;
 
+// Page sizes with semantic names
+const PAGE_SIZE = {
+  SMALL: 10,
+  MEDIUM: 20,
+  LARGE: 50,
+  XLARGE: 100,
+} as const;
+
+const PAGE_SIZES = Object.values(PAGE_SIZE); // [10, 20, 50, 100] for select
+const DEFAULT_PAGE_SIZE = PAGE_SIZE.SMALL; // 10
+
+// Sort orders and defaults
+const SORT_ORDERS = ["asc", "desc"] as const;
+const DEFAULT_SORT_ORDER = "desc" as const;
+const DEFAULT_SORT_BY = "createdAt" as const;
+
+// Universal parsers
 const parseAsPage = createParser({
   parse(query) {
     const parsed = parseInt(query, 10);
     return Number.isNaN(parsed) || parsed < 1
       ? 1
-      : Math.min(parsed, PAGINATION.maxPage);
+      : Math.min(parsed, MAX_PAGE);
   },
-  serialize: (value) => String(value),
+  serialize(value) {
+    return String(value);
+  },
 });
 
 const parseAsSafeSearch = createParser({
-  parse: (query) =>
-    query ? query.slice(0, FILTERS.maxSearchLength).trim() : "",
-  serialize: (value) => value,
+  parse(query) {
+    if (!query) return "";
+    return query.slice(0, MAX_SEARCH_LENGTH).trim();
+  },
+  serialize(value) {
+    return value;
+  },
 });
 
-const parseAsOrder = parseAsStringLiteral(SORTING.orders);
+const parseAsPageSize = createParser({
+  parse(query) {
+    const parsed = parseInt(query, 10);
+    return (PAGE_SIZES as readonly number[]).includes(parsed)
+      ? parsed
+      : PAGE_SIZE.SMALL; // Fallback sur SMALL (10) si invalide
+  },
+  serialize(value) {
+    return String(value);
+  },
+});
 
+const parseAsOrder = parseAsStringLiteral(SORT_ORDERS);
+
+// Factory functions
 function createEnumParser<T extends readonly string[]>(enumValues: T) {
   return parseAsStringLiteral(enumValues);
 }
@@ -87,25 +101,43 @@ function createSortByParser<T extends readonly string[]>(allowedFields: T) {
   return parseAsStringLiteral(allowedFields);
 }
 
+// Types
+type PageSize = (typeof PAGE_SIZES)[number]; // 10 | 20 | 50 | 100
+type SortOrder = (typeof SORT_ORDERS)[number]; // "asc" | "desc"
+
 export {
   createEnumParser,
   createSortByParser,
+  DEFAULT_PAGE_SIZE,
+  DEFAULT_SORT_BY,
+  DEFAULT_SORT_ORDER,
+  MAX_ARRAY_LENGTH,
+  MAX_PAGE,
+  MAX_SEARCH_LENGTH,
+  PAGE_SIZE,
+  PAGE_SIZES,
   parseAsOrder,
   parseAsPage,
+  parseAsPageSize,
   parseAsSafeSearch,
+  SORT_ORDERS,
 };
 export type { PageSize, SortOrder };
 ```
 
 **Rules**:
 
-- Parsers MUST NOT re-export constants
+- ALL query constants and parsers centralized in `nuqs.ts`
+- `PAGE_SIZE` object with semantic names (SMALL/MEDIUM/LARGE/XLARGE)
+- `PAGE_SIZES` array for select components
+- `DEFAULT_PAGE_SIZE` points to `PAGE_SIZE.SMALL`
+- `parseAsPageSize` validates against `PAGE_SIZES` with fallback
 - `parseAsSafeSearch` MUST truncate (`.slice()`) not reject
 - Factory functions wrap `parseAsStringLiteral`
 
-## Layer 3: Domain Configuration (P0)
+## Layer 2: Domain Configuration (P0)
 
-`lib/constants/{entity}-filters.constant.ts`
+`features/{feature}/constants/{entity}-filters.constant.ts`
 
 ```tsx
 import {
@@ -161,23 +193,23 @@ export type { UserRoleFilter, VerificationFilter };
 - Type guards defined here for server validation
 - Labels defined here (single source for UI)
 
-## Layer 4: Validation Schema (P0)
+## Layer 3: Validation Schema (P0)
 
 `features/*/schemas/{entity}-filters.schema.ts`
 
 ```tsx
 import { z } from "zod";
 
-import { FILTERS } from "@/lib/constants/query.constant";
 import {
   userRoleFilters,
   verificationFilters,
-} from "@/lib/constants/users-filters.constant";
+} from "@/features/users/constants/users-filters.constant";
+import { MAX_SEARCH_LENGTH } from "@/lib/parsers/nuqs";
 
 const FilterUsersSchema = z.object({
   search: z
     .string()
-    .max(FILTERS.maxSearchLength, `Max ${FILTERS.maxSearchLength} caractères`)
+    .max(MAX_SEARCH_LENGTH, `Max ${MAX_SEARCH_LENGTH} caractères`)
     .trim(),
   role: z.enum(userRoleFilters, { message: "Rôle invalide" }),
   verified: z.enum(verificationFilters, { message: "Statut invalide" }),
@@ -190,49 +222,59 @@ export type { FilterUsersSchemaType };
 
 **Rules**:
 
-- IMPORTS enum arrays from constants (never defines them)
+- IMPORTS enum arrays from feature constants (never defines them)
+- IMPORTS limits from `@/lib/parsers/nuqs`
 - Validates form fields only (not `sortBy`/`order`/`page` — parsers validate those)
 
-## Layer 5: Server Data Fetching (P0)
+## Layer 4: Server Data Fetching (P0)
 
 `features/*/services/get-{entity}.service.ts`
 
-| Rule              | Convention                                                   |
-| ----------------- | ------------------------------------------------------------ |
-| **Protection**    | `import "server-only"` at top                                |
-| **Re-validation** | ALL params re-validated server-side (defense in depth)       |
-| **Prisma**        | `$transaction` for parallel `findMany` + `count`             |
-| **Select**        | Always `select` + `take` on `findMany`                       |
-| **OrderBy**       | Dynamic: `{ [safeSortBy]: safeOrder }`                       |
-| **Type guards**   | Use from constants (e.g., `isUserRole()`)                    |
-| **Defaults**      | Fall back to `SORTING.defaultSortBy`, `SORTING.defaultOrder` |
+| Rule              | Convention                                                     |
+| ----------------- | -------------------------------------------------------------- |
+| **Protection**    | `import "server-only"` at top                                  |
+| **Re-validation** | ALL params re-validated server-side (defense in depth)         |
+| **Prisma**        | `$transaction` for parallel `findMany` + `count`               |
+| **Select**        | Always `select` + `take` on `findMany`                         |
+| **OrderBy**       | Dynamic: `{ [safeSortBy]: safeOrder }`                         |
+| **Type guards**   | Use from feature constants (e.g., `isUserRole()`)              |
+| **Defaults**      | Fall back to `DEFAULT_SORT_BY`, `DEFAULT_SORT_ORDER`, etc.     |
 
 ```tsx
 import "server-only";
 
-import { FILTERS, PAGINATION, SORTING } from "@/lib/constants/query.constant";
 import {
   isUserRole,
   usersSortableFields,
-} from "@/lib/constants/users-filters.constant";
+} from "@/features/users/constants/users-filters.constant";
+
+import {
+  DEFAULT_PAGE_SIZE,
+  DEFAULT_SORT_BY,
+  DEFAULT_SORT_ORDER,
+  MAX_PAGE,
+  MAX_SEARCH_LENGTH,
+  SORT_ORDERS,
+  type SortOrder,
+} from "@/lib/parsers/nuqs";
 import { prisma } from "@/lib/prisma";
 
-const PAGE_SIZE = PAGINATION.defaultPageSize;
-
 async function getUsers(filters: GetUsersFilters) {
-  const safeSearch = filters.search.slice(0, FILTERS.maxSearchLength).trim();
-  const safePage = Math.max(1, Math.min(filters.page, PAGINATION.maxPage));
+  const safeSearch = filters.search.slice(0, MAX_SEARCH_LENGTH).trim();
+  const safePage = Math.max(1, Math.min(filters.page, MAX_PAGE));
   const safeRole = isUserRoleFilter(filters.role) ? filters.role : "all";
+
   const safeSortBy = (usersSortableFields as readonly string[]).includes(
     filters.sortBy
   )
     ? filters.sortBy
-    : SORTING.defaultSortBy;
-  const safeOrder = (SORTING.orders as readonly string[]).includes(
+    : DEFAULT_SORT_BY;
+
+  const safeOrder: SortOrder = (SORT_ORDERS as readonly string[]).includes(
     filters.order
   )
-    ? filters.order
-    : SORTING.defaultOrder;
+    ? (filters.order as SortOrder)
+    : DEFAULT_SORT_ORDER;
 
   const whereClause = {
     ...(safeSearch && {
@@ -246,8 +288,8 @@ async function getUsers(filters: GetUsersFilters) {
       where: whereClause,
       select: { id: true, name: true },
       orderBy: { [safeSortBy]: safeOrder },
-      skip: (safePage - 1) * PAGE_SIZE,
-      take: PAGE_SIZE,
+      skip: (safePage - 1) * DEFAULT_PAGE_SIZE,
+      take: DEFAULT_PAGE_SIZE,
     }),
     prisma.user.count({ where: whereClause }),
   ]);
@@ -255,19 +297,19 @@ async function getUsers(filters: GetUsersFilters) {
   return {
     users,
     totalCount,
-    totalPages: Math.max(1, Math.ceil(totalCount / PAGE_SIZE)),
+    totalPages: Math.max(1, Math.ceil(totalCount / DEFAULT_PAGE_SIZE)),
     currentPage: safePage,
   };
 }
 ```
 
-## Layer 6: Server Page (P0)
+## Layer 5: Server Page (P0)
 
 ```tsx
 import { getUsers } from "@/features/users/services/get-users.service";
 import { type SearchParams, createLoader } from "nuqs/server";
 
-import { usersSearchParams } from "@/lib/constants/users-filters.constant";
+import { usersSearchParams } from "@/features/users/constants/users-filters.constant";
 
 const loadSearchParams = createLoader(usersSearchParams);
 
@@ -296,9 +338,9 @@ export default async function AdminUsersPage({
 - Page does NOT re-validate (service does it)
 - DataTable receives raw data (no client-side sort/filter/pagination)
 
-## Layer 7: Client Components
+## Layer 6: Client Components
 
-### 7a. Filter Component
+### 6a. Filter Component
 
 `features/*/components/{entity}-filters.tsx`
 
@@ -308,7 +350,7 @@ import { FilterUsersSchema } from "@/features/users/schemas/users-filters.schema
 import { useForm } from "@tanstack/react-form";
 import { useQueryStates } from "nuqs";
 
-import { usersSearchParams } from "@/lib/constants/users-filters.constant";
+import { usersSearchParams } from "@/features/users/constants/users-filters.constant";
 
 function UsersFilters() {
   const [isLoading, startTransition] = useTransition();
@@ -348,7 +390,7 @@ function UsersFilters() {
 
 **Rules**: `useTransition` + `shallow: false` + `history: "push"` + reset `page: 1` on filter change + use `null` to clear params
 
-### 7b. SortableHeader in Columns
+### 6b. SortableHeader in Columns
 
 `features/*/components/{entity}-columns.tsx`
 
@@ -358,7 +400,7 @@ import { useTransition } from "react";
 
 import { useQueryStates } from "nuqs";
 
-import { usersSearchParams } from "@/lib/constants/users-filters.constant";
+import { usersSearchParams } from "@/features/users/constants/users-filters.constant";
 
 function SortableHeader({ field, label }: { field: string; label: string }) {
   const [isLoading, startTransition] = useTransition();
@@ -402,7 +444,7 @@ const usersColumns: ColumnDef[] = [
 
 **Rules**: 3-state toggle (`unsorted → asc → desc → reset`), reset sets `sortBy: null, order: null`, `field` MUST match value in `{entity}SortableFields`
 
-### 7c. DataTable (Dumb Renderer)
+### 6c. DataTable (Dumb Renderer)
 
 `components/ui/data-table.tsx`
 
@@ -422,7 +464,7 @@ function DataTable({ columns, data }) {
 
 **Rules**: ONLY `getCoreRowModel()` — NO `getSortedRowModel`, `getFilteredRowModel`, `getPaginationRowModel`
 
-### 7d. Pagination Component
+### 6d. Pagination Component
 
 `components/pagination.tsx`
 
@@ -466,6 +508,67 @@ function Pagination({ currentPage, totalPages }) {
 ```
 
 **Rules**: Uses `useQueryState` (single param), hides when `totalPages <= 1`, disables at boundaries
+
+### 6e. Page Size Selector (Optional)
+
+`components/page-size-selector.tsx`
+
+```tsx
+"use client";
+import { useTransition } from "react";
+
+import { PAGE_SIZES, parseAsPageSize, PAGE_SIZE } from "@/lib/parsers/nuqs";
+import { useQueryState } from "nuqs";
+
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+function PageSizeSelector() {
+  const [isLoading, startTransition] = useTransition();
+  const [pageSize, setPageSize] = useQueryState(
+    "pageSize",
+    parseAsPageSize.withDefault(PAGE_SIZE.SMALL).withOptions({
+      shallow: false,
+      history: "push",
+      startTransition,
+    })
+  );
+
+  return (
+    <Select
+      value={pageSize.toString()}
+      onValueChange={(value: string) => {
+        setPageSize(parseInt(value, 10));
+      }}
+      disabled={isLoading}
+    >
+      <SelectTrigger className="w-32">
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        {PAGE_SIZES.map((size: number) => (
+          <SelectItem key={size} value={size.toString()}>
+            {size} par page
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
+}
+
+export { PageSizeSelector };
+```
+
+**Rules**:
+- Uses `PAGE_SIZES` array to map options
+- Uses `parseAsPageSize` parser with `PAGE_SIZE.SMALL` default
+- Validates against `PAGE_SIZES` with automatic fallback
+- Type-safe: `PageSize = 10 | 20 | 50 | 100`
 
 ## Nuqs Options (P0)
 

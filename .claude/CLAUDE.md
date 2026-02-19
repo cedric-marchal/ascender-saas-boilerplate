@@ -223,20 +223,24 @@ export type { CreateContactSchemaType };
 ```tsx
 import "server-only";
 
-import { FILTERS, PAGINATION, SORTING } from "@/lib/constants/query.constant";
+import {
+  DEFAULT_PAGE_SIZE,
+  MAX_PAGE,
+  MAX_SEARCH_LENGTH,
+} from "@/lib/parsers/nuqs";
 import { prisma } from "@/lib/prisma";
 
 async function getUsers(filters: GetUsersFilters) {
-  const safeSearch = filters.search.slice(0, FILTERS.maxSearchLength).trim();
-  const safePage = Math.max(1, Math.min(filters.page, PAGINATION.maxPage));
+  const safeSearch = filters.search.slice(0, MAX_SEARCH_LENGTH).trim();
+  const safePage = Math.max(1, Math.min(filters.page, MAX_PAGE));
 
   const [users, totalCount] = await prisma.$transaction([
     prisma.user.findMany({
       where: whereClause,
       select: { id: true, name: true, email: true },
       orderBy: { [safeSortBy]: safeOrder },
-      skip: (safePage - 1) * PAGE_SIZE,
-      take: PAGE_SIZE,
+      skip: (safePage - 1) * DEFAULT_PAGE_SIZE,
+      take: DEFAULT_PAGE_SIZE,
     }),
     prisma.user.count({ where: whereClause }),
   ]);

@@ -10,16 +10,18 @@ import {
   usersSortableFields,
 } from "@/features/users/constants/users-filters.constant";
 
-import { FILTERS, PAGINATION, SORTING } from "@/lib/constants/query.constant";
 import type { User } from "@/lib/generated/prisma/client";
 import type { UserWhereInput } from "@/lib/generated/prisma/models";
-import type { SortOrder } from "@/lib/parsers/nuqs";
+import {
+  DEFAULT_PAGE_SIZE,
+  DEFAULT_SORT_BY,
+  DEFAULT_SORT_ORDER,
+  MAX_PAGE,
+  MAX_SEARCH_LENGTH,
+  SORT_ORDERS,
+  type SortOrder,
+} from "@/lib/parsers/nuqs";
 import { prisma } from "@/lib/prisma";
-
-const PAGE_SIZE = 12;
-
-const DEFAULT_SORT_BY = "createdAt";
-const DEFAULT_ORDER = "desc";
 
 type GetUsersFilters = {
   search: string;
@@ -41,8 +43,8 @@ type GetUsersResult = {
 };
 
 async function getUsers(filters: GetUsersFilters): Promise<GetUsersResult> {
-  const safeSearch = filters.search.slice(0, FILTERS.maxSearchLength).trim();
-  const safePage = Math.max(1, Math.min(filters.page, PAGINATION.maxPage));
+  const safeSearch = filters.search.slice(0, MAX_SEARCH_LENGTH).trim();
+  const safePage = Math.max(1, Math.min(filters.page, MAX_PAGE));
 
   const safeRole: UserRoleFilter = isUserRoleFilter(filters.role)
     ? filters.role
@@ -60,11 +62,11 @@ async function getUsers(filters: GetUsersFilters): Promise<GetUsersResult> {
     ? (filters.sortBy as UserSortableField)
     : (DEFAULT_SORT_BY as UserSortableField);
 
-  const safeOrder: SortOrder = (SORTING.orders as readonly string[]).includes(
+  const safeOrder: SortOrder = (SORT_ORDERS as readonly string[]).includes(
     filters.order
   )
     ? (filters.order as SortOrder)
-    : DEFAULT_ORDER;
+    : DEFAULT_SORT_ORDER;
 
   const whereClause: UserWhereInput = {
     ...(safeSearch && {
@@ -91,13 +93,13 @@ async function getUsers(filters: GetUsersFilters): Promise<GetUsersResult> {
         createdAt: true,
       },
       orderBy: { [safeSortBy]: safeOrder },
-      skip: (safePage - 1) * PAGE_SIZE,
-      take: PAGE_SIZE,
+      skip: (safePage - 1) * DEFAULT_PAGE_SIZE,
+      take: DEFAULT_PAGE_SIZE,
     }),
     prisma.user.count({ where: whereClause }),
   ]);
 
-  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
+  const totalPages = Math.max(1, Math.ceil(totalCount / DEFAULT_PAGE_SIZE));
 
   return {
     users,

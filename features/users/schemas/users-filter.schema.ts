@@ -4,14 +4,14 @@ import {
 } from "@/features/users/constants/users-filters.constant";
 import { z } from "zod";
 
-import { FILTERS } from "@/lib/constants/query.constant";
+import { MAX_SEARCH_LENGTH } from "@/lib/parsers/nuqs";
 
 const FilterUsersSchema = z.object({
   search: z
     .string()
     .max(
-      FILTERS.maxSearchLength,
-      `La recherche doit contenir moins de ${FILTERS.maxSearchLength} caractères`
+      MAX_SEARCH_LENGTH,
+      `La recherche doit contenir moins de ${MAX_SEARCH_LENGTH} caractères`
     )
     .trim(),
   role: z.enum(userRoleFilters, {

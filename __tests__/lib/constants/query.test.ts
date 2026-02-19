@@ -1,52 +1,43 @@
 import {
-  FILTERS,
-  PAGINATION,
-  SORTING,
-} from "@/lib/constants/query.constant";
+  DEFAULT_PAGE_SIZE,
+  MAX_ARRAY_LENGTH,
+  MAX_PAGE,
+  MAX_SEARCH_LENGTH,
+  PAGE_SIZES,
+  SORT_ORDERS,
+} from "@/lib/parsers/nuqs";
 import { describe, expect, it } from "vitest";
 
-describe("PAGINATION", () => {
-  it("has maxPage === 1000", () => {
-    expect(PAGINATION.maxPage).toBe(1000);
+describe("Pagination constants", () => {
+  it("has MAX_PAGE === 1000", () => {
+    expect(MAX_PAGE).toBe(1000);
   });
 
-  it("has defaultPageSize === 12", () => {
-    expect(PAGINATION.defaultPageSize).toBe(12);
+  it("has DEFAULT_PAGE_SIZE === 10", () => {
+    expect(DEFAULT_PAGE_SIZE).toBe(10);
   });
 
-  it("has pageSizes array", () => {
-    expect(PAGINATION.pageSizes).toEqual([10, 12, 20, 25, 50, 100]);
+  it("has PAGE_SIZES array", () => {
+    expect(PAGE_SIZES).toEqual([10, 20, 50, 100]);
   });
 
-  it("defaultPageSize is included in pageSizes", () => {
-    expect(PAGINATION.pageSizes).toContain(PAGINATION.defaultPageSize);
-  });
-});
-
-describe("FILTERS", () => {
-  it("has maxSearchLength === 100", () => {
-    expect(FILTERS.maxSearchLength).toBe(100);
-  });
-
-  it("has maxArrayLength === 50", () => {
-    expect(FILTERS.maxArrayLength).toBe(50);
+  it("DEFAULT_PAGE_SIZE is included in PAGE_SIZES", () => {
+    expect(PAGE_SIZES).toContain(DEFAULT_PAGE_SIZE);
   });
 });
 
-describe("SORTING", () => {
-  it("has orders containing asc and desc", () => {
-    expect(SORTING.orders).toEqual(["asc", "desc"]);
+describe("Filter constants", () => {
+  it("has MAX_SEARCH_LENGTH === 100", () => {
+    expect(MAX_SEARCH_LENGTH).toBe(100);
   });
 
-  it("has defaultOrder === 'desc'", () => {
-    expect(SORTING.defaultOrder).toBe("desc");
+  it("has MAX_ARRAY_LENGTH === 50", () => {
+    expect(MAX_ARRAY_LENGTH).toBe(50);
   });
+});
 
-  it("has defaultSortBy === 'createdAt'", () => {
-    expect(SORTING.defaultSortBy).toBe("createdAt");
-  });
-
-  it("defaultOrder is included in orders", () => {
-    expect(SORTING.orders).toContain(SORTING.defaultOrder);
+describe("Sort constants", () => {
+  it("has SORT_ORDERS containing asc and desc", () => {
+    expect(SORT_ORDERS).toEqual(["asc", "desc"]);
   });
 });
