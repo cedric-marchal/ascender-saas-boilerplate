@@ -1,6 +1,7 @@
 import { getUsers } from "@/features/users/services/get-users.service";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import { UserRole } from "@/lib/constants/roles.constant";
 import { prisma } from "@/lib/prisma";
 
 vi.mock("@/lib/prisma", () => {
@@ -63,7 +64,7 @@ describe("getUsers", () => {
   it("returns users with pagination metadata", async () => {
     vi.mocked(prisma.$transaction).mockResolvedValue([mockUsers, 2]);
 
-    const result = await getUsers(defaultFilters, testUserId);
+    const result = await getUsers(defaultFilters, testUserId, UserRole.ADMIN);
 
     expect(result.users).toEqual(mockUsers);
     expect(result.totalCount).toBe(2);
@@ -74,7 +75,7 @@ describe("getUsers", () => {
   it("calls prisma.$transaction", async () => {
     vi.mocked(prisma.$transaction).mockResolvedValue([[], 0]);
 
-    await getUsers(defaultFilters, testUserId);
+    await getUsers(defaultFilters, testUserId, UserRole.ADMIN);
 
     expect(prisma.$transaction).toHaveBeenCalled();
   });
@@ -82,7 +83,7 @@ describe("getUsers", () => {
   it("calculates totalPages correctly", async () => {
     vi.mocked(prisma.$transaction).mockResolvedValue([mockUsers, 25]);
 
-    const result = await getUsers(defaultFilters, testUserId);
+    const result = await getUsers(defaultFilters, testUserId, UserRole.ADMIN);
 
     expect(result.totalPages).toBe(3);
   });
@@ -90,7 +91,7 @@ describe("getUsers", () => {
   it("returns at least 1 total page even with 0 results", async () => {
     vi.mocked(prisma.$transaction).mockResolvedValue([[], 0]);
 
-    const result = await getUsers(defaultFilters, testUserId);
+    const result = await getUsers(defaultFilters, testUserId, UserRole.ADMIN);
 
     expect(result.totalPages).toBe(1);
   });
@@ -100,7 +101,7 @@ describe("getUsers", () => {
       vi.mocked(prisma.$transaction).mockResolvedValue([[], 0]);
 
       const longSearch = "a".repeat(150);
-      await getUsers({ ...defaultFilters, search: longSearch }, testUserId);
+      await getUsers({ ...defaultFilters, search: longSearch }, testUserId, UserRole.ADMIN);
 
       expect(prisma.$transaction).toHaveBeenCalled();
     });
@@ -108,7 +109,7 @@ describe("getUsers", () => {
     it("trims search whitespace", async () => {
       vi.mocked(prisma.$transaction).mockResolvedValue([[], 0]);
 
-      await getUsers({ ...defaultFilters, search: "  test  " }, testUserId);
+      await getUsers({ ...defaultFilters, search: "  test  " }, testUserId, UserRole.ADMIN);
 
       expect(prisma.$transaction).toHaveBeenCalled();
     });
@@ -118,7 +119,7 @@ describe("getUsers", () => {
     it("clamps page to minimum 1", async () => {
       vi.mocked(prisma.$transaction).mockResolvedValue([[], 0]);
 
-      const result = await getUsers({ ...defaultFilters, page: -5 }, testUserId);
+      const result = await getUsers({ ...defaultFilters, page: -5 }, testUserId, UserRole.ADMIN);
 
       expect(result.currentPage).toBe(1);
     });
@@ -126,7 +127,7 @@ describe("getUsers", () => {
     it("clamps page to maximum 1000", async () => {
       vi.mocked(prisma.$transaction).mockResolvedValue([[], 0]);
 
-      const result = await getUsers({ ...defaultFilters, page: 9999 }, testUserId);
+      const result = await getUsers({ ...defaultFilters, page: 9999 }, testUserId, UserRole.ADMIN);
 
       expect(result.currentPage).toBe(1000);
     });
@@ -136,7 +137,7 @@ describe("getUsers", () => {
     it("defaults to 'all' for invalid role", async () => {
       vi.mocked(prisma.$transaction).mockResolvedValue([[], 0]);
 
-      await getUsers({ ...defaultFilters, role: "INVALID" }, testUserId);
+      await getUsers({ ...defaultFilters, role: "INVALID" }, testUserId, UserRole.ADMIN);
 
       expect(prisma.$transaction).toHaveBeenCalled();
     });
@@ -144,8 +145,8 @@ describe("getUsers", () => {
     it("accepts valid role values", async () => {
       vi.mocked(prisma.$transaction).mockResolvedValue([[], 0]);
 
-      await getUsers({ ...defaultFilters, role: "ADMIN" }, testUserId);
-      await getUsers({ ...defaultFilters, role: "CUSTOMER" }, testUserId);
+      await getUsers({ ...defaultFilters, role: "ADMIN" }, testUserId, UserRole.ADMIN);
+      await getUsers({ ...defaultFilters, role: "CUSTOMER" }, testUserId, UserRole.ADMIN);
 
       expect(prisma.$transaction).toHaveBeenCalledTimes(2);
     });
@@ -155,7 +156,7 @@ describe("getUsers", () => {
     it("defaults to 'all' for invalid verified value", async () => {
       vi.mocked(prisma.$transaction).mockResolvedValue([[], 0]);
 
-      await getUsers({ ...defaultFilters, verified: "INVALID" }, testUserId);
+      await getUsers({ ...defaultFilters, verified: "INVALID" }, testUserId, UserRole.ADMIN);
 
       expect(prisma.$transaction).toHaveBeenCalled();
     });
@@ -163,8 +164,8 @@ describe("getUsers", () => {
     it("accepts valid verified values", async () => {
       vi.mocked(prisma.$transaction).mockResolvedValue([[], 0]);
 
-      await getUsers({ ...defaultFilters, verified: "verified" }, testUserId);
-      await getUsers({ ...defaultFilters, verified: "unverified" }, testUserId);
+      await getUsers({ ...defaultFilters, verified: "verified" }, testUserId, UserRole.ADMIN);
+      await getUsers({ ...defaultFilters, verified: "unverified" }, testUserId, UserRole.ADMIN);
 
       expect(prisma.$transaction).toHaveBeenCalledTimes(2);
     });
@@ -174,7 +175,7 @@ describe("getUsers", () => {
     it("defaults to 'createdAt' for invalid sortBy", async () => {
       vi.mocked(prisma.$transaction).mockResolvedValue([[], 0]);
 
-      await getUsers({ ...defaultFilters, sortBy: "password" }, testUserId);
+      await getUsers({ ...defaultFilters, sortBy: "password" }, testUserId, UserRole.ADMIN);
 
       expect(prisma.$transaction).toHaveBeenCalled();
     });
@@ -182,9 +183,9 @@ describe("getUsers", () => {
     it("accepts valid sortBy values", async () => {
       vi.mocked(prisma.$transaction).mockResolvedValue([[], 0]);
 
-      await getUsers({ ...defaultFilters, sortBy: "name" }, testUserId);
-      await getUsers({ ...defaultFilters, sortBy: "email" }, testUserId);
-      await getUsers({ ...defaultFilters, sortBy: "createdAt" }, testUserId);
+      await getUsers({ ...defaultFilters, sortBy: "name" }, testUserId, UserRole.ADMIN);
+      await getUsers({ ...defaultFilters, sortBy: "email" }, testUserId, UserRole.ADMIN);
+      await getUsers({ ...defaultFilters, sortBy: "createdAt" }, testUserId, UserRole.ADMIN);
 
       expect(prisma.$transaction).toHaveBeenCalledTimes(3);
     });
@@ -194,7 +195,7 @@ describe("getUsers", () => {
     it("defaults to 'desc' for invalid order", async () => {
       vi.mocked(prisma.$transaction).mockResolvedValue([[], 0]);
 
-      await getUsers({ ...defaultFilters, order: "INVALID" }, testUserId);
+      await getUsers({ ...defaultFilters, order: "INVALID" }, testUserId, UserRole.ADMIN);
 
       expect(prisma.$transaction).toHaveBeenCalled();
     });
@@ -202,8 +203,8 @@ describe("getUsers", () => {
     it("accepts valid order values", async () => {
       vi.mocked(prisma.$transaction).mockResolvedValue([[], 0]);
 
-      await getUsers({ ...defaultFilters, order: "asc" }, testUserId);
-      await getUsers({ ...defaultFilters, order: "desc" }, testUserId);
+      await getUsers({ ...defaultFilters, order: "asc" }, testUserId, UserRole.ADMIN);
+      await getUsers({ ...defaultFilters, order: "desc" }, testUserId, UserRole.ADMIN);
 
       expect(prisma.$transaction).toHaveBeenCalledTimes(2);
     });

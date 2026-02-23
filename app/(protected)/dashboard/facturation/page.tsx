@@ -5,6 +5,8 @@ import { getBilling } from "@/features/billing/services/get-billing.service";
 
 import { requireCustomerVerifiedEmail } from "@/lib/session";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Facturation",
   robots: {

@@ -6,7 +6,10 @@ import type { InvoiceStatus } from "@/lib/constants/invoice-status.constant";
 import type { SubscriptionStatus } from "@/lib/constants/subscription-status.constant";
 import { prisma } from "@/lib/prisma";
 import { redis } from "@/lib/redis";
+import { filterRatelimit } from "@/lib/ratelimit";
 import { stripe } from "@/lib/stripe";
+
+import { checkRatelimit } from "@/utils/ratelimit/check-ratelimit";
 
 type BillingInvoiceStatus = InvoiceStatus | null;
 
@@ -64,6 +67,8 @@ function mapSubscription(
 }
 
 async function getBilling(userId: string): Promise<GetBillingResult | null> {
+  await checkRatelimit(filterRatelimit, userId);
+
   const stripeCustomer = await prisma.stripeCustomer.findUnique({
     where: { userId },
     select: { stripeCustomerId: true },

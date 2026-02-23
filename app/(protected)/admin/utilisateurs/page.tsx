@@ -16,6 +16,8 @@ import { DataTable } from "@/components/ui/data-table";
 
 const loadSearchParams = createLoader(usersSearchParams);
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Gestion des utilisateurs",
   robots: {
@@ -37,7 +39,8 @@ export default async function AdminUsersPage({
 
   const { users, totalCount, totalPages, currentPage } = await getUsers(
     filters,
-    session.user.id
+    session.user.id,
+    session.user.role
   );
 
   return (

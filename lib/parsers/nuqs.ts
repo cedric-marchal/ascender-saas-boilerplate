@@ -42,7 +42,10 @@ const parseAsSafeSearch = createParser({
       return "";
     }
 
-    return query.slice(0, MAX_SEARCH_LENGTH).trim();
+    const normalized = query.normalize("NFC");
+    const cleaned = normalized.replace(/[\u200B-\u200D\uFEFF]/g, "");
+
+    return cleaned.slice(0, MAX_SEARCH_LENGTH).trim();
   },
   serialize(value) {
     return value;
@@ -52,6 +55,7 @@ const parseAsSafeSearch = createParser({
 const parseAsPageSize = createParser({
   parse(query) {
     const parsed = parseInt(query, 10);
+
     return (PAGE_SIZES as readonly number[]).includes(parsed)
       ? parsed
       : PAGE_SIZE.SMALL; // Fallback sur SMALL (10) si invalide

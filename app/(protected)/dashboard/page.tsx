@@ -4,6 +4,8 @@ import { redirect } from "next/navigation";
 import { UserRole } from "@/lib/constants/roles.constant";
 import { requireSession } from "@/lib/session";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Dashboard",
   robots: {
