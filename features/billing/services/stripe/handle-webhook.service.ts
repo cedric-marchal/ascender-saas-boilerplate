@@ -3,10 +3,8 @@ import "server-only";
 import * as Sentry from "@sentry/nextjs";
 import type Stripe from "stripe";
 
-import {
-  ALL_SUBSCRIPTION_STATUSES,
-  type SubscriptionStatus,
-} from "@/lib/constants/subscription-status.constant";
+import { ALL_SUBSCRIPTION_STATUSES } from "@/features/billing/constants/subscription-status.constant";
+import type { SubscriptionStatus } from "@/lib/generated/prisma/client";
 import { env } from "@/lib/env";
 import { prisma } from "@/lib/prisma";
 import { redis } from "@/lib/redis";

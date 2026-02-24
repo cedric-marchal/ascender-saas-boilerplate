@@ -6,7 +6,7 @@ import { Calendar, Download, FileText } from "lucide-react";
 import {
   type InvoiceStatus,
   invoiceStatusLabels,
-} from "@/lib/constants/invoice-status.constant";
+} from "@/features/billing/constants/invoice-status.constant";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";

@@ -1,7 +1,7 @@
 import {
   type InvoiceStatus,
   invoiceStatusLabels,
-} from "@/lib/constants/invoice-status.constant";
+} from "@/features/billing/constants/invoice-status.constant";
 import { describe, expect, it } from "vitest";
 
 describe("invoiceStatusLabels", () => {

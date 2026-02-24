@@ -4,7 +4,7 @@ import {
 } from "next-safe-action";
 
 import { auth } from "@/lib/auth";
-import { UserRole } from "@/lib/constants/roles.constant";
+import { UserRole } from "@/lib/generated/prisma/client";
 
 import {
   AppError,

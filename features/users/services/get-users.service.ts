@@ -10,7 +10,7 @@ import {
   usersSortableFields,
 } from "@/features/users/constants/users-filters.constant";
 
-import { UserRole } from "@/lib/constants/roles.constant";
+import type { UserRole } from "@/lib/generated/prisma/client";
 import type { User } from "@/lib/generated/prisma/client";
 import type { UserWhereInput } from "@/lib/generated/prisma/models";
 import {

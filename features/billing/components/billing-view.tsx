@@ -11,7 +11,7 @@ import type {
 } from "@/features/billing/services/get-billing.service";
 import { AlertCircle } from "lucide-react";
 
-import { ACTIVE_SUBSCRIPTION_STATUSES } from "@/lib/constants/subscription-status.constant";
+import { ACTIVE_SUBSCRIPTION_STATUSES } from "@/features/billing/constants/subscription-status.constant";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";

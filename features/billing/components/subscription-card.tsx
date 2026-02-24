@@ -2,9 +2,9 @@ import type { BillingSubscription } from "@/features/billing/services/get-billin
 import { Calendar, CheckCircle2, XCircle } from "lucide-react";
 
 import {
-  type SubscriptionStatus,
   subscriptionStatusLabels,
-} from "@/lib/constants/subscription-status.constant";
+} from "@/features/billing/constants/subscription-status.constant";
+import type { SubscriptionStatus } from "@/lib/generated/prisma/client";
 
 import { Badge } from "@/components/ui/badge";
 import {

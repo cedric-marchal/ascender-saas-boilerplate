@@ -2,8 +2,8 @@ import "server-only";
 
 import type Stripe from "stripe";
 
-import type { InvoiceStatus } from "@/lib/constants/invoice-status.constant";
-import type { SubscriptionStatus } from "@/lib/constants/subscription-status.constant";
+import type { InvoiceStatus } from "@/features/billing/constants/invoice-status.constant";
+import type { SubscriptionStatus } from "@/lib/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { redis } from "@/lib/redis";
 import { filterRatelimit } from "@/lib/ratelimit";

@@ -1,6 +1,6 @@
 import "server-only";
 
-import { UserRole } from "@/lib/constants/roles.constant";
+import { UserRole } from "@/lib/generated/prisma/client";
 import { env } from "@/lib/env";
 import { prisma } from "@/lib/prisma";
 import { stripe } from "@/lib/stripe";

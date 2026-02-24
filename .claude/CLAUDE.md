@@ -47,7 +47,6 @@ features/                     # ALL business logic
 │   └── services/             # Server-only logic ("server-only")
 
 lib/                          # Shared infrastructure
-├── constants/                # GLOBAL constants (roles, subscription-status, invoice-status, query)
 ├── parsers/                  # Nuqs parsers
 ├── generated/                # Prisma client
 ├── auth.ts, prisma.ts, etc.  # Core configs
@@ -70,9 +69,7 @@ hooks/                        # Shared hooks
 ```
 Prisma Schema (UserRole, SubscriptionStatus enums)
   ↓
-lib/generated/prisma/client
-  ↓
-lib/constants/*.constant.ts (GLOBAL: roles, subscription-status, invoice-status, query)
+lib/generated/prisma/client  ← import UserRole, SubscriptionStatus directly from here
   ↓
 lib/parsers/nuqs.ts
   ↓
@@ -89,7 +86,7 @@ features/{feature}/components/ (UI)
 app/*/page.tsx (pages import from features)
 ```
 
-**Key principle**: NEVER import enums from Prisma. Always from `lib/constants/*.constant.ts`.
+**Key principle**: Import Prisma enums (`UserRole`, `SubscriptionStatus`) directly from `@/lib/generated/prisma/client`.
 
 ## Core Conventions
 
@@ -118,7 +115,7 @@ app/*/page.tsx (pages import from features)
 | **Authorization**       | Define `UNRESTRICTED_ROLES: UserRole[]` constant, check with `.includes(userRole)`                  |
 | **Filtering**           | Filter by `userId` by default UNLESS `userRole` in `UNRESTRICTED_ROLES`                             |
 | **Rate limiting**       | ALWAYS `await checkRatelimit(filterRatelimit, userId)` in services                                   |
-| **Type safety**         | Import `UserRole` from `@/lib/constants/roles.constant` (NEVER from Prisma, NEVER strings/booleans) |
+| **Type safety**         | Import `UserRole` from `@/lib/generated/prisma/client` (NEVER strings/booleans)                     |
 | **Extensibility**       | Pattern supports multiple roles (ADMIN, MANAGER, MODERATOR) without code changes                    |
 | **Full documentation**  | See `.claude/rules/security.md` for complete patterns and examples                                   |
 
@@ -129,7 +126,7 @@ app/*/page.tsx (pages import from features)
 async function getDocuments(userId: string, isAdmin: boolean = false) { }
 
 // ✅ CORRECT: UserRole permissions (extensible, type-safe)
-import { UserRole } from "@/lib/constants/roles.constant";
+import { UserRole } from "@/lib/generated/prisma/client";
 
 const UNRESTRICTED_ROLES: UserRole[] = [UserRole.ADMIN];
 
@@ -151,14 +148,13 @@ async function getDocuments(
 ### UserRole
 
 ```tsx
-// ✅ Import from constants
-import { UserRole, roleLabels } from "@/lib/constants/roles.constant";
+// ✅ Import direct depuis Prisma (valeur)
+import { UserRole } from "@/lib/generated/prisma/client";
+
+// ✅ Import direct depuis Prisma (type uniquement)
+import type { UserRole } from "@/lib/generated/prisma/client";
 
 if (user.role === UserRole.ADMIN) { ... }
-const label = roleLabels[user.role];  // Exhaustive
-
-// ❌ NEVER from Prisma
-import { UserRole } from "@/lib/generated/prisma/client";
 
 // ❌ NEVER magic strings
 if (user.role === "ADMIN") { ... }
@@ -167,12 +163,14 @@ if (user.role === "ADMIN") { ... }
 ### SubscriptionStatus
 
 ```tsx
-// ✅ Import from constants
+// ✅ Type depuis Prisma
+import type { SubscriptionStatus } from "@/lib/generated/prisma/client";
+
+// ✅ Constantes depuis features/billing
 import {
   ACTIVE_SUBSCRIPTION_STATUSES,
   subscriptionStatusLabels,
-  type SubscriptionStatus,
-} from "@/lib/constants/subscription-status.constant";
+} from "@/features/billing/constants/subscription-status.constant";
 
 if (ACTIVE_SUBSCRIPTION_STATUSES.includes(subscription.status)) { ... }
 const label = subscriptionStatusLabels[subscription.status];
@@ -602,9 +600,9 @@ export default function Component() { ... }
 // ❌ NEVER relative imports
 import { Component } from "./component";
 
-// ❌ NEVER import enums from Prisma
-import { UserRole } from "@/lib/generated/prisma/client";
-// ✅ Use: import { UserRole } from "@/lib/constants/roles.constant";
+// ❌ NEVER magic strings for UserRole
+if (user.role === "ADMIN") { ... }
+// ✅ Use: import { UserRole } from "@/lib/generated/prisma/client";
 
 // ❌ NEVER magic strings for enums
 if (user.role === "ADMIN") { ... }

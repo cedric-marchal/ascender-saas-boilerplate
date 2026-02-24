@@ -4,7 +4,7 @@ import { PricingGrid } from "@/features/pricing/components/pricing-grid";
 import { PLANS, type Plan } from "@/features/pricing/constants/pricing-plans";
 import type { Product, WebPage, WithContext } from "schema-dts";
 
-import { UserRole } from "@/lib/constants/roles.constant";
+import { UserRole } from "@/lib/generated/prisma/client";
 import { env } from "@/lib/env";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";

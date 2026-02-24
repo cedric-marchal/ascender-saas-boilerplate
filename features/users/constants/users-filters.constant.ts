@@ -1,8 +1,4 @@
-import {
-  UserRole,
-  roleLabels as baseRoleLabels,
-} from "@/lib/constants/roles.constant";
-import type { User } from "@/lib/generated/prisma/client";
+import { UserRole } from "@/lib/generated/prisma/client";
 import {
   createEnumParser,
   createSortByParser,
@@ -22,7 +18,8 @@ type UserSortableField = (typeof usersSortableFields)[number];
 
 const roleLabels: Record<UserRoleFilter, string> = {
   all: "Tous les rôles",
-  ...baseRoleLabels,
+  ADMIN: "Administrateur",
+  CUSTOMER: "Client",
 };
 
 const verificationLabels: Record<VerificationFilter, string> = {

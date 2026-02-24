@@ -1,4 +1,4 @@
-import { UserRole } from "@/lib/constants/roles.constant";
+import { UserRole } from "@/lib/generated/prisma/client";
 
 const EXACT_COUNT_ROLES: UserRole[] = [UserRole.ADMIN];
 

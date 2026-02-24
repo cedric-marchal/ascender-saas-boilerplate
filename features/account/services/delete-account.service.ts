@@ -2,8 +2,8 @@ import "server-only";
 
 import { AccountDeletedEmail } from "@/features/account/emails/account-deleted-email";
 
-import { UserRole } from "@/lib/constants/roles.constant";
 import { env } from "@/lib/env";
+import { UserRole } from "@/lib/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { deleteFile } from "@/lib/r2";
 import { redis } from "@/lib/redis";

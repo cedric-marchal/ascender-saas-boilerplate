@@ -4,7 +4,7 @@ import { CheckCircle2, XCircle } from "lucide-react";
 import {
   ACTIVE_SUBSCRIPTION_STATUSES,
   subscriptionStatusLabels,
-} from "@/lib/constants/subscription-status.constant";
+} from "@/features/billing/constants/subscription-status.constant";
 import { env } from "@/lib/env";
 
 import { Badge } from "@/components/ui/badge";

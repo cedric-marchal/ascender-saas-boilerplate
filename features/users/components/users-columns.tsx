@@ -2,12 +2,15 @@
 
 import { useTransition } from "react";
 
-import { usersSearchParams } from "@/features/users/constants/users-filters.constant";
+import {
+  roleLabels,
+  usersSearchParams,
+} from "@/features/users/constants/users-filters.constant";
 import type { ColumnDef } from "@tanstack/react-table";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import { useQueryStates } from "nuqs";
 
-import { UserRole, roleLabels } from "@/lib/constants/roles.constant";
+import { UserRole } from "@/lib/generated/prisma/client";
 import { env } from "@/lib/env";
 import type { User } from "@/lib/generated/prisma/client";
 
