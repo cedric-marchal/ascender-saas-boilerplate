@@ -12,7 +12,7 @@ import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { toast } from "sonner";
 
-import { signOut } from "@/lib/auth-client";
+import { signOutAction } from "@/features/auth/actions/sign-out.action";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -46,7 +46,7 @@ function DeleteAccountForm({ email, onSuccess }: DeleteAccountFormProps) {
         getActionResult(await executeAsync(value));
 
         toast.success("Votre compte a été supprimé avec succès");
-        await signOut().catch(() => {});
+        await signOutAction().catch(() => {});
 
         onSuccess();
       } catch (error: unknown) {

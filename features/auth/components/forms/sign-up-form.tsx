@@ -4,23 +4,30 @@ import { type ChangeEvent, type SubmitEvent, useState } from "react";
 
 import { useRouter } from "next/navigation";
 
+import { signUpAction } from "@/features/auth/actions/sign-up.action";
 import {
   SignUpSchema,
   type SignUpSchemaType,
 } from "@/features/auth/schemas/auth.schema";
 import { useForm } from "@tanstack/react-form";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { useAction } from "next-safe-action/hooks";
 import { toast } from "sonner";
 
-import { signIn, signUp } from "@/lib/auth-client";
+import { signIn } from "@/lib/auth-client";
 
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 
+import { getActionResult } from "@/utils/errors/get-action-result";
+import { getErrorMessage } from "@/utils/errors/get-error-message";
+
 function SignUpForm() {
-  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const router = useRouter();
+  const { executeAsync, isExecuting } = useAction(signUpAction);
+
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
   const form = useForm({
     defaultValues: {
@@ -32,22 +39,24 @@ function SignUpForm() {
       onSubmit: SignUpSchema,
     },
     onSubmit: async ({ value }) => {
-      const { error } = await signUp.email({
-        name: value.name,
-        email: value.email,
-        password: value.password,
-      });
-
-      if (error) {
-        toast.error(error.message || "Erreur lors de l'inscription");
-        return;
+      try {
+        getActionResult(await executeAsync(value));
+        toast.success("Compte créé avec succès");
+        router.push("/dashboard");
+        router.refresh();
+      } catch (error: unknown) {
+        toast.error(getErrorMessage(error));
       }
-
-      toast.success("Compte créé avec succès");
-      router.push("/dashboard");
-      router.refresh();
     },
   });
+
+  async function handleGoogleSignUp() {
+    const { error } = await signIn.social({ provider: "google" });
+
+    if (error) {
+      toast.error(error.message || "Une erreur est survenue");
+    }
+  }
 
   return (
     <>
@@ -173,41 +182,26 @@ function SignUpForm() {
           {([canSubmit, isSubmitting]) => (
             <Button
               type="submit"
-              disabled={!canSubmit || isSubmitting}
+              disabled={!canSubmit || isExecuting || isSubmitting}
               className="w-full"
             >
-              {isSubmitting ? (
+              {isExecuting || isSubmitting ? (
                 <Loader2
                   className="mr-2 h-4 w-4 animate-spin"
                   aria-hidden="true"
                 />
               ) : null}
-              {isSubmitting ? "Création en cours..." : "Créer un compte"}
+              {isExecuting || isSubmitting
+                ? "Création en cours..."
+                : "Créer un compte"}
             </Button>
           )}
         </form.Subscribe>
       </form>
 
-      <form.Subscribe selector={(state) => state.isSubmitting}>
-        {(isSubmitting) => (
-          <Button
-            type="button"
-            disabled={isSubmitting}
-            onClick={() => signIn.social({ provider: "google" })}
-            className="w-full"
-          >
-            {isSubmitting ? (
-              <Loader2
-                className="mr-2 h-4 w-4 animate-spin"
-                aria-hidden="true"
-              />
-            ) : null}
-            {isSubmitting
-              ? "Inscription en cours..."
-              : "Créer un compte avec Google"}
-          </Button>
-        )}
-      </form.Subscribe>
+      <Button type="button" onClick={handleGoogleSignUp} className="w-full">
+        Créer un compte avec Google
+      </Button>
     </>
   );
 }

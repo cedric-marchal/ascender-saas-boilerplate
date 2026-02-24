@@ -4,51 +4,52 @@ import { type ChangeEvent, type SubmitEvent, useState } from "react";
 
 import { useRouter } from "next/navigation";
 
+import { resetPasswordAction } from "@/features/auth/actions/reset-password.action";
 import {
-  ResetPasswordSchema,
-  type ResetPasswordSchemaType,
+  ResetPasswordActionSchema,
+  type ResetPasswordActionSchemaType,
 } from "@/features/auth/schemas/auth.schema";
 import { useForm } from "@tanstack/react-form";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { useAction } from "next-safe-action/hooks";
 import { toast } from "sonner";
-
-import { resetPassword } from "@/lib/auth-client";
 
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+
+import { getActionResult } from "@/utils/errors/get-action-result";
+import { getErrorMessage } from "@/utils/errors/get-error-message";
 
 type ResetPasswordFormProps = {
   token: string;
 };
 
 function ResetPasswordForm({ token }: ResetPasswordFormProps) {
+  const router = useRouter();
+  const { executeAsync, isExecuting } = useAction(resetPasswordAction);
+
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] =
     useState(false);
-  const router = useRouter();
 
   const form = useForm({
     defaultValues: {
       password: "",
       confirmPassword: "",
-    } as ResetPasswordSchemaType,
+      token,
+    } as ResetPasswordActionSchemaType,
     validators: {
-      onSubmit: ResetPasswordSchema,
+      onSubmit: ResetPasswordActionSchema,
     },
     onSubmit: async ({ value }) => {
-      const { error } = await resetPassword({
-        newPassword: value.password,
-        token,
-      });
-
-      if (error) {
-        toast.error(error.message || "Une erreur est survenue");
-        return;
+      try {
+        getActionResult(await executeAsync(value));
+        toast.success("Mot de passe mis à jour avec succès");
+        router.push("/connexion");
+      } catch (error: unknown) {
+        toast.error(getErrorMessage(error));
       }
-
-      toast.success("Mot de passe mis à jour avec succès");
-      router.push("/connexion");
     },
   });
 
@@ -174,16 +175,16 @@ function ResetPasswordForm({ token }: ResetPasswordFormProps) {
         {([canSubmit, isSubmitting]) => (
           <Button
             type="submit"
-            disabled={!canSubmit || isSubmitting}
+            disabled={!canSubmit || isExecuting || isSubmitting}
             className="w-full"
           >
-            {isSubmitting ? (
+            {isExecuting || isSubmitting ? (
               <Loader2
                 className="mr-2 h-4 w-4 animate-spin"
                 aria-hidden="true"
               />
             ) : null}
-            {isSubmitting
+            {isExecuting || isSubmitting
               ? "Mise à jour en cours..."
               : "Mettre à jour le mot de passe"}
           </Button>

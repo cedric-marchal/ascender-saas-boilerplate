@@ -2,21 +2,26 @@
 
 import { type ChangeEvent, type SubmitEvent, useState } from "react";
 
+import { forgotPasswordAction } from "@/features/auth/actions/forgot-password.action";
 import {
   ForgotPasswordSchema,
   type ForgotPasswordSchemaType,
 } from "@/features/auth/schemas/auth.schema";
 import { useForm } from "@tanstack/react-form";
 import { Loader2 } from "lucide-react";
+import { useAction } from "next-safe-action/hooks";
 import { toast } from "sonner";
-
-import { requestPasswordReset } from "@/lib/auth-client";
 
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 
+import { getActionResult } from "@/utils/errors/get-action-result";
+import { getErrorMessage } from "@/utils/errors/get-error-message";
+
 function ForgotPasswordForm() {
+  const { executeAsync, isExecuting } = useAction(forgotPasswordAction);
+
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   const form = useForm({
@@ -27,17 +32,12 @@ function ForgotPasswordForm() {
       onSubmit: ForgotPasswordSchema,
     },
     onSubmit: async ({ value }) => {
-      const { error } = await requestPasswordReset({
-        email: value.email,
-        redirectTo: "/nouveau-mot-de-passe",
-      });
-
-      if (error) {
-        toast.error(error.message || "Une erreur est survenue");
-        return;
+      try {
+        getActionResult(await executeAsync(value));
+        setIsSubmitted(true);
+      } catch (error: unknown) {
+        toast.error(getErrorMessage(error));
       }
-
-      setIsSubmitted(true);
     },
   });
 
@@ -99,16 +99,16 @@ function ForgotPasswordForm() {
         {([canSubmit, isSubmitting]) => (
           <Button
             type="submit"
-            disabled={!canSubmit || isSubmitting}
+            disabled={!canSubmit || isExecuting || isSubmitting}
             className="w-full"
           >
-            {isSubmitting ? (
+            {isExecuting || isSubmitting ? (
               <Loader2
                 className="mr-2 h-4 w-4 animate-spin"
                 aria-hidden="true"
               />
             ) : null}
-            {isSubmitting
+            {isExecuting || isSubmitting
               ? "Envoi en cours..."
               : "Envoyer le lien de réinitialisation"}
           </Button>

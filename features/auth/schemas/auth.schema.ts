@@ -48,13 +48,21 @@ const ResetPasswordSchema = z
     path: ["confirmPassword"],
   });
 
+const ResetPasswordActionSchema = ResetPasswordSchema.and(
+  z.object({
+    token: z.string().min(1, "Token requis").trim(),
+  })
+);
+
 type SignUpSchemaType = z.infer<typeof SignUpSchema>;
 type SignInSchemaType = z.infer<typeof SignInSchema>;
 type ForgotPasswordSchemaType = z.infer<typeof ForgotPasswordSchema>;
 type ResetPasswordSchemaType = z.infer<typeof ResetPasswordSchema>;
+type ResetPasswordActionSchemaType = z.infer<typeof ResetPasswordActionSchema>;
 
 export {
   ForgotPasswordSchema,
+  ResetPasswordActionSchema,
   ResetPasswordSchema,
   SignInSchema,
   SignUpSchema,
@@ -62,6 +70,7 @@ export {
 
 export type {
   ForgotPasswordSchemaType,
+  ResetPasswordActionSchemaType,
   ResetPasswordSchemaType,
   SignInSchemaType,
   SignUpSchemaType,
