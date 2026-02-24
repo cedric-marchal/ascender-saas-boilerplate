@@ -3,10 +3,11 @@ import "server-only";
 import type Stripe from "stripe";
 
 import type { InvoiceStatus } from "@/features/billing/constants/invoice-status.constant";
+
 import type { SubscriptionStatus } from "@/lib/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
-import { redis } from "@/lib/redis";
 import { filterRatelimit } from "@/lib/ratelimit";
+import { redis } from "@/lib/redis";
 import { stripe } from "@/lib/stripe";
 
 import { checkRatelimit } from "@/utils/ratelimit/check-ratelimit";
@@ -51,7 +52,7 @@ function mapInvoice(invoice: Stripe.Invoice): BillingInvoice {
 }
 
 function mapSubscription(
-  subscription: Stripe.Subscription
+  subscription: Stripe.Subscription,
 ): BillingSubscription {
   const subscriptionItem = subscription.items.data[0];
 
@@ -91,7 +92,7 @@ async function getBilling(userId: string): Promise<GetBillingResult | null> {
       limit: 100,
     });
     invoices = fetchedInvoices.map((invoice: Stripe.Invoice) =>
-      mapInvoice(invoice)
+      mapInvoice(invoice),
     );
     await redis.set(invoicesCacheKey, invoices, { ex: 300 });
   }
@@ -102,7 +103,7 @@ async function getBilling(userId: string): Promise<GetBillingResult | null> {
   });
 
   const subscriptions = fetchedSubscriptions.map(
-    (subscription: Stripe.Subscription) => mapSubscription(subscription)
+    (subscription: Stripe.Subscription) => mapSubscription(subscription),
   );
 
   return { invoices, subscriptions };

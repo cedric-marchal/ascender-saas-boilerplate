@@ -109,36 +109,36 @@ app/*/page.tsx (pages import from features)
 
 ## Security: IDOR Prevention (P0) 🔴
 
-| Rule                    | Convention                                                                                          |
-| ----------------------- | --------------------------------------------------------------------------------------------------- |
-| **Service params**      | ALWAYS `userId: string` + `userRole: UserRole` (NEVER booleans like `isAdmin`)                      |
-| **Authorization**       | Define `UNRESTRICTED_ROLES: UserRole[]` constant, check with `.includes(userRole)`                  |
-| **Filtering**           | Filter by `userId` by default UNLESS `userRole` in `UNRESTRICTED_ROLES`                             |
-| **Rate limiting**       | ALWAYS `await checkRatelimit(filterRatelimit, userId)` in services                                   |
-| **Type safety**         | Import `UserRole` from `@/lib/generated/prisma/client` (NEVER strings/booleans)                     |
-| **Extensibility**       | Pattern supports multiple roles (ADMIN, MANAGER, MODERATOR) without code changes                    |
-| **Full documentation**  | See `.claude/rules/security.md` for complete patterns and examples                                   |
+| Rule                   | Convention                                                                         |
+| ---------------------- | ---------------------------------------------------------------------------------- |
+| **Service params**     | ALWAYS `userId: string` + `userRole: UserRole` (NEVER booleans like `isAdmin`)     |
+| **Authorization**      | Define `UNRESTRICTED_ROLES: UserRole[]` constant, check with `.includes(userRole)` |
+| **Filtering**          | Filter by `userId` by default UNLESS `userRole` in `UNRESTRICTED_ROLES`            |
+| **Rate limiting**      | ALWAYS `await checkRatelimit(filterRatelimit, userId)` in services                 |
+| **Type safety**        | Import `UserRole` from `@/lib/generated/prisma/client` (NEVER strings/booleans)    |
+| **Extensibility**      | Pattern supports multiple roles (ADMIN, MANAGER, MODERATOR) without code changes   |
+| **Full documentation** | See `.claude/rules/security.md` for complete patterns and examples                 |
 
 **Critical Example** :
 
 ```tsx
-// ❌ WRONG: Boolean permissions (not extensible, not type-safe)
-async function getDocuments(userId: string, isAdmin: boolean = false) { }
-
 // ✅ CORRECT: UserRole permissions (extensible, type-safe)
 import { UserRole } from "@/lib/generated/prisma/client";
+
+// ❌ WRONG: Boolean permissions (not extensible, not type-safe)
+async function getDocuments(userId: string, isAdmin: boolean = false) {}
 
 const UNRESTRICTED_ROLES: UserRole[] = [UserRole.ADMIN];
 
 async function getDocuments(
   filters: GetDocumentsFilters,
   userId: string,
-  userRole: UserRole
+  userRole: UserRole,
 ) {
   await checkRatelimit(filterRatelimit, userId);
   const canAccessAllData = UNRESTRICTED_ROLES.includes(userRole);
   const whereClause = {
-    ...(!canAccessAllData && { userId }),  // Non-admin sees only their data
+    ...(!canAccessAllData && { userId }), // Non-admin sees only their data
   };
 }
 ```
@@ -320,14 +320,15 @@ Location: `features/{feature}/components/forms/{entity}-form.tsx`
 ```tsx
 "use client";
 
+import { useForm } from "@tanstack/react-form";
+import { useAction } from "next-safe-action/hooks";
+import { toast } from "sonner";
+
 import { createContactAction } from "@/features/contact/actions/create-contact.action";
 import {
   CreateContactSchema,
   type CreateContactSchemaType,
 } from "@/features/contact/schemas/contact.schema";
-import { useForm } from "@tanstack/react-form";
-import { useAction } from "next-safe-action/hooks";
-import { toast } from "sonner";
 
 import { getActionResult } from "@/utils/errors/get-action-result";
 import { getErrorMessage } from "@/utils/errors/get-error-message";
@@ -378,17 +379,17 @@ function ContactForm() {
 
 ALWAYS truncate data received from database using `utils/string/truncate.ts` helpers. Apply with good judgment based on context.
 
-| Helper                 | Length | Usage                                         |
-| ---------------------- | ------ | --------------------------------------------- |
-| `truncateTitle()`      | 60     | SEO titles, Open Graph, cards                 |
-| `truncateDescription()`| 160    | Meta descriptions, Open Graph descriptions    |
-| `truncatePreview()`    | 200    | 4-5 line article/post preview                 |
-| `truncateExcerpt()`    | 300    | 6-8 line blog post excerpt                    |
-| `truncateName()`       | 20     | Sidebar labels, avatar names, badges          |
+| Helper                  | Length | Usage                                      |
+| ----------------------- | ------ | ------------------------------------------ |
+| `truncateTitle()`       | 60     | SEO titles, Open Graph, cards              |
+| `truncateDescription()` | 160    | Meta descriptions, Open Graph descriptions |
+| `truncatePreview()`     | 200    | 4-5 line article/post preview              |
+| `truncateExcerpt()`     | 300    | 6-8 line blog post excerpt                 |
+| `truncateName()`        | 20     | Sidebar labels, avatar names, badges       |
 
 ```tsx
 // ✅ Correct: Truncate DB data before display
-import { truncateTitle, truncateDescription } from "@/utils/string/truncate";
+import { truncateDescription, truncateTitle } from "@/utils/string/truncate";
 
 const posts = await prisma.post.findMany({
   select: { id: true, title: true, description: true },
@@ -413,7 +414,7 @@ function PostCard({ title, description }: PostCardProps) {
 // ❌ Wrong: No truncation
 return posts.map((post) => ({
   id: post.id,
-  title: post.title,  // Can overflow in card layouts
+  title: post.title, // Can overflow in card layouts
   description: post.description,
 }));
 ```

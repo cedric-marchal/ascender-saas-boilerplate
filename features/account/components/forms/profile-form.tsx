@@ -4,16 +4,17 @@ import type { ChangeEvent, SubmitEvent } from "react";
 
 import { useRouter } from "next/navigation";
 
+import { useForm } from "@tanstack/react-form";
+import { Loader2 } from "lucide-react";
+import { useAction } from "next-safe-action/hooks";
+import { toast } from "sonner";
+
 import { updateProfileAction } from "@/features/account/actions/update-profile.action";
 import { EmailVerificationBadge } from "@/features/account/components/email-verification-badge";
 import {
   UpdateProfileSchema,
   type UpdateProfileSchemaType,
 } from "@/features/account/schemas/profile.schema";
-import { useForm } from "@tanstack/react-form";
-import { Loader2 } from "lucide-react";
-import { useAction } from "next-safe-action/hooks";
-import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -52,7 +53,7 @@ function ProfileForm({ name, email, emailVerified }: ProfileFormProps) {
         toast.success(
           data.emailChanged
             ? "Profil mis à jour avec succès. Un email de vérification a été envoyé."
-            : "Profil mis à jour avec succès"
+            : "Profil mis à jour avec succès",
         );
 
         router.refresh();

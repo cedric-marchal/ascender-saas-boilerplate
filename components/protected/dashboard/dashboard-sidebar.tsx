@@ -4,7 +4,6 @@ import type { ComponentType } from "react";
 
 import Link from "next/link";
 
-import { SignOutButton } from "@/features/auth/components/sign-out-button";
 import {
   ChevronUp,
   CreditCard,
@@ -12,6 +11,8 @@ import {
   LayoutDashboard,
   Settings,
 } from "lucide-react";
+
+import { SignOutButton } from "@/features/auth/components/sign-out-button";
 
 import { env } from "@/lib/env";
 

@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
-import { ResetPasswordForm } from "@/features/auth/components/forms/reset-password-form";
 import type { WebPage, WithContext } from "schema-dts";
+
+import { ResetPasswordForm } from "@/features/auth/components/forms/reset-password-form";
 
 import { env } from "@/lib/env";
 import { getSession } from "@/lib/session";

@@ -26,7 +26,7 @@ type UpdateProfileResult = {
 };
 
 async function updateProfile(
-  input: UpdateProfileInput
+  input: UpdateProfileInput,
 ): Promise<UpdateProfileResult> {
   const currentUser = await prisma.user.findUnique({
     where: { id: input.userId },

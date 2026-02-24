@@ -20,7 +20,7 @@ import { Switch } from "@/components/ui/switch";
 
 function CookiePreferencesModal() {
   const isPreferencesOpen = useCookieConsent(
-    (state) => state.isPreferencesOpen
+    (state) => state.isPreferencesOpen,
   );
   const closePreferences = useCookieConsent((state) => state.closePreferences);
   const preferences = useCookieConsent((state) => state.preferences);
@@ -67,7 +67,7 @@ function CookiePreferencesModal() {
                     />
                   </div>
                 );
-              }
+              },
             )}
           </div>
         </div>

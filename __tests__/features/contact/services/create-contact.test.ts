@@ -16,9 +16,8 @@ vi.mock("@/lib/env", () => ({
 }));
 
 // Import after mocks
-const { createContact } = await import(
-  "@/features/contact/services/create-contact.service"
-);
+const { createContact } =
+  await import("@/features/contact/services/create-contact.service");
 
 describe("createContact", () => {
   beforeEach(() => {
@@ -112,7 +111,7 @@ describe("createContact", () => {
     mockSendEmail.mockRejectedValue(new Error("Email service unavailable"));
 
     await expect(createContact(input)).rejects.toThrow(
-      "Email service unavailable"
+      "Email service unavailable",
     );
   });
 

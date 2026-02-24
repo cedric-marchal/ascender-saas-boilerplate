@@ -49,7 +49,7 @@ type GetUsersResult = {
 async function getUsers(
   filters: GetUsersFilters,
   userId: string,
-  userRole: UserRole
+  userRole: UserRole,
 ): Promise<GetUsersResult> {
   await checkRatelimit(filterRatelimit, userId);
 
@@ -61,7 +61,7 @@ async function getUsers(
     : "all";
 
   const safeVerified: VerificationFilter = isVerificationFilter(
-    filters.verified
+    filters.verified,
   )
     ? filters.verified
     : "all";
@@ -73,7 +73,7 @@ async function getUsers(
     : (DEFAULT_SORT_BY as UserSortableField);
 
   const safeOrder: SortOrder = (SORT_ORDERS as readonly string[]).includes(
-    filters.order
+    filters.order,
   )
     ? (filters.order as SortOrder)
     : DEFAULT_SORT_ORDER;

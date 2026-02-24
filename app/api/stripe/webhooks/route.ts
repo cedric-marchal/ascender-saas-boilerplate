@@ -9,7 +9,7 @@ async function POST(request: Request) {
   if (!signature) {
     return NextResponse.json(
       { success: false, message: "Signature manquante" },
-      { status: 400 }
+      { status: 400 },
     );
   }
 

@@ -4,15 +4,16 @@ import { type ChangeEvent, type SubmitEvent, useState } from "react";
 
 import { useRouter } from "next/navigation";
 
+import { useForm } from "@tanstack/react-form";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { useAction } from "next-safe-action/hooks";
+import { toast } from "sonner";
+
 import { signUpAction } from "@/features/auth/actions/sign-up.action";
 import {
   SignUpSchema,
   type SignUpSchemaType,
 } from "@/features/auth/schemas/auth.schema";
-import { useForm } from "@tanstack/react-form";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
-import { useAction } from "next-safe-action/hooks";
-import { toast } from "sonner";
 
 import { signIn } from "@/lib/auth-client";
 

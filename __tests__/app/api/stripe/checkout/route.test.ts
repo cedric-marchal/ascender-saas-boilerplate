@@ -13,7 +13,7 @@ vi.mock(
   "@/features/billing/services/stripe/create-checkout-session.service",
   () => ({
     createCheckoutSession: mockCreateCheckoutSession,
-  })
+  }),
 );
 
 vi.mock("@/utils/errors/handle-api-error", () => ({
@@ -47,7 +47,7 @@ describe("POST /api/stripe/checkout", () => {
     mockHandleApiError.mockImplementation((error: Error) => {
       return Response.json(
         { success: false, message: error.message },
-        { status: 401 }
+        { status: 401 },
       );
     });
 
@@ -123,7 +123,7 @@ describe("POST /api/stripe/checkout", () => {
     mockHandleApiError.mockImplementation((error: Error) => {
       return Response.json(
         { success: false, message: "Validation failed" },
-        { status: 400 }
+        { status: 400 },
       );
     });
 
@@ -145,14 +145,12 @@ describe("POST /api/stripe/checkout", () => {
       formData: vi.fn().mockResolvedValue(formData),
     } as unknown as Request;
 
-    mockCreateCheckoutSession.mockRejectedValue(
-      new Error("Stripe API error")
-    );
+    mockCreateCheckoutSession.mockRejectedValue(new Error("Stripe API error"));
 
     mockHandleApiError.mockImplementation((error: Error) => {
       return Response.json(
         { success: false, message: error.message },
-        { status: 500 }
+        { status: 500 },
       );
     });
 

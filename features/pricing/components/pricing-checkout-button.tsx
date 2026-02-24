@@ -42,7 +42,7 @@ function PricingCheckoutButton({
 
     if (!isEmailVerified) {
       toast.error(
-        "Vous devez vérifier votre adresse e-mail avant de vous abonner"
+        "Vous devez vérifier votre adresse e-mail avant de vous abonner",
       );
       router.push("/dashboard/parametres");
       return;
@@ -50,7 +50,7 @@ function PricingCheckoutButton({
 
     if (!isCustomer) {
       toast.error(
-        "Seuls les utilisateurs avec le rôle CUSTOMER peuvent souscrire à un abonnement"
+        "Seuls les utilisateurs avec le rôle CUSTOMER peuvent souscrire à un abonnement",
       );
       return;
     }

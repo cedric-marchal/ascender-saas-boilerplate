@@ -1,10 +1,11 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
 import {
   BadRequestError,
   ConflictError,
   ForbiddenError,
   UnauthorizedError,
 } from "@/utils/errors/errors";
-import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Create mocks
 const mockPrismaUserFindUnique = vi.fn();
@@ -61,9 +62,8 @@ vi.mock("@/lib/constants/roles.constant", () => ({
 }));
 
 // Import after mocks
-const { createCheckoutSession } = await import(
-  "@/features/billing/services/stripe/create-checkout-session.service"
-);
+const { createCheckoutSession } =
+  await import("@/features/billing/services/stripe/create-checkout-session.service");
 
 describe("createCheckoutSession", () => {
   beforeEach(() => {
@@ -113,7 +113,8 @@ describe("createCheckoutSession", () => {
         },
       ],
       mode: "subscription",
-      success_url: "https://test.example.com/dashboard/facturation?success=true",
+      success_url:
+        "https://test.example.com/dashboard/facturation?success=true",
       cancel_url: "https://test.example.com/tarifs?canceled=true",
       metadata: {
         userId: "user-123",
@@ -128,13 +129,13 @@ describe("createCheckoutSession", () => {
       createCheckoutSession({
         userId: "missing-user",
         priceId: "price_pro_123",
-      })
+      }),
     ).rejects.toThrow(UnauthorizedError);
     await expect(
       createCheckoutSession({
         userId: "missing-user",
         priceId: "price_pro_123",
-      })
+      }),
     ).rejects.toThrow("Utilisateur introuvable");
   });
 
@@ -151,13 +152,13 @@ describe("createCheckoutSession", () => {
       createCheckoutSession({
         userId: "user-123",
         priceId: "price_pro_123",
-      })
+      }),
     ).rejects.toThrow(ForbiddenError);
     await expect(
       createCheckoutSession({
         userId: "user-123",
         priceId: "price_pro_123",
-      })
+      }),
     ).rejects.toThrow("vérifier votre adresse e-mail");
   });
 
@@ -174,13 +175,13 @@ describe("createCheckoutSession", () => {
       createCheckoutSession({
         userId: "user-123",
         priceId: "price_pro_123",
-      })
+      }),
     ).rejects.toThrow(ForbiddenError);
     await expect(
       createCheckoutSession({
         userId: "user-123",
         priceId: "price_pro_123",
-      })
+      }),
     ).rejects.toThrow("rôle CUSTOMER");
   });
 
@@ -197,13 +198,13 @@ describe("createCheckoutSession", () => {
       createCheckoutSession({
         userId: "user-123",
         priceId: "price_invalid",
-      })
+      }),
     ).rejects.toThrow(BadRequestError);
     await expect(
       createCheckoutSession({
         userId: "user-123",
         priceId: "price_invalid",
-      })
+      }),
     ).rejects.toThrow("Prix invalide");
   });
 
@@ -235,13 +236,13 @@ describe("createCheckoutSession", () => {
       createCheckoutSession({
         userId: "user-123",
         priceId: "price_pro_123",
-      })
+      }),
     ).rejects.toThrow(ConflictError);
     await expect(
       createCheckoutSession({
         userId: "user-123",
         priceId: "price_pro_123",
-      })
+      }),
     ).rejects.toThrow("déjà un abonnement actif");
   });
 
@@ -436,13 +437,13 @@ describe("createCheckoutSession", () => {
       createCheckoutSession({
         userId: "user-123",
         priceId: "price_pro_123",
-      })
+      }),
     ).rejects.toThrow(BadRequestError);
     await expect(
       createCheckoutSession({
         userId: "user-123",
         priceId: "price_pro_123",
-      })
+      }),
     ).rejects.toThrow("Impossible de créer la session de paiement");
   });
 });

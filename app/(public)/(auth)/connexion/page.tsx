@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { SignInForm } from "@/features/auth/components/forms/sign-in-form";
 import type { WebPage, WithContext } from "schema-dts";
+
+import { SignInForm } from "@/features/auth/components/forms/sign-in-form";
 
 import { env } from "@/lib/env";
 import { getSession } from "@/lib/session";

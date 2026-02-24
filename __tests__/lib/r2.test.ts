@@ -1,8 +1,9 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
 import {
   BadRequestError,
   ServiceUnavailableError,
 } from "@/utils/errors/errors";
-import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Mock AWS SDK before imports
 const mockSend = vi.fn();
@@ -54,14 +55,14 @@ describe("validateKey (via getPublicUrl)", () => {
   it("throws for key with ..", () => {
     expect(() => getPublicUrl("path/../sensitive")).toThrow(BadRequestError);
     expect(() => getPublicUrl("path/../sensitive")).toThrow(
-      "caractères invalides"
+      "caractères invalides",
     );
   });
 
   it("throws for key starting with /", () => {
     expect(() => getPublicUrl("/absolute/path")).toThrow(BadRequestError);
     expect(() => getPublicUrl("/absolute/path")).toThrow(
-      "caractères invalides"
+      "caractères invalides",
     );
   });
 
@@ -113,10 +114,10 @@ describe("uploadFile", () => {
 
   it("throws BadRequestError for empty body", async () => {
     await expect(
-      uploadFile("key", null as never, "text/plain")
+      uploadFile("key", null as never, "text/plain"),
     ).rejects.toThrow(BadRequestError);
     await expect(
-      uploadFile("key", null as never, "text/plain")
+      uploadFile("key", null as never, "text/plain"),
     ).rejects.toThrow("Le contenu du fichier est requis");
   });
 
@@ -125,7 +126,7 @@ describe("uploadFile", () => {
 
     await expect(uploadFile("key", body, "")).rejects.toThrow(BadRequestError);
     await expect(uploadFile("key", body, "")).rejects.toThrow(
-      "Le type de contenu est requis"
+      "Le type de contenu est requis",
     );
   });
 
@@ -133,10 +134,10 @@ describe("uploadFile", () => {
     const body = Buffer.from("data");
 
     await expect(uploadFile("key", body, "   ")).rejects.toThrow(
-      BadRequestError
+      BadRequestError,
     );
     await expect(uploadFile("key", body, "   ")).rejects.toThrow(
-      "Le type de contenu est requis"
+      "Le type de contenu est requis",
     );
   });
 
@@ -146,10 +147,10 @@ describe("uploadFile", () => {
     const body = Buffer.from("data");
 
     await expect(uploadFile("key", body, "text/plain")).rejects.toThrow(
-      ServiceUnavailableError
+      ServiceUnavailableError,
     );
     await expect(uploadFile("key", body, "text/plain")).rejects.toThrow(
-      "temporairement indisponible"
+      "temporairement indisponible",
     );
   });
 });
@@ -181,7 +182,7 @@ describe("deleteFile", () => {
 
     await expect(deleteFile("key")).rejects.toThrow(ServiceUnavailableError);
     await expect(deleteFile("key")).rejects.toThrow(
-      "temporairement indisponible"
+      "temporairement indisponible",
     );
   });
 
@@ -258,19 +259,19 @@ describe("getPrivateUrl", () => {
 
   it("throws for expiresIn < 60", async () => {
     await expect(getPrivateUrl("file.txt", 30)).rejects.toThrow(
-      BadRequestError
+      BadRequestError,
     );
     await expect(getPrivateUrl("file.txt", 30)).rejects.toThrow(
-      "durée d'expiration"
+      "durée d'expiration",
     );
   });
 
   it("throws for expiresIn > 604800", async () => {
     await expect(getPrivateUrl("file.txt", 700000)).rejects.toThrow(
-      BadRequestError
+      BadRequestError,
     );
     await expect(getPrivateUrl("file.txt", 700000)).rejects.toThrow(
-      "durée d'expiration"
+      "durée d'expiration",
     );
   });
 
@@ -295,10 +296,10 @@ describe("getPrivateUrl", () => {
     mockGetSignedUrl.mockRejectedValue(new Error("Signing failed"));
 
     await expect(getPrivateUrl("file.txt")).rejects.toThrow(
-      ServiceUnavailableError
+      ServiceUnavailableError,
     );
     await expect(getPrivateUrl("file.txt")).rejects.toThrow(
-      "temporairement indisponible"
+      "temporairement indisponible",
     );
   });
 

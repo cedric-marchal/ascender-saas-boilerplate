@@ -1,8 +1,9 @@
+import { z } from "zod";
+
 import {
   MAX_PASSWORD_LENGTH,
   passwordSchema,
 } from "@/features/auth/schemas/password.schema";
-import { z } from "zod";
 
 const emailSchema = z
   .string()
@@ -29,7 +30,7 @@ const SignInSchema = z.object({
     .min(1, "Le mot de passe est requis")
     .max(
       MAX_PASSWORD_LENGTH,
-      `Le nom doit contenir moins de ${MAX_PASSWORD_LENGTH} caractères`
+      `Le nom doit contenir moins de ${MAX_PASSWORD_LENGTH} caractères`,
     )
     .trim(),
 });
@@ -51,7 +52,7 @@ const ResetPasswordSchema = z
 const ResetPasswordActionSchema = ResetPasswordSchema.and(
   z.object({
     token: z.string().min(1, "Token requis").trim(),
-  })
+  }),
 );
 
 type SignUpSchemaType = z.infer<typeof SignUpSchema>;

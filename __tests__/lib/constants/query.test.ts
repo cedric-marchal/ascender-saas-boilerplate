@@ -1,3 +1,5 @@
+import { describe, expect, it } from "vitest";
+
 import {
   DEFAULT_PAGE_SIZE,
   MAX_ARRAY_LENGTH,
@@ -6,7 +8,6 @@ import {
   PAGE_SIZES,
   SORT_ORDERS,
 } from "@/lib/parsers/nuqs";
-import { describe, expect, it } from "vitest";
 
 describe("Pagination constants", () => {
   it("has MAX_PAGE === 1000", () => {

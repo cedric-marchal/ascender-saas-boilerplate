@@ -4,8 +4,8 @@ import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 
 import { auth } from "@/lib/auth";
-import { UserRole } from "@/lib/generated/prisma/client";
 import { env } from "@/lib/env";
+import { UserRole } from "@/lib/generated/prisma/client";
 import type { SubscriptionStatus } from "@/lib/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 

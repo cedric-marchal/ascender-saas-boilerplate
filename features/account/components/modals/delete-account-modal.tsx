@@ -4,9 +4,10 @@ import { useState } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { DeleteAccountForm } from "@/features/account/components/forms/delete-account-form";
 import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog";
 import { Trash2, X } from "lucide-react";
+
+import { DeleteAccountForm } from "@/features/account/components/forms/delete-account-form";
 
 import {
   AlertDialog,

@@ -9,17 +9,19 @@ Règles critiques pour prévenir les vulnérabilités IDOR (Insecure Direct Obje
 ### 1. JAMAIS de Booléens pour les Permissions
 
 **❌ INTERDIT** :
+
 ```tsx
 async function getEntity(
   filters: GetEntityFilters,
   userId: string,
-  isAdmin: boolean = false      // ❌ NON EXTENSIBLE
-) { }
+  isAdmin: boolean = false, // ❌ NON EXTENSIBLE
+) {}
 
-async function canDelete(isAdmin: boolean) { }  // ❌ NON TYPE-SAFE
+async function canDelete(isAdmin: boolean) {} // ❌ NON TYPE-SAFE
 ```
 
 **Problèmes** :
+
 - ❌ Non extensible (que faire avec MANAGER, MODERATOR ?)
 - ❌ Non type-safe (`boolean` accepte n'importe quel booléen)
 - ❌ Logique dupliquée dans chaque service
@@ -33,8 +35,8 @@ import { UserRole } from "@/lib/constants/roles.constant";
 async function getEntity(
   filters: GetEntityFilters,
   userId: string,
-  userRole: UserRole  // ✅ TYPE-SAFE, EXTENSIBLE
-) { }
+  userRole: UserRole, // ✅ TYPE-SAFE, EXTENSIBLE
+) {}
 ```
 
 ### 2. Pattern UNRESTRICTED_ROLES
@@ -43,6 +45,7 @@ async function getEntity(
 
 ```tsx
 import "server-only";
+
 import { UserRole } from "@/lib/constants/roles.constant";
 
 // ✅ Rôles qui peuvent accéder à TOUTES les données (pas seulement les leurs)
@@ -60,7 +63,7 @@ const EXPORT_ALLOWED_ROLES: UserRole[] = [UserRole.ADMIN, UserRole.MANAGER];
 async function getEntities(
   filters: GetEntitiesFilters,
   userId: string,
-  userRole: UserRole
+  userRole: UserRole,
 ): Promise<GetEntitiesResult> {
   // Logique claire et maintenable
   const canAccessAllData = UNRESTRICTED_ROLES.includes(userRole);
@@ -81,6 +84,7 @@ async function getEntities(
 ```
 
 **Avantages** :
+
 - ✅ Type-safe : TypeScript force `UserRole`
 - ✅ Extensible : Ajouter un rôle = 1 ligne
 - ✅ Maintenable : Logique centralisée
@@ -97,16 +101,18 @@ async function getEntities(
 
 ```tsx
 import "server-only";
+
 import { UserRole } from "@/lib/constants/roles.constant";
 import { filterRatelimit } from "@/lib/ratelimit";
+
 import { checkRatelimit } from "@/utils/ratelimit/check-ratelimit";
 
 const UNRESTRICTED_ROLES: UserRole[] = [UserRole.ADMIN];
 
 async function getDocuments(
   filters: GetDocumentsFilters,
-  userId: string,     // ✅ MANDATORY
-  userRole: UserRole  // ✅ MANDATORY
+  userId: string, // ✅ MANDATORY
+  userRole: UserRole, // ✅ MANDATORY
 ): Promise<GetDocumentsResult> {
   // ✅ Rate limiting par userId
   await checkRatelimit(filterRatelimit, userId);
@@ -123,7 +129,7 @@ async function getDocuments(
 
   const [documents, totalCount] = await prisma.$transaction([
     prisma.document.findMany({
-      where: whereClause,  // ✅ userId forcé pour non-admin
+      where: whereClause, // ✅ userId forcé pour non-admin
       select: { id: true, name: true, content: true },
       orderBy: { [safeSortBy]: safeOrder },
       skip: (safePage - 1) * DEFAULT_PAGE_SIZE,
@@ -140,7 +146,7 @@ const session = await requireSession();
 const { documents } = await getDocuments(
   filters,
   session.user.id,
-  session.user.role
+  session.user.role,
 );
 ```
 
@@ -152,12 +158,14 @@ const { documents } = await getDocuments(
 
 ```tsx
 import "server-only";
+
 import { filterRatelimit } from "@/lib/ratelimit";
+
 import { checkRatelimit } from "@/utils/ratelimit/check-ratelimit";
 
 async function getUsers(
   filters: GetUsersFilters,
-  userId: string  // ✅ Pour rate limiting (pas filtering)
+  userId: string, // ✅ Pour rate limiting (pas filtering)
 ): Promise<GetUsersResult> {
   // ✅ Rate limiting par userId (empêche spam même admin)
   await checkRatelimit(filterRatelimit, userId);
@@ -190,7 +198,7 @@ async function getUsers(
 }
 
 // Usage dans la page ADMIN
-const session = await requireAdminVerifiedEmail();  // ✅ Guard avant service
+const session = await requireAdminVerifiedEmail(); // ✅ Guard avant service
 const { users } = await getUsers(filters, session.user.id);
 ```
 
@@ -200,6 +208,7 @@ const { users } = await getUsers(filters, session.user.id);
 
 ```tsx
 import "server-only";
+
 import { UserRole } from "@/lib/constants/roles.constant";
 
 const UNRESTRICTED_ROLES: UserRole[] = [UserRole.ADMIN];
@@ -208,7 +217,7 @@ const TEAM_SCOPED_ROLES: UserRole[] = [UserRole.MANAGER];
 async function getProjects(
   filters: GetProjectsFilters,
   userId: string,
-  userRole: UserRole
+  userRole: UserRole,
 ): Promise<GetProjectsResult> {
   const canAccessAllData = UNRESTRICTED_ROLES.includes(userRole);
   const canAccessTeamData = TEAM_SCOPED_ROLES.includes(userRole);
@@ -354,30 +363,34 @@ curl -H "Cookie: session-user-a" /api/documents?userId=user-b-id
 
 ```tsx
 import { describe, expect, it } from "vitest";
-import { getDocuments } from "./get-documents.service";
+
 import { UserRole } from "@/lib/constants/roles.constant";
+
+import { getDocuments } from "./get-documents.service";
 
 describe("getDocuments - IDOR Prevention", () => {
   it("should return only user's documents for CUSTOMER role", async () => {
     const result = await getDocuments(
       { search: "", page: 1 },
       "user-a-id",
-      UserRole.CUSTOMER
+      UserRole.CUSTOMER,
     );
 
     // Verify all returned documents belong to user-a-id
-    expect(result.documents.every(doc => doc.userId === "user-a-id")).toBe(true);
+    expect(result.documents.every((doc) => doc.userId === "user-a-id")).toBe(
+      true,
+    );
   });
 
   it("should return all documents for ADMIN role", async () => {
     const result = await getDocuments(
       { search: "", page: 1 },
       "admin-id",
-      UserRole.ADMIN
+      UserRole.ADMIN,
     );
 
     // Verify documents from multiple users are returned
-    const uniqueUserIds = new Set(result.documents.map(doc => doc.userId));
+    const uniqueUserIds = new Set(result.documents.map((doc) => doc.userId));
     expect(uniqueUserIds.size).toBeGreaterThan(1);
   });
 
@@ -385,20 +398,20 @@ describe("getDocuments - IDOR Prevention", () => {
     const userADocs = await getDocuments(
       { search: "", page: 1 },
       "user-a-id",
-      UserRole.CUSTOMER
+      UserRole.CUSTOMER,
     );
 
     const userBDocs = await getDocuments(
       { search: "", page: 1 },
       "user-b-id",
-      UserRole.CUSTOMER
+      UserRole.CUSTOMER,
     );
 
     // Verify no overlap between users
-    const userAIds = new Set(userADocs.documents.map(d => d.id));
-    const userBIds = new Set(userBDocs.documents.map(d => d.id));
+    const userAIds = new Set(userADocs.documents.map((d) => d.id));
+    const userBIds = new Set(userBDocs.documents.map((d) => d.id));
 
-    const intersection = [...userAIds].filter(id => userBIds.has(id));
+    const intersection = [...userAIds].filter((id) => userBIds.has(id));
     expect(intersection.length).toBe(0);
   });
 });
@@ -409,11 +422,12 @@ describe("getDocuments - IDOR Prevention", () => {
 ### Existing Service Using Boolean
 
 **Before** :
+
 ```tsx
 async function getEntities(
   filters: GetEntitiesFilters,
   userId: string,
-  isAdmin: boolean = false
+  isAdmin: boolean = false,
 ) {
   const whereClause = {
     ...(!isAdmin && { userId }),
@@ -422,6 +436,7 @@ async function getEntities(
 ```
 
 **After** :
+
 ```tsx
 import { UserRole } from "@/lib/constants/roles.constant";
 
@@ -430,7 +445,7 @@ const UNRESTRICTED_ROLES: UserRole[] = [UserRole.ADMIN];
 async function getEntities(
   filters: GetEntitiesFilters,
   userId: string,
-  userRole: UserRole  // ✅ Changed from boolean
+  userRole: UserRole, // ✅ Changed from boolean
 ) {
   const canAccessAllData = UNRESTRICTED_ROLES.includes(userRole);
   const whereClause = {
@@ -440,6 +455,7 @@ async function getEntities(
 ```
 
 **Page Update** :
+
 ```tsx
 // Before
 const session = await requireSession();

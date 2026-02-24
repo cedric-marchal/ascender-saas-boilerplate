@@ -10,7 +10,11 @@ import {
 type UserRoleFilter = "all" | UserRole;
 type VerificationFilter = "all" | "verified" | "unverified";
 
-const userRoleFilters = ["all", "ADMIN", "CUSTOMER"] as const satisfies readonly UserRoleFilter[];
+const userRoleFilters = [
+  "all",
+  "ADMIN",
+  "CUSTOMER",
+] as const satisfies readonly UserRoleFilter[];
 const verificationFilters = ["all", "verified", "unverified"] as const;
 const usersSortableFields = ["name", "email", "createdAt"] as const;
 

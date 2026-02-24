@@ -4,14 +4,15 @@ import * as Sentry from "@sentry/nextjs";
 import type Stripe from "stripe";
 
 import { ALL_SUBSCRIPTION_STATUSES } from "@/features/billing/constants/subscription-status.constant";
-import type { SubscriptionStatus } from "@/lib/generated/prisma/client";
+
 import { env } from "@/lib/env";
+import type { SubscriptionStatus } from "@/lib/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { redis } from "@/lib/redis";
 import { stripe } from "@/lib/stripe";
 
 const VALID_SUBSCRIPTION_STATUSES = new Set<SubscriptionStatus>(
-  ALL_SUBSCRIPTION_STATUSES
+  ALL_SUBSCRIPTION_STATUSES,
 );
 
 const EVENT_TTL_SECONDS = 86400;
@@ -23,7 +24,7 @@ type WebhookResult = {
 
 async function handleStripeWebhook(
   body: string,
-  signature: string
+  signature: string,
 ): Promise<WebhookResult> {
   let event: Stripe.Event;
 
@@ -31,7 +32,7 @@ async function handleStripeWebhook(
     event = stripe.webhooks.constructEvent(
       body,
       signature,
-      env.STRIPE_WEBHOOK_SECRET
+      env.STRIPE_WEBHOOK_SECRET,
     );
   } catch (error: unknown) {
     const errorMessage =
@@ -78,7 +79,7 @@ async function handleStripeWebhook(
         if (!stripeCustomer) {
           Sentry.captureMessage(
             `StripeCustomer not found for ${customerId}. Event: ${event.type}`,
-            "warning"
+            "warning",
           );
           break;
         }
@@ -89,7 +90,7 @@ async function handleStripeWebhook(
         if (!priceId || !subscriptionItem) {
           Sentry.captureMessage(
             `Missing priceId for subscription ${subscription.id}. Event: ${event.type}`,
-            "warning"
+            "warning",
           );
           break;
         }
@@ -97,7 +98,7 @@ async function handleStripeWebhook(
         if (!VALID_SUBSCRIPTION_STATUSES.has(subscription.status)) {
           Sentry.captureMessage(
             `Unknown subscription status "${subscription.status}" for ${subscription.id}. Event: ${event.type}`,
-            "warning"
+            "warning",
           );
           break;
         }
@@ -112,10 +113,10 @@ async function handleStripeWebhook(
             stripePriceId: priceId,
             status: subscriptionStatus,
             currentPeriodStart: new Date(
-              subscriptionItem.current_period_start * 1000
+              subscriptionItem.current_period_start * 1000,
             ),
             currentPeriodEnd: new Date(
-              subscriptionItem.current_period_end * 1000
+              subscriptionItem.current_period_end * 1000,
             ),
             cancelAtPeriodEnd: subscription.cancel_at_period_end,
           },
@@ -123,10 +124,10 @@ async function handleStripeWebhook(
             stripePriceId: priceId,
             status: subscriptionStatus,
             currentPeriodStart: new Date(
-              subscriptionItem.current_period_start * 1000
+              subscriptionItem.current_period_start * 1000,
             ),
             currentPeriodEnd: new Date(
-              subscriptionItem.current_period_end * 1000
+              subscriptionItem.current_period_end * 1000,
             ),
             cancelAtPeriodEnd: subscription.cancel_at_period_end,
           },
@@ -134,7 +135,7 @@ async function handleStripeWebhook(
 
         if (process.env.NODE_ENV === "development") {
           console.log(
-            `[Subscription synced] ${subscription.id} (${subscription.status}) for user ${stripeCustomer.userId}`
+            `[Subscription synced] ${subscription.id} (${subscription.status}) for user ${stripeCustomer.userId}`,
           );
         }
 
@@ -156,7 +157,7 @@ async function handleStripeWebhook(
         if (!stripeCustomer) {
           Sentry.captureMessage(
             `StripeCustomer not found for ${customerId}. Event: ${event.type}`,
-            "warning"
+            "warning",
           );
           break;
         }
@@ -167,7 +168,7 @@ async function handleStripeWebhook(
 
         if (process.env.NODE_ENV === "development") {
           console.log(
-            `[Subscription deleted] ${subscription.id} for user ${stripeCustomer.userId}`
+            `[Subscription deleted] ${subscription.id} for user ${stripeCustomer.userId}`,
           );
         }
 
@@ -187,7 +188,7 @@ async function handleStripeWebhook(
         if (!customerId) {
           Sentry.captureMessage(
             `No customer ID in invoice. Event: ${event.type}`,
-            "warning"
+            "warning",
           );
           break;
         }
@@ -200,7 +201,7 @@ async function handleStripeWebhook(
         if (!stripeCustomer) {
           Sentry.captureMessage(
             `StripeCustomer not found for ${customerId}. Event: ${event.type}`,
-            "warning"
+            "warning",
           );
           break;
         }
@@ -209,7 +210,7 @@ async function handleStripeWebhook(
         await redis.del(invoicesCacheKey);
         if (process.env.NODE_ENV === "development") {
           console.log(
-            `[Cache invalidated] Invoices cache for user ${stripeCustomer.userId} - Event: ${event.type}`
+            `[Cache invalidated] Invoices cache for user ${stripeCustomer.userId} - Event: ${event.type}`,
           );
         }
 

@@ -2,15 +2,16 @@
 
 import { type ChangeEvent, type SubmitEvent, useState } from "react";
 
+import { useForm } from "@tanstack/react-form";
+import { Loader2 } from "lucide-react";
+import { useAction } from "next-safe-action/hooks";
+import { toast } from "sonner";
+
 import { forgotPasswordAction } from "@/features/auth/actions/forgot-password.action";
 import {
   ForgotPasswordSchema,
   type ForgotPasswordSchemaType,
 } from "@/features/auth/schemas/auth.schema";
-import { useForm } from "@tanstack/react-form";
-import { Loader2 } from "lucide-react";
-import { useAction } from "next-safe-action/hooks";
-import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";

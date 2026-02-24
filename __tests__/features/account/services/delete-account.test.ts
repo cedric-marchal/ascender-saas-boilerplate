@@ -1,5 +1,6 @@
-import { BadRequestError, ForbiddenError } from "@/utils/errors/errors";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import { BadRequestError, ForbiddenError } from "@/utils/errors/errors";
 
 // Create mocks
 const mockPrismaUserFindUnique = vi.fn();
@@ -61,9 +62,8 @@ vi.mock("@/lib/constants/roles.constant", () => ({
 }));
 
 // Import after mocks
-const { deleteAccount } = await import(
-  "@/features/account/services/delete-account.service"
-);
+const { deleteAccount } =
+  await import("@/features/account/services/delete-account.service");
 
 describe("deleteAccount", () => {
   beforeEach(() => {
@@ -245,7 +245,7 @@ describe("deleteAccount", () => {
         userId: "user-123",
         userName: "John",
         confirmation: "user@example.com",
-      })
+      }),
     ).resolves.not.toThrow();
   });
 
@@ -257,14 +257,14 @@ describe("deleteAccount", () => {
         userId: "missing-user",
         userName: "Test",
         confirmation: "test@example.com",
-      })
+      }),
     ).rejects.toThrow(BadRequestError);
     await expect(
       deleteAccount({
         userId: "missing-user",
         userName: "Test",
         confirmation: "test@example.com",
-      })
+      }),
     ).rejects.toThrow("Utilisateur introuvable");
   });
 
@@ -281,14 +281,14 @@ describe("deleteAccount", () => {
         userId: "user-123",
         userName: "John",
         confirmation: "wrong@example.com",
-      })
+      }),
     ).rejects.toThrow(BadRequestError);
     await expect(
       deleteAccount({
         userId: "user-123",
         userName: "John",
         confirmation: "wrong@example.com",
-      })
+      }),
     ).rejects.toThrow("email de confirmation ne correspond pas");
   });
 
@@ -306,14 +306,14 @@ describe("deleteAccount", () => {
         userId: "admin-123",
         userName: "Admin",
         confirmation: "admin@example.com",
-      })
+      }),
     ).rejects.toThrow(ForbiddenError);
     await expect(
       deleteAccount({
         userId: "admin-123",
         userName: "Admin",
         confirmation: "admin@example.com",
-      })
+      }),
     ).rejects.toThrow("seul administrateur");
   });
 });

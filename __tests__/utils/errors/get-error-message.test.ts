@@ -1,5 +1,6 @@
-import { getErrorMessage } from "@/utils/errors/get-error-message";
 import { describe, expect, it, vi } from "vitest";
+
+import { getErrorMessage } from "@/utils/errors/get-error-message";
 
 // Mock up-fetch
 vi.mock("up-fetch", () => ({

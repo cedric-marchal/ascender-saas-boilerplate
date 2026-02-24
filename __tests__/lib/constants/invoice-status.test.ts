@@ -1,8 +1,9 @@
+import { describe, expect, it } from "vitest";
+
 import {
   type InvoiceStatus,
   invoiceStatusLabels,
 } from "@/features/billing/constants/invoice-status.constant";
-import { describe, expect, it } from "vitest";
 
 describe("invoiceStatusLabels", () => {
   it("has an entry for all 5 invoice statuses", () => {

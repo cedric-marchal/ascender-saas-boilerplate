@@ -56,7 +56,7 @@ const env = createEnv({
       })
       .default(4718592)
       .pipe(
-        z.number({ message: "La taille maximale de fichier est de 4.5MB" })
+        z.number({ message: "La taille maximale de fichier est de 4.5MB" }),
       ),
     NEXT_PUBLIC_SENTRY_DSN: z.string().min(1),
   },

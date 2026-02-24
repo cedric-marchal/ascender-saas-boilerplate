@@ -45,7 +45,7 @@ describe("Error classes", () => {
     (
       name: string,
       ErrorClass: new (message: string) => AppError,
-      statusCode: number
+      statusCode: number,
     ) => {
       const error = new ErrorClass("test");
       expect(error.statusCode).toBe(statusCode);
@@ -53,6 +53,6 @@ describe("Error classes", () => {
       expect(error.message).toBe("test");
       expect(error).toBeInstanceOf(AppError);
       expect(error).toBeInstanceOf(Error);
-    }
+    },
   );
 });

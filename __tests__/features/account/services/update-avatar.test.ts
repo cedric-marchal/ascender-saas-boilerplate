@@ -40,9 +40,8 @@ vi.mock("next/headers", () => ({
 }));
 
 // Import after mocks
-const { updateAvatar } = await import(
-  "@/features/account/services/update-avatar.service"
-);
+const { updateAvatar } =
+  await import("@/features/account/services/update-avatar.service");
 
 describe("updateAvatar", () => {
   beforeEach(() => {
@@ -82,7 +81,7 @@ describe("updateAvatar", () => {
     expect(mockUploadFile).toHaveBeenCalledWith(
       expect.stringMatching(/^avatars\/user-123-\d+\.webp$/),
       expect.any(Buffer),
-      "image/webp"
+      "image/webp",
     );
   });
 
@@ -188,7 +187,7 @@ describe("updateAvatar", () => {
     expect(mockUploadFile).toHaveBeenCalledWith(
       expect.stringMatching(/^avatars\/user____123-\d+\.webp$/),
       expect.any(Buffer),
-      "image/webp"
+      "image/webp",
     );
   });
 });

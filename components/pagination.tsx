@@ -23,7 +23,7 @@ function Pagination({ currentPage, totalPages }: PaginationProps) {
       shallow: false,
       startTransition,
       history: "push",
-    })
+    }),
   );
 
   function handlePrevious() {

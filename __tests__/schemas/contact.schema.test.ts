@@ -1,5 +1,6 @@
-import { CreateContactSchema } from "@/features/contact/schemas/contact.schema";
 import { describe, expect, it } from "vitest";
+
+import { CreateContactSchema } from "@/features/contact/schemas/contact.schema";
 
 describe("CreateContactSchema", () => {
   const validData = {
@@ -48,7 +49,7 @@ describe("CreateContactSchema", () => {
       expect(result.success).toBe(false);
       if (!result.success) {
         const nameErrors = result.error.issues.filter(
-          (issue) => issue.path[0] === "name"
+          (issue) => issue.path[0] === "name",
         );
         expect(nameErrors.length).toBeGreaterThan(0);
       }

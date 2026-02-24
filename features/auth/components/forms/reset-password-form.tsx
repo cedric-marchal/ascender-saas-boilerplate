@@ -4,15 +4,16 @@ import { type ChangeEvent, type SubmitEvent, useState } from "react";
 
 import { useRouter } from "next/navigation";
 
+import { useForm } from "@tanstack/react-form";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { useAction } from "next-safe-action/hooks";
+import { toast } from "sonner";
+
 import { resetPasswordAction } from "@/features/auth/actions/reset-password.action";
 import {
   ResetPasswordActionSchema,
   type ResetPasswordActionSchemaType,
 } from "@/features/auth/schemas/auth.schema";
-import { useForm } from "@tanstack/react-form";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
-import { useAction } from "next-safe-action/hooks";
-import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
@@ -146,7 +147,7 @@ function ResetPasswordForm({ token }: ResetPasswordFormProps) {
                   type="button"
                   onClick={() =>
                     setIsConfirmPasswordVisible(
-                      (previous: boolean) => !previous
+                      (previous: boolean) => !previous,
                     )
                   }
                   className="text-muted-foreground hover:text-foreground absolute top-0 right-0 flex h-9 w-9 items-center justify-center"

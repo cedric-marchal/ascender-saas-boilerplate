@@ -15,7 +15,7 @@ vi.mock("next/server", () => ({
   NextResponse: {
     json: vi.fn(
       (body: unknown, init: { status: number }) =>
-        ({ body, status: init.status }) as any
+        ({ body, status: init.status }) as any,
     ),
   },
 }));
@@ -47,7 +47,7 @@ describe("handleApiError", () => {
       const response = handleApiError(zodError) as any;
       expect(response.status).toBe(400);
       expect(response.body.message).toBe(
-        "Une erreur de validation s'est produite"
+        "Une erreur de validation s'est produite",
       );
     });
   });
@@ -108,7 +108,7 @@ describe("handleApiError", () => {
       expect(response.body.success).toBe(false);
       expect(response.body.type).toBe("ServerError");
       expect(response.body.message).toBe(
-        "Une erreur inattendue s'est produite"
+        "Une erreur inattendue s'est produite",
       );
 
       process.env.NODE_ENV = originalEnv;
@@ -129,7 +129,7 @@ describe("handleApiError", () => {
       const response = handleApiError("string error") as any;
       expect(response.status).toBe(500);
       expect(response.body.message).toBe(
-        "Une erreur inattendue s'est produite"
+        "Une erreur inattendue s'est produite",
       );
     });
 

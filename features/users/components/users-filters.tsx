@@ -2,6 +2,10 @@
 
 import { type ChangeEvent, type SubmitEvent, useTransition } from "react";
 
+import { useForm } from "@tanstack/react-form";
+import { Filter, Search, X } from "lucide-react";
+import { useQueryStates } from "nuqs";
+
 import {
   type UserRoleFilter,
   type VerificationFilter,
@@ -12,9 +16,6 @@ import {
   verificationLabels,
 } from "@/features/users/constants/users-filters.constant";
 import { FilterUsersSchema } from "@/features/users/schemas/users-filter.schema";
-import { useForm } from "@tanstack/react-form";
-import { Filter, Search, X } from "lucide-react";
-import { useQueryStates } from "nuqs";
 
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";

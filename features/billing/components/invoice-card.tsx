@@ -1,12 +1,12 @@
 import Link from "next/link";
 
-import type { BillingInvoice } from "@/features/billing/services/get-billing.service";
 import { Calendar, Download, FileText } from "lucide-react";
 
 import {
   type InvoiceStatus,
   invoiceStatusLabels,
 } from "@/features/billing/constants/invoice-status.constant";
+import type { BillingInvoice } from "@/features/billing/services/get-billing.service";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";

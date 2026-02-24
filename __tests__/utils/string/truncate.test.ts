@@ -41,7 +41,7 @@ describe("truncate", () => {
 
   it("throws error when maxLength is less than 4", () => {
     expect(() => truncate("Hello", 3)).toThrow(
-      "maxLength must be at least 4 for ellipsis"
+      "maxLength must be at least 4 for ellipsis",
     );
   });
 

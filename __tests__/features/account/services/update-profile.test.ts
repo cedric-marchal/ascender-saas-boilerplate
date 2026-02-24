@@ -1,5 +1,6 @@
-import { BadRequestError, ConflictError } from "@/utils/errors/errors";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import { BadRequestError, ConflictError } from "@/utils/errors/errors";
 
 // Create mocks
 const mockPrismaFindUnique = vi.fn();
@@ -40,9 +41,8 @@ vi.mock("@/lib/env", () => ({
 }));
 
 // Import after mocks
-const { updateProfile } = await import(
-  "@/features/account/services/update-profile.service"
-);
+const { updateProfile } =
+  await import("@/features/account/services/update-profile.service");
 
 describe("updateProfile", () => {
   beforeEach(() => {
@@ -169,14 +169,14 @@ describe("updateProfile", () => {
         userId: "missing-user",
         name: "Test",
         email: "test@example.com",
-      })
+      }),
     ).rejects.toThrow(BadRequestError);
     await expect(
       updateProfile({
         userId: "missing-user",
         name: "Test",
         email: "test@example.com",
-      })
+      }),
     ).rejects.toThrow("Utilisateur introuvable");
   });
 
@@ -197,7 +197,7 @@ describe("updateProfile", () => {
         userId: "user-123",
         name: "John Doe",
         email: "taken@example.com",
-      })
+      }),
     ).rejects.toThrow(ConflictError);
 
     // Reset mocks for second assertion
@@ -218,7 +218,7 @@ describe("updateProfile", () => {
         userId: "user-123",
         name: "John Doe",
         email: "taken@example.com",
-      })
+      }),
     ).rejects.toThrow("adresse email est déjà utilisée");
   });
 

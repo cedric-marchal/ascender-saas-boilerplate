@@ -1,10 +1,11 @@
+import { describe, expect, it } from "vitest";
+
 import {
   ForgotPasswordSchema,
   ResetPasswordSchema,
   SignInSchema,
   SignUpSchema,
 } from "@/features/auth/schemas/auth.schema";
-import { describe, expect, it } from "vitest";
 
 describe("SignUpSchema", () => {
   const validData = {
@@ -196,7 +197,7 @@ describe("ResetPasswordSchema", () => {
     expect(result.success).toBe(false);
     if (!result.success) {
       const confirmErrors = result.error.issues.filter((issue) =>
-        issue.path.includes("confirmPassword")
+        issue.path.includes("confirmPassword"),
       );
       expect(confirmErrors.length).toBeGreaterThan(0);
     }

@@ -1,17 +1,17 @@
 import Link from "next/link";
 
+import { AlertCircle } from "lucide-react";
+
 import { BillingPortalButton } from "@/features/billing/components/billing-portal-button";
 import { InvoiceList } from "@/features/billing/components/invoice-list";
 import { SubscriptionCard } from "@/features/billing/components/subscription-card";
 import { SubscriptionListEmpty } from "@/features/billing/components/subscription-list-empty";
 import { SubscriptionStatusCard } from "@/features/billing/components/subscription-status-card";
+import { ACTIVE_SUBSCRIPTION_STATUSES } from "@/features/billing/constants/subscription-status.constant";
 import type {
   BillingSubscription,
   GetBillingResult,
 } from "@/features/billing/services/get-billing.service";
-import { AlertCircle } from "lucide-react";
-
-import { ACTIVE_SUBSCRIPTION_STATUSES } from "@/features/billing/constants/subscription-status.constant";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -49,7 +49,7 @@ function BillingView({ billing }: BillingViewProps) {
 
   const activeSubscription = subscriptions.find(
     (subscription: BillingSubscription) =>
-      ACTIVE_SUBSCRIPTION_STATUSES.includes(subscription.status)
+      ACTIVE_SUBSCRIPTION_STATUSES.includes(subscription.status),
   );
 
   return (
@@ -104,7 +104,7 @@ function BillingView({ billing }: BillingViewProps) {
                     <AlertDescription>
                       Votre abonnement sera annulé le{" "}
                       {new Date(
-                        activeSubscription.currentPeriodEnd * 1000
+                        activeSubscription.currentPeriodEnd * 1000,
                       ).toLocaleDateString("fr-FR", {
                         day: "numeric",
                         month: "long",
@@ -126,7 +126,7 @@ function BillingView({ billing }: BillingViewProps) {
 
           {subscriptions.filter(
             (subscription: BillingSubscription) =>
-              !ACTIVE_SUBSCRIPTION_STATUSES.includes(subscription.status)
+              !ACTIVE_SUBSCRIPTION_STATUSES.includes(subscription.status),
           ).length > 0 && (
             <div className="space-y-4">
               <h2 className="text-xl font-semibold">Anciens abonnements</h2>
@@ -136,8 +136,8 @@ function BillingView({ billing }: BillingViewProps) {
                   .filter(
                     (subscription: BillingSubscription) =>
                       !ACTIVE_SUBSCRIPTION_STATUSES.includes(
-                        subscription.status
-                      )
+                        subscription.status,
+                      ),
                   )
                   .map((subscription: BillingSubscription) => (
                     <SubscriptionCard

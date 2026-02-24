@@ -9,7 +9,7 @@ const resend = new Resend(env.RESEND_API_KEY);
 type SendEmailResult = Awaited<ReturnType<typeof resend.emails.send>>;
 
 async function sendEmail(
-  options: CreateEmailOptions
+  options: CreateEmailOptions,
 ): Promise<SendEmailResult> {
   const emailOptions = { ...options };
 
@@ -40,7 +40,7 @@ async function sendEmail(
 }
 
 async function sendEmailSafe(
-  options: CreateEmailOptions
+  options: CreateEmailOptions,
 ): Promise<SendEmailResult> {
   try {
     return await sendEmail(options);

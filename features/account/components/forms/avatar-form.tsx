@@ -10,10 +10,11 @@ import {
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
-import { UpdateAvatarSchema } from "@/features/account/schemas/avatar.schema";
 import { useForm } from "@tanstack/react-form";
 import { Loader2, Upload, X } from "lucide-react";
 import { toast } from "sonner";
+
+import { UpdateAvatarSchema } from "@/features/account/schemas/avatar.schema";
 
 import { env } from "@/lib/env";
 import { upfetch } from "@/lib/up-fetch";
@@ -165,7 +166,7 @@ function AvatarForm({ name, image }: AvatarFormProps) {
                   isDragging
                     ? "border-primary bg-primary/5"
                     : "border-muted-foreground/25 hover:border-muted-foreground/50",
-                  value && "border-primary/50 bg-primary/5 border-solid"
+                  value && "border-primary/50 bg-primary/5 border-solid",
                 )}
               >
                 {value ? (

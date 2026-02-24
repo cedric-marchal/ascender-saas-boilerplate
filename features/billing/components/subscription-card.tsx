@@ -1,9 +1,8 @@
-import type { BillingSubscription } from "@/features/billing/services/get-billing.service";
 import { Calendar, CheckCircle2, XCircle } from "lucide-react";
 
-import {
-  subscriptionStatusLabels,
-} from "@/features/billing/constants/subscription-status.constant";
+import { subscriptionStatusLabels } from "@/features/billing/constants/subscription-status.constant";
+import type { BillingSubscription } from "@/features/billing/services/get-billing.service";
+
 import type { SubscriptionStatus } from "@/lib/generated/prisma/client";
 
 import { Badge } from "@/components/ui/badge";
@@ -97,7 +96,7 @@ function SubscriptionCard({ subscription }: SubscriptionCardProps) {
             <p className="text-sm font-medium">
               {subscription.currentPeriodStart
                 ? new Date(
-                    subscription.currentPeriodStart * 1000
+                    subscription.currentPeriodStart * 1000,
                   ).toLocaleDateString("fr-FR", {
                     day: "numeric",
                     month: "long",
@@ -115,7 +114,7 @@ function SubscriptionCard({ subscription }: SubscriptionCardProps) {
             <p className="text-sm font-medium">
               {subscription.currentPeriodEnd
                 ? new Date(
-                    subscription.currentPeriodEnd * 1000
+                    subscription.currentPeriodEnd * 1000,
                   ).toLocaleDateString("fr-FR", {
                     day: "numeric",
                     month: "long",
@@ -139,7 +138,7 @@ function SubscriptionCard({ subscription }: SubscriptionCardProps) {
                   day: "numeric",
                   month: "long",
                   year: "numeric",
-                }
+                },
               )}
             </p>
           </div>

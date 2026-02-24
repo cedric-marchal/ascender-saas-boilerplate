@@ -132,8 +132,8 @@ const useCookieConsent = create<CookieConsentStore>()(
         consentTimestamp: state.consentTimestamp,
         preferences: state.preferences,
       }),
-    }
-  )
+    },
+  ),
 );
 
 export { useCookieConsent, COOKIE_CATEGORIES };

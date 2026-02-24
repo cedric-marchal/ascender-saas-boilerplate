@@ -36,12 +36,12 @@ function generateCsp(nonce: string): string {
 
 function applySecurityHeaders(
   response: NextResponse,
-  nonce: string
+  nonce: string,
 ): NextResponse {
   Object.entries(STATIC_SECURITY_HEADERS).forEach(
     ([key, value]: [string, string]) => {
       response.headers.set(key, value);
-    }
+    },
   );
   response.headers.set("Content-Security-Policy", generateCsp(nonce));
   return response;
@@ -49,7 +49,7 @@ function applySecurityHeaders(
 
 function isProtectedRoute(pathname: string): boolean {
   return PROTECTED_PREFIXES.some((prefix: string) =>
-    pathname.startsWith(prefix)
+    pathname.startsWith(prefix),
   );
 }
 
@@ -59,7 +59,7 @@ function isProtectedApiRoute(pathname: string): boolean {
   }
 
   return !PUBLIC_API_PREFIXES.some((prefix: string) =>
-    pathname.startsWith(prefix)
+    pathname.startsWith(prefix),
   );
 }
 
@@ -84,9 +84,9 @@ export function proxy(request: NextRequest) {
             type: "MaintenanceError",
             message: "Service en maintenance",
           },
-          { status: 503 }
+          { status: 503 },
         ),
-        nonce
+        nonce,
       );
     }
 
@@ -109,9 +109,9 @@ export function proxy(request: NextRequest) {
               type: "UnauthorizedError",
               message: "Vous devez être connecté",
             },
-            { status: 401 }
+            { status: 401 },
           ),
-          nonce
+          nonce,
         );
       }
 

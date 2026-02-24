@@ -1,10 +1,12 @@
+import { describe, expect, it } from "vitest";
+
 import {
   ACTIVE_SUBSCRIPTION_STATUSES,
   ALL_SUBSCRIPTION_STATUSES,
   subscriptionStatusLabels,
 } from "@/features/billing/constants/subscription-status.constant";
+
 import type { SubscriptionStatus } from "@/lib/generated/prisma/client";
-import { describe, expect, it } from "vitest";
 
 describe("subscriptionStatusLabels", () => {
   it("has an entry for each SubscriptionStatus", () => {

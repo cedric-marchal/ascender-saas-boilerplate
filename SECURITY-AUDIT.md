@@ -37,6 +37,7 @@ Parsers → Constants → Schemas → Services → Prisma → React
 ```
 
 **Points forts** :
+
 - ✅ Validation multi-niveaux (parsers, Zod, serveur)
 - ✅ Whitelists strictes (enums, sortBy, select)
 - ✅ Requêtes paramétrées (Prisma ORM)
@@ -44,6 +45,7 @@ Parsers → Constants → Schemas → Services → Prisma → React
 - ✅ Type-safety (TypeScript + Zod)
 
 **Points faibles** :
+
 - ❌ Absence de rate limiting
 - ❌ Vérifications d'autorisation incomplètes (IDOR)
 - ❌ Fuites d'information via `totalCount`
@@ -95,17 +97,17 @@ Parsers → Constants → Schemas → Services → Prisma → React
 
 ## Mécanismes de Sécurité Existants
 
-| Protection | Implémentation | Efficacité |
-|------------|----------------|------------|
-| **SQL Injection** | Prisma requêtes paramétrées + whitelist `sortBy` | ✅ Excellente |
-| **XSS** | React auto-escape + truncation parsers | ✅ Excellente |
-| **Enum Injection** | `parseAsStringLiteral` + Zod `z.enum()` | ✅ Excellente |
-| **Negative Page** | `Math.max(1, ...)` dans parser | ✅ Excellente |
-| **Huge Page** | `Math.min(..., MAX_PAGE)` dans parser | ✅ Excellente |
-| **Long Search** | `.slice(0, MAX_SEARCH_LENGTH)` | ✅ Bonne |
-| **DoS (Rows)** | `take: DEFAULT_PAGE_SIZE` (10/20/50/100) | ✅ Bonne |
-| **Order By Injection** | Whitelist `sortableFields` | ✅ Excellente |
-| **Select * Exposure** | `select: { ... }` explicite | ✅ Excellente |
+| Protection             | Implémentation                                   | Efficacité    |
+| ---------------------- | ------------------------------------------------ | ------------- |
+| **SQL Injection**      | Prisma requêtes paramétrées + whitelist `sortBy` | ✅ Excellente |
+| **XSS**                | React auto-escape + truncation parsers           | ✅ Excellente |
+| **Enum Injection**     | `parseAsStringLiteral` + Zod `z.enum()`          | ✅ Excellente |
+| **Negative Page**      | `Math.max(1, ...)` dans parser                   | ✅ Excellente |
+| **Huge Page**          | `Math.min(..., MAX_PAGE)` dans parser            | ✅ Excellente |
+| **Long Search**        | `.slice(0, MAX_SEARCH_LENGTH)`                   | ✅ Bonne      |
+| **DoS (Rows)**         | `take: DEFAULT_PAGE_SIZE` (10/20/50/100)         | ✅ Bonne      |
+| **Order By Injection** | Whitelist `sortableFields`                       | ✅ Excellente |
+| **Select \* Exposure** | `select: { ... }` explicite                      | ✅ Excellente |
 
 ---
 
@@ -118,6 +120,7 @@ Parsers → Constants → Schemas → Services → Prisma → React
 Aucune limite sur les requêtes de filtrage. Un attaquant peut spammer la DB.
 
 **Vecteur d'attaque** :
+
 ```bash
 # Script automatisé - 1000 requêtes/seconde
 for i in {1..100000}; do
@@ -126,6 +129,7 @@ done
 ```
 
 **Impact** :
+
 - 🔴 **DoS** : Saturation CPU/DB
 - 🔴 **Énumération** : Découverte de tous les utilisateurs
 - 🔴 **Coût** : Explosion facture serverless (Vercel/Neon)
@@ -136,6 +140,7 @@ done
 
 ```tsx
 import { Ratelimit } from "@upstash/ratelimit";
+
 import { redis } from "@/lib/redis";
 
 export const filterRatelimit = new Ratelimit({
@@ -150,8 +155,10 @@ export const filterRatelimit = new Ratelimit({
 
 ```tsx
 import "server-only";
-import { checkRatelimit } from "@/utils/ratelimit/check-ratelimit";
+
 import { filterRatelimit } from "@/lib/ratelimit";
+
+import { checkRatelimit } from "@/utils/ratelimit/check-ratelimit";
 
 async function getUsers(filters: GetUsersFilters, userId: string) {
   // ✅ Rate limit: 100 requêtes/minute par utilisateur
@@ -192,6 +199,7 @@ async function getDocuments(filters: GetDocumentsFilters) {
 ```
 
 **Exploitation** :
+
 ```
 Utilisateur A (ID: user-123) peut voir TOUS les documents de TOUS les utilisateurs
 → Accès non autorisé à données sensibles
@@ -202,6 +210,7 @@ Utilisateur A (ID: user-123) peut voir TOUS les documents de TOUS les utilisateu
 ```tsx
 // ✅ CORRECTION: Utiliser UserRole au lieu de booléens
 import "server-only";
+
 import { UserRole } from "@/lib/constants/roles.constant";
 
 // Définir quels rôles peuvent accéder à TOUTES les données
@@ -209,8 +218,8 @@ const UNRESTRICTED_ROLES: UserRole[] = [UserRole.ADMIN];
 
 async function getDocuments(
   filters: GetDocumentsFilters,
-  userId: string,     // ← OBLIGATOIRE: ID de l'utilisateur connecté
-  userRole: UserRole  // ← OBLIGATOIRE: Rôle de l'utilisateur connecté
+  userId: string, // ← OBLIGATOIRE: ID de l'utilisateur connecté
+  userRole: UserRole, // ← OBLIGATOIRE: Rôle de l'utilisateur connecté
 ): Promise<GetDocumentsResult> {
   // Vérifier si l'utilisateur a un rôle non restreint
   const canAccessAllData = UNRESTRICTED_ROLES.includes(userRole);
@@ -225,7 +234,7 @@ async function getDocuments(
 
   const [documents, totalCount] = await prisma.$transaction([
     prisma.document.findMany({
-      where: whereClause,  // ✅ userId forcé sauf pour ADMIN
+      where: whereClause, // ✅ userId forcé sauf pour ADMIN
       select: { id: true, name: true, content: true },
     }),
     prisma.document.count({ where: whereClause }),
@@ -236,16 +245,22 @@ async function getDocuments(
 
 // Usage dans la page
 const session = await requireSession();
-const { documents } = await getDocuments(filters, session.user.id, session.user.role);
+const { documents } = await getDocuments(
+  filters,
+  session.user.id,
+  session.user.role,
+);
 ```
 
 **Règles** :
+
 1. **TOUS** les services doivent recevoir `userId: string` ET `userRole: UserRole`
 2. **Définir** `UNRESTRICTED_ROLES` au début du service pour lister les rôles autorisés
 3. **Filtrer** par `userId` par défaut, sauf si `userRole` est dans `UNRESTRICTED_ROLES`
 4. **JAMAIS** de booléens `isAdmin`, toujours utiliser `UserRole` depuis `@/lib/constants/roles.constant`
 
 **Avantages** :
+
 - ✅ Type-safe avec TypeScript
 - ✅ Extensible : ajout facile de nouveaux rôles (MANAGER, MODERATOR, etc.)
 - ✅ Single source of truth : rôles définis dans Prisma
@@ -260,11 +275,12 @@ const { documents } = await getDocuments(filters, session.user.id, session.user.
 #### Règle Stricte : JAMAIS de booléens pour les permissions
 
 **❌ INTERDIT** :
+
 ```tsx
 async function getEntity(
   filters: GetEntityFilters,
   userId: string,
-  isAdmin: boolean = false  // ❌ Booléen = Non maintenable
+  isAdmin: boolean = false, // ❌ Booléen = Non maintenable
 ) {
   const whereClause = {
     ...(!isAdmin && { userId }),
@@ -273,6 +289,7 @@ async function getEntity(
 ```
 
 **Problèmes avec les booléens** :
+
 - ❌ Non extensible : Que faire avec un 3e rôle (MANAGER, MODERATOR) ?
 - ❌ Logique ternaire : `if (!isAdmin)` devient confus avec plusieurs rôles
 - ❌ Non type-safe : `isAdmin: boolean` accepte n'importe quel booléen
@@ -282,6 +299,7 @@ async function getEntity(
 
 ```tsx
 import "server-only";
+
 import { UserRole } from "@/lib/constants/roles.constant";
 
 // 1. Définir explicitement quels rôles ont quels accès
@@ -291,7 +309,7 @@ const UNRESTRICTED_ROLES: UserRole[] = [UserRole.ADMIN];
 async function getEntity(
   filters: GetEntityFilters,
   userId: string,
-  userRole: UserRole  // ✅ Type-safe, extensible
+  userRole: UserRole, // ✅ Type-safe, extensible
 ): Promise<GetEntityResult> {
   // 2. Logique claire et maintenable
   const canAccessAllData = UNRESTRICTED_ROLES.includes(userRole);
@@ -304,6 +322,7 @@ async function getEntity(
 ```
 
 **Avantages** :
+
 - ✅ **Extensibilité** : Ajout de nouveaux rôles en 1 ligne
 - ✅ **Type-safety** : TypeScript force `UserRole` (pas `string`)
 - ✅ **Maintenabilité** : Logique centralisée dans `UNRESTRICTED_ROLES`
@@ -322,20 +341,27 @@ const EXPORT_ALLOWED_ROLES: UserRole[] = [UserRole.ADMIN, UserRole.MANAGER];
 async function getEntity(
   filters: GetEntityFilters,
   userId: string,
-  userRole: UserRole
+  userRole: UserRole,
 ) {
   const canAccessAllData = UNRESTRICTED_ROLES.includes(userRole);
   const canCombineFilters = UNRESTRICTED_FILTER_ROLES.includes(userRole);
   const canExport = EXPORT_ALLOWED_ROLES.includes(userRole);
 
   // Logique claire pour chaque permission
-  if (!canAccessAllData) { /* filtrer par userId */ }
-  if (!canCombineFilters) { /* interdire combinaisons */ }
-  if (!canExport) { /* bloquer export */ }
+  if (!canAccessAllData) {
+    /* filtrer par userId */
+  }
+  if (!canCombineFilters) {
+    /* interdire combinaisons */
+  }
+  if (!canExport) {
+    /* bloquer export */
+  }
 }
 ```
 
 **À appliquer dans** :
+
 - ✅ TOUS les services `get-*.service.ts`
 - ✅ TOUS les utilitaires (`getFuzzyCount`, `constantTimeDelay`, etc.)
 - ✅ TOUTE logique de permissions
@@ -365,6 +391,7 @@ GET /admin/users?search=fake@test.com
 ```
 
 **Impact** :
+
 - 🟠 **Énumération** : Découverte d'emails/usernames
 - 🟠 **OSINT** : Profilage des utilisateurs (noms, rôles)
 - 🟠 **Timing attacks** : Combiné avec temps de réponse
@@ -443,13 +470,14 @@ export const updateProfileAction = authActionClient
   .action(async ({ parsedInput, ctx }) => {
     const user = await prisma.user.update({
       where: { id: ctx.userId },
-      data: parsedInput,  // ❌ Si schema contient "role", l'utilisateur devient admin!
+      data: parsedInput, // ❌ Si schema contient "role", l'utilisateur devient admin!
     });
     return { success: true, user };
   });
 ```
 
 **Exploitation** :
+
 ```tsx
 // Si UpdateProfileSchema contient:
 const UpdateProfileSchema = z.object({
@@ -476,7 +504,7 @@ export const updateProfileAction = authActionClient
     const user = await prisma.user.update({
       where: { id: ctx.userId },
       data: {
-        name,    // ✅ Seulement champs autorisés
+        name, // ✅ Seulement champs autorisés
         email,
         bio,
         // ❌ JAMAIS: role, isAdmin, permissions, createdAt, etc.
@@ -550,6 +578,7 @@ GET /users?search=раypal  # 'а' et 'у' cyrilliques ressemblent à 'a' et 'y'
 ```
 
 **Impact** :
+
 - 🟡 **Bypass** : Contournement de blacklists
 - 🟡 **Confusion** : Homograph attacks (phishing interne)
 
@@ -599,7 +628,7 @@ GET /admin/users?search=<script>alert(1)</script>
 
 ```tsx
 // app/(protected)/admin/users/page.tsx
-export const revalidate = 0;           // ✅ Pas de cache
+export const revalidate = 0; // ✅ Pas de cache
 export const dynamic = "force-dynamic"; // ✅ Toujours dynamique
 
 // Ou headers explicites
@@ -608,8 +637,8 @@ export async function generateMetadata() {
     robots: { index: false, follow: false },
     other: {
       "Cache-Control": "private, no-cache, no-store, must-revalidate",
-      "Pragma": "no-cache",
-      "Expires": "0",
+      Pragma: "no-cache",
+      Expires: "0",
     },
   };
 }
@@ -702,7 +731,7 @@ const UNRESTRICTED_FILTER_ROLES: UserRole[] = [UserRole.ADMIN];
 async function getUsers(
   filters: GetUsersFilters,
   userId: string,
-  userRole: UserRole
+  userRole: UserRole,
 ) {
   const canCombineFilters = UNRESTRICTED_FILTER_ROLES.includes(userRole);
 
@@ -727,9 +756,11 @@ Tous les services de filtrage doivent suivre ce template :
 
 ```tsx
 import "server-only";
+
 import { UserRole } from "@/lib/constants/roles.constant";
-import { checkRatelimit } from "@/utils/ratelimit/check-ratelimit";
 import { filterRatelimit } from "@/lib/ratelimit";
+
+import { checkRatelimit } from "@/utils/ratelimit/check-ratelimit";
 import { constantTimeDelay } from "@/utils/security/constant-time";
 import { getFuzzyCount } from "@/utils/security/fuzzy-count";
 
@@ -739,8 +770,8 @@ const UNRESTRICTED_FILTER_ROLES: UserRole[] = [UserRole.ADMIN];
 
 async function getEntity(
   filters: GetEntityFilters,
-  userId: string,     // ✅ 1. Toujours userId
-  userRole: UserRole  // ✅ 2. Toujours userRole (JAMAIS de booléen)
+  userId: string, // ✅ 1. Toujours userId
+  userRole: UserRole, // ✅ 2. Toujours userRole (JAMAIS de booléen)
 ): Promise<GetEntityResult> {
   // ✅ 3. Rate limiting
   await checkRatelimit(filterRatelimit, userId);
@@ -780,10 +811,10 @@ async function getEntity(
   const [entities, realCount] = await prisma.$transaction([
     prisma.entity.findMany({
       where: whereClause,
-      select: { id: true, name: true },  // ✅ 9. Jamais select *
+      select: { id: true, name: true }, // ✅ 9. Jamais select *
       orderBy: { [safeSortBy]: safeOrder },
       skip: (safePage - 1) * DEFAULT_PAGE_SIZE,
-      take: DEFAULT_PAGE_SIZE,           // ✅ 10. Toujours limite stricte
+      take: DEFAULT_PAGE_SIZE, // ✅ 10. Toujours limite stricte
     }),
     prisma.entity.count({ where: whereClause }),
   ]);
@@ -793,7 +824,7 @@ async function getEntity(
 
   return {
     entities,
-    totalCount: getFuzzyCount(realCount, userRole),  // ✅ 12. Fuzzy count selon rôle
+    totalCount: getFuzzyCount(realCount, userRole), // ✅ 12. Fuzzy count selon rôle
     totalPages: Math.ceil(realCount / DEFAULT_PAGE_SIZE),
     currentPage: safePage,
   };
@@ -808,6 +839,7 @@ export { getEntity };
 "use server";
 
 import { UpdateEntitySchema } from "@/features/entity/schemas/entity.schema";
+
 import { authActionClient } from "@/lib/safe-action";
 
 export const updateEntityAction = authActionClient
@@ -913,19 +945,20 @@ export const updateEntityAction = authActionClient
 
 ## Tableau de Synthèse
 
-| Faille | Gravité | Exploitabilité | Impact | CVSS | Priorité | Effort |
-|--------|---------|----------------|--------|------|----------|--------|
-| **Rate Limiting** | 🔴 Critique | Facile | DoS + Énumération | 8.6 | P0 | 4h |
-| **IDOR** | 🔴 Critique | Facile | Data Breach | 9.1 | P0 | 8h |
-| **Info Disclosure (Count)** | 🟠 Majeur | Facile | Énumération | 6.5 | P1 | 4h |
-| **Mass Assignment** | 🟠 Majeur | Moyen | Privilege Escalation | 7.3 | P1 | 8h |
-| **Parameter Pollution** | 🟡 Moyen | Moyen | Bypass Filtres | 5.0 | P2 | 2h |
-| **Unicode Attacks** | 🟡 Moyen | Moyen | Bypass Validation | 4.8 | P2 | 2h |
-| **Cache Poisoning** | 🟡 Moyen | Difficile | XSS Stored | 6.0 | P2 | 2h |
-| **Timing Attacks** | 🟡 Moyen | Difficile | Info Leak | 3.5 | P3 | 4h |
-| **Business Logic** | 🟡 Moyen | Facile | Info Leak | 5.5 | P2 | 4h |
+| Faille                      | Gravité     | Exploitabilité | Impact               | CVSS | Priorité | Effort |
+| --------------------------- | ----------- | -------------- | -------------------- | ---- | -------- | ------ |
+| **Rate Limiting**           | 🔴 Critique | Facile         | DoS + Énumération    | 8.6  | P0       | 4h     |
+| **IDOR**                    | 🔴 Critique | Facile         | Data Breach          | 9.1  | P0       | 8h     |
+| **Info Disclosure (Count)** | 🟠 Majeur   | Facile         | Énumération          | 6.5  | P1       | 4h     |
+| **Mass Assignment**         | 🟠 Majeur   | Moyen          | Privilege Escalation | 7.3  | P1       | 8h     |
+| **Parameter Pollution**     | 🟡 Moyen    | Moyen          | Bypass Filtres       | 5.0  | P2       | 2h     |
+| **Unicode Attacks**         | 🟡 Moyen    | Moyen          | Bypass Validation    | 4.8  | P2       | 2h     |
+| **Cache Poisoning**         | 🟡 Moyen    | Difficile      | XSS Stored           | 6.0  | P2       | 2h     |
+| **Timing Attacks**          | 🟡 Moyen    | Difficile      | Info Leak            | 3.5  | P3       | 4h     |
+| **Business Logic**          | 🟡 Moyen    | Facile         | Info Leak            | 5.5  | P2       | 4h     |
 
 **Légende** :
+
 - 🔴 Critique (CVSS 9.0-10.0) : Exploitation facile, impact majeur
 - 🟠 Majeur (CVSS 7.0-8.9) : Exploitation moyenne, impact sérieux
 - 🟡 Moyen (CVSS 4.0-6.9) : Exploitation difficile ou impact limité
@@ -939,12 +972,11 @@ export const updateEntityAction = authActionClient
 ### Avant Mise en Production
 
 **BLOCKERS (P0)** :
+
 1. ✅ Rate limiting opérationnel sur TOUS les endpoints de filtrage
 2. ✅ Vérifications IDOR (userId) dans TOUS les services
 
-**FORTEMENT RECOMMANDÉ (P1)** :
-3. ✅ Fuzzy count pour non-admin
-4. ✅ Audit complet mass assignment dans actions
+**FORTEMENT RECOMMANDÉ (P1)** : 3. ✅ Fuzzy count pour non-admin 4. ✅ Audit complet mass assignment dans actions
 
 ### Tests de Non-Régression
 

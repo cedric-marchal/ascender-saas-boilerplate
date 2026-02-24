@@ -68,7 +68,7 @@ export const authActionClient = actionClient.use(async ({ next }) => {
 export const adminActionClient = authActionClient.use(async ({ next, ctx }) => {
   if (ctx.userRole !== UserRole.ADMIN) {
     throw new ForbiddenError(
-      "Accès non autorisé. Vous devez être administrateur."
+      "Accès non autorisé. Vous devez être administrateur.",
     );
   }
 

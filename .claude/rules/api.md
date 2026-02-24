@@ -149,7 +149,7 @@ async function GET(request: Request, { params }: RouteParams) {
 
     return NextResponse.json(
       { success: true, data: document },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error: unknown) {
     return handleApiError(error);
@@ -172,7 +172,7 @@ async function POST(request: Request) {
 
     return NextResponse.json(
       { success: true, data: document },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (error: unknown) {
     return handleApiError(error);

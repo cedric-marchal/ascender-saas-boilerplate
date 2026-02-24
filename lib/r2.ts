@@ -36,13 +36,13 @@ function validateKey(key: string): void {
 
   if (key.length > MAX_KEY_LENGTH) {
     throw new BadRequestError(
-      `La clé du fichier est trop longue (max ${MAX_KEY_LENGTH} caractères)`
+      `La clé du fichier est trop longue (max ${MAX_KEY_LENGTH} caractères)`,
     );
   }
 
   if (key.includes("..") || key.startsWith("/")) {
     throw new BadRequestError(
-      "La clé du fichier contient des caractères invalides"
+      "La clé du fichier contient des caractères invalides",
     );
   }
 }
@@ -50,7 +50,7 @@ function validateKey(key: string): void {
 function validateExpiresIn(expiresIn: number): void {
   if (expiresIn < MIN_EXPIRES_IN || expiresIn > MAX_EXPIRES_IN) {
     throw new BadRequestError(
-      `La durée d'expiration doit être entre ${MIN_EXPIRES_IN} et ${MAX_EXPIRES_IN} secondes`
+      `La durée d'expiration doit être entre ${MIN_EXPIRES_IN} et ${MAX_EXPIRES_IN} secondes`,
     );
   }
 }
@@ -66,7 +66,7 @@ function getPublicUrl(key: string): string {
 async function uploadFile(
   key: string,
   body: Buffer | Blob,
-  contentType: string
+  contentType: string,
 ): Promise<void> {
   validateKey(key);
 
@@ -85,12 +85,12 @@ async function uploadFile(
         Key: key,
         Body: body,
         ContentType: contentType,
-      })
+      }),
     );
   } catch (error: unknown) {
     console.error("R2 upload error:", error);
     throw new ServiceUnavailableError(
-      "Le service de stockage est temporairement indisponible"
+      "Le service de stockage est temporairement indisponible",
     );
   }
 }
@@ -103,12 +103,12 @@ async function deleteFile(key: string): Promise<void> {
       new DeleteObjectCommand({
         Bucket: BUCKET,
         Key: key,
-      })
+      }),
     );
   } catch (error: unknown) {
     console.error("R2 delete error:", error);
     throw new ServiceUnavailableError(
-      "Le service de stockage est temporairement indisponible"
+      "Le service de stockage est temporairement indisponible",
     );
   }
 }
@@ -121,7 +121,7 @@ async function fileExists(key: string): Promise<boolean> {
       new GetObjectCommand({
         Bucket: BUCKET,
         Key: key,
-      })
+      }),
     );
     return true;
   } catch {
@@ -131,7 +131,7 @@ async function fileExists(key: string): Promise<boolean> {
 
 async function getPrivateUrl(
   key: string,
-  expiresIn: number = 3600
+  expiresIn: number = 3600,
 ): Promise<string> {
   validateKey(key);
   validateExpiresIn(expiresIn);
@@ -143,14 +143,14 @@ async function getPrivateUrl(
         Bucket: BUCKET,
         Key: key,
       }),
-      { expiresIn }
+      { expiresIn },
     );
 
     return url;
   } catch (error: unknown) {
     console.error("R2 signed URL error:", error);
     throw new ServiceUnavailableError(
-      "Le service de stockage est temporairement indisponible"
+      "Le service de stockage est temporairement indisponible",
     );
   }
 }

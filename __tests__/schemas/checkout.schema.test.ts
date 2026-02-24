@@ -1,5 +1,6 @@
-import { CreateCheckoutSessionSchema } from "@/features/billing/schemas/checkout.schema";
 import { describe, expect, it } from "vitest";
+
+import { CreateCheckoutSessionSchema } from "@/features/billing/schemas/checkout.schema";
 
 describe("CreateCheckoutSessionSchema", () => {
   it("accepts valid priceId", () => {

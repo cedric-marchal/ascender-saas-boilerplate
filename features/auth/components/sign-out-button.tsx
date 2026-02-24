@@ -2,9 +2,10 @@
 
 import { useRouter } from "next/navigation";
 
-import { signOutAction } from "@/features/auth/actions/sign-out.action";
 import { useAction } from "next-safe-action/hooks";
 import { toast } from "sonner";
+
+import { signOutAction } from "@/features/auth/actions/sign-out.action";
 
 import { Button } from "@/components/ui/button";
 

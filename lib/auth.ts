@@ -1,15 +1,16 @@
 import "server-only";
 
-import { EmailChangeNotificationEmail } from "@/features/auth/emails/email-change-notification-email";
-import { PasswordChangedEmail } from "@/features/auth/emails/password-changed-email";
-import { ResetPasswordEmail } from "@/features/auth/emails/reset-password-email";
-import { WelcomeEmail } from "@/features/auth/emails/welcome-email";
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { nextCookies } from "better-auth/next-js";
 
-import { UserRole } from "@/lib/generated/prisma/client";
+import { EmailChangeNotificationEmail } from "@/features/auth/emails/email-change-notification-email";
+import { PasswordChangedEmail } from "@/features/auth/emails/password-changed-email";
+import { ResetPasswordEmail } from "@/features/auth/emails/reset-password-email";
+import { WelcomeEmail } from "@/features/auth/emails/welcome-email";
+
 import { env } from "@/lib/env";
+import { UserRole } from "@/lib/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { sendEmailSafe } from "@/lib/resend";
 import { stripe } from "@/lib/stripe";
@@ -115,12 +116,12 @@ const auth = betterAuth({
         });
 
         console.log(
-          `Stripe customer email updated for user ${user.id}: ${dbUser.email}`
+          `Stripe customer email updated for user ${user.id}: ${dbUser.email}`,
         );
       } catch (error: unknown) {
         console.error(
           `Failed to update Stripe customer email for user ${user.id}:`,
-          error
+          error,
         );
       }
     },

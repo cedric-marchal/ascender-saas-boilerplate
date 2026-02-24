@@ -1,10 +1,11 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
 import {
   BadRequestError,
   ForbiddenError,
   NotFoundError,
   UnauthorizedError,
 } from "@/utils/errors/errors";
-import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Create mocks
 const mockPrismaUserFindUnique = vi.fn();
@@ -46,9 +47,8 @@ vi.mock("@/lib/constants/roles.constant", () => ({
 }));
 
 // Import after mocks
-const { createPortalSession } = await import(
-  "@/features/billing/services/stripe/create-portal-session.service"
-);
+const { createPortalSession } =
+  await import("@/features/billing/services/stripe/create-portal-session.service");
 
 describe("createPortalSession", () => {
   beforeEach(() => {
@@ -83,10 +83,10 @@ describe("createPortalSession", () => {
     mockPrismaUserFindUnique.mockResolvedValue(null);
 
     await expect(
-      createPortalSession({ userId: "missing-user" })
+      createPortalSession({ userId: "missing-user" }),
     ).rejects.toThrow(UnauthorizedError);
     await expect(
-      createPortalSession({ userId: "missing-user" })
+      createPortalSession({ userId: "missing-user" }),
     ).rejects.toThrow("Utilisateur introuvable");
   });
 
@@ -97,12 +97,12 @@ describe("createPortalSession", () => {
       role: "CUSTOMER",
     });
 
-    await expect(
-      createPortalSession({ userId: "user-123" })
-    ).rejects.toThrow(ForbiddenError);
-    await expect(
-      createPortalSession({ userId: "user-123" })
-    ).rejects.toThrow("vérifier votre adresse e-mail");
+    await expect(createPortalSession({ userId: "user-123" })).rejects.toThrow(
+      ForbiddenError,
+    );
+    await expect(createPortalSession({ userId: "user-123" })).rejects.toThrow(
+      "vérifier votre adresse e-mail",
+    );
   });
 
   it("throws ForbiddenError if role is not CUSTOMER", async () => {
@@ -112,12 +112,12 @@ describe("createPortalSession", () => {
       role: "ADMIN",
     });
 
-    await expect(
-      createPortalSession({ userId: "user-123" })
-    ).rejects.toThrow(ForbiddenError);
-    await expect(
-      createPortalSession({ userId: "user-123" })
-    ).rejects.toThrow("rôle CUSTOMER");
+    await expect(createPortalSession({ userId: "user-123" })).rejects.toThrow(
+      ForbiddenError,
+    );
+    await expect(createPortalSession({ userId: "user-123" })).rejects.toThrow(
+      "rôle CUSTOMER",
+    );
   });
 
   it("throws NotFoundError if no StripeCustomer", async () => {
@@ -129,12 +129,12 @@ describe("createPortalSession", () => {
 
     mockPrismaStripeCustomerFindUnique.mockResolvedValue(null);
 
-    await expect(
-      createPortalSession({ userId: "user-123" })
-    ).rejects.toThrow(NotFoundError);
-    await expect(
-      createPortalSession({ userId: "user-123" })
-    ).rejects.toThrow("Aucun client Stripe trouvé");
+    await expect(createPortalSession({ userId: "user-123" })).rejects.toThrow(
+      NotFoundError,
+    );
+    await expect(createPortalSession({ userId: "user-123" })).rejects.toThrow(
+      "Aucun client Stripe trouvé",
+    );
   });
 
   it("throws BadRequestError if portalSession.url is null", async () => {
@@ -152,12 +152,12 @@ describe("createPortalSession", () => {
       url: null,
     });
 
-    await expect(
-      createPortalSession({ userId: "user-123" })
-    ).rejects.toThrow(BadRequestError);
-    await expect(
-      createPortalSession({ userId: "user-123" })
-    ).rejects.toThrow("Impossible de créer la session du portail");
+    await expect(createPortalSession({ userId: "user-123" })).rejects.toThrow(
+      BadRequestError,
+    );
+    await expect(createPortalSession({ userId: "user-123" })).rejects.toThrow(
+      "Impossible de créer la session du portail",
+    );
   });
 
   it("selects correct fields from user", async () => {

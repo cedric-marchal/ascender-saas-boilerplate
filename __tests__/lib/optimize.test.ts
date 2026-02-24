@@ -1,12 +1,14 @@
+import sharp from "sharp";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
 import {
   getImageMetadata,
   optimizeAvatar,
   optimizeBanner,
   optimizeImage,
 } from "@/lib/optimize";
+
 import { BadRequestError } from "@/utils/errors/errors";
-import sharp from "sharp";
-import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Mock sharp
 vi.mock("sharp");
@@ -21,7 +23,7 @@ describe("validateImageBuffer (via optimizeImage)", () => {
 
     await expect(optimizeImage(emptyBuffer)).rejects.toThrow(BadRequestError);
     await expect(optimizeImage(emptyBuffer)).rejects.toThrow(
-      "Le fichier image est vide"
+      "Le fichier image est vide",
     );
   });
 
@@ -39,7 +41,7 @@ describe("validateImageBuffer (via optimizeImage)", () => {
 
     await expect(optimizeImage(buffer)).rejects.toThrow(BadRequestError);
     await expect(optimizeImage(buffer)).rejects.toThrow(
-      "Format d'image non supporté"
+      "Format d'image non supporté",
     );
   });
 
@@ -168,7 +170,7 @@ describe("validateImageBuffer (via optimizeImage)", () => {
 
     await expect(optimizeImage(buffer)).rejects.toThrow(BadRequestError);
     await expect(optimizeImage(buffer)).rejects.toThrow(
-      "Impossible de lire les dimensions"
+      "Impossible de lire les dimensions",
     );
   });
 });
@@ -287,7 +289,7 @@ describe("optimizeImage", () => {
 
     await expect(optimizeImage(input)).rejects.toThrow(BadRequestError);
     await expect(optimizeImage(input)).rejects.toThrow(
-      "Échec de l'optimisation"
+      "Échec de l'optimisation",
     );
   });
 });
@@ -360,7 +362,7 @@ describe("optimizeAvatar", () => {
 
     await expect(optimizeAvatar(input)).rejects.toThrow(BadRequestError);
     await expect(optimizeAvatar(input)).rejects.toThrow(
-      "Échec de l'optimisation de l'avatar"
+      "Échec de l'optimisation de l'avatar",
     );
   });
 });
@@ -422,7 +424,7 @@ describe("optimizeBanner", () => {
 
     await expect(optimizeBanner(input)).rejects.toThrow(BadRequestError);
     await expect(optimizeBanner(input)).rejects.toThrow(
-      "Échec de l'optimisation de la bannière"
+      "Échec de l'optimisation de la bannière",
     );
   });
 });
@@ -496,6 +498,8 @@ describe("getImageMetadata", () => {
 
     // Validation fails first, so we get the validation error
     await expect(getImageMetadata(input)).rejects.toThrow(BadRequestError);
-    await expect(getImageMetadata(input)).rejects.toThrow("pas une image valide");
+    await expect(getImageMetadata(input)).rejects.toThrow(
+      "pas une image valide",
+    );
   });
 });

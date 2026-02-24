@@ -7,9 +7,8 @@ vi.mock("@/lib/env", () => ({
 }));
 
 // Import after mocks
-const { UpdateAvatarSchema } = await import(
-  "@/features/account/schemas/avatar.schema"
-);
+const { UpdateAvatarSchema } =
+  await import("@/features/account/schemas/avatar.schema");
 
 describe("UpdateAvatarSchema", () => {
   describe("accepts valid files", () => {
@@ -132,7 +131,7 @@ describe("UpdateAvatarSchema", () => {
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.error.issues[0]?.message).toBe(
-          "Format non supporté. Formats acceptés : JPEG, PNG, WebP"
+          "Format non supporté. Formats acceptés : JPEG, PNG, WebP",
         );
       }
     });
@@ -146,7 +145,9 @@ describe("UpdateAvatarSchema", () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.issues[0]?.message).toContain("Format non supporté");
+        expect(result.error.issues[0]?.message).toContain(
+          "Format non supporté",
+        );
         expect(result.error.issues[0]?.message).toContain("JPEG, PNG, WebP");
       }
     });
@@ -160,7 +161,9 @@ describe("UpdateAvatarSchema", () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.issues[0]?.message).toContain("Format non supporté");
+        expect(result.error.issues[0]?.message).toContain(
+          "Format non supporté",
+        );
       }
     });
 
@@ -173,7 +176,9 @@ describe("UpdateAvatarSchema", () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.issues[0]?.message).toContain("Format non supporté");
+        expect(result.error.issues[0]?.message).toContain(
+          "Format non supporté",
+        );
       }
     });
 
@@ -186,7 +191,9 @@ describe("UpdateAvatarSchema", () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.issues[0]?.message).toContain("Format non supporté");
+        expect(result.error.issues[0]?.message).toContain(
+          "Format non supporté",
+        );
       }
     });
 
@@ -197,7 +204,9 @@ describe("UpdateAvatarSchema", () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.issues[0]?.message).toContain("Format non supporté");
+        expect(result.error.issues[0]?.message).toContain(
+          "Format non supporté",
+        );
       }
     });
   });

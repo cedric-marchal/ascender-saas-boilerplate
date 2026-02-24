@@ -2,16 +2,16 @@
 
 import type { ChangeEvent, SubmitEvent } from "react";
 
-import { deleteAccountAction } from "@/features/account/actions/delete-account.action";
-import {
-  DeleteAccountSchema,
-  type DeleteAccountSchemaType,
-} from "@/features/account/schemas/account.schema";
 import { useForm } from "@tanstack/react-form";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { toast } from "sonner";
 
+import { deleteAccountAction } from "@/features/account/actions/delete-account.action";
+import {
+  DeleteAccountSchema,
+  type DeleteAccountSchemaType,
+} from "@/features/account/schemas/account.schema";
 import { signOutAction } from "@/features/auth/actions/sign-out.action";
 
 import { Button } from "@/components/ui/button";

@@ -1,5 +1,6 @@
-import { UserRole, roleLabels } from "@/lib/constants/roles.constant";
 import { describe, expect, it } from "vitest";
+
+import { UserRole, roleLabels } from "@/lib/constants/roles.constant";
 
 describe("UserRole", () => {
   it("contains ADMIN", () => {

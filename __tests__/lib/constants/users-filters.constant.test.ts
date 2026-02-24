@@ -1,3 +1,5 @@
+import { describe, expect, it } from "vitest";
+
 import {
   isUserRole,
   isUserRoleFilter,
@@ -9,7 +11,6 @@ import {
   verificationFilters,
   verificationLabels,
 } from "@/features/users/constants/users-filters.constant";
-import { describe, expect, it } from "vitest";
 
 describe("userRoleFilters", () => {
   it("contains 'all', 'ADMIN', and 'CUSTOMER'", () => {

@@ -7,11 +7,11 @@ const passwordSchema = z
   .string()
   .min(
     MIN_PASSWORD_LENGTH,
-    `Le mot de passe doit contenir au moins ${MIN_PASSWORD_LENGTH} caractères`
+    `Le mot de passe doit contenir au moins ${MIN_PASSWORD_LENGTH} caractères`,
   )
   .max(
     MAX_PASSWORD_LENGTH,
-    `Le mot de passe doit contenir moins de ${MAX_PASSWORD_LENGTH} caractères`
+    `Le mot de passe doit contenir moins de ${MAX_PASSWORD_LENGTH} caractères`,
   )
   .trim()
   .refine((pwd) => /[a-z]/.test(pwd), "Au moins une lettre minuscule")

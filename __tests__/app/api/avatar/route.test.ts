@@ -42,7 +42,7 @@ describe("POST /api/avatar", () => {
     mockHandleApiError.mockImplementation((error: Error) => {
       return Response.json(
         { success: false, message: error.message },
-        { status: 500 }
+        { status: 500 },
       );
     });
   });
@@ -63,7 +63,7 @@ describe("POST /api/avatar", () => {
     mockHandleApiError.mockImplementation((error: Error) => {
       return Response.json(
         { success: false, message: error.message },
-        { status: 401 }
+        { status: 401 },
       );
     });
 
@@ -100,10 +100,7 @@ describe("POST /api/avatar", () => {
 
     await POST(mockRequest);
 
-    expect(mockCheckRatelimit).toHaveBeenCalledWith(
-      { limit: 10 },
-      userId
-    );
+    expect(mockCheckRatelimit).toHaveBeenCalledWith({ limit: 10 }, userId);
   });
 
   it("parses formData and validates with Zod", async () => {
@@ -184,7 +181,7 @@ describe("POST /api/avatar", () => {
     mockHandleApiError.mockImplementation((error: Error) => {
       return Response.json(
         { success: false, message: "Validation failed" },
-        { status: 400 }
+        { status: 400 },
       );
     });
 
@@ -213,7 +210,7 @@ describe("POST /api/avatar", () => {
     mockHandleApiError.mockImplementation((error: Error) => {
       return Response.json(
         { success: false, message: error.message },
-        { status: 429 }
+        { status: 429 },
       );
     });
 
@@ -244,7 +241,7 @@ describe("POST /api/avatar", () => {
     mockHandleApiError.mockImplementation((error: Error) => {
       return Response.json(
         { success: false, message: error.message },
-        { status: 500 }
+        { status: 500 },
       );
     });
 
@@ -270,7 +267,7 @@ describe("POST /api/avatar", () => {
     mockHandleApiError.mockImplementation((error: Error) => {
       return Response.json(
         { success: false, message: "Validation failed" },
-        { status: 400 }
+        { status: 400 },
       );
     });
 

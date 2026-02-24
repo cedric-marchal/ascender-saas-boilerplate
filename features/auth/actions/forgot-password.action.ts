@@ -2,8 +2,9 @@
 
 import { headers } from "next/headers";
 
-import { ForgotPasswordSchema } from "@/features/auth/schemas/auth.schema";
 import { APIError } from "better-auth/api";
+
+import { ForgotPasswordSchema } from "@/features/auth/schemas/auth.schema";
 
 import { auth } from "@/lib/auth";
 import { actionClient } from "@/lib/safe-action";

@@ -46,7 +46,7 @@ async function deleteOldAvatar(userId: string): Promise<void> {
 }
 
 async function updateAvatar(
-  input: UpdateAvatarInput
+  input: UpdateAvatarInput,
 ): Promise<UpdateAvatarResult> {
   const arrayBuffer = await input.avatar.arrayBuffer();
   const buffer = Buffer.from(arrayBuffer);

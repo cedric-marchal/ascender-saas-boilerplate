@@ -1,5 +1,6 @@
-import { getBilling } from "@/features/billing/services/get-billing.service";
 import { describe, expect, it, vi } from "vitest";
+
+import { getBilling } from "@/features/billing/services/get-billing.service";
 
 import { prisma } from "@/lib/prisma";
 import { redis } from "@/lib/redis";
@@ -104,7 +105,7 @@ describe("getBilling", () => {
     expect(result!.invoices[0].id).toBe("inv_1");
     expect(result!.invoices[0].amountPaid).toBe(2900);
     expect(result!.invoices[0].invoicePdfUrl).toBe(
-      "https://example.com/inv.pdf"
+      "https://example.com/inv.pdf",
     );
 
     expect(stripe.invoices.list).toHaveBeenCalledWith({
@@ -115,7 +116,7 @@ describe("getBilling", () => {
     expect(redis.set).toHaveBeenCalledWith(
       `invoices:${mockUserId}`,
       expect.any(Array),
-      { ex: 300 }
+      { ex: 300 },
     );
   });
 

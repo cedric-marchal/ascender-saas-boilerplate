@@ -67,7 +67,7 @@ async function deleteAccount(input: DeleteAccountInput): Promise<void> {
 
   if (input.confirmation !== user.email) {
     throw new BadRequestError(
-      "L'email de confirmation ne correspond pas à votre adresse email"
+      "L'email de confirmation ne correspond pas à votre adresse email",
     );
   }
 
@@ -78,7 +78,7 @@ async function deleteAccount(input: DeleteAccountInput): Promise<void> {
 
     if (adminCount <= 1) {
       throw new ForbiddenError(
-        "Vous êtes le seul administrateur. Vous ne pouvez pas supprimer votre compte."
+        "Vous êtes le seul administrateur. Vous ne pouvez pas supprimer votre compte.",
       );
     }
   }

@@ -1,7 +1,7 @@
 import "server-only";
 
-import { UserRole } from "@/lib/generated/prisma/client";
 import { env } from "@/lib/env";
+import { UserRole } from "@/lib/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { stripe } from "@/lib/stripe";
 
@@ -21,7 +21,7 @@ type CreatePortalSessionResult = {
 };
 
 async function createPortalSession(
-  input: CreatePortalSessionInput
+  input: CreatePortalSessionInput,
 ): Promise<CreatePortalSessionResult> {
   const user = await prisma.user.findUnique({
     where: { id: input.userId },
@@ -38,13 +38,13 @@ async function createPortalSession(
 
   if (!user.emailVerified) {
     throw new ForbiddenError(
-      "Vous devez vérifier votre adresse e-mail avant d'accéder au portail de facturation"
+      "Vous devez vérifier votre adresse e-mail avant d'accéder au portail de facturation",
     );
   }
 
   if (user.role !== UserRole.CUSTOMER) {
     throw new ForbiddenError(
-      "Seuls les utilisateurs avec le rôle CUSTOMER peuvent accéder au portail de facturation"
+      "Seuls les utilisateurs avec le rôle CUSTOMER peuvent accéder au portail de facturation",
     );
   }
 
@@ -55,7 +55,7 @@ async function createPortalSession(
 
   if (!stripeCustomer) {
     throw new NotFoundError(
-      "Aucun client Stripe trouvé. Vous devez d'abord souscrire à un abonnement."
+      "Aucun client Stripe trouvé. Vous devez d'abord souscrire à un abonnement.",
     );
   }
 
@@ -66,7 +66,7 @@ async function createPortalSession(
 
   if (!portalSession.url) {
     throw new BadRequestError(
-      "Impossible de créer la session du portail de facturation"
+      "Impossible de créer la session du portail de facturation",
     );
   }
 

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Create mocks
@@ -9,9 +10,7 @@ vi.mock("@/features/billing/services/stripe/handle-webhook.service", () => ({
 }));
 
 // Import after mocks
-const { POST } = await import(
-  "@/app/api/stripe/webhooks/route"
-);
+const { POST } = await import("@/app/api/stripe/webhooks/route");
 
 describe("POST /api/stripe/webhooks", () => {
   beforeEach(() => {
@@ -53,7 +52,7 @@ describe("POST /api/stripe/webhooks", () => {
 
     expect(mockHandleStripeWebhook).toHaveBeenCalledWith(
       webhookBody,
-      signature
+      signature,
     );
   });
 

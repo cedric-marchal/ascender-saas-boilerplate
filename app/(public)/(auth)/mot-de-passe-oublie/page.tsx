@@ -2,9 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { ForgotPasswordForm } from "@/features/auth/components/forms/forgot-password-form";
 import { ArrowLeft } from "lucide-react";
 import type { WebPage, WithContext } from "schema-dts";
+
+import { ForgotPasswordForm } from "@/features/auth/components/forms/forgot-password-form";
 
 import { env } from "@/lib/env";
 import { getSession } from "@/lib/session";

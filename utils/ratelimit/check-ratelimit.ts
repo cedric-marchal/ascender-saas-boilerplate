@@ -8,7 +8,7 @@ import { TooManyRequestsError } from "../errors/errors";
 
 async function checkRatelimit(
   ratelimiter: Ratelimit,
-  identifier: string
+  identifier: string,
 ): Promise<void> {
   if (
     !env.UPSTASH_REDIS_REST_URL ||
@@ -17,7 +17,7 @@ async function checkRatelimit(
     env.UPSTASH_REDIS_REST_TOKEN === "your-token-here"
   ) {
     console.warn(
-      "[Rate Limit] Upstash credentials not configured. Skipping rate limit check."
+      "[Rate Limit] Upstash credentials not configured. Skipping rate limit check.",
     );
     return;
   }
@@ -26,7 +26,7 @@ async function checkRatelimit(
 
   if (!success) {
     throw new TooManyRequestsError(
-      "Trop de requêtes. Veuillez réessayer plus tard."
+      "Trop de requêtes. Veuillez réessayer plus tard.",
     );
   }
 }

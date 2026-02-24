@@ -4,9 +4,10 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { headers } from "next/headers";
 
-import { CookieBanner } from "@/features/cookie-consent/components/cookie-banner";
 import { ThemeProvider } from "next-themes";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
+
+import { CookieBanner } from "@/features/cookie-consent/components/cookie-banner";
 
 import { env } from "@/lib/env";
 

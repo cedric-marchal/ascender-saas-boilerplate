@@ -29,9 +29,8 @@ vi.mock("@/lib/env", () => ({
 }));
 
 // Import after mocks
-const { updatePassword } = await import(
-  "@/features/account/services/update-password.service"
-);
+const { updatePassword } =
+  await import("@/features/account/services/update-password.service");
 
 describe("updatePassword", () => {
   beforeEach(() => {

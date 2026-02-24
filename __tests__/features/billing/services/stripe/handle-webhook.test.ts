@@ -51,9 +51,8 @@ vi.mock("@/lib/env", () => ({
 }));
 
 // Import after mocks
-const { handleStripeWebhook } = await import(
-  "@/features/billing/services/stripe/handle-webhook.service"
-);
+const { handleStripeWebhook } =
+  await import("@/features/billing/services/stripe/handle-webhook.service");
 
 describe("handleStripeWebhook", () => {
   beforeEach(() => {
@@ -140,7 +139,7 @@ describe("handleStripeWebhook", () => {
       expect(mockRedisSet).toHaveBeenCalledWith(
         "stripe:event:evt_test_123",
         1,
-        { ex: 86400 }
+        { ex: 86400 },
       );
     });
   });
@@ -255,7 +254,7 @@ describe("handleStripeWebhook", () => {
 
       expect(mockSentryCapture).toHaveBeenCalledWith(
         expect.stringContaining("StripeCustomer not found"),
-        "warning"
+        "warning",
       );
       expect(mockPrismaUpsert).not.toHaveBeenCalled();
     });
@@ -284,7 +283,7 @@ describe("handleStripeWebhook", () => {
 
       expect(mockSentryCapture).toHaveBeenCalledWith(
         expect.stringContaining("Missing priceId"),
-        "warning"
+        "warning",
       );
       expect(mockPrismaUpsert).not.toHaveBeenCalled();
     });
@@ -321,7 +320,7 @@ describe("handleStripeWebhook", () => {
 
       expect(mockSentryCapture).toHaveBeenCalledWith(
         expect.stringContaining("Unknown subscription status"),
-        "warning"
+        "warning",
       );
       expect(mockPrismaUpsert).not.toHaveBeenCalled();
     });
@@ -360,7 +359,7 @@ describe("handleStripeWebhook", () => {
         expect.objectContaining({
           create: expect.objectContaining({ cancelAtPeriodEnd: true }),
           update: expect.objectContaining({ cancelAtPeriodEnd: true }),
-        })
+        }),
       );
     });
   });
@@ -407,7 +406,7 @@ describe("handleStripeWebhook", () => {
 
       expect(mockSentryCapture).toHaveBeenCalledWith(
         expect.stringContaining("StripeCustomer not found"),
-        "warning"
+        "warning",
       );
       expect(mockPrismaDeleteMany).not.toHaveBeenCalled();
     });
@@ -474,7 +473,7 @@ describe("handleStripeWebhook", () => {
 
       expect(mockSentryCapture).toHaveBeenCalledWith(
         expect.stringContaining("No customer ID in invoice"),
-        "warning"
+        "warning",
       );
       expect(mockRedisDel).not.toHaveBeenCalled();
     });
@@ -496,7 +495,7 @@ describe("handleStripeWebhook", () => {
 
       expect(mockSentryCapture).toHaveBeenCalledWith(
         expect.stringContaining("StripeCustomer not found"),
-        "warning"
+        "warning",
       );
       expect(mockRedisDel).not.toHaveBeenCalled();
     });
@@ -573,7 +572,7 @@ describe("handleStripeWebhook", () => {
             eventType: "customer.subscription.created",
             eventId: "evt_error",
           }),
-        })
+        }),
       );
       expect(result.status).toBe(200);
       expect(result.body.success).toBe(true);

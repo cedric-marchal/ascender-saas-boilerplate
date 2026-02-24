@@ -11,11 +11,11 @@ const UpdateAvatarSchema = z.object({
     .refine((file) => file.size > 0, "L'image est requise")
     .refine(
       (file) => file.size <= MAX_FILE_SIZE,
-      `L'image est trop volumineuse (max ${MAX_FILE_SIZE / 1024 / 1024}MB)`
+      `L'image est trop volumineuse (max ${MAX_FILE_SIZE / 1024 / 1024}MB)`,
     )
     .refine(
       (file) => ACCEPTED_IMAGE_TYPES.includes(file.type),
-      "Format non supporté. Formats acceptés : JPEG, PNG, WebP"
+      "Format non supporté. Formats acceptés : JPEG, PNG, WebP",
     ),
 });
 

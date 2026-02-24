@@ -1,7 +1,7 @@
 import "server-only";
 
-import { UserRole } from "@/lib/generated/prisma/client";
 import { env } from "@/lib/env";
+import { UserRole } from "@/lib/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { stripe } from "@/lib/stripe";
 
@@ -29,14 +29,14 @@ type CreateCheckoutSessionResult = {
 
 async function syncStripeCustomerIfNeeded(
   stripeCustomerId: string,
-  user: StripeUser
+  user: StripeUser,
 ): Promise<void> {
   try {
     const stripeCustomer = await stripe.customers.retrieve(stripeCustomerId);
 
     if (stripeCustomer.deleted) {
       throw new BadRequestError(
-        "Votre compte Stripe a été supprimé. Veuillez contacter le support."
+        "Votre compte Stripe a été supprimé. Veuillez contacter le support.",
       );
     }
 
@@ -51,7 +51,7 @@ async function syncStripeCustomerIfNeeded(
 
       if (process.env.NODE_ENV === "development") {
         console.log(
-          `Stripe customer synchronized during checkout for user ${user.id}`
+          `Stripe customer synchronized during checkout for user ${user.id}`,
         );
       }
     }
@@ -59,7 +59,7 @@ async function syncStripeCustomerIfNeeded(
     if (process.env.NODE_ENV === "development") {
       console.error(
         `Failed to sync Stripe customer during checkout for user ${user.id}:`,
-        error
+        error,
       );
     }
   }
@@ -74,7 +74,7 @@ async function getOrCreateStripeCustomer(user: StripeUser): Promise<string> {
   if (existingStripeCustomer) {
     await syncStripeCustomerIfNeeded(
       existingStripeCustomer.stripeCustomerId,
-      user
+      user,
     );
     return existingStripeCustomer.stripeCustomerId;
   }
@@ -98,7 +98,7 @@ async function getOrCreateStripeCustomer(user: StripeUser): Promise<string> {
 }
 
 async function createCheckoutSession(
-  input: CreateCheckoutSessionInput
+  input: CreateCheckoutSessionInput,
 ): Promise<CreateCheckoutSessionResult> {
   const user = await prisma.user.findUnique({
     where: { id: input.userId },
@@ -117,13 +117,13 @@ async function createCheckoutSession(
 
   if (!user.emailVerified) {
     throw new ForbiddenError(
-      "Vous devez vérifier votre adresse e-mail avant de souscrire à un abonnement"
+      "Vous devez vérifier votre adresse e-mail avant de souscrire à un abonnement",
     );
   }
 
   if (user.role !== UserRole.CUSTOMER) {
     throw new ForbiddenError(
-      "Seuls les utilisateurs avec le rôle CUSTOMER peuvent souscrire à un abonnement"
+      "Seuls les utilisateurs avec le rôle CUSTOMER peuvent souscrire à un abonnement",
     );
   }
 
@@ -145,7 +145,7 @@ async function createCheckoutSession(
 
   if (existingSubscriptions.data.length > 0) {
     throw new ConflictError(
-      "Vous avez déjà un abonnement actif. Gérez-le depuis votre espace facturation."
+      "Vous avez déjà un abonnement actif. Gérez-le depuis votre espace facturation.",
     );
   }
 

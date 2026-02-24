@@ -5,9 +5,10 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { Cookie, Shield } from "lucide-react";
+
 import { CookiePreferencesModal } from "@/features/cookie-consent/components/cookie-preferences-modal";
 import { useCookieConsent } from "@/features/cookie-consent/hooks/use-cookie-consent";
-import { Cookie, Shield } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 

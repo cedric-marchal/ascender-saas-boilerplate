@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 
-import { PricingGrid } from "@/features/pricing/components/pricing-grid";
-import { PLANS, type Plan } from "@/features/pricing/constants/pricing-plans";
 import type { Product, WebPage, WithContext } from "schema-dts";
 
-import { UserRole } from "@/lib/generated/prisma/client";
+import { PricingGrid } from "@/features/pricing/components/pricing-grid";
+import { PLANS, type Plan } from "@/features/pricing/constants/pricing-plans";
+
 import { env } from "@/lib/env";
+import { UserRole } from "@/lib/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
 
@@ -53,14 +54,14 @@ function getPricingSchemas(): WithContext<Product>[] {
         price: plan.price,
         priceCurrency: "EUR",
         priceValidUntil: new Date(
-          new Date().setFullYear(new Date().getFullYear() + 1)
+          new Date().setFullYear(new Date().getFullYear() + 1),
         )
           .toISOString()
           .split("T")[0],
         availability: "https://schema.org/InStock",
         url: `${BASE_URL}/tarifs`,
       },
-    })
+    }),
   );
 }
 

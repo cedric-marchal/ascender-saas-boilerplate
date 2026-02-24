@@ -28,15 +28,16 @@ features/account/components/modals/delete-account-modal.tsx  # Contains form log
 
 import type { ChangeEvent, SubmitEvent } from "react";
 
+import { useForm } from "@tanstack/react-form";
+import { Loader2 } from "lucide-react";
+import { useAction } from "next-safe-action/hooks";
+import { toast } from "sonner";
+
 import { createContactAction } from "@/features/contact/actions/create-contact.action";
 import {
   CreateContactSchema,
   type CreateContactSchemaType,
 } from "@/features/contact/schemas/contact.schema";
-import { useForm } from "@tanstack/react-form";
-import { Loader2 } from "lucide-react";
-import { useAction } from "next-safe-action/hooks";
-import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
@@ -340,7 +341,7 @@ File inputs MUST include drag & drop + preview + removal.
             isDragging
               ? "border-primary bg-primary/5"
               : "border-muted-foreground/25",
-            value && "border-primary/50"
+            value && "border-primary/50",
           )}
         >
           {value ? (
@@ -391,14 +392,15 @@ Form and Modal MUST be separate files.
 
 ```tsx
 "use client";
+import { useForm } from "@tanstack/react-form";
+import { useAction } from "next-safe-action/hooks";
+import { toast } from "sonner";
+
 import { deleteAccountAction } from "@/features/account/actions/delete-account.action";
 import {
   DeleteAccountSchema,
   type DeleteAccountSchemaType,
 } from "@/features/account/schemas/account.schema";
-import { useForm } from "@tanstack/react-form";
-import { useAction } from "next-safe-action/hooks";
-import { toast } from "sonner";
 
 import { getActionResult } from "@/utils/errors/get-action-result";
 import { getErrorMessage } from "@/utils/errors/get-error-message";

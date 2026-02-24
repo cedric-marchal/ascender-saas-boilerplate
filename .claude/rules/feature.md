@@ -142,8 +142,8 @@ const UNRESTRICTED_ROLES: UserRole[] = [UserRole.ADMIN];
 
 async function getEntities(
   filters: GetEntitiesFilters,
-  userId: string,     // ✅ MANDATORY: Current user ID
-  userRole: UserRole  // ✅ MANDATORY: Current user role (NEVER boolean)
+  userId: string, // ✅ MANDATORY: Current user ID
+  userRole: UserRole, // ✅ MANDATORY: Current user role (NEVER boolean)
 ): Promise<GetEntitiesResult> {
   const safeSearch = filters.search.slice(0, MAX_SEARCH_LENGTH).trim();
   const safePage = Math.max(1, Math.min(filters.page, MAX_PAGE));
@@ -185,11 +185,12 @@ import "server-only";
 
 import { UserRole } from "@/lib/constants/roles.constant";
 import { filterRatelimit } from "@/lib/ratelimit";
+
 import { checkRatelimit } from "@/utils/ratelimit/check-ratelimit";
 
 async function getUsers(
   filters: GetUsersFilters,
-  userId: string     // ✅ For rate limiting (not filtering)
+  userId: string, // ✅ For rate limiting (not filtering)
 ): Promise<GetUsersResult> {
   // ✅ Rate limit per user (prevent abuse)
   await checkRatelimit(filterRatelimit, userId);
@@ -231,17 +232,17 @@ export { getUsers };
 async function getEntities(
   filters: GetEntitiesFilters,
   userId: string,
-  isAdmin: boolean = false  // ❌ NOT extensible, NOT type-safe
+  isAdmin: boolean = false, // ❌ NOT extensible, NOT type-safe
 ) {
   const whereClause = {
-    ...(!isAdmin && { userId }),  // ❌ What about MANAGER role?
+    ...(!isAdmin && { userId }), // ❌ What about MANAGER role?
   };
 }
 
 // ❌ WRONG: Missing userId parameter
 async function getEntities(filters: GetEntitiesFilters) {
   const entities = await prisma.entity.findMany({
-    where: { name: filters.search },  // ❌ IDOR vulnerability!
+    where: { name: filters.search }, // ❌ IDOR vulnerability!
   });
 }
 
@@ -249,10 +250,10 @@ async function getEntities(filters: GetEntitiesFilters) {
 async function getEntities(
   filters: GetEntitiesFilters,
   userId: string,
-  userRole: UserRole
+  userRole: UserRole,
 ) {
   const entities = await prisma.entity.findMany({
-    where: { name: filters.search },  // ❌ Missing userId check!
+    where: { name: filters.search }, // ❌ Missing userId check!
   });
 }
 ```
@@ -402,15 +403,16 @@ export { UserForm };
 
 import type { ChangeEvent, SubmitEvent } from "react";
 
+import { useForm } from "@tanstack/react-form";
+import { Loader2 } from "lucide-react";
+import { useAction } from "next-safe-action/hooks";
+import { toast } from "sonner";
+
 import { createContactAction } from "@/features/contact/actions/create-contact.action";
 import {
   CreateContactSchema,
   type CreateContactSchemaType,
 } from "@/features/contact/schemas/contact.schema";
-import { useForm } from "@tanstack/react-form";
-import { Loader2 } from "lucide-react";
-import { useAction } from "next-safe-action/hooks";
-import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
@@ -524,8 +526,9 @@ export { ContactForm };
 
 import { useState } from "react";
 
-import { DeleteAccountForm } from "@/features/account/components/forms/delete-account-form";
 import { Trash2 } from "lucide-react";
+
+import { DeleteAccountForm } from "@/features/account/components/forms/delete-account-form";
 
 import { Button } from "@/components/ui/button";
 import {

@@ -25,7 +25,7 @@ function getRequestIdentifier(request: Request): string {
   }
 
   console.warn(
-    "[Rate Limit] Unable to determine client IP. Using fallback identifier 'unknown'. This may cause all users to share the same rate limit."
+    "[Rate Limit] Unable to determine client IP. Using fallback identifier 'unknown'. This may cause all users to share the same rate limit.",
   );
 
   return "unknown";
@@ -55,7 +55,7 @@ async function getActionIdentifier(): Promise<string> {
   }
 
   console.warn(
-    "[Rate Limit] Unable to determine client IP. Using fallback identifier 'unknown'. This may cause all users to share the same rate limit."
+    "[Rate Limit] Unable to determine client IP. Using fallback identifier 'unknown'. This may cause all users to share the same rate limit.",
   );
 
   return "unknown";

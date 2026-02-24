@@ -60,7 +60,7 @@ describe("checkRatelimit", () => {
     };
 
     await expect(
-      checkRatelimit(mockRatelimiter as any, "test-id")
+      checkRatelimit(mockRatelimiter as any, "test-id"),
     ).resolves.toBeUndefined();
 
     expect(mockRatelimiter.limit).toHaveBeenCalledWith("test-id");
@@ -72,7 +72,7 @@ describe("checkRatelimit", () => {
     };
 
     await expect(
-      checkRatelimit(mockRatelimiter as any, "test-id")
+      checkRatelimit(mockRatelimiter as any, "test-id"),
     ).rejects.toThrow(TooManyRequestsError);
   });
 
@@ -82,7 +82,7 @@ describe("checkRatelimit", () => {
     };
 
     await expect(
-      checkRatelimit(mockRatelimiter as any, "test-id")
+      checkRatelimit(mockRatelimiter as any, "test-id"),
     ).rejects.toThrow("Trop de requêtes. Veuillez réessayer plus tard.");
   });
 });

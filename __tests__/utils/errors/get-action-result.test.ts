@@ -1,5 +1,6 @@
-import { getActionResult } from "@/utils/errors/get-action-result";
 import { describe, expect, it } from "vitest";
+
+import { getActionResult } from "@/utils/errors/get-action-result";
 
 describe("getActionResult", () => {
   it("returns data when result has data", () => {
@@ -19,7 +20,7 @@ describe("getActionResult", () => {
     const result = { serverError: "Erreur serveur personnalisée" };
 
     expect(() => getActionResult(result)).toThrow(
-      "Erreur serveur personnalisée"
+      "Erreur serveur personnalisée",
     );
   });
 

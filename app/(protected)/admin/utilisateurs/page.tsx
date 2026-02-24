@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 
+import { type SearchParams, createLoader } from "nuqs/server";
+
 import {
   type UserTableData,
   usersColumns,
@@ -7,7 +9,6 @@ import {
 import { UsersFilters } from "@/features/users/components/users-filters";
 import { usersSearchParams } from "@/features/users/constants/users-filters.constant";
 import { getUsers } from "@/features/users/services/get-users.service";
-import { type SearchParams, createLoader } from "nuqs/server";
 
 import { requireAdminVerifiedEmail } from "@/lib/session";
 
@@ -40,7 +41,7 @@ export default async function AdminUsersPage({
   const { users, totalCount, totalPages, currentPage } = await getUsers(
     filters,
     session.user.id,
-    session.user.role
+    session.user.role,
   );
 
   return (

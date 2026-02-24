@@ -2,15 +2,16 @@
 
 import { type ChangeEvent, type SubmitEvent, useState } from "react";
 
+import { useForm } from "@tanstack/react-form";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { useAction } from "next-safe-action/hooks";
+import { toast } from "sonner";
+
 import { updatePasswordAction } from "@/features/account/actions/update-password.action";
 import {
   UpdatePasswordSchema,
   type UpdatePasswordSchemaType,
 } from "@/features/auth/schemas/password.schema";
-import { useForm } from "@tanstack/react-form";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
-import { useAction } from "next-safe-action/hooks";
-import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -46,7 +47,7 @@ function PasswordForm() {
         getActionResult(await executeAsync(value));
 
         toast.success(
-          "Mot de passe modifié avec succès. Un email de confirmation a été envoyé."
+          "Mot de passe modifié avec succès. Un email de confirmation a été envoyé.",
         );
 
         form.reset();
@@ -95,7 +96,7 @@ function PasswordForm() {
                   type="button"
                   onClick={() =>
                     setIsCurrentPasswordVisible(
-                      (previous: boolean) => !previous
+                      (previous: boolean) => !previous,
                     )
                   }
                   className="text-muted-foreground hover:text-foreground absolute top-0 right-0 flex h-9 w-9 items-center justify-center"
@@ -204,7 +205,7 @@ function PasswordForm() {
                   type="button"
                   onClick={() =>
                     setIsConfirmPasswordVisible(
-                      (previous: boolean) => !previous
+                      (previous: boolean) => !previous,
                     )
                   }
                   className="text-muted-foreground hover:text-foreground absolute top-0 right-0 flex h-9 w-9 items-center justify-center"

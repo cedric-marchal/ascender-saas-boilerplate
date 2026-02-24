@@ -45,7 +45,7 @@ async function validateImageBuffer(input: Buffer): Promise<void> {
 
     if (!ACCEPTED_IMAGE_FORMATS.includes(mimeType)) {
       throw new BadRequestError(
-        "Format d'image non supporté. Formats acceptés : JPEG, PNG, WebP"
+        "Format d'image non supporté. Formats acceptés : JPEG, PNG, WebP",
       );
     }
 
@@ -58,7 +58,7 @@ async function validateImageBuffer(input: Buffer): Promise<void> {
       metadata.height > MAX_IMAGE_HEIGHT
     ) {
       throw new BadRequestError(
-        `L'image est trop grande (max ${MAX_IMAGE_WIDTH}x${MAX_IMAGE_HEIGHT}px)`
+        `L'image est trop grande (max ${MAX_IMAGE_WIDTH}x${MAX_IMAGE_HEIGHT}px)`,
       );
     }
   } catch (error: unknown) {
@@ -72,7 +72,7 @@ async function validateImageBuffer(input: Buffer): Promise<void> {
 
 async function optimizeImage(
   input: Buffer,
-  options: OptimizeImageOptions = {}
+  options: OptimizeImageOptions = {},
 ): Promise<OptimizeImageResult> {
   await validateImageBuffer(input);
 
