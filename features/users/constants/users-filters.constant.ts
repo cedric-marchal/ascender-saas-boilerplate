@@ -1,4 +1,4 @@
-import { UserRole } from "@/lib/generated/prisma/client";
+import type { UserRole } from "@/lib/generated/prisma/client";
 import {
   createEnumParser,
   createSortByParser,
@@ -10,7 +10,7 @@ import {
 type UserRoleFilter = "all" | UserRole;
 type VerificationFilter = "all" | "verified" | "unverified";
 
-const userRoleFilters = ["all", UserRole.ADMIN, UserRole.CUSTOMER] as const;
+const userRoleFilters = ["all", "ADMIN", "CUSTOMER"] as const satisfies readonly UserRoleFilter[];
 const verificationFilters = ["all", "verified", "unverified"] as const;
 const usersSortableFields = ["name", "email", "createdAt"] as const;
 
@@ -38,7 +38,7 @@ const usersSearchParams = {
 };
 
 function isUserRole(value: string): value is UserRole {
-  return value === UserRole.ADMIN || value === UserRole.CUSTOMER;
+  return value === "ADMIN" || value === "CUSTOMER";
 }
 
 function isUserRoleFilter(value: string): value is UserRoleFilter {

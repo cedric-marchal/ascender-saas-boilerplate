@@ -1,4 +1,4 @@
-import { createParser, parseAsStringLiteral } from "nuqs";
+import { createParser, parseAsStringLiteral } from "nuqs/server";
 
 const MAX_PAGE = 1000;
 const MAX_SEARCH_LENGTH = 100;
