@@ -5,11 +5,11 @@ import { headers } from "next/headers";
 import { APIError } from "better-auth/api";
 
 import { auth } from "@/lib/auth";
-import { authActionClient } from "@/lib/safe-action";
+import { actionClient } from "@/lib/safe-action";
 
 import { BadRequestError } from "@/utils/errors/errors";
 
-export const signOutAction = authActionClient.action(async () => {
+export const signOutAction = actionClient.action(async () => {
   try {
     await auth.api.signOut({
       headers: await headers(),
