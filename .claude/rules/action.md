@@ -42,7 +42,7 @@ export const createContactAction = actionClient
 | ------------------- | ------------------------- | -------------------------------------------- |
 | `actionClient`      | Public (no auth)          | None                                         |
 | `authActionClient`  | Protected (auth required) | `userId`, `userEmail`, `userName`            |
-| `adminActionClient` | Admin only                | `userId`, `userEmail`, `userName`, `isAdmin` |
+| `adminActionClient` | Admin only                | `userId`, `userEmail`, `userName`, `userRole` |
 
 **Public example**:
 

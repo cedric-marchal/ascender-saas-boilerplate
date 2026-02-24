@@ -16,6 +16,7 @@ function parseUserRole(role: string): UserRole {
   if (!Object.values(UserRole).includes(role as UserRole)) {
     throw new Error(`Role invalide dans la session: ${role}`);
   }
+
   return role as UserRole;
 }
 
@@ -71,10 +72,5 @@ export const adminActionClient = authActionClient.use(async ({ next, ctx }) => {
     );
   }
 
-  return next({
-    ctx: {
-      ...ctx,
-      isAdmin: true,
-    },
-  });
+  return next({ ctx });
 });
