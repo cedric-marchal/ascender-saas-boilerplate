@@ -95,6 +95,8 @@ jobs:
       - run: pnpm build
         env:
           NODE_ENV: production
+          NEXT_TELEMETRY_DISABLED: "1"
+          MAINTENANCE_ENABLED: "false"
           BETTER_AUTH_SECRET: ci-placeholder-secret
           GOOGLE_CLIENT_ID: ci-placeholder
           GOOGLE_CLIENT_SECRET: ci-placeholder
@@ -107,9 +109,12 @@ jobs:
           RESEND_EMAIL_NOREPLY: noreply@ci.example.com
           RESEND_EMAIL_CONTACT: contact@ci.example.com
           RESEND_EMAIL_SECURITY: security@ci.example.com
+          UPSTASH_REDIS_REST_URL: https://ci.upstash.io
+          UPSTASH_REDIS_REST_TOKEN: ci-placeholder-token
           STRIPE_SECRET_KEY: sk_test_ci_placeholder
           STRIPE_WEBHOOK_SECRET: whsec_ci_placeholder
           STRIPE_PRICE_ID_PRO: price_ci_placeholder
           NEXT_PUBLIC_APP_NAME: Ascender
           NEXT_PUBLIC_BASE_URL: https://ci.example.com
           NEXT_PUBLIC_R2_PUBLIC_URL: https://ci.r2.example.com
+          NEXT_PUBLIC_SENTRY_DSN: https://ci@ci.ingest.sentry.io/0
