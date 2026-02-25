@@ -9,10 +9,10 @@ import { useQueryStates } from "nuqs";
 import {
   roleLabels,
   usersSearchParams,
+  type UserSortableField,
 } from "@/features/users/constants/users-filters.constant";
 
-import { env } from "@/lib/env";
-import { UserRole, type User } from "@/lib/generated/prisma/client";
+import { UserRole, type User } from "@/lib/generated/prisma/browser";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -25,7 +25,13 @@ export type UserTableData = Pick<
   "id" | "name" | "email" | "role" | "emailVerified" | "image" | "createdAt"
 >;
 
-function SortableHeader({ field, label }: { field: string; label: string }) {
+function SortableHeader({
+  field,
+  label,
+}: {
+  field: UserSortableField;
+  label: string;
+}) {
   const [isLoading, startTransition] = useTransition();
 
   const [filters, setFilters] = useQueryStates(usersSearchParams, {
@@ -83,7 +89,7 @@ const usersColumns: ColumnDef<UserTableData>[] = [
           <Avatar className="h-8 w-8">
             {user.image ? (
               <AvatarImage
-                src={`${env.NEXT_PUBLIC_R2_PUBLIC_URL}/${user.image}`}
+                src={`${process.env.NEXT_PUBLIC_R2_PUBLIC_URL}/${user.image}`}
                 alt={`${user.name} avatar`}
               />
             ) : (

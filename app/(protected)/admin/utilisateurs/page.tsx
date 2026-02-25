@@ -38,7 +38,8 @@ export default async function AdminUsersPage({
 
   const filters = await loadSearchParams(searchParams);
 
-  const { users, totalCount, totalPages, currentPage } = await getUsers(filters);
+  const { users, totalCount, totalPages, currentPage } =
+    await getUsers(filters);
 
   return (
     <main className="flex min-h-screen w-full flex-col gap-6 p-6">

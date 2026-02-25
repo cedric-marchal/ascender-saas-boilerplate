@@ -1,4 +1,8 @@
-import { createParser, parseAsStringLiteral } from "nuqs/server";
+import {
+  createParser,
+  parseAsStringLiteral,
+  type SingleParserBuilder,
+} from "nuqs/server";
 
 const MAX_PAGE = 1000;
 const MAX_SEARCH_LENGTH = 100;
@@ -67,12 +71,16 @@ const parseAsPageSize = createParser({
 
 const parseAsOrder = parseAsStringLiteral(SORT_ORDERS);
 
-function createEnumParser<T extends readonly string[]>(enumValues: T) {
-  return parseAsStringLiteral(enumValues);
+function createEnumParser<const T extends readonly string[]>(
+  enumValues: T,
+): SingleParserBuilder<T[number]> {
+  return parseAsStringLiteral(enumValues) as SingleParserBuilder<T[number]>;
 }
 
-function createSortByParser<T extends readonly string[]>(allowedFields: T) {
-  return parseAsStringLiteral(allowedFields);
+function createSortByParser<const T extends readonly string[]>(
+  allowedFields: T,
+): SingleParserBuilder<T[number]> {
+  return parseAsStringLiteral(allowedFields) as SingleParserBuilder<T[number]>;
 }
 
 export {
