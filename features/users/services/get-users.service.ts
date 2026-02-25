@@ -10,7 +10,6 @@ import {
   usersSortableFields,
 } from "@/features/users/constants/users-filters.constant";
 
-import type { UserRole } from "@/lib/generated/prisma/client";
 import type { User } from "@/lib/generated/prisma/client";
 import type { UserWhereInput } from "@/lib/generated/prisma/models";
 import {
@@ -49,7 +48,6 @@ type GetUsersResult = {
 async function getUsers(
   filters: GetUsersFilters,
   userId: string,
-  userRole: UserRole,
 ): Promise<GetUsersResult> {
   await checkRatelimit(filterRatelimit, userId);
 

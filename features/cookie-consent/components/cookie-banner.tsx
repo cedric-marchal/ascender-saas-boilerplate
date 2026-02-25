@@ -24,6 +24,7 @@ function CookieBanner() {
   const closePreferences = useCookieConsent((state) => state.closePreferences);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsHydrated(true);
 
     const { hasConsented: persisted, preferences } =

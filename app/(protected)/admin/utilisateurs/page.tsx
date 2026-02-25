@@ -41,7 +41,6 @@ export default async function AdminUsersPage({
   const { users, totalCount, totalPages, currentPage } = await getUsers(
     filters,
     session.user.id,
-    session.user.role,
   );
 
   return (
