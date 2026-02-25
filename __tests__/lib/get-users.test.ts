@@ -3,8 +3,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { getUsers } from "@/features/users/services/get-users.service";
 import type { GetUsersFilters } from "@/features/users/services/get-users.service";
 
-import { prisma } from "@/lib/prisma";
 import { DEFAULT_PAGE_SIZE } from "@/lib/parsers/nuqs";
+import { prisma } from "@/lib/prisma";
 
 vi.mock("@/lib/prisma", () => ({
   prisma: {
@@ -12,9 +12,11 @@ vi.mock("@/lib/prisma", () => ({
       findMany: vi.fn(),
       count: vi.fn(),
     },
-    $transaction: vi.fn().mockImplementation(
-      (queries: Promise<unknown>[]) => Promise.all(queries),
-    ),
+    $transaction: vi
+      .fn()
+      .mockImplementation((queries: Promise<unknown>[]) =>
+        Promise.all(queries),
+      ),
   },
 }));
 

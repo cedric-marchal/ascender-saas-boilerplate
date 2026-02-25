@@ -7,12 +7,12 @@ import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import { useQueryStates } from "nuqs";
 
 import {
+  type UserSortableField,
   roleLabels,
   usersSearchParams,
-  type UserSortableField,
 } from "@/features/users/constants/users-filters.constant";
 
-import { UserRole, type User } from "@/lib/generated/prisma/browser";
+import { type User, UserRole } from "@/lib/generated/prisma/browser";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
