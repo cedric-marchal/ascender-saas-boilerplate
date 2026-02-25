@@ -1,32 +1,24 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { getUsers } from "@/features/users/services/get-users.service";
+import type { GetUsersFilters } from "@/features/users/services/get-users.service";
 
 import { prisma } from "@/lib/prisma";
+import { DEFAULT_PAGE_SIZE } from "@/lib/parsers/nuqs";
 
-vi.mock("@/lib/prisma", () => {
-  const mockFindMany = vi.fn();
-  const mockCount = vi.fn();
-  const mockTransaction = vi.fn();
-
-  return {
-    prisma: {
-      user: {
-        findMany: mockFindMany,
-        count: mockCount,
-      },
-      $transaction: mockTransaction,
+vi.mock("@/lib/prisma", () => ({
+  prisma: {
+    user: {
+      findMany: vi.fn(),
+      count: vi.fn(),
     },
-  };
-});
-
-vi.mock("@/utils/ratelimit/check-ratelimit", () => ({
-  checkRatelimit: vi.fn().mockResolvedValue(undefined),
+    $transaction: vi.fn().mockImplementation(
+      (queries: Promise<unknown>[]) => Promise.all(queries),
+    ),
+  },
 }));
 
-const testUserId = "test-user-id";
-
-const defaultFilters = {
+const defaultFilters: GetUsersFilters = {
   search: "",
   role: "all",
   verified: "all",
@@ -35,36 +27,48 @@ const defaultFilters = {
   page: 1,
 };
 
+const mockDate = new Date("2024-01-15");
+
 const mockUsers = [
   {
     id: "1",
     name: "Jean Dupont",
     email: "jean@exemple.fr",
-    role: "CUSTOMER",
+    role: "CUSTOMER" as const,
     emailVerified: true,
     image: null,
-    createdAt: new Date("2024-01-15"),
+    slug: "jean-dupont",
+    createdAt: mockDate,
+    updatedAt: mockDate,
   },
   {
     id: "2",
     name: "Admin User",
     email: "admin@exemple.fr",
-    role: "ADMIN",
+    role: "ADMIN" as const,
     emailVerified: true,
     image: null,
+    slug: "admin-user",
     createdAt: new Date("2024-01-10"),
+    updatedAt: new Date("2024-01-10"),
   },
 ];
 
 describe("getUsers", () => {
+  beforeEach(() => {
+    vi.mocked(prisma.user.findMany).mockResolvedValue([]);
+    vi.mocked(prisma.user.count).mockResolvedValue(0);
+  });
+
   afterEach(() => {
     vi.clearAllMocks();
   });
 
   it("returns users with pagination metadata", async () => {
-    vi.mocked(prisma.$transaction).mockResolvedValue([mockUsers, 2]);
+    vi.mocked(prisma.user.findMany).mockResolvedValue(mockUsers);
+    vi.mocked(prisma.user.count).mockResolvedValue(2);
 
-    const result = await getUsers(defaultFilters, testUserId);
+    const result = await getUsers(defaultFilters);
 
     expect(result.users).toEqual(mockUsers);
     expect(result.totalCount).toBe(2);
@@ -72,147 +76,135 @@ describe("getUsers", () => {
     expect(result.currentPage).toBe(1);
   });
 
-  it("calls prisma.$transaction", async () => {
-    vi.mocked(prisma.$transaction).mockResolvedValue([[], 0]);
-
-    await getUsers(defaultFilters, testUserId);
+  it("uses $transaction for parallel queries", async () => {
+    await getUsers(defaultFilters);
 
     expect(prisma.$transaction).toHaveBeenCalled();
   });
 
-  it("calculates totalPages correctly", async () => {
-    vi.mocked(prisma.$transaction).mockResolvedValue([mockUsers, 25]);
+  describe("pagination", () => {
+    it("calculates totalPages correctly", async () => {
+      vi.mocked(prisma.user.count).mockResolvedValue(25);
 
-    const result = await getUsers(defaultFilters, testUserId);
+      const result = await getUsers(defaultFilters);
 
-    expect(result.totalPages).toBe(3);
-  });
-
-  it("returns at least 1 total page even with 0 results", async () => {
-    vi.mocked(prisma.$transaction).mockResolvedValue([[], 0]);
-
-    const result = await getUsers(defaultFilters, testUserId);
-
-    expect(result.totalPages).toBe(1);
-  });
-
-  describe("search filter sanitization", () => {
-    it("truncates search to max 100 characters", async () => {
-      vi.mocked(prisma.$transaction).mockResolvedValue([[], 0]);
-
-      const longSearch = "a".repeat(150);
-      await getUsers({ ...defaultFilters, search: longSearch }, testUserId);
-
-      expect(prisma.$transaction).toHaveBeenCalled();
+      expect(result.totalPages).toBe(3);
     });
 
-    it("trims search whitespace", async () => {
-      vi.mocked(prisma.$transaction).mockResolvedValue([[], 0]);
+    it("returns at least 1 total page when 0 results", async () => {
+      const result = await getUsers(defaultFilters);
 
-      await getUsers({ ...defaultFilters, search: "  test  " }, testUserId);
-
-      expect(prisma.$transaction).toHaveBeenCalled();
-    });
-  });
-
-  describe("page sanitization", () => {
-    it("clamps page to minimum 1", async () => {
-      vi.mocked(prisma.$transaction).mockResolvedValue([[], 0]);
-
-      const result = await getUsers(
-        { ...defaultFilters, page: -5 },
-        testUserId,
-      );
-
-      expect(result.currentPage).toBe(1);
+      expect(result.totalPages).toBe(1);
     });
 
-    it("clamps page to maximum 1000", async () => {
-      vi.mocked(prisma.$transaction).mockResolvedValue([[], 0]);
+    it("reflects currentPage from filters", async () => {
+      const result = await getUsers({ ...defaultFilters, page: 5 });
 
-      const result = await getUsers(
-        { ...defaultFilters, page: 9999 },
-        testUserId,
-      );
+      expect(result.currentPage).toBe(5);
+    });
 
-      expect(result.currentPage).toBe(1000);
+    it("applies correct skip for page 3", async () => {
+      await getUsers({ ...defaultFilters, page: 3 });
+
+      const findManyArgs = vi.mocked(prisma.user.findMany).mock.calls[0]![0]!;
+      expect(findManyArgs.skip).toBe(2 * DEFAULT_PAGE_SIZE);
+    });
+
+    it("limits results to DEFAULT_PAGE_SIZE", async () => {
+      await getUsers(defaultFilters);
+
+      const findManyArgs = vi.mocked(prisma.user.findMany).mock.calls[0]![0]!;
+      expect(findManyArgs.take).toBe(DEFAULT_PAGE_SIZE);
     });
   });
 
-  describe("role filter sanitization", () => {
-    it("defaults to 'all' for invalid role", async () => {
-      vi.mocked(prisma.$transaction).mockResolvedValue([[], 0]);
+  describe("search filter", () => {
+    it("applies OR clause on name and email when search is provided", async () => {
+      await getUsers({ ...defaultFilters, search: "dupont" });
 
-      await getUsers({ ...defaultFilters, role: "INVALID" }, testUserId);
-
-      expect(prisma.$transaction).toHaveBeenCalled();
+      const findManyArgs = vi.mocked(prisma.user.findMany).mock.calls[0]![0]!;
+      expect(findManyArgs.where).toMatchObject({
+        OR: [
+          { name: { contains: "dupont", mode: "insensitive" } },
+          { email: { contains: "dupont", mode: "insensitive" } },
+        ],
+      });
     });
 
-    it("accepts valid role values", async () => {
-      vi.mocked(prisma.$transaction).mockResolvedValue([[], 0]);
+    it("omits OR clause when search is empty", async () => {
+      await getUsers({ ...defaultFilters, search: "" });
 
-      await getUsers({ ...defaultFilters, role: "ADMIN" }, testUserId);
-      await getUsers({ ...defaultFilters, role: "CUSTOMER" }, testUserId);
-
-      expect(prisma.$transaction).toHaveBeenCalledTimes(2);
-    });
-  });
-
-  describe("verified filter sanitization", () => {
-    it("defaults to 'all' for invalid verified value", async () => {
-      vi.mocked(prisma.$transaction).mockResolvedValue([[], 0]);
-
-      await getUsers({ ...defaultFilters, verified: "INVALID" }, testUserId);
-
-      expect(prisma.$transaction).toHaveBeenCalled();
-    });
-
-    it("accepts valid verified values", async () => {
-      vi.mocked(prisma.$transaction).mockResolvedValue([[], 0]);
-
-      await getUsers({ ...defaultFilters, verified: "verified" }, testUserId);
-      await getUsers({ ...defaultFilters, verified: "unverified" }, testUserId);
-
-      expect(prisma.$transaction).toHaveBeenCalledTimes(2);
+      const findManyArgs = vi.mocked(prisma.user.findMany).mock.calls[0]![0]!;
+      expect(findManyArgs.where).not.toHaveProperty("OR");
     });
   });
 
-  describe("sortBy sanitization", () => {
-    it("defaults to 'createdAt' for invalid sortBy", async () => {
-      vi.mocked(prisma.$transaction).mockResolvedValue([[], 0]);
+  describe("role filter", () => {
+    it("applies role ADMIN to where clause", async () => {
+      await getUsers({ ...defaultFilters, role: "ADMIN" });
 
-      await getUsers({ ...defaultFilters, sortBy: "password" }, testUserId);
-
-      expect(prisma.$transaction).toHaveBeenCalled();
+      const findManyArgs = vi.mocked(prisma.user.findMany).mock.calls[0]![0]!;
+      expect(findManyArgs.where).toMatchObject({ role: "ADMIN" });
     });
 
-    it("accepts valid sortBy values", async () => {
-      vi.mocked(prisma.$transaction).mockResolvedValue([[], 0]);
+    it("applies role CUSTOMER to where clause", async () => {
+      await getUsers({ ...defaultFilters, role: "CUSTOMER" });
 
-      await getUsers({ ...defaultFilters, sortBy: "name" }, testUserId);
-      await getUsers({ ...defaultFilters, sortBy: "email" }, testUserId);
-      await getUsers({ ...defaultFilters, sortBy: "createdAt" }, testUserId);
+      const findManyArgs = vi.mocked(prisma.user.findMany).mock.calls[0]![0]!;
+      expect(findManyArgs.where).toMatchObject({ role: "CUSTOMER" });
+    });
 
-      expect(prisma.$transaction).toHaveBeenCalledTimes(3);
+    it("omits role filter when role is 'all'", async () => {
+      await getUsers({ ...defaultFilters, role: "all" });
+
+      const findManyArgs = vi.mocked(prisma.user.findMany).mock.calls[0]![0]!;
+      expect(findManyArgs.where).not.toHaveProperty("role");
     });
   });
 
-  describe("order sanitization", () => {
-    it("defaults to 'desc' for invalid order", async () => {
-      vi.mocked(prisma.$transaction).mockResolvedValue([[], 0]);
+  describe("verified filter", () => {
+    it("filters emailVerified: true when verified is 'verified'", async () => {
+      await getUsers({ ...defaultFilters, verified: "verified" });
 
-      await getUsers({ ...defaultFilters, order: "INVALID" }, testUserId);
-
-      expect(prisma.$transaction).toHaveBeenCalled();
+      const findManyArgs = vi.mocked(prisma.user.findMany).mock.calls[0]![0]!;
+      expect(findManyArgs.where).toMatchObject({ emailVerified: true });
     });
 
-    it("accepts valid order values", async () => {
-      vi.mocked(prisma.$transaction).mockResolvedValue([[], 0]);
+    it("filters emailVerified: false when verified is 'unverified'", async () => {
+      await getUsers({ ...defaultFilters, verified: "unverified" });
 
-      await getUsers({ ...defaultFilters, order: "asc" }, testUserId);
-      await getUsers({ ...defaultFilters, order: "desc" }, testUserId);
+      const findManyArgs = vi.mocked(prisma.user.findMany).mock.calls[0]![0]!;
+      expect(findManyArgs.where).toMatchObject({ emailVerified: false });
+    });
 
-      expect(prisma.$transaction).toHaveBeenCalledTimes(2);
+    it("omits emailVerified filter when verified is 'all'", async () => {
+      await getUsers({ ...defaultFilters, verified: "all" });
+
+      const findManyArgs = vi.mocked(prisma.user.findMany).mock.calls[0]![0]!;
+      expect(findManyArgs.where).not.toHaveProperty("emailVerified");
+    });
+  });
+
+  describe("sort and order", () => {
+    it("applies name field ascending", async () => {
+      await getUsers({ ...defaultFilters, sortBy: "name", order: "asc" });
+
+      const findManyArgs = vi.mocked(prisma.user.findMany).mock.calls[0]![0]!;
+      expect(findManyArgs.orderBy).toEqual({ name: "asc" });
+    });
+
+    it("applies email field descending", async () => {
+      await getUsers({ ...defaultFilters, sortBy: "email", order: "desc" });
+
+      const findManyArgs = vi.mocked(prisma.user.findMany).mock.calls[0]![0]!;
+      expect(findManyArgs.orderBy).toEqual({ email: "desc" });
+    });
+
+    it("applies createdAt field descending by default", async () => {
+      await getUsers(defaultFilters);
+
+      const findManyArgs = vi.mocked(prisma.user.findMany).mock.calls[0]![0]!;
+      expect(findManyArgs.orderBy).toEqual({ createdAt: "desc" });
     });
   });
 });
