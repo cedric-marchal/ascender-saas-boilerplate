@@ -52,7 +52,7 @@ describe("POST /api/stripe/checkout", () => {
     });
 
     const response = await POST(mockRequest);
-    const data = await response.json() as { success: boolean };
+    const data = (await response.json()) as { success: boolean };
 
     expect(response.status).toBe(401);
     expect(data.success).toBe(false);
