@@ -32,6 +32,10 @@ vi.mock("@/lib/redis", () => ({
   },
 }));
 
+vi.mock("@/utils/ratelimit/check-ratelimit", () => ({
+  checkRatelimit: vi.fn().mockResolvedValue(undefined),
+}));
+
 describe("getBilling", () => {
   const mockUserId = "user-123";
   const mockStripeCustomerId = "cus_123";

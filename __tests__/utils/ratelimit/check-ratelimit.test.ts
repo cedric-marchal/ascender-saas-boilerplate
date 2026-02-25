@@ -3,10 +3,10 @@ import { describe, expect, it, vi } from "vitest";
 import { TooManyRequestsError } from "@/utils/errors/errors";
 import { checkRatelimit } from "@/utils/ratelimit/check-ratelimit";
 
-const mockEnv = {
+const mockEnv = vi.hoisted(() => ({
   UPSTASH_REDIS_REST_URL: "https://test.upstash.io",
   UPSTASH_REDIS_REST_TOKEN: "test-token",
-};
+}));
 
 vi.mock("@/lib/env", () => ({
   env: mockEnv,

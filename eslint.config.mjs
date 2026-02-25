@@ -12,6 +12,10 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Generated files — never lint these.
+    "lib/generated/**",
+    // Coverage reports.
+    "coverage/**",
   ]),
   {
     rules: {
