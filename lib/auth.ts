@@ -172,7 +172,7 @@ const auth = betterAuth({
       create: {
         before: async (user) => {
           const baseSlug = slugify(user.name) || "utilisateur";
-          const randomValue = crypto.getRandomValues(new Uint32Array(1))[0];
+          const randomValue = crypto.getRandomValues(new Uint32Array(1))[0]!;
           const uniqueSuffix =
             Date.now().toString(36) + randomValue.toString(36);
 

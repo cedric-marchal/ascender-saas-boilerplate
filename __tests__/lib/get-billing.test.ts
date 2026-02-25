@@ -102,9 +102,9 @@ describe("getBilling", () => {
 
     expect(result).not.toBeNull();
     expect(result!.invoices).toHaveLength(1);
-    expect(result!.invoices[0].id).toBe("inv_1");
-    expect(result!.invoices[0].amountPaid).toBe(2900);
-    expect(result!.invoices[0].invoicePdfUrl).toBe(
+    expect(result!.invoices[0]!.id).toBe("inv_1");
+    expect(result!.invoices[0]!.amountPaid).toBe(2900);
+    expect(result!.invoices[0]!.invoicePdfUrl).toBe(
       "https://example.com/inv.pdf",
     );
 
@@ -180,9 +180,9 @@ describe("getBilling", () => {
     const result = await getBilling(mockUserId);
 
     expect(result).not.toBeNull();
-    expect(result!.subscriptions[0].currentPeriodStart).toBe(0);
-    expect(result!.subscriptions[0].currentPeriodEnd).toBe(0);
-    expect(result!.subscriptions[0].priceId).toBeNull();
+    expect(result!.subscriptions[0]!.currentPeriodStart).toBe(0);
+    expect(result!.subscriptions[0]!.currentPeriodEnd).toBe(0);
+    expect(result!.subscriptions[0]!.priceId).toBeNull();
   });
 
   it("handles invoice with missing optional fields", async () => {
