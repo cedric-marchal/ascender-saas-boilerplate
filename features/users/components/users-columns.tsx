@@ -12,8 +12,7 @@ import {
 } from "@/features/users/constants/users-filters.constant";
 
 import { env } from "@/lib/env";
-import type { UserRole } from "@/lib/generated/prisma/client";
-import type { User } from "@/lib/generated/prisma/client";
+import { UserRole, type User } from "@/lib/generated/prisma/client";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -106,7 +105,7 @@ const usersColumns: ColumnDef<UserTableData>[] = [
     cell: ({ row }) => {
       const role = row.original.role;
       return (
-        <Badge variant={role === "ADMIN" ? "default" : "secondary"}>
+        <Badge variant={role === UserRole.ADMIN ? "default" : "secondary"}>
           {roleLabels[role]}
         </Badge>
       );

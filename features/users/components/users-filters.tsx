@@ -37,7 +37,7 @@ function UsersFilters() {
     startTransition,
   });
 
-  const formInstance = useForm({
+  const form = useForm({
     defaultValues: {
       search: urlFilters.search || "",
       role: urlFilters.role || ("all" as UserRoleFilter),
@@ -57,7 +57,7 @@ function UsersFilters() {
   });
 
   function handleClearFilters() {
-    formInstance.reset();
+    form.reset();
     setUrlFilters({
       search: null,
       role: null,
@@ -76,11 +76,11 @@ function UsersFilters() {
       <form
         onSubmit={(event: SubmitEvent<HTMLFormElement>) => {
           event.preventDefault();
-          formInstance.handleSubmit();
+          form.handleSubmit();
         }}
         className="flex flex-col gap-4 sm:flex-row"
       >
-        <formInstance.Field
+        <form.Field
           name="search"
           children={(field) => {
             const isInvalid =
@@ -112,7 +112,7 @@ function UsersFilters() {
           }}
         />
 
-        <formInstance.Field
+        <form.Field
           name="role"
           children={(field) => {
             const isInvalid =
@@ -146,7 +146,7 @@ function UsersFilters() {
           }}
         />
 
-        <formInstance.Field
+        <form.Field
           name="verified"
           children={(field) => {
             const isInvalid =
@@ -180,7 +180,7 @@ function UsersFilters() {
           }}
         />
 
-        <formInstance.Subscribe
+        <form.Subscribe
           selector={(state) => [state.canSubmit, state.isSubmitting]}
         >
           {([canSubmit, isSubmitting]) => (
@@ -193,7 +193,7 @@ function UsersFilters() {
               {isLoading ? "Chargement..." : "Appliquer"}
             </Button>
           )}
-        </formInstance.Subscribe>
+        </form.Subscribe>
 
         {hasActiveFilters && (
           <Button

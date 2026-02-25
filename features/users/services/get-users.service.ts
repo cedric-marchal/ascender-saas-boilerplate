@@ -1,37 +1,22 @@
 import "server-only";
 
-import {
-  type UserRoleFilter,
-  type UserSortableField,
-  type VerificationFilter,
-  isUserRole,
-  isUserRoleFilter,
-  isVerificationFilter,
-  usersSortableFields,
+import type {
+  UserRoleFilter,
+  UserSortableField,
+  VerificationFilter,
 } from "@/features/users/constants/users-filters.constant";
 
-import type { User } from "@/lib/generated/prisma/client";
+import type { User, UserRole } from "@/lib/generated/prisma/client";
 import type { UserWhereInput } from "@/lib/generated/prisma/models";
-import {
-  DEFAULT_PAGE_SIZE,
-  DEFAULT_SORT_BY,
-  DEFAULT_SORT_ORDER,
-  MAX_PAGE,
-  MAX_SEARCH_LENGTH,
-  SORT_ORDERS,
-  type SortOrder,
-} from "@/lib/parsers/nuqs";
+import { DEFAULT_PAGE_SIZE, type SortOrder } from "@/lib/parsers/nuqs";
 import { prisma } from "@/lib/prisma";
-import { filterRatelimit } from "@/lib/ratelimit";
-
-import { checkRatelimit } from "@/utils/ratelimit/check-ratelimit";
 
 type GetUsersFilters = {
   search: string;
-  role: string;
-  verified: string;
-  sortBy: string;
-  order: string;
+  role: UserRoleFilter;
+  verified: VerificationFilter;
+  sortBy: UserSortableField;
+  order: SortOrder;
   page: number;
 };
 
@@ -45,47 +30,17 @@ type GetUsersResult = {
   currentPage: number;
 };
 
-async function getUsers(
-  filters: GetUsersFilters,
-  userId: string,
-): Promise<GetUsersResult> {
-  await checkRatelimit(filterRatelimit, userId);
-
-  const safeSearch = filters.search.slice(0, MAX_SEARCH_LENGTH).trim();
-  const safePage = Math.max(1, Math.min(filters.page, MAX_PAGE));
-
-  const safeRole: UserRoleFilter = isUserRoleFilter(filters.role)
-    ? filters.role
-    : "all";
-
-  const safeVerified: VerificationFilter = isVerificationFilter(
-    filters.verified,
-  )
-    ? filters.verified
-    : "all";
-
-  const safeSortBy: UserSortableField = (
-    usersSortableFields as readonly string[]
-  ).includes(filters.sortBy)
-    ? (filters.sortBy as UserSortableField)
-    : (DEFAULT_SORT_BY as UserSortableField);
-
-  const safeOrder: SortOrder = (SORT_ORDERS as readonly string[]).includes(
-    filters.order,
-  )
-    ? (filters.order as SortOrder)
-    : DEFAULT_SORT_ORDER;
-
+async function getUsers(filters: GetUsersFilters): Promise<GetUsersResult> {
   const whereClause: UserWhereInput = {
-    ...(safeSearch && {
+    ...(filters.search && {
       OR: [
-        { name: { contains: safeSearch, mode: "insensitive" as const } },
-        { email: { contains: safeSearch, mode: "insensitive" as const } },
+        { name: { contains: filters.search, mode: "insensitive" as const } },
+        { email: { contains: filters.search, mode: "insensitive" as const } },
       ],
     }),
-    ...(safeRole !== "all" && isUserRole(safeRole) && { role: safeRole }),
-    ...(safeVerified === "verified" && { emailVerified: true }),
-    ...(safeVerified === "unverified" && { emailVerified: false }),
+    ...(filters.role !== "all" && { role: filters.role as UserRole }),
+    ...(filters.verified === "verified" && { emailVerified: true }),
+    ...(filters.verified === "unverified" && { emailVerified: false }),
   };
 
   const [users, totalCount] = await prisma.$transaction([
@@ -100,8 +55,8 @@ async function getUsers(
         image: true,
         createdAt: true,
       },
-      orderBy: { [safeSortBy]: safeOrder },
-      skip: (safePage - 1) * DEFAULT_PAGE_SIZE,
+      orderBy: { [filters.sortBy]: filters.order },
+      skip: (filters.page - 1) * DEFAULT_PAGE_SIZE,
       take: DEFAULT_PAGE_SIZE,
     }),
     prisma.user.count({ where: whereClause }),
@@ -113,7 +68,7 @@ async function getUsers(
     users,
     totalCount,
     totalPages,
-    currentPage: safePage,
+    currentPage: filters.page,
   };
 }
 
