@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { ZodError } from "zod";
 
 import {
@@ -27,7 +27,7 @@ describe("handleApiError", () => {
         {
           code: "too_small",
           minimum: 1,
-          type: "string",
+          origin: "string",
           inclusive: true,
           message: "Le nom est requis",
           path: ["name"],
@@ -99,9 +99,12 @@ describe("handleApiError", () => {
   });
 
   describe("Unknown error handling", () => {
+    afterEach(() => {
+      vi.unstubAllEnvs();
+    });
+
     it("returns 500 for unknown errors in production", () => {
-      const originalEnv = process.env.NODE_ENV;
-      process.env.NODE_ENV = "production";
+      vi.stubEnv("NODE_ENV", "production");
 
       const response = handleApiError(new Error("secret info")) as any;
       expect(response.status).toBe(500);
@@ -110,19 +113,14 @@ describe("handleApiError", () => {
       expect(response.body.message).toBe(
         "Une erreur inattendue s'est produite",
       );
-
-      process.env.NODE_ENV = originalEnv;
     });
 
     it("returns error message in development for Error instances", () => {
-      const originalEnv = process.env.NODE_ENV;
-      process.env.NODE_ENV = "development";
+      vi.stubEnv("NODE_ENV", "development");
 
       const response = handleApiError(new Error("debug info")) as any;
       expect(response.status).toBe(500);
       expect(response.body.message).toBe("debug info");
-
-      process.env.NODE_ENV = originalEnv;
     });
 
     it("returns generic message for non-Error types", () => {

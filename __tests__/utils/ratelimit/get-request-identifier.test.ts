@@ -1,6 +1,6 @@
 import { headers } from "next/headers";
 
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
   getActionIdentifier,
@@ -20,6 +20,10 @@ function createMockRequest(headerMap: Record<string, string>): Request {
 }
 
 describe("getRequestIdentifier", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
   it("returns first IP from x-forwarded-for", () => {
     const request = createMockRequest({
       "x-forwarded-for": "192.168.1.1, 10.0.0.1",
@@ -49,23 +53,17 @@ describe("getRequestIdentifier", () => {
   });
 
   it("returns 'dev-localhost' in development when no headers", () => {
-    const originalEnv = process.env.NODE_ENV;
-    process.env.NODE_ENV = "development";
+    vi.stubEnv("NODE_ENV", "development");
 
     const request = createMockRequest({});
     expect(getRequestIdentifier(request)).toBe("dev-localhost");
-
-    process.env.NODE_ENV = originalEnv;
   });
 
   it("returns 'unknown' in production when no headers", () => {
-    const originalEnv = process.env.NODE_ENV;
-    process.env.NODE_ENV = "production";
+    vi.stubEnv("NODE_ENV", "production");
 
     const request = createMockRequest({});
     expect(getRequestIdentifier(request)).toBe("unknown");
-
-    process.env.NODE_ENV = originalEnv;
   });
 
   it("prefers x-forwarded-for over cf-connecting-ip and x-real-ip", () => {
@@ -87,6 +85,10 @@ describe("getRequestIdentifier", () => {
 });
 
 describe("getActionIdentifier", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
   it("returns first IP from x-forwarded-for header", async () => {
     const mockHeaders = {
       get: (name: string) => {
@@ -127,8 +129,7 @@ describe("getActionIdentifier", () => {
   });
 
   it("returns 'dev-localhost' in development when no headers", async () => {
-    const originalEnv = process.env.NODE_ENV;
-    process.env.NODE_ENV = "development";
+    vi.stubEnv("NODE_ENV", "development");
 
     const mockHeaders = {
       get: () => null,
@@ -137,7 +138,5 @@ describe("getActionIdentifier", () => {
 
     const result = await getActionIdentifier();
     expect(result).toBe("dev-localhost");
-
-    process.env.NODE_ENV = originalEnv;
   });
 });

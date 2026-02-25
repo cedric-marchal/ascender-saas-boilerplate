@@ -60,7 +60,7 @@ describe("parseAsSafeSearch", () => {
   it("truncates long strings to max length (100 chars)", () => {
     const longString = "a".repeat(150);
     const result = parseAsSafeSearch.parse(longString);
-    expect(result.length).toBeLessThanOrEqual(100);
+    expect(result!.length).toBeLessThanOrEqual(100);
   });
 
   it("preserves strings at max length", () => {

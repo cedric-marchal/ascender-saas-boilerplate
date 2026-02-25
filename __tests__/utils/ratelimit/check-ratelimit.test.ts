@@ -3,55 +3,58 @@ import { describe, expect, it, vi } from "vitest";
 import { TooManyRequestsError } from "@/utils/errors/errors";
 import { checkRatelimit } from "@/utils/ratelimit/check-ratelimit";
 
+const mockEnv = {
+  UPSTASH_REDIS_REST_URL: "https://test.upstash.io",
+  UPSTASH_REDIS_REST_TOKEN: "test-token",
+};
+
+vi.mock("@/lib/env", () => ({
+  env: mockEnv,
+}));
+
 describe("checkRatelimit", () => {
   it("skips rate limit when UPSTASH_REDIS_REST_URL is empty", async () => {
-    vi.mocked(await import("@/lib/env")).env.UPSTASH_REDIS_REST_URL = "";
+    mockEnv.UPSTASH_REDIS_REST_URL = "";
 
     const mockRatelimiter = { limit: vi.fn() };
     await checkRatelimit(mockRatelimiter as any, "test-id");
 
     expect(mockRatelimiter.limit).not.toHaveBeenCalled();
 
-    vi.mocked(await import("@/lib/env")).env.UPSTASH_REDIS_REST_URL =
-      "https://test.upstash.io";
+    mockEnv.UPSTASH_REDIS_REST_URL = "https://test.upstash.io";
   });
 
   it("skips rate limit when UPSTASH_REDIS_REST_TOKEN is empty", async () => {
-    vi.mocked(await import("@/lib/env")).env.UPSTASH_REDIS_REST_TOKEN = "";
+    mockEnv.UPSTASH_REDIS_REST_TOKEN = "";
 
     const mockRatelimiter = { limit: vi.fn() };
     await checkRatelimit(mockRatelimiter as any, "test-id");
 
     expect(mockRatelimiter.limit).not.toHaveBeenCalled();
 
-    vi.mocked(await import("@/lib/env")).env.UPSTASH_REDIS_REST_TOKEN =
-      "test-token";
+    mockEnv.UPSTASH_REDIS_REST_TOKEN = "test-token";
   });
 
   it("skips rate limit when URL is placeholder", async () => {
-    vi.mocked(await import("@/lib/env")).env.UPSTASH_REDIS_REST_URL =
-      "your-url-here";
+    mockEnv.UPSTASH_REDIS_REST_URL = "your-url-here";
 
     const mockRatelimiter = { limit: vi.fn() };
     await checkRatelimit(mockRatelimiter as any, "test-id");
 
     expect(mockRatelimiter.limit).not.toHaveBeenCalled();
 
-    vi.mocked(await import("@/lib/env")).env.UPSTASH_REDIS_REST_URL =
-      "https://test.upstash.io";
+    mockEnv.UPSTASH_REDIS_REST_URL = "https://test.upstash.io";
   });
 
   it("skips rate limit when token is placeholder", async () => {
-    vi.mocked(await import("@/lib/env")).env.UPSTASH_REDIS_REST_TOKEN =
-      "your-token-here";
+    mockEnv.UPSTASH_REDIS_REST_TOKEN = "your-token-here";
 
     const mockRatelimiter = { limit: vi.fn() };
     await checkRatelimit(mockRatelimiter as any, "test-id");
 
     expect(mockRatelimiter.limit).not.toHaveBeenCalled();
 
-    vi.mocked(await import("@/lib/env")).env.UPSTASH_REDIS_REST_TOKEN =
-      "test-token";
+    mockEnv.UPSTASH_REDIS_REST_TOKEN = "test-token";
   });
 
   it("allows request when rate limit succeeds", async () => {
