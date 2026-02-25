@@ -58,7 +58,10 @@ const env = createEnv({
       .pipe(
         z.number({ message: "La taille maximale de fichier est de 4.5MB" }),
       ),
-    NEXT_PUBLIC_SENTRY_DSN: z.string().min(1),
+    NEXT_PUBLIC_SENTRY_DSN: z
+      .string()
+      .min(1)
+      .pipe(z.url({ message: "URL invalide" })),
   },
   runtimeEnv: {
     // Server

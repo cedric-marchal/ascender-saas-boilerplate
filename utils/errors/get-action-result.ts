@@ -16,7 +16,7 @@ function getActionResult<TData>(result: ActionResult<TData>): TData {
     throw new Error(result.serverError);
   }
 
-  if (!result.data) {
+  if (result.data === undefined) {
     throw new Error(DEFAULT_ERROR_MESSAGE);
   }
 
