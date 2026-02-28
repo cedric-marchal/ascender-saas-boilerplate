@@ -4,10 +4,9 @@ import type { Product, WebPage, WithContext } from "schema-dts";
 
 import { PricingGrid } from "@/features/pricing/components/pricing-grid";
 import { PLANS, type Plan } from "@/features/pricing/constants/pricing-plans";
+import { getPricingUserStatus } from "@/features/pricing/services/get-pricing-user-status.service";
 
 import { env } from "@/lib/env";
-import { UserRole } from "@/lib/generated/prisma/client";
-import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
 
 const APP_NAME = env.NEXT_PUBLIC_APP_NAME;
@@ -83,19 +82,8 @@ function getWebPageSchema(): WithContext<WebPage> {
 export default async function PricingPage() {
   const session = await getSession();
 
-  const user = session
-    ? await prisma.user.findUnique({
-        where: { id: session.user.id },
-        select: {
-          emailVerified: true,
-          role: true,
-        },
-      })
-    : null;
-
-  const isAuthenticated = !!session;
-  const isEmailVerified = user?.emailVerified ?? false;
-  const isCustomer = user?.role === UserRole.CUSTOMER;
+  const { isAuthenticated, isEmailVerified, isCustomer } =
+    await getPricingUserStatus(session?.user.id ?? null);
 
   const webPageSchema = getWebPageSchema();
   const pricingSchemas = getPricingSchemas();
