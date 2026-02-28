@@ -41,8 +41,9 @@ features/                     # ALL business logic
 ├── {feature}/
 │   ├── actions/              # Server Actions (next-safe-action)
 │   ├── components/           # UI (forms/, modals/ subdirs)
-│   ├── constants/            # Domain-specific constants
+│   ├── constants/            # Domain-specific constants + SEO schemas
 │   ├── emails/               # React Email templates
+│   ├── pages/                # Feature page components + loading components
 │   ├── schemas/              # Zod validation
 │   └── services/             # Server-only logic ("server-only")
 
@@ -53,8 +54,10 @@ lib/                          # Shared infrastructure
 
 components/                   # Shared UI
 ├── ui/                       # Shadcn/ui
+├── pages/                    # Global page components (not-found, error, sitemap...)
 ├── public/                   # Header, footer
 ├── protected/                # Sidebars
+├── main.tsx                  # Main wrapper (bg-background min-h-screen w-full)
 └── pagination.tsx            # Generic pagination
 
 utils/                        # Pure utilities
@@ -198,16 +201,20 @@ const STATUS_CONFIG: Record<string, StatusConfig> = { ... };
 
 ### File Locations
 
-| Type      | Path                                                        | Example                                                       |
-| --------- | ----------------------------------------------------------- | ------------------------------------------------------------- |
-| Schema    | `features/{feature}/schemas/{entity}.schema.ts`             | `features/contact/schemas/contact.schema.ts`                  |
-| Action    | `features/{feature}/actions/{verb}-{entity}.action.ts`      | `features/contact/actions/create-contact.action.ts`           |
-| Service   | `features/{feature}/services/{verb}-{entity}.service.ts`    | `features/contact/services/create-contact.service.ts`         |
-| Component | `features/{feature}/components/{name}.tsx`                  | `features/contact/components/forms/contact-form.tsx`          |
-| Form      | `features/{feature}/components/forms/{entity}-form.tsx`     | `features/account/components/forms/profile-form.tsx`          |
-| Modal     | `features/{feature}/components/modals/{entity}-modal.tsx`   | `features/account/components/modals/delete-account-modal.tsx` |
-| Email     | `features/{feature}/emails/{entity}-email.tsx`              | `features/contact/emails/contact-email.tsx`                   |
-| Constant  | `features/{feature}/constants/{entity}-filters.constant.ts` | `features/users/constants/users-filters.constant.ts`          |
+| Type         | Path                                                           | Example                                                          |
+| ------------ | -------------------------------------------------------------- | ---------------------------------------------------------------- |
+| Schema       | `features/{feature}/schemas/{entity}.schema.ts`                | `features/contact/schemas/contact.schema.ts`                     |
+| Action       | `features/{feature}/actions/{verb}-{entity}.action.ts`         | `features/contact/actions/create-contact.action.ts`              |
+| Service      | `features/{feature}/services/{verb}-{entity}.service.ts`       | `features/contact/services/create-contact.service.ts`            |
+| Page         | `features/{feature}/pages/{name}-page.tsx`                     | `features/pricing/pages/pricing-page.tsx`                        |
+| Loading      | `features/{feature}/pages/{name}-loading.tsx`                  | `features/pricing/pages/pricing-loading.tsx`                     |
+| SEO constant | `features/{feature}/constants/{page}-seo.constant.ts`          | `features/pricing/constants/pricing-seo.constant.ts`             |
+| Component    | `features/{feature}/components/{name}.tsx`                     | `features/contact/components/forms/contact-form.tsx`             |
+| Form         | `features/{feature}/components/forms/{entity}-form.tsx`        | `features/account/components/forms/profile-form.tsx`             |
+| Modal        | `features/{feature}/components/modals/{entity}-modal.tsx`      | `features/account/components/modals/delete-account-modal.tsx`    |
+| Email        | `features/{feature}/emails/{entity}-email.tsx`                 | `features/contact/emails/contact-email.tsx`                      |
+| Constant     | `features/{feature}/constants/{entity}-filters.constant.ts`    | `features/users/constants/users-filters.constant.ts`             |
+| Global page  | `components/pages/{name}-page.tsx`                             | `components/pages/not-found-page.tsx`                            |
 
 ### Naming Patterns
 
@@ -475,81 +482,53 @@ Rules:
 
 ## Page Rules
 
-Function: `{Path}Page` (e.g., `ContactPage`, `DashboardSettingsPage`)
+**Full documentation**: `.claude/rules/page.md`
 
-Top-level element: `<main>`
+### Thin Shim Pattern (P0)
 
-### Public Pages
+`app/` route files = thin shims. All UI lives in `features/{feature}/pages/`.
+
+Route function: `{Path}Route` in **English** (e.g., `PricingRoute`, `SignInRoute`, `LegalNoticeRoute`)
 
 ```tsx
-import type { Metadata } from "next";
+// app/(public)/tarifs/page.tsx — thin shim
+export const metadata: Metadata = { ... };
 
-import type { WebPage, WithContext } from "schema-dts";
-
-import { env } from "@/lib/env";
-
-const APP_NAME = env.NEXT_PUBLIC_APP_NAME;
-const DESCRIPTION = "...";
-
-export const metadata: Metadata = {
-  title: `${APP_NAME} - Tagline`,
-  description: DESCRIPTION,
-  keywords: ["keyword1", "keyword2"],
-  alternates: { canonical: "/path" },
-  openGraph: { title: "...", description: "...", url: "/path" },
-  twitter: { title: "...", description: "..." },
-};
-
-export default function ExamplePage() {
-  const pageSchema: WithContext<WebPage> = {
-    /* ... */
-  };
-  return (
-    <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(pageSchema) }}
-      />
-      <main>{/* content */}</main>
-    </>
-  );
+export default function PricingRoute() {
+  return <PricingPage />;
 }
 ```
 
-### Protected Pages
+### Feature Page Components (P0)
+
+Location: `features/{feature}/pages/{name}-page.tsx`
+
+Naming: `{Feature}Page` (named export, never default)
+
+- Use `<Main>` from `@/components/main` (defaults: `bg-background min-h-screen w-full`)
+- JSON-LD `<script>` tags live here (not in `app/page.tsx`)
+- SEO constants imported from `features/{feature}/constants/{page}-seo.constant.ts`
+- Override bg via className: `<Main className="bg-muted">` (Tailwind Merge handles conflict)
+
+### Global Pages (P0)
+
+Location: `components/pages/` — for not-found, maintenance, error, global-error, sitemap
+
+### Metadata Format (P0)
+
+Always expanded multi-line for nested objects:
 
 ```tsx
-import type { Metadata } from "next";
-
-import { requireSession } from "@/lib/session";
-
-export const metadata: Metadata = {
-  title: "Page Title",
-  robots: { index: false, follow: false },
-};
-
-export default async function DashboardExamplePage() {
-  await requireSession();
-  return <main>{/* content */}</main>;
-}
-```
-
-### Loading Pages
-
-Function: `{Path}Loading`
-
-```tsx
-import { Skeleton } from "@/components/ui/skeleton";
-
-export default function ExampleLoading() {
-  return (
-    <main aria-busy="true" aria-label="Chargement...">
-      {Array.from({ length: 6 }).map((_, index: number) => (
-        <Skeleton key={index} className="h-32 w-full" />
-      ))}
-    </main>
-  );
-}
+robots: {
+  index: true,
+  follow: true,
+},
+alternates: {
+  canonical: "/path",
+},
+dangerouslySetInnerHTML={{
+  __html: JSON.stringify(schema),
+}}
 ```
 
 ## Filter/Sort/Pagination Pattern
