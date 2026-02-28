@@ -12,7 +12,9 @@ const DESCRIPTION = `Créez un nouveau mot de passe pour votre compte ${APP_NAME
 export const metadata: Metadata = {
   title: "Nouveau mot de passe",
   description: DESCRIPTION,
-  alternates: { canonical: "/nouveau-mot-de-passe" },
+  alternates: {
+    canonical: "/nouveau-mot-de-passe",
+  },
   robots: {
     index: false,
     follow: false,
@@ -23,7 +25,7 @@ type NouveauMotDePasseRouteProps = {
   searchParams: Promise<{ token?: string }>;
 };
 
-export default async function NouveauMotDePasseRoute({
+export default async function ResetPasswordRoute({
   searchParams,
 }: NouveauMotDePasseRouteProps) {
   const session = await getSession();

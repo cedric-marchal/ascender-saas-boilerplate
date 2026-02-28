@@ -13,7 +13,9 @@ const DESCRIPTION = `Plan du site de ${APP_NAME}. Accédez rapidement à toutes 
 export const metadata: Metadata = {
   title: "Plan du site",
   description: DESCRIPTION,
-  alternates: { canonical: "/plan-du-site" },
+  alternates: {
+    canonical: "/plan-du-site",
+  },
   openGraph: {
     title: `Plan du site | ${APP_NAME}`,
     description: DESCRIPTION,
@@ -29,7 +31,7 @@ export const metadata: Metadata = {
   },
 };
 
-export default function PlanDuSiteRoute() {
+export default function SitemapRoute() {
   const webPageSchema: WithContext<WebPage> = {
     "@context": "https://schema.org",
     "@type": "WebPage",

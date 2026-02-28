@@ -19,7 +19,9 @@ export const metadata: Metadata = {
     APP_NAME.toLowerCase(),
     "saas pricing",
   ],
-  alternates: { canonical: "/tarifs" },
+  alternates: {
+    canonical: "/tarifs",
+  },
   openGraph: {
     title: `Tarifs | ${APP_NAME}`,
     description: DESCRIPTION,
@@ -35,7 +37,7 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function TarifsRoute() {
+export default async function PricingRoute() {
   const session = await getSession();
 
   const { isAuthenticated, isEmailVerified, isCustomer } =

@@ -10,7 +10,9 @@ const DESCRIPTION = `Mentions légales de ${APP_NAME}. Informations sur l'édite
 export const metadata: Metadata = {
   title: "Mentions légales",
   description: DESCRIPTION,
-  alternates: { canonical: "/mentions-legales" },
+  alternates: {
+    canonical: "/mentions-legales",
+  },
   openGraph: {
     title: `Mentions légales | ${APP_NAME}`,
     description: DESCRIPTION,
@@ -26,6 +28,6 @@ export const metadata: Metadata = {
   },
 };
 
-export default function MentionsLegalesRoute() {
+export default function LegalNoticeRoute() {
   return <LegalNoticePage />;
 }

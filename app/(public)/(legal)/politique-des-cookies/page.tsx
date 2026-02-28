@@ -10,7 +10,9 @@ const DESCRIPTION = `Politique des cookies de ${APP_NAME}. Découvrez les cookie
 export const metadata: Metadata = {
   title: "Politique des cookies",
   description: DESCRIPTION,
-  alternates: { canonical: "/politique-des-cookies" },
+  alternates: {
+    canonical: "/politique-des-cookies",
+  },
   openGraph: {
     title: `Politique des cookies | ${APP_NAME}`,
     description: DESCRIPTION,
@@ -26,6 +28,6 @@ export const metadata: Metadata = {
   },
 };
 
-export default function PolitiqueDespCookiesRoute() {
+export default function CookiePolicyRoute() {
   return <CookiePolicyPage />;
 }

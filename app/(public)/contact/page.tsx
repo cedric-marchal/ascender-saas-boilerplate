@@ -11,7 +11,9 @@ export const metadata: Metadata = {
   title: "Contact",
   description: DESCRIPTION,
   keywords: ["contact", APP_NAME.toLowerCase(), "support", "aide", "question"],
-  alternates: { canonical: "/contact" },
+  alternates: {
+    canonical: "/contact",
+  },
   openGraph: {
     title: `Contact | ${APP_NAME}`,
     description: DESCRIPTION,

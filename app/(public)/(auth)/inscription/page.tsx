@@ -18,7 +18,9 @@ export const metadata: Metadata = {
     "sign up",
     "créer un compte",
   ],
-  alternates: { canonical: "/inscription" },
+  alternates: {
+    canonical: "/inscription",
+  },
   openGraph: {
     title: `Inscription | ${APP_NAME}`,
     description: DESCRIPTION,
@@ -34,7 +36,7 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function InscriptionRoute() {
+export default async function SignUpRoute() {
   const session = await getSession();
 
   if (session) {

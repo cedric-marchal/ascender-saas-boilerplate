@@ -10,7 +10,9 @@ const DESCRIPTION = `Conditions d'utilisation de ${APP_NAME}. Lisez les règles 
 export const metadata: Metadata = {
   title: "Conditions d'utilisation",
   description: DESCRIPTION,
-  alternates: { canonical: "/conditions-d-utilisation" },
+  alternates: {
+    canonical: "/conditions-d-utilisation",
+  },
   openGraph: {
     title: `Conditions d'utilisation | ${APP_NAME}`,
     description: DESCRIPTION,
@@ -26,6 +28,6 @@ export const metadata: Metadata = {
   },
 };
 
-export default function ConditionsDUtilisationRoute() {
+export default function TermsOfServiceRoute() {
   return <TermsOfServicePage />;
 }

@@ -10,7 +10,9 @@ const DESCRIPTION = `Conditions de vente de ${APP_NAME}. Découvrez les termes r
 export const metadata: Metadata = {
   title: "Conditions de vente",
   description: DESCRIPTION,
-  alternates: { canonical: "/conditions-de-vente" },
+  alternates: {
+    canonical: "/conditions-de-vente",
+  },
   openGraph: {
     title: `Conditions de vente | ${APP_NAME}`,
     description: DESCRIPTION,
@@ -26,6 +28,6 @@ export const metadata: Metadata = {
   },
 };
 
-export default function ConditionsDeVenteRoute() {
+export default function TermsOfSaleRoute() {
   return <TermsOfSalePage />;
 }

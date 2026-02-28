@@ -10,7 +10,9 @@ const DESCRIPTION = `Politique de confidentialité de ${APP_NAME}. Découvrez co
 export const metadata: Metadata = {
   title: "Politique de confidentialité",
   description: DESCRIPTION,
-  alternates: { canonical: "/politique-de-confidentialite" },
+  alternates: {
+    canonical: "/politique-de-confidentialite",
+  },
   openGraph: {
     title: `Politique de confidentialité | ${APP_NAME}`,
     description: DESCRIPTION,
@@ -26,6 +28,6 @@ export const metadata: Metadata = {
   },
 };
 
-export default function PolitiqueDeConfidentialiteRoute() {
+export default function PrivacyPolicyRoute() {
   return <PrivacyPolicyPage />;
 }

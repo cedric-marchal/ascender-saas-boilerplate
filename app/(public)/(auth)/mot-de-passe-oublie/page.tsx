@@ -12,7 +12,9 @@ const DESCRIPTION = `Réinitialisez votre mot de passe ${APP_NAME}. Recevez un l
 export const metadata: Metadata = {
   title: "Mot de passe oublié",
   description: DESCRIPTION,
-  alternates: { canonical: "/mot-de-passe-oublie" },
+  alternates: {
+    canonical: "/mot-de-passe-oublie",
+  },
   openGraph: {
     title: `Mot de passe oublié | ${APP_NAME}`,
     description: DESCRIPTION,
@@ -28,7 +30,7 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function MotDePasseOublieRoute() {
+export default async function ForgotPasswordRoute() {
   const session = await getSession();
 
   if (session) {

@@ -13,7 +13,9 @@ export const metadata: Metadata = {
   title: "Connexion",
   description: DESCRIPTION,
   keywords: [APP_NAME.toLowerCase(), "connexion", "login", "sign in"],
-  alternates: { canonical: "/connexion" },
+  alternates: {
+    canonical: "/connexion",
+  },
   openGraph: {
     title: `Connexion | ${APP_NAME}`,
     description: DESCRIPTION,
@@ -29,7 +31,7 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function ConnexionRoute() {
+export default async function SignInRoute() {
   const session = await getSession();
 
   if (session) {
