@@ -9,7 +9,10 @@ function getRequestIdentifier(request: Request): string {
 
   if (forwardedFor) {
     const firstIp = forwardedFor.split(",")[0]?.trim();
-    if (firstIp) return firstIp;
+
+    if (firstIp) {
+      return firstIp;
+    }
   }
 
   if (cfConnectingIp) {
@@ -39,7 +42,9 @@ async function getActionIdentifier(): Promise<string> {
 
   if (forwardedFor) {
     const firstIp = forwardedFor.split(",")[0]?.trim();
-    if (firstIp) return firstIp;
+    if (firstIp) {
+      return firstIp;
+    }
   }
 
   if (cfConnectingIp) {
@@ -61,4 +66,4 @@ async function getActionIdentifier(): Promise<string> {
   return "unknown";
 }
 
-export { getRequestIdentifier, getActionIdentifier };
+export { getActionIdentifier, getRequestIdentifier };

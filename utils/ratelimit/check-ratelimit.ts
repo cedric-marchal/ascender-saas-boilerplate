@@ -2,26 +2,12 @@ import "server-only";
 
 import type { Ratelimit } from "@upstash/ratelimit";
 
-import { env } from "@/lib/env";
-
-import { TooManyRequestsError } from "../errors/errors";
+import { TooManyRequestsError } from "@/utils/errors/errors";
 
 async function checkRatelimit(
   ratelimiter: Ratelimit,
   identifier: string,
 ): Promise<void> {
-  if (
-    !env.UPSTASH_REDIS_REST_URL ||
-    !env.UPSTASH_REDIS_REST_TOKEN ||
-    env.UPSTASH_REDIS_REST_URL === "your-url-here" ||
-    env.UPSTASH_REDIS_REST_TOKEN === "your-token-here"
-  ) {
-    console.warn(
-      "[Rate Limit] Upstash credentials not configured. Skipping rate limit check.",
-    );
-    return;
-  }
-
   const { success } = await ratelimiter.limit(identifier);
 
   if (!success) {

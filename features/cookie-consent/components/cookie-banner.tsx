@@ -13,9 +13,9 @@ import { useCookieConsent } from "@/features/cookie-consent/hooks/use-cookie-con
 import { Button } from "@/components/ui/button";
 
 function CookieBanner() {
-  const [isHydrated, setIsHydrated] = useState(false);
-
   const pathname = usePathname();
+
+  const [isHydrated, setIsHydrated] = useState(false);
 
   const hasConsented = useCookieConsent((state) => state.hasConsented);
   const acceptAll = useCookieConsent((state) => state.acceptAll);
@@ -47,7 +47,9 @@ function CookieBanner() {
     closePreferences();
   }, [pathname, closePreferences]);
 
-  if (!isHydrated) return null;
+  if (!isHydrated) {
+    return null;
+  }
 
   return (
     <>

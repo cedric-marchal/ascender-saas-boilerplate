@@ -24,7 +24,10 @@ export const signUpAction = actionClient
         headers: await headers(),
       });
     } catch (error: unknown) {
-      if (error instanceof APIError) throw new ConflictError(error.message);
+      if (error instanceof APIError) {
+        throw new ConflictError(error.message);
+      }
+
       throw error;
     }
 

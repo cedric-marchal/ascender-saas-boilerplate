@@ -15,7 +15,10 @@ export const signOutAction = actionClient.action(async () => {
       headers: await headers(),
     });
   } catch (error: unknown) {
-    if (error instanceof APIError) throw new BadRequestError(error.message);
+    if (error instanceof APIError) {
+      throw new BadRequestError(error.message);
+    }
+
     throw error;
   }
 

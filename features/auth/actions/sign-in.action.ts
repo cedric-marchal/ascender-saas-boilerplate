@@ -20,7 +20,10 @@ export const signInAction = actionClient
         headers: await headers(),
       });
     } catch (error: unknown) {
-      if (error instanceof APIError) throw new UnauthorizedError(error.message);
+      if (error instanceof APIError) {
+        throw new UnauthorizedError(error.message);
+      }
+
       throw error;
     }
 

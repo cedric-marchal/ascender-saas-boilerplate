@@ -92,7 +92,9 @@ describe("getActionIdentifier", () => {
   it("returns first IP from x-forwarded-for header", async () => {
     const mockHeaders = {
       get: (name: string) => {
-        if (name === "x-forwarded-for") return "192.168.1.1, 10.0.0.1";
+        if (name === "x-forwarded-for") {
+          return "192.168.1.1, 10.0.0.1";
+        }
         return null;
       },
     };
@@ -105,7 +107,9 @@ describe("getActionIdentifier", () => {
   it("returns cf-connecting-ip when no x-forwarded-for", async () => {
     const mockHeaders = {
       get: (name: string) => {
-        if (name === "cf-connecting-ip") return "172.16.0.1";
+        if (name === "cf-connecting-ip") {
+          return "172.16.0.1";
+        }
         return null;
       },
     };
@@ -118,7 +122,9 @@ describe("getActionIdentifier", () => {
   it("returns x-real-ip as fallback", async () => {
     const mockHeaders = {
       get: (name: string) => {
-        if (name === "x-real-ip") return "10.0.0.1";
+        if (name === "x-real-ip") {
+          return "10.0.0.1";
+        }
         return null;
       },
     };

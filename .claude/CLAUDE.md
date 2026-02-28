@@ -101,6 +101,7 @@ app/*/page.tsx (pages import from features)
 | **Callbacks**     | Always type params: `.map((item: Item) => ...)`, `.map((_, index: number) => ...)` |
 | **Buttons**       | `type="button"` (except submit), `aria-hidden="true"` on decorative icons          |
 | **Forms**         | TanStack Form + Zod + `useAction` + `getActionResult` + `getErrorMessage`          |
+| **If braces**     | Always use braces, even single-line: `if (cond) {\n  return;\n}` never `if (cond) return;` |
 | **Error pattern** | Components: early return. Async: throw (no multiple returns in try)                |
 | **Prisma**        | Always `select` + `take` on `findMany`, `$transaction` for parallel count+findMany |
 | **Strings**       | `.min().max().trim()` (always French error messages)                               |
