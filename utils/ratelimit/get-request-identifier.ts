@@ -7,12 +7,10 @@ function getRequestIdentifier(request: Request): string {
   const realIp = request.headers.get("x-real-ip");
   const cfConnectingIp = request.headers.get("cf-connecting-ip");
 
-  if (forwardedFor) {
-    const firstIp = forwardedFor.split(",")[0]?.trim();
+  const firstIp = forwardedFor?.split(",")[0]?.trim();
 
-    if (firstIp) {
-      return firstIp;
-    }
+  if (firstIp) {
+    return firstIp;
   }
 
   if (cfConnectingIp) {
@@ -40,11 +38,10 @@ async function getActionIdentifier(): Promise<string> {
   const realIp = headersList.get("x-real-ip");
   const cfConnectingIp = headersList.get("cf-connecting-ip");
 
-  if (forwardedFor) {
-    const firstIp = forwardedFor.split(",")[0]?.trim();
-    if (firstIp) {
-      return firstIp;
-    }
+  const firstIp = forwardedFor?.split(",")[0]?.trim();
+
+  if (firstIp) {
+    return firstIp;
   }
 
   if (cfConnectingIp) {
