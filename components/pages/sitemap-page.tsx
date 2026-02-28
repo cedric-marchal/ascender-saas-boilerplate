@@ -1,3 +1,5 @@
+import type { WebPage, WithContext } from "schema-dts";
+
 import Link from "next/link";
 
 import { Main } from "@/components/main";
@@ -15,6 +17,8 @@ type SitemapSection = {
 };
 
 const APP_NAME = env.NEXT_PUBLIC_APP_NAME;
+const BASE_URL = env.NEXT_PUBLIC_BASE_URL;
+const DESCRIPTION = `Plan du site de ${APP_NAME}. Accédez rapidement à toutes les pages disponibles.`;
 
 const STATIC_SECTIONS: SitemapSection[] = [
   {
@@ -51,8 +55,27 @@ const STATIC_SECTIONS: SitemapSection[] = [
 ];
 
 function SitemapPage() {
+  const webPageSchema: WithContext<WebPage> = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "@id": `${BASE_URL}/plan-du-site/#webpage`,
+    name: `Plan du site | ${APP_NAME}`,
+    description: DESCRIPTION,
+    url: `${BASE_URL}/plan-du-site`,
+    inLanguage: "fr-FR",
+    isPartOf: { "@type": "WebSite", "@id": `${BASE_URL}/#website` },
+  };
+
   return (
-    <Main className="bg-background">
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(webPageSchema),
+        }}
+      />
+
+      <Main>
       <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6 md:py-16 lg:px-8 lg:py-20">
         <header className="mb-12">
           <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
@@ -85,7 +108,8 @@ function SitemapPage() {
           ))}
         </div>
       </div>
-    </Main>
+      </Main>
+    </>
   );
 }
 

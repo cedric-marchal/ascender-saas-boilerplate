@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 
 import { type SearchParams, createLoader } from "nuqs/server";
 
-import { UsersPage } from "@/features/users/pages/users-page";
 import { usersSearchParams } from "@/features/users/constants/users-filters.constant";
+import { UsersPage } from "@/features/users/pages/users-page";
 import { getUsers } from "@/features/users/services/get-users.service";
 
 import { requireAdminVerifiedEmail } from "@/lib/session";
@@ -24,11 +24,15 @@ type AdminUsersRouteProps = {
   searchParams: Promise<SearchParams>;
 };
 
-export default async function AdminUsersRoute({ searchParams }: AdminUsersRouteProps) {
+export default async function AdminUsersRoute({
+  searchParams,
+}: AdminUsersRouteProps) {
   await requireAdminVerifiedEmail();
 
   const filters = await loadSearchParams(searchParams);
-  const { users, totalCount, totalPages, currentPage } = await getUsers(filters);
+
+  const { users, totalCount, totalPages, currentPage } =
+    await getUsers(filters);
 
   return (
     <UsersPage

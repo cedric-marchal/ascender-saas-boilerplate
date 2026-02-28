@@ -18,6 +18,7 @@ export const metadata: Metadata = {
 
 export default async function DashboardBillingRoute() {
   const session = await requireCustomerVerifiedEmail();
+
   const billing = await getBilling(session.user.id);
 
   if (!billing) {
