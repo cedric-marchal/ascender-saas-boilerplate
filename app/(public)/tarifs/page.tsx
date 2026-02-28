@@ -1,16 +1,12 @@
 import type { Metadata } from "next";
 
-import type { Product, WebPage, WithContext } from "schema-dts";
-
-import { PricingGrid } from "@/features/pricing/components/pricing-grid";
-import { PLANS, type Plan } from "@/features/pricing/constants/pricing-plans";
+import { PricingPage } from "@/features/pricing/pages/pricing-page";
 import { getPricingUserStatus } from "@/features/pricing/services/get-pricing-user-status.service";
 
 import { env } from "@/lib/env";
 import { getSession } from "@/lib/session";
 
 const APP_NAME = env.NEXT_PUBLIC_APP_NAME;
-const BASE_URL = env.NEXT_PUBLIC_BASE_URL;
 const DESCRIPTION = `Découvrez les tarifs de ${APP_NAME} : offres flexibles pour les indépendants, équipes et entreprises, sans engagement.`;
 
 export const metadata: Metadata = {
@@ -23,9 +19,7 @@ export const metadata: Metadata = {
     APP_NAME.toLowerCase(),
     "saas pricing",
   ],
-  alternates: {
-    canonical: "/tarifs",
-  },
+  alternates: { canonical: "/tarifs" },
   openGraph: {
     title: `Tarifs | ${APP_NAME}`,
     description: DESCRIPTION,
@@ -37,102 +31,17 @@ export const metadata: Metadata = {
   },
 };
 
-function getPricingSchemas(): WithContext<Product>[] {
-  return PLANS.filter((plan: Plan) => plan.price !== "Sur mesure").map(
-    (plan: Plan) => ({
-      "@context": "https://schema.org",
-      "@type": "Product",
-      name: `${APP_NAME} ${plan.name}`,
-      description: plan.description,
-      brand: {
-        "@type": "Brand",
-        name: APP_NAME,
-      },
-      offers: {
-        "@type": "Offer",
-        price: plan.price,
-        priceCurrency: "EUR",
-        priceValidUntil: new Date(
-          new Date().setFullYear(new Date().getFullYear() + 1),
-        )
-          .toISOString()
-          .split("T")[0],
-        availability: "https://schema.org/InStock",
-        url: `${BASE_URL}/tarifs`,
-      },
-    }),
-  );
-}
-
-function getWebPageSchema(): WithContext<WebPage> {
-  return {
-    "@context": "https://schema.org",
-    "@type": "WebPage",
-    "@id": `${BASE_URL}/tarifs/#webpage`,
-    name: `Tarifs | ${APP_NAME}`,
-    description: DESCRIPTION,
-    url: `${BASE_URL}/tarifs`,
-    isPartOf: {
-      "@type": "WebSite",
-      "@id": `${BASE_URL}/#website`,
-    },
-  };
-}
-
-export default async function PricingPage() {
+export default async function TarifsRoute() {
   const session = await getSession();
 
   const { isAuthenticated, isEmailVerified, isCustomer } =
     await getPricingUserStatus(session?.user.id ?? null);
 
-  const webPageSchema = getWebPageSchema();
-  const pricingSchemas = getPricingSchemas();
-
   return (
-    <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(webPageSchema),
-        }}
-      />
-
-      {pricingSchemas.map((schema: WithContext<Product>, index: number) => (
-        <script
-          key={index}
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify(schema),
-          }}
-        />
-      ))}
-
-      <main className="bg-background min-h-screen">
-        <section className="mx-auto flex w-full max-w-5xl flex-col gap-10 px-4 py-12 sm:px-6 md:gap-12 md:py-16 lg:px-8 lg:py-20">
-          <header className="space-y-4 text-center">
-            <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-              Des tarifs clairs, pensés pour grandir avec vous
-            </h1>
-            <p className="text-muted-foreground mx-auto max-w-2xl">
-              Que vous soyez indépendant, en petite équipe ou dans une structure
-              plus large, {APP_NAME} propose des offres flexibles, sans
-              engagement, pour vous permettre d&apos;avancer à votre rythme.
-            </p>
-          </header>
-
-          <PricingGrid
-            isAuthenticated={isAuthenticated}
-            isEmailVerified={isEmailVerified}
-            isCustomer={isCustomer}
-          />
-
-          <p className="text-muted-foreground text-center text-xs">
-            Les tarifs affichés sont présentés à titre indicatif et peuvent
-            évoluer. Pour des besoins spécifiques ou des volumes importants,
-            contactez-nous.
-          </p>
-        </section>
-      </main>
-    </>
+    <PricingPage
+      isAuthenticated={isAuthenticated}
+      isEmailVerified={isEmailVerified}
+      isCustomer={isCustomer}
+    />
   );
 }

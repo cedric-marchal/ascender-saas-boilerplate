@@ -1,78 +1,23 @@
 import type { Metadata } from "next";
 
-import type { Organization, WebSite, WithContext } from "schema-dts";
-
-import { env } from "@/lib/env";
-
-const APP_NAME = env.NEXT_PUBLIC_APP_NAME;
-const BASE_URL = env.NEXT_PUBLIC_BASE_URL;
-
-const TITLE = "Accueil";
-const DESCRIPTION = "[Ta description de 150-160 caractères ici]";
+import { HomePage } from "@/features/home/pages/home-page";
 
 export const metadata: Metadata = {
-  title: TITLE, // Page d'accueil = titre complet, pas template
-  description: DESCRIPTION,
-  keywords: [APP_NAME.toLowerCase(), "mot-clé-1", "mot-clé-2", "mot-clé-3"],
-  alternates: {
-    canonical: "/", // Relatif suffit grâce à metadataBase du layout
-  },
+  title: "Accueil",
+  description: "[Ta description de 150-160 caractères ici]",
+  keywords: ["ascender-saas-boilerplate", "mot-clé-1", "mot-clé-2", "mot-clé-3"],
+  alternates: { canonical: "/" },
   openGraph: {
-    title: TITLE,
-    description: DESCRIPTION,
+    title: "Accueil",
+    description: "[Ta description de 150-160 caractères ici]",
     url: "/",
-    // images héritées du layout si identiques, sinon override ici
   },
   twitter: {
-    title: TITLE,
-    description: DESCRIPTION,
-    // images héritées du layout
+    title: "Accueil",
+    description: "[Ta description de 150-160 caractères ici]",
   },
 };
 
-export default function HomePage() {
-  const websiteSchema: WithContext<WebSite> = {
-    "@context": "https://schema.org",
-    "@type": "WebSite",
-    "@id": `${BASE_URL}/#website`,
-    name: APP_NAME,
-    url: BASE_URL,
-    description: DESCRIPTION,
-    inLanguage: "fr-FR",
-  };
-
-  const organizationSchema: WithContext<Organization> = {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    "@id": `${BASE_URL}/#organization`,
-    name: APP_NAME,
-    url: BASE_URL,
-    logo: {
-      "@type": "ImageObject",
-      url: `${BASE_URL}/images/logos/ascender-saas-boilerplate-logo-dark.svg`,
-    },
-    // sameAs: ["https://twitter.com/...", "https://linkedin.com/..."],
-  };
-
-  return (
-    <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(websiteSchema),
-        }}
-      />
-
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(organizationSchema),
-        }}
-      />
-
-      <main className="bg-background flex min-h-screen items-center justify-center">
-        <h1 className="text-2xl font-bold">Hello World</h1>
-      </main>
-    </>
-  );
+export default function HomeRoute() {
+  return <HomePage />;
 }

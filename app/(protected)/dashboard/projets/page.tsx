@@ -1,23 +1,18 @@
 import type { Metadata } from "next";
 
+import { ProjectsPage } from "@/features/projects/pages/projects-page";
+
 import { requireCustomerProSubscription } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Projets",
-  robots: {
-    index: false,
-    follow: false,
-  },
+  robots: { index: false, follow: false },
 };
 
-export default async function ProjectsPage() {
+export default async function DashboardProjectsRoute() {
   await requireCustomerProSubscription();
 
-  return (
-    <main className="flex min-h-screen w-full flex-col px-4 py-8 sm:px-6 lg:px-8">
-      <h1 className="text-2xl font-semibold tracking-tight">Projets</h1>
-    </main>
-  );
+  return <ProjectsPage />;
 }
