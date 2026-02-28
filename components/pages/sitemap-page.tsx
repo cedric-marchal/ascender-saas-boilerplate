@@ -52,7 +52,7 @@ const STATIC_SECTIONS: SitemapSection[] = [
 
 function SitemapPage() {
   return (
-    <Main className="bg-background min-h-screen">
+    <Main className="bg-background">
       <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6 md:py-16 lg:px-8 lg:py-20">
         <header className="mb-12">
           <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">

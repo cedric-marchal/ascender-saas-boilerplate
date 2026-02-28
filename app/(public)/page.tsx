@@ -16,6 +16,10 @@ export const metadata: Metadata = {
     title: "Accueil",
     description: "[Ta description de 150-160 caractères ici]",
   },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function HomeRoute() {

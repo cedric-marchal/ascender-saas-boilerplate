@@ -21,6 +21,10 @@ export const metadata: Metadata = {
     title: `Contact | ${APP_NAME}`,
     description: DESCRIPTION,
   },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function ContactRoute() {

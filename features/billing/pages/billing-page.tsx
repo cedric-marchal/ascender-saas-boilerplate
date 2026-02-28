@@ -30,7 +30,7 @@ function BillingPage({ billing }: BillingPageProps) {
   );
 
   return (
-    <Main className="flex min-h-screen flex-col gap-6 p-6">
+    <Main className="flex flex-col gap-6 p-6">
       <header className="space-y-2">
         <h1 className="text-3xl font-semibold tracking-tight">Facturation</h1>
         <p className="text-muted-foreground">

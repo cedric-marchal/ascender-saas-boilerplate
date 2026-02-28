@@ -11,7 +11,7 @@ import { Main } from "@/components/main";
 
 function AdminDashboardPage() {
   return (
-    <Main className="flex min-h-screen w-full flex-col gap-6 p-6">
+    <Main className="flex flex-col gap-6 p-6">
       <header className="space-y-2">
         <h1 className="text-3xl font-bold tracking-tight">
           Tableau de bord admin

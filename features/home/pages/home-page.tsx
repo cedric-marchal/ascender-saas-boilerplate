@@ -1,4 +1,7 @@
-import { getHomeOrganizationSchema, getHomeWebsiteSchema } from "@/features/home/constants/home-seo.constant";
+import {
+  getHomeOrganizationSchema,
+  getHomeWebsiteSchema,
+} from "@/features/home/constants/home-seo.constant";
 
 import { Main } from "@/components/main";
 
@@ -10,13 +13,19 @@ function HomePage() {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(websiteSchema),
+        }}
       />
+
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(organizationSchema),
+        }}
       />
-      <Main className="bg-background flex min-h-screen items-center justify-center">
+
+      <Main className="bg-background flex items-center justify-center">
         <h1 className="text-2xl font-bold">Hello World</h1>
       </Main>
     </>

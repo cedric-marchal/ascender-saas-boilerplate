@@ -25,7 +25,7 @@ type SettingsPageProps = {
 
 function SettingsPage({ user, showStripeWarning = false }: SettingsPageProps) {
   return (
-    <Main className="flex min-h-screen w-full flex-col gap-6 p-6">
+    <Main className="flex flex-col gap-6 p-6">
       <SettingsHeader />
 
       <div className="grid gap-6 lg:grid-cols-2">

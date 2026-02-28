@@ -29,6 +29,10 @@ export const metadata: Metadata = {
     title: `Tarifs | ${APP_NAME}`,
     description: DESCRIPTION,
   },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default async function TarifsRoute() {

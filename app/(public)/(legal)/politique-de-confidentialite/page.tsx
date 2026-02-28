@@ -20,7 +20,10 @@ export const metadata: Metadata = {
     title: `Politique de confidentialité | ${APP_NAME}`,
     description: DESCRIPTION,
   },
-  robots: { index: true, follow: true },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function PolitiqueDeConfidentialiteRoute() {

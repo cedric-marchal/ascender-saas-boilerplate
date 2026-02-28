@@ -10,7 +10,7 @@ import {
 
 function MaintenancePage() {
   return (
-    <Main className="flex min-h-screen items-center justify-center p-4">
+    <Main className="flex items-center justify-center p-4">
       <Card className="w-full max-w-md text-center">
         <CardHeader className="space-y-4">
           <div className="bg-muted mx-auto flex h-16 w-16 items-center justify-center rounded-full">

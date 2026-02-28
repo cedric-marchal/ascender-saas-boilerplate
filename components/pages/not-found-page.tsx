@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 function NotFoundPage() {
   return (
     <Main
-      className="flex min-h-screen flex-col items-center justify-center px-4"
+      className="flex flex-col items-center justify-center px-4"
       role="main"
       aria-labelledby="not-found-title"
     >

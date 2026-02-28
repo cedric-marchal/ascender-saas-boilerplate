@@ -12,10 +12,12 @@ function SignInPage() {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(webPageSchema) }}
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(webPageSchema),
+        }}
       />
 
-      <Main className="bg-background flex min-h-screen items-center justify-center px-4 py-12">
+      <Main className="bg-background flex items-center justify-center px-4 py-12">
         <div className="w-full max-w-sm space-y-6">
           <header className="space-y-2 text-center">
             <h1 className="text-2xl font-semibold tracking-tight">Connexion</h1>

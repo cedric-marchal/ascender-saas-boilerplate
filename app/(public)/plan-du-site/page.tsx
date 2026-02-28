@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
+
 import type { WebPage, WithContext } from "schema-dts";
 
-import { SitemapPage } from "@/components/pages/sitemap-page";
-
 import { env } from "@/lib/env";
+
+import { SitemapPage } from "@/components/pages/sitemap-page";
 
 const APP_NAME = env.NEXT_PUBLIC_APP_NAME;
 const BASE_URL = env.NEXT_PUBLIC_BASE_URL;
@@ -22,7 +23,10 @@ export const metadata: Metadata = {
     title: `Plan du site | ${APP_NAME}`,
     description: DESCRIPTION,
   },
-  robots: { index: true, follow: true },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function PlanDuSiteRoute() {
@@ -43,6 +47,7 @@ export default function PlanDuSiteRoute() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(webPageSchema) }}
       />
+
       <SitemapPage />
     </>
   );

@@ -22,7 +22,10 @@ export const metadata: Metadata = {
     title: `Mot de passe oublié | ${APP_NAME}`,
     description: DESCRIPTION,
   },
-  robots: { index: false, follow: true },
+  robots: {
+    index: false,
+    follow: true,
+  },
 };
 
 export default async function MotDePasseOublieRoute() {

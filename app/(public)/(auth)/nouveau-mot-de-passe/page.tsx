@@ -13,7 +13,10 @@ export const metadata: Metadata = {
   title: "Nouveau mot de passe",
   description: DESCRIPTION,
   alternates: { canonical: "/nouveau-mot-de-passe" },
-  robots: { index: false, follow: false },
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 type NouveauMotDePasseRouteProps = {

@@ -4,7 +4,7 @@ import { Main } from "@/components/main";
 function BillingLoading() {
   return (
     <Main
-      className="flex min-h-screen flex-col gap-6 p-6"
+      className="flex flex-col gap-6 p-6"
       aria-busy="true"
       aria-label="Chargement de la facturation"
     >

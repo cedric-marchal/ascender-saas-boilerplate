@@ -15,7 +15,7 @@ type ErrorPageProps = {
 function ErrorPage({ error, reset }: ErrorPageProps) {
   return (
     <Main
-      className="flex min-h-screen flex-col items-center justify-center px-4"
+      className="flex flex-col items-center justify-center px-4"
       role="main"
       aria-labelledby="error-title"
     >
