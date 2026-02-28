@@ -13,6 +13,7 @@ export const createContactAction = actionClient
   .use(async ({ next }) => {
     const identifier = await getActionIdentifier();
     await checkRatelimit(contactRatelimit, identifier);
+
     return next();
   })
   .inputSchema(CreateContactSchema)

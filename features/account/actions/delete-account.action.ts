@@ -11,6 +11,7 @@ import { checkRatelimit } from "@/utils/ratelimit/check-ratelimit";
 export const deleteAccountAction = authActionClient
   .use(async ({ next, ctx }) => {
     await checkRatelimit(authenticatedRatelimit, ctx.userId);
+
     return next();
   })
   .inputSchema(DeleteAccountSchema)
