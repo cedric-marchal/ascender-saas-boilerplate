@@ -4,7 +4,6 @@ import { Main } from "@/components/main";
 function PricingLoading() {
   return (
     <Main
-      className="bg-background"
       aria-busy="true"
       aria-label="Chargement des tarifs"
     >

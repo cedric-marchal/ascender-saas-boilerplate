@@ -17,7 +17,7 @@ function ContactPage() {
         }}
       />
 
-      <Main className="bg-background">
+      <Main>
         <section className="mx-auto flex w-full max-w-5xl flex-col gap-10 px-4 py-12 sm:px-6 md:gap-12 md:py-16 lg:px-8 lg:py-20">
           <header className="space-y-4 text-center">
             <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">

@@ -17,7 +17,7 @@ function SignUpPage() {
         }}
       />
 
-      <Main className="bg-background flex items-center justify-center px-4 py-12">
+      <Main className="flex items-center justify-center px-4 py-12">
         <div className="w-full max-w-sm space-y-6">
           <header className="space-y-2 text-center">
             <h1 className="text-2xl font-semibold tracking-tight">
