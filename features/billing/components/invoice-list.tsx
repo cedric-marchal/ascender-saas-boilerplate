@@ -2,11 +2,7 @@ import { InvoiceCard } from "@/features/billing/components/invoice-card";
 import { InvoiceListEmpty } from "@/features/billing/components/invoice-list-empty";
 import type { BillingInvoice } from "@/features/billing/services/get-billing.service";
 
-type InvoiceListProps = {
-  invoices: BillingInvoice[];
-};
-
-function InvoiceList({ invoices }: InvoiceListProps) {
+function InvoiceList({ invoices }: { invoices: BillingInvoice[] }) {
   if (invoices.length === 0) {
     return <InvoiceListEmpty />;
   }

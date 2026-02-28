@@ -63,11 +63,7 @@ const STATUS_CONFIG: Record<SubscriptionStatus, SubscriptionStatusConfig> = {
   },
 };
 
-type SubscriptionCardProps = {
-  subscription: BillingSubscription;
-};
-
-function SubscriptionCard({ subscription }: SubscriptionCardProps) {
+function SubscriptionCard({ subscription }: { subscription: BillingSubscription }) {
   const config = STATUS_CONFIG[subscription.status] ?? STATUS_CONFIG.canceled;
   const StatusIcon = config.icon;
 

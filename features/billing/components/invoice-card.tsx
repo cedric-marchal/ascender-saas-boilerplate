@@ -34,24 +34,20 @@ const STATUS_CONFIG: Record<InvoiceStatus, InvoiceStatusConfig> = {
   void: { label: invoiceStatusLabels.void, variant: "destructive" },
 };
 
-type InvoiceCardProps = {
-  invoice: BillingInvoice;
-};
+function formatAmount(amount: number | null): string {
+  if (amount === null) {
+    return "0,00 €";
+  }
+  return new Intl.NumberFormat("fr-FR", {
+    style: "currency",
+    currency: "eur",
+  }).format(amount / 100);
+}
 
-function InvoiceCard({ invoice }: InvoiceCardProps) {
+function InvoiceCard({ invoice }: { invoice: BillingInvoice }) {
   const config = invoice.status
     ? (STATUS_CONFIG[invoice.status] ?? STATUS_CONFIG.draft)
     : STATUS_CONFIG.draft;
-
-  function formatAmount(amount: number | null): string {
-    if (amount === null) {
-      return "0,00 €";
-    }
-    return new Intl.NumberFormat("fr-FR", {
-      style: "currency",
-      currency: "eur",
-    }).format(amount / 100);
-  }
 
   return (
     <Card>
