@@ -30,7 +30,7 @@ async function canDelete(isAdmin: boolean) {} // ❌ NON TYPE-SAFE
 **✅ OBLIGATOIRE : Utiliser `UserRole`**
 
 ```tsx
-import { UserRole } from "@/lib/constants/roles.constant";
+import { UserRole } from "@/lib/generated/prisma/client";
 
 async function getEntity(
   filters: GetEntityFilters,
@@ -46,7 +46,7 @@ async function getEntity(
 ```tsx
 import "server-only";
 
-import { UserRole } from "@/lib/constants/roles.constant";
+import { UserRole } from "@/lib/generated/prisma/client";
 
 // ✅ Rôles qui peuvent accéder à TOUTES les données (pas seulement les leurs)
 const UNRESTRICTED_ROLES: UserRole[] = [UserRole.ADMIN];
@@ -102,7 +102,7 @@ async function getEntities(
 ```tsx
 import "server-only";
 
-import { UserRole } from "@/lib/constants/roles.constant";
+import { UserRole } from "@/lib/generated/prisma/client";
 import { filterRatelimit } from "@/lib/ratelimit";
 
 import { checkRatelimit } from "@/utils/ratelimit/check-ratelimit";
@@ -209,7 +209,7 @@ const { users } = await getUsers(filters, session.user.id);
 ```tsx
 import "server-only";
 
-import { UserRole } from "@/lib/constants/roles.constant";
+import { UserRole } from "@/lib/generated/prisma/client";
 
 const UNRESTRICTED_ROLES: UserRole[] = [UserRole.ADMIN];
 const TEAM_SCOPED_ROLES: UserRole[] = [UserRole.MANAGER];
@@ -364,7 +364,7 @@ curl -H "Cookie: session-user-a" /api/documents?userId=user-b-id
 ```tsx
 import { describe, expect, it } from "vitest";
 
-import { UserRole } from "@/lib/constants/roles.constant";
+import { UserRole } from "@/lib/generated/prisma/client";
 
 import { getDocuments } from "./get-documents.service";
 
@@ -438,7 +438,7 @@ async function getEntities(
 **After** :
 
 ```tsx
-import { UserRole } from "@/lib/constants/roles.constant";
+import { UserRole } from "@/lib/generated/prisma/client";
 
 const UNRESTRICTED_ROLES: UserRole[] = [UserRole.ADMIN];
 

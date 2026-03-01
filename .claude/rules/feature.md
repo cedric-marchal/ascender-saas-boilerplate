@@ -107,7 +107,7 @@ export type { CreateContactSchemaType, UpdateContactSchemaType };
 
 - **CRITICAL**: EVERY service MUST receive `userId: string` AND `userRole: UserRole`
 - **NEVER** use booleans (`isAdmin`, `isCustomer`, etc.) for permissions
-- **ALWAYS** import `UserRole` from `@/lib/constants/roles.constant`
+- **ALWAYS** import `UserRole` from `@/lib/generated/prisma/client`
 - **ALWAYS** define `UNRESTRICTED_ROLES` constant listing roles with full data access
 - **ALWAYS** filter by `userId` UNLESS user role is in `UNRESTRICTED_ROLES`
 
@@ -127,7 +127,7 @@ import {
   isUserRole,
 } from "@/features/users/constants/users-filters.constant";
 
-import { UserRole } from "@/lib/constants/roles.constant";
+import { UserRole } from "@/lib/generated/prisma/client";
 import type { User } from "@/lib/generated/prisma/client";
 import {
   DEFAULT_PAGE_SIZE,
@@ -183,7 +183,7 @@ For admin-only pages (like user management), still receive `userId` for rate lim
 ```tsx
 import "server-only";
 
-import { UserRole } from "@/lib/constants/roles.constant";
+import { UserRole } from "@/lib/generated/prisma/client";
 import { filterRatelimit } from "@/lib/ratelimit";
 
 import { checkRatelimit } from "@/utils/ratelimit/check-ratelimit";
@@ -618,27 +618,24 @@ export { WelcomeEmail };
 
 ## Constant Rules (P0)
 
-**Global constants**: `lib/constants/*.constant.ts`
-
-- `query.constant.ts` — pagination, filter, sort limits
-- `roles.constant.ts` — UserRole enum + roleLabels (re-exported from Prisma)
-- `subscription-status.constant.ts` — SubscriptionStatus + labels + ACTIVE_SUBSCRIPTION_STATUSES
-- `invoice-status.constant.ts` — InvoiceStatus + labels (Stripe-only)
+**Prisma enums**: Import `UserRole`, `SubscriptionStatus` directly from `@/lib/generated/prisma/client`. No intermediate re-export layer.
 
 **Domain constants**: `features/{feature}/constants/{entity}-filters.constant.ts`
 
 - Filter values (enums, arrays)
 - `searchParams` object (uses parsers from `lib/parsers/nuqs.ts`)
 - Type guards (`isUserRole`, etc.)
-- Labels (extends global labels with filter-specific values like "all")
+- Labels (`Record<Enum, string>` for UI display)
+
+**Billing constants**: `features/billing/constants/`
+
+- `subscription-status.constant.ts` — `subscriptionStatusLabels`, `ACTIVE_SUBSCRIPTION_STATUSES`, `ALL_SUBSCRIPTION_STATUSES`
+- `invoice-status.constant.ts` — `InvoiceStatus` (Stripe-only, not a Prisma enum), `invoiceStatusLabels`
 
 **Example**:
 
 ```tsx
-import {
-  UserRole,
-  roleLabels as baseRoleLabels,
-} from "@/lib/constants/roles.constant";
+import { UserRole } from "@/lib/generated/prisma/client";
 import {
   createEnumParser,
   createSortByParser,
@@ -652,7 +649,8 @@ const userRoleFilters = ["all", UserRole.ADMIN, UserRole.CUSTOMER] as const;
 
 const roleLabels: Record<UserRoleFilter, string> = {
   all: "Tous les rôles",
-  ...baseRoleLabels, // Reuse SSOT labels
+  [UserRole.ADMIN]: "Administrateur",
+  [UserRole.CUSTOMER]: "Client",
 };
 
 const usersSearchParams = {

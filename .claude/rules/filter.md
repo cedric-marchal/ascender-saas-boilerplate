@@ -7,12 +7,12 @@ URL-based filters/search/sort/pagination using nuqs. Universal pattern for all f
 ## Source of Truth Hierarchy (P0)
 
 ```
-Prisma Schema (enums) → lib/generated/prisma/client → lib/constants/*.constant.ts
+Prisma Schema (enums) → lib/generated/prisma/client
   → lib/parsers/nuqs.ts → features/{feature}/constants/{entity}-filters.constant.ts
   → features/*/schemas/ → features/*/services/ → features/*/components/ → app/*/page.tsx
 ```
 
-**Rules**: Enums DEFINED in Prisma, RE-EXPORTED by `lib/constants/`, IMPORTED by app code. NEVER import from Prisma directly.
+**Rules**: Enums (`UserRole`, `SubscriptionStatus`) DEFINED in Prisma, IMPORTED directly from `@/lib/generated/prisma/client`. Domain-specific filter constants in `features/{feature}/constants/`.
 
 ## 6-Layer Architecture
 
@@ -138,10 +138,7 @@ export type { PageSize, SortOrder };
 `features/{feature}/constants/{entity}-filters.constant.ts`
 
 ```tsx
-import {
-  UserRole,
-  roleLabels as baseRoleLabels,
-} from "@/lib/constants/roles.constant";
+import { UserRole } from "@/lib/generated/prisma/client";
 import {
   createEnumParser,
   createSortByParser,
@@ -159,7 +156,8 @@ const usersSortableFields = ["name", "email", "createdAt"] as const;
 
 const roleLabels: Record<UserRoleFilter, string> = {
   all: "Tous les rôles",
-  ...baseRoleLabels,
+  [UserRole.ADMIN]: "Administrateur",
+  [UserRole.CUSTOMER]: "Client",
 };
 const verificationLabels: Record<VerificationFilter, string> = {
   all: "Tous",
@@ -598,7 +596,7 @@ Validate at EVERY layer: Parser (bounds/length/enum) → Schema (Zod) → Server
 ```tsx
 // ❌ Parsers inline in page file → MUST be in lib/parsers/nuqs.ts
 // ❌ Enums in schema → MUST be in constants
-// ❌ Parsers re-exporting constants → consumers import from query.constant.ts
+// ❌ Parsers re-exporting constants → consumers import parsers from lib/parsers/nuqs.ts, enums from features/*/constants/
 // ❌ parseAsSafeSearch rejecting → MUST truncate with .slice()
 // ❌ Client-side sorting in DataTable → getSortedRowModel(), getFilteredRowModel(), getPaginationRowModel()
 // ❌ Not using useTransition → no loading feedback
@@ -614,14 +612,14 @@ Validate at EVERY layer: Parser (bounds/length/enum) → Schema (Zod) → Server
 
 ## Key Principles
 
-1. **Single source of truth**: Prisma → Constants → Parsers → Domain Config → Schema → Components
+1. **Single source of truth**: Prisma → `lib/generated/prisma/client` → `lib/parsers/nuqs.ts` → `features/*/constants/` → Schema → Components
 2. **Domino effect**: Changing one layer cascades automatically
 3. **Defense in depth**: Validate at parser, schema, AND server
 4. **Server-side everything**: DataTable is dumb renderer
 5. **3-state sort**: unsorted → asc → desc → reset
 6. **useTransition everywhere**: All URL mutations use startTransition
-7. **Enums in constants**: Defined in constants, imported by schemas
-8. **Parsers don't re-export**: Consumers import from query.constant.ts
+7. **Enums from Prisma**: Import `UserRole` directly from `@/lib/generated/prisma/client`, domain filter arrays in `features/*/constants/`
+8. **Parsers in nuqs.ts**: All query parsers and constants centralized in `lib/parsers/nuqs.ts`
 9. **Truncate, don't reject**: parseAsSafeSearch uses .slice()
 10. **null to clear**: Remove params with null, not empty strings
 11. **select + take always**: Every findMany must have both

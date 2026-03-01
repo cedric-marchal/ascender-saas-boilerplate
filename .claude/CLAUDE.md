@@ -609,6 +609,6 @@ components/emails/contact-email.tsx              # → features/contact/emails/
 - **Filters, Sort & Pagination**: `.claude/rules/filter.md`
 - **Forms**: `.claude/rules/form.md`
 - **API Routes**: `.claude/rules/api.md`
-- **Server Actions**: `.claude/rules/server-action.md`
+- **Server Actions**: `.claude/rules/action.md`
 - **Pages**: `.claude/rules/page.md`
 - **Security (IDOR & Authorization)**: `.claude/rules/security.md` — **CRITICAL: Read this**
