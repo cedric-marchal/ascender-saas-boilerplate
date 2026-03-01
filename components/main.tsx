@@ -6,7 +6,10 @@ type MainProps = ComponentPropsWithoutRef<"main">;
 
 function Main({ children, className, ...props }: MainProps) {
   return (
-    <main className={cn("bg-background min-h-screen w-full", className)} {...props}>
+    <main
+      className={cn("bg-background min-h-screen w-full pb-24", className)}
+      {...props}
+    >
       {children}
     </main>
   );

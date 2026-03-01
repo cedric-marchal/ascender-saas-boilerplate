@@ -105,6 +105,8 @@ app/*/page.tsx (pages import from features)
 | **Buttons**       | `type="button"` (except submit), `aria-hidden="true"` on decorative icons          |
 | **Forms**         | TanStack Form + Zod + `useAction` + `getActionResult` + `getErrorMessage`          |
 | **If braces**     | Always use braces, even single-line: `if (cond) {\n  return;\n}` never `if (cond) return;` |
+| **Spacing**       | Blank line after `}` if code follows. Blank line before final `return` if code above |
+| **Strings concat** | Template strings for interpolation, never concatenation (`+`)                     |
 | **Error pattern** | Components: early return. Async: throw (no multiple returns in try)                |
 | **Prisma**        | Always `select` + `take` on `findMany`, `$transaction` for parallel count+findMany |
 | **Strings**       | `.min().max().trim()` (always French error messages)                               |
@@ -598,6 +600,22 @@ prisma.user.findMany({ where: { ... } });
 const response = await fetch("/api/endpoint", { ... });
 // ✅ Use: upfetch from @/lib/up-fetch
 
+// ❌ NEVER concatenation for strings
+const name = firstName + " " + lastName;
+// ✅ Use: const name = `${firstName} ${lastName}`;
+
+// ❌ NEVER missing blank line after } when code follows
+if (!user) {
+  return null;
+}
+const name = user.name; // ❌ needs blank line above
+
+// ❌ NEVER missing blank line before final return when code above
+function Component() {
+  const value = compute();
+  return <div>{value}</div>; // ❌ needs blank line above
+}
+
 // ❌ NEVER wrong file locations
 lib/schemas/contact.schema.ts                    # → features/contact/schemas/
 app/(public)/contact/_actions/                   # → features/contact/actions/
@@ -606,6 +624,7 @@ components/emails/contact-email.tsx              # → features/contact/emails/
 
 ## Detailed Rule Files
 
+- **Code Style (Spacing, Strings, Control Flow)**: `.claude/rules/code-style.md`
 - **Filters, Sort & Pagination**: `.claude/rules/filter.md`
 - **Forms**: `.claude/rules/form.md`
 - **API Routes**: `.claude/rules/api.md`
