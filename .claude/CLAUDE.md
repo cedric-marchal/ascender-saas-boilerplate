@@ -91,6 +91,19 @@ app/*/page.tsx (pages import from features)
 
 **Key principle**: Import Prisma enums (`UserRole`, `SubscriptionStatus`) directly from `@/lib/generated/prisma/client`.
 
+## Workflow avant toute modification (P0)
+
+🚨 **RÈGLE CRITIQUE — TOUJOURS SUIVRE** 🚨
+
+**AVANT de modifier des fichiers, tu DOIS lire au minimum 3 fichiers** qui t'aideront à comprendre comment faire de façon cohérente et consistante.
+
+**Types de fichiers à lire :**
+
+1. **Fichiers similaires** : fichiers qui font une fonctionnalité similaire (comprendre patterns et conventions)
+2. **Dépendances importées** : lire l'implémentation de tout import dont tu n'es pas sûr à 100% — comprendre leur API, types et patterns d'usage
+
+❌ JAMAIS sauter cette étape, même pour des "petits" changements.
+
 ## Core Conventions
 
 | Rule              | Convention                                                                         |
@@ -112,6 +125,8 @@ app/*/page.tsx (pages import from features)
 | **Strings**       | `.min().max().trim()` (always French error messages)                               |
 | **User messages** | French. Code: English.                                                             |
 | **File naming**   | kebab-case.tsx                                                                     |
+| **Booleans**      | Prefixes `is`, `has`, `can`, `should` (e.g., `isLoading`, `hasError`, `canSubmit`) |
+| **Async naming**  | Clear action verbs: `fetchUsers`, `createUser`, `updateProfile`, `deleteAccount`   |
 
 ## Security: IDOR Prevention (P0) 🔴
 
@@ -631,3 +646,13 @@ components/emails/contact-email.tsx              # → features/contact/emails/
 - **Server Actions**: `.claude/rules/action.md`
 - **Pages**: `.claude/rules/page.md`
 - **Security (IDOR & Authorization)**: `.claude/rules/security.md` — **CRITICAL: Read this**
+
+## ❗ Auto-vérification avant de finaliser
+
+Avant de terminer, demande-toi :
+
+- As-tu lu au minimum 3 fichiers existants avant de faire des changements ?
+- Le code est-il cohérent avec les patterns existants du projet ?
+- As-tu suivi toutes les conventions ci-dessus ?
+
+Si non à l'une de ces questions, arrête et fais-le d'abord.
