@@ -115,10 +115,7 @@ const auth = betterAuth({
           name: dbUser.name,
         });
 
-        console.log(
-          `Stripe customer email updated for user ${user.id}: ${dbUser.email}`,
-        );
-      } catch (error: unknown) {
+} catch (error: unknown) {
         console.error(
           `Failed to update Stripe customer email for user ${user.id}:`,
           error,
@@ -146,7 +143,7 @@ const auth = betterAuth({
     },
     changeEmail: {
       enabled: true,
-      sendChangeEmailVerification: async ({ user, newEmail, url }) => {
+      sendChangeEmailConfirmation: async ({ user, newEmail, url }) => {
         await Promise.allSettled([
           sendEmailSafe({
             from: `${APP_NAME} <${env.RESEND_EMAIL_NOREPLY}>`,
