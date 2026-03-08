@@ -7,7 +7,7 @@ import { getSession } from "@/lib/session";
 import { UnauthorizedError } from "@/utils/errors/errors";
 import { handleApiError } from "@/utils/errors/handle-api-error";
 
-async function POST(request: Request) {
+async function POST() {
   try {
     const session = await getSession();
 

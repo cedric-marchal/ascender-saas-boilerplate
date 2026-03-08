@@ -2,10 +2,7 @@ import { env } from "@/lib/env";
 
 import { Main } from "@/components/main";
 
-import {
-  LEGAL_NOTICE_DESCRIPTION,
-  getLegalNoticeSchema,
-} from "@/features/legal/constants/legal-seo.constant";
+import { getLegalNoticeSchema } from "@/features/legal/constants/legal-seo.constant";
 
 const APP_NAME = env.NEXT_PUBLIC_APP_NAME;
 

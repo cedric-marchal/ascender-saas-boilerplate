@@ -1,8 +1,10 @@
 "use client";
 
-import Link from "next/link";
+import { useEffect } from "react";
 
+import * as Sentry from "@sentry/nextjs";
 import { AlertTriangle } from "lucide-react";
+import Link from "next/link";
 
 import { Main } from "@/components/main";
 import { Button } from "@/components/ui/button";
@@ -13,6 +15,10 @@ type ErrorPageProps = {
 };
 
 function ErrorPage({ error, reset }: ErrorPageProps) {
+  useEffect(() => {
+    Sentry.captureException(error);
+  }, [error]);
+
   return (
     <Main
       className="flex flex-col items-center justify-center px-4"

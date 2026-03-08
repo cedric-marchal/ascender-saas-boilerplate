@@ -4,10 +4,7 @@ import { env } from "@/lib/env";
 
 import { Main } from "@/components/main";
 
-import {
-  PRIVACY_POLICY_DESCRIPTION,
-  getPrivacyPolicySchema,
-} from "@/features/legal/constants/legal-seo.constant";
+import { getPrivacyPolicySchema } from "@/features/legal/constants/legal-seo.constant";
 
 const APP_NAME = env.NEXT_PUBLIC_APP_NAME;
 

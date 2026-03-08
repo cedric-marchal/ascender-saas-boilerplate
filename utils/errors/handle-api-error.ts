@@ -2,6 +2,7 @@ import "server-only";
 
 import { NextResponse } from "next/server";
 
+import * as Sentry from "@sentry/nextjs";
 import { ZodError } from "zod";
 
 import { AppError } from "@/utils/errors/errors";
@@ -29,6 +30,8 @@ function handleApiError(error: unknown): NextResponse {
       { status: error.statusCode },
     );
   }
+
+  Sentry.captureException(error);
 
   const message =
     process.env.NODE_ENV === "development" && error instanceof Error

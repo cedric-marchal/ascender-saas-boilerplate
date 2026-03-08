@@ -4,10 +4,7 @@ import { env } from "@/lib/env";
 
 import { Main } from "@/components/main";
 
-import {
-  TERMS_OF_SERVICE_DESCRIPTION,
-  getTermsOfServiceSchema,
-} from "@/features/legal/constants/legal-seo.constant";
+import { getTermsOfServiceSchema } from "@/features/legal/constants/legal-seo.constant";
 
 const APP_NAME = env.NEXT_PUBLIC_APP_NAME;
 

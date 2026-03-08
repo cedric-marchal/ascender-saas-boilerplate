@@ -3,6 +3,8 @@ import {
   createSafeActionClient,
 } from "next-safe-action";
 
+import * as Sentry from "@sentry/nextjs";
+
 import { auth } from "@/lib/auth";
 import { UserRole } from "@/lib/generated/prisma/client";
 
@@ -27,6 +29,8 @@ export const actionClient = createSafeActionClient({
     if (error instanceof AppError) {
       return error.message;
     }
+
+    Sentry.captureException(error);
 
     if (process.env.NODE_ENV === "development") {
       return error.message;
