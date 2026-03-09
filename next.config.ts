@@ -1,19 +1,23 @@
 import type { NextConfig } from "next";
 
-import bundleAnalyzer from "@next/bundle-analyzer";
 import { withSentryConfig } from "@sentry/nextjs";
-
-const withBundleAnalyzer = bundleAnalyzer({
-  enabled: process.env.ANALYZE === "true",
-});
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  serverExternalPackages: [
+    "@prisma/client",
+    "@react-email/components",
+    "sharp",
+    "@aws-sdk/client-s3",
+    "@aws-sdk/s3-request-presigner",
+    "stripe",
+    "pg",
+    "better-auth",
+  ],
   experimental: {
     optimizePackageImports: [
       "lucide-react",
-      "@radix-ui/react-accordion",
       "@radix-ui/react-alert-dialog",
       "@radix-ui/react-avatar",
       "@radix-ui/react-dialog",
@@ -41,18 +45,16 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withBundleAnalyzer(
-  withSentryConfig(nextConfig, {
-    org: process.env.SENTRY_ORG,
-    project: process.env.SENTRY_PROJECT,
-    silent: !process.env.CI,
-    widenClientFileUpload: true,
-    tunnelRoute: "/monitoring",
-    webpack: {
-      automaticVercelMonitors: true,
-      treeshake: {
-        removeDebugLogging: true,
-      },
+export default withSentryConfig(nextConfig, {
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  silent: !process.env.CI,
+  widenClientFileUpload: true,
+  tunnelRoute: "/monitoring",
+  webpack: {
+    automaticVercelMonitors: true,
+    treeshake: {
+      removeDebugLogging: true,
     },
-  }),
-);
+  },
+});
