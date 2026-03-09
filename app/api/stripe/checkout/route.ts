@@ -3,10 +3,12 @@ import { NextResponse } from "next/server";
 import { CreateCheckoutSessionSchema } from "@/features/billing/schemas/checkout.schema";
 import { createCheckoutSession } from "@/features/billing/services/stripe/create-checkout-session.service";
 
+import { authenticatedRatelimit } from "@/lib/ratelimit";
 import { getSession } from "@/lib/session";
 
 import { UnauthorizedError } from "@/utils/errors/errors";
 import { handleApiError } from "@/utils/errors/handle-api-error";
+import { checkRatelimit } from "@/utils/ratelimit/check-ratelimit";
 
 async function POST(request: Request) {
   try {
@@ -15,6 +17,8 @@ async function POST(request: Request) {
     if (!session) {
       throw new UnauthorizedError("Vous devez être connecté");
     }
+
+    await checkRatelimit(authenticatedRatelimit, session.user.id);
 
     const formData = await request.formData();
 

@@ -23,14 +23,20 @@ type CreatePortalSessionResult = {
 async function createPortalSession(
   input: CreatePortalSessionInput,
 ): Promise<CreatePortalSessionResult> {
-  const user = await prisma.user.findUnique({
-    where: { id: input.userId },
-    select: {
-      id: true,
-      emailVerified: true,
-      role: true,
-    },
-  });
+  const [user, stripeCustomer] = await Promise.all([
+    prisma.user.findUnique({
+      where: { id: input.userId },
+      select: {
+        id: true,
+        emailVerified: true,
+        role: true,
+      },
+    }),
+    prisma.stripeCustomer.findUnique({
+      where: { userId: input.userId },
+      select: { stripeCustomerId: true },
+    }),
+  ]);
 
   if (!user) {
     throw new UnauthorizedError("Utilisateur introuvable");
@@ -47,11 +53,6 @@ async function createPortalSession(
       "Seuls les utilisateurs avec le rôle CUSTOMER peuvent accéder au portail de facturation",
     );
   }
-
-  const stripeCustomer = await prisma.stripeCustomer.findUnique({
-    where: { userId: user.id },
-    select: { stripeCustomerId: true },
-  });
 
   if (!stripeCustomer) {
     throw new NotFoundError(

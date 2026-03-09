@@ -4,6 +4,7 @@ import { type ChangeEvent, type SubmitEvent, useState } from "react";
 
 import { useForm } from "@tanstack/react-form";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useAction } from "next-safe-action/hooks";
 import { toast } from "sonner";
 
@@ -26,6 +27,7 @@ import { getActionResult } from "@/utils/errors/get-action-result";
 import { getErrorMessage } from "@/utils/errors/get-error-message";
 
 function PasswordForm() {
+  const router = useRouter();
   const [isCurrentPasswordVisible, setIsCurrentPasswordVisible] =
     useState(false);
   const [isNewPasswordVisible, setIsNewPasswordVisible] = useState(false);
@@ -51,6 +53,7 @@ function PasswordForm() {
         );
 
         form.reset();
+        router.refresh();
       } catch (error: unknown) {
         toast.error(getErrorMessage(error));
       }
