@@ -25,6 +25,7 @@ SaaS boilerplate: Next.js 16 (App Router) + TypeScript + Tailwind CSS + Shadcn/u
 | HTTP Client | up-fetch                     |
 | Rate Limit  | Upstash Redis + Ratelimit    |
 | Monitoring  | Sentry                       |
+| Hosting     | Vercel                       |
 | Tests       | Vitest                       |
 
 ## Architecture: Feature-Based (P0)
