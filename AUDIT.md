@@ -168,9 +168,9 @@ user: {
 },
 ```
 
+- [x] Vérifié : BetterAuth lit `email_verified` depuis le token Google nativement (`generic-oauth/routes.mjs:388`) — aucune action nécessaire
 - [ ] Tester le flow Google OAuth → accès à `/dashboard/facturation`
 - [ ] Confirmer que `emailVerified = true` après OAuth Google
-- [ ] Ajouter un hook `user.create.after` si nécessaire pour forcer `emailVerified: true` pour OAuth
 
 ---
 
@@ -182,7 +182,7 @@ user: {
 
 **Correction :** Configurer BetterAuth pour utiliser Redis comme storage de rate limiting. Consulter la [doc BetterAuth rate limiting](https://www.better-auth.com/docs/concepts/rate-limit) pour la configuration du custom storage.
 
-- [ ] Remplacer `storage: "database"` par le storage Redis BetterAuth
+- [x] Remplacé `storage: "database"` par `customStorage` Redis dans `lib/auth.ts`
 - [ ] Mesurer la latence de sign-in avant/après (objectif : < 200ms total)
 
 ---
@@ -205,8 +205,8 @@ user: {
 }
 ```
 
-- [ ] Importer `captureException` de `@sentry/nextjs`
-- [ ] Ajouter `captureException` dans le catch de la sync Stripe
+- [x] Importé `* as Sentry from "@sentry/nextjs"` dans `lib/auth.ts`
+- [x] Ajouté `Sentry.captureException` dans le catch de la sync Stripe
 
 ---
 
@@ -263,8 +263,9 @@ export { GET };
 }
 ```
 
-- [ ] Créer `app/api/cron/cleanup/route.ts`
-- [ ] Créer `vercel.json` avec la configuration du cron
+- [x] Créé `app/api/cron/cleanup/route.ts` (GET, auth Bearer, $transaction delete sessions/verifications/rateLimits)
+- [x] Créé `vercel.json` avec cron `0 3 * * *` et `maxDuration: 30` pour le webhook Stripe
+- [x] Ajouté `CRON_SECRET` dans `lib/env.ts` (optionnel, z.string().min(1).optional())
 - [ ] Ajouter `CRON_SECRET` dans les variables d'environnement Vercel
 - [ ] Vérifier que le cron s'exécute dans les logs Vercel
 
@@ -280,8 +281,8 @@ export { GET };
 - Réduire à 60 secondes : `maxAge: 60`
 - Ou implémenter une invalidation explicite en appelant `auth.api.revokeSession()` lors des changements de rôle admin
 
-- [ ] Décider de la stratégie (réduction délai ou invalidation explicite)
-- [ ] Appliquer la correction dans `lib/auth.ts`
+- [x] Stratégie choisie : réduction à 60s (compromis sécurité/performance)
+- [x] Appliqué `maxAge: 60` dans `lib/auth.ts`
 
 ---
 
@@ -335,7 +336,7 @@ account: {
 },
 ```
 
-- [ ] Ajouter la configuration `account.accountLinking` dans `lib/auth.ts`
+- [x] Ajouté `account.accountLinking` dans `lib/auth.ts` avec `trustedProviders: ["google", "credential"]`
 - [ ] Tester le scénario : inscription Google → tentative connexion email/password avec même email
 
 ---

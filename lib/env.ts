@@ -42,6 +42,8 @@ const env = createEnv({
 
     SENTRY_ORG: z.string().min(1).optional(),
     SENTRY_PROJECT: z.string().min(1).optional(),
+
+    CRON_SECRET: z.string().min(1).optional(),
   },
   client: {
     NEXT_PUBLIC_APP_NAME: z.string().min(1),
@@ -98,6 +100,8 @@ const env = createEnv({
 
     SENTRY_ORG: process.env.SENTRY_ORG,
     SENTRY_PROJECT: process.env.SENTRY_PROJECT,
+
+    CRON_SECRET: process.env.CRON_SECRET,
 
     // Client
     NEXT_PUBLIC_APP_NAME: process.env.NEXT_PUBLIC_APP_NAME,

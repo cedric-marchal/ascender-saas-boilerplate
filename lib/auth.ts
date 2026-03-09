@@ -1,5 +1,6 @@
 import "server-only";
 
+import * as Sentry from "@sentry/nextjs";
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { nextCookies } from "better-auth/next-js";
@@ -12,6 +13,7 @@ import { WelcomeEmail } from "@/features/auth/emails/welcome-email";
 import { env } from "@/lib/env";
 import { UserRole } from "@/lib/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
+import { redis } from "@/lib/redis";
 import { sendEmailSafe } from "@/lib/resend";
 import { stripe } from "@/lib/stripe";
 
@@ -26,7 +28,7 @@ const auth = betterAuth({
   session: {
     cookieCache: {
       enabled: true,
-      maxAge: 60 * 5,
+      maxAge: 60,
     },
   },
   rateLimit: {
@@ -51,7 +53,27 @@ const auth = betterAuth({
         max: 3,
       },
     },
-    storage: "database",
+    customStorage: {
+      get: async (key: string) => {
+        const data = await redis.get<string>(key);
+
+        if (!data) {
+          return null;
+        }
+
+        return JSON.parse(data) as {
+          key: string;
+          count: number;
+          lastRequest: number;
+        };
+      },
+      set: async (
+        key: string,
+        value: { key: string; count: number; lastRequest: number },
+      ) => {
+        await redis.set(key, JSON.stringify(value), { ex: 60 });
+      },
+    },
   },
   emailAndPassword: {
     enabled: true,
@@ -114,12 +136,10 @@ const auth = betterAuth({
           email: dbUser.email,
           name: dbUser.name,
         });
-
-} catch (error: unknown) {
-        console.error(
-          `Failed to update Stripe customer email for user ${user.id}:`,
-          error,
-        );
+      } catch (error: unknown) {
+        Sentry.captureException(error, {
+          tags: { userId: user.id, context: "stripe-email-sync" },
+        });
       }
     },
   },
@@ -162,6 +182,12 @@ const auth = betterAuth({
           }),
         ]);
       },
+    },
+  },
+  account: {
+    accountLinking: {
+      enabled: true,
+      trustedProviders: ["google", "credential"],
     },
   },
   databaseHooks: {
