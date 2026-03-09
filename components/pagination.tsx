@@ -17,7 +17,7 @@ type PaginationProps = {
 function Pagination({ currentPage, totalPages }: PaginationProps) {
   const [isLoading, startTransition] = useTransition();
 
-  const [, setPage] = useQueryState(
+  const [page, setPage] = useQueryState(
     "page",
     parseAsPage.withDefault(1).withOptions({
       shallow: false,
@@ -27,14 +27,14 @@ function Pagination({ currentPage, totalPages }: PaginationProps) {
   );
 
   function handlePrevious() {
-    if (currentPage > 1) {
-      setPage(currentPage - 1);
+    if (page > 1) {
+      setPage(page - 1);
     }
   }
 
   function handleNext() {
-    if (currentPage < totalPages) {
-      setPage(currentPage + 1);
+    if (page < totalPages) {
+      setPage(page + 1);
     }
   }
 

@@ -36,7 +36,7 @@ function PricingPage({
 
       {productSchemas.map((schema: WithContext<Product>, index: number) => (
         <script
-          key={index}
+          key={String(schema["@id"] ?? index)}
           type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify(schema),

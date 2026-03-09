@@ -1,3 +1,5 @@
+import { Ratelimit } from "@upstash/ratelimit";
+import { Redis } from "@upstash/redis";
 import { type NextRequest, NextResponse } from "next/server";
 
 import { getSessionCookie } from "better-auth/cookies";
@@ -18,6 +20,14 @@ const STATIC_SECURITY_HEADERS: Record<string, string> = {
   "Strict-Transport-Security": "max-age=63072000; includeSubDomains; preload",
   "X-DNS-Prefetch-Control": "on",
 };
+
+const ratelimit = new Ratelimit({
+  redis: Redis.fromEnv(),
+  limiter: Ratelimit.slidingWindow(200, "1 m"),
+  ephemeralCache: new Map(),
+  analytics: true,
+  prefix: "@upstash/ratelimit/proxy",
+});
 
 function generateCsp(nonce: string): string {
   return [
@@ -44,6 +54,7 @@ function applySecurityHeaders(
     },
   );
   response.headers.set("Content-Security-Policy", generateCsp(nonce));
+
   return response;
 }
 
@@ -63,10 +74,11 @@ function isProtectedApiRoute(pathname: string): boolean {
   );
 }
 
-export function proxy(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
 
+  // Maintenance mode — court-circuit total
   if (MAINTENANCE_ENABLED) {
     const isMaintenancePage = pathname === MAINTENANCE_PATH;
     const isAsset =
@@ -93,10 +105,43 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL(MAINTENANCE_PATH, request.url));
   }
 
+  // Redirige /maintenance vers / quand hors maintenance
   if (pathname === MAINTENANCE_PATH) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 
+  // Rate limiting IP — couvre pages, nuqs, API routes et server actions
+  const ip =
+    request.headers.get("x-forwarded-for") ??
+    request.headers.get("x-real-ip") ??
+    "anonymous";
+
+  const { success } = await ratelimit.limit(ip);
+
+  if (!success) {
+    if (pathname.startsWith("/api")) {
+      return applySecurityHeaders(
+        NextResponse.json(
+          {
+            success: false,
+            type: "TooManyRequestsError",
+            message: "Trop de requêtes, veuillez réessayer plus tard",
+          },
+          { status: 429 },
+        ),
+        nonce,
+      );
+    }
+
+    return applySecurityHeaders(
+      new NextResponse("Trop de requêtes, veuillez réessayer plus tard", {
+        status: 429,
+      }),
+      nonce,
+    );
+  }
+
+  // Auth check — routes protégées sans cookie de session
   if (isProtectedRoute(pathname) || isProtectedApiRoute(pathname)) {
     const sessionCookie = getSessionCookie(request);
 
@@ -121,6 +166,7 @@ export function proxy(request: NextRequest) {
     }
   }
 
+  // Passage normal avec headers de sécurité et nonce
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-nonce", nonce);
 

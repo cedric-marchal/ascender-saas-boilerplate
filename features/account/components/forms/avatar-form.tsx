@@ -178,6 +178,7 @@ function AvatarForm({ name, image }: AvatarFormProps) {
                             src={previewUrl}
                             alt="Preview"
                             fill
+                            sizes="48px"
                             className="object-cover"
                           />
                         </div>
