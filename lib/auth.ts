@@ -178,8 +178,12 @@ const auth = betterAuth({
       },
     },
   },
+  trustedOrigins: [env.NEXT_PUBLIC_BASE_URL],
   baseURL: env.NEXT_PUBLIC_BASE_URL,
   secret: env.BETTER_AUTH_SECRET,
+  advanced: {
+    useSecureCookies: process.env.NODE_ENV === "production",
+  },
   plugins: [nextCookies()],
 });
 

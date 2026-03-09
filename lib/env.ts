@@ -70,7 +70,9 @@ const env = createEnv({
   runtimeEnv: {
     // Server
     NEXT_TELEMETRY_DISABLED: process.env.NEXT_TELEMETRY_DISABLED,
+
     MAINTENANCE_ENABLED: process.env.MAINTENANCE_ENABLED,
+
     BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET,
     GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
     GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,

@@ -1,13 +1,9 @@
 import "server-only";
 
-import { PrismaPg } from "@prisma/adapter-pg";
+import { PrismaNeon } from "@prisma/adapter-neon";
 
 import { env } from "@/lib/env";
 import { PrismaClient } from "@/lib/generated/prisma/client";
-
-const adapter = new PrismaPg({
-  connectionString: env.DATABASE_URL,
-});
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
@@ -16,11 +12,10 @@ const globalForPrisma = globalThis as unknown as {
 export const prisma =
   globalForPrisma.prisma ??
   new PrismaClient({
-    adapter,
+    adapter: new PrismaNeon({ connectionString: env.DATABASE_URL }),
     log: ["warn", "error"],
   });
 
 if (process.env.NODE_ENV !== "production") {
   globalForPrisma.prisma = prisma;
 }
-

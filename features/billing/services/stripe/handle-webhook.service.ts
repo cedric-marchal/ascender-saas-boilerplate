@@ -11,6 +11,17 @@ import { prisma } from "@/lib/prisma";
 import { redis } from "@/lib/redis";
 import { stripe } from "@/lib/stripe";
 
+function isTransientDbError(error: unknown): boolean {
+  if (!(error instanceof Error)) {
+    return false;
+  }
+
+  return (
+    error.name === "PrismaClientInitializationError" ||
+    error.name === "PrismaClientRustPanicError"
+  );
+}
+
 const VALID_SUBSCRIPTION_STATUSES = new Set<SubscriptionStatus>(
   ALL_SUBSCRIPTION_STATUSES,
 );
@@ -53,13 +64,21 @@ async function handleStripeWebhook(
   }
 
   const eventKey = `stripe:event:${event.id}`;
-  const alreadyProcessed = await redis.get(eventKey);
 
-  if (alreadyProcessed) {
-    return { status: 200, body: { success: true, received: true } };
+  try {
+    const alreadyProcessed = await redis.get(eventKey);
+
+    if (alreadyProcessed) {
+      return { status: 200, body: { success: true, received: true } };
+    }
+
+    await redis.set(eventKey, 1, { ex: EVENT_TTL_SECONDS });
+  } catch (redisError: unknown) {
+    Sentry.captureException(redisError, {
+      extra: { eventType: event.type, eventId: event.id, context: "idempotency-check" },
+    });
+    // Redis indisponible → on continue sans idempotence (mieux que bloquer)
   }
-
-  await redis.set(eventKey, 1, { ex: EVENT_TTL_SECONDS });
 
   try {
     switch (event.type) {
@@ -226,6 +245,14 @@ async function handleStripeWebhook(
     Sentry.captureException(error, {
       extra: { eventType: event.type, eventId: event.id },
     });
+
+    if (isTransientDbError(error)) {
+      return {
+        status: 503,
+        body: { success: false, message: "Service temporairement indisponible" },
+      };
+    }
+
     return { status: 200, body: { success: true, received: true } };
   }
 

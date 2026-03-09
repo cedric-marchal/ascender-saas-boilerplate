@@ -10,6 +10,6 @@ export const metadata: Metadata = {
   },
 };
 
-export default function NotFound() {
+export default function NotFoundRoute() {
   return <NotFoundPage />;
 }

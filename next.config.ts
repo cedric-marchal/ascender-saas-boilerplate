@@ -7,12 +7,12 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   serverExternalPackages: [
     "@prisma/client",
+    "@neondatabase/serverless",
     "@react-email/components",
     "sharp",
     "@aws-sdk/client-s3",
     "@aws-sdk/s3-request-presigner",
     "stripe",
-    "pg",
     "better-auth",
   ],
   experimental: {
