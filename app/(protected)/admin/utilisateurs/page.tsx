@@ -6,7 +6,10 @@ import { usersSearchParams } from "@/features/users/constants/users-filters.cons
 import { UsersPage } from "@/features/users/pages/users-page";
 import { getUsers } from "@/features/users/services/get-users.service";
 
+import { filterRatelimit } from "@/lib/ratelimit";
 import { requireAdminVerifiedEmail } from "@/lib/session";
+
+import { TooManyRequestsPage } from "@/components/pages/too-many-requests-page";
 
 const loadSearchParams = createLoader(usersSearchParams);
 
@@ -27,7 +30,13 @@ type AdminUsersRouteProps = {
 export default async function AdminUsersRoute({
   searchParams,
 }: AdminUsersRouteProps) {
-  await requireAdminVerifiedEmail();
+  const session = await requireAdminVerifiedEmail();
+
+  const { success } = await filterRatelimit.limit(session.user.id);
+
+  if (!success) {
+    return <TooManyRequestsPage />;
+  }
 
   const filters = await loadSearchParams(searchParams);
 

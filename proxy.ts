@@ -1,6 +1,4 @@
-import { Ratelimit } from "@upstash/ratelimit";
-import { Redis } from "@upstash/redis";
-import { type NextRequest, NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 
 import { getSessionCookie } from "better-auth/cookies";
 
@@ -20,14 +18,6 @@ const STATIC_SECURITY_HEADERS: Record<string, string> = {
   "Strict-Transport-Security": "max-age=63072000; includeSubDomains; preload",
   "X-DNS-Prefetch-Control": "on",
 };
-
-const ratelimit = new Ratelimit({
-  redis: Redis.fromEnv(),
-  limiter: Ratelimit.slidingWindow(200, "1 m"),
-  ephemeralCache: new Map(),
-  analytics: true,
-  prefix: "@upstash/ratelimit/proxy",
-});
 
 function generateCsp(nonce: string): string {
   return [
@@ -77,93 +67,67 @@ function isProtectedApiRoute(pathname: string): boolean {
 export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
+  const isApi = pathname.startsWith("/api");
+  const isMaintenancePage = pathname === MAINTENANCE_PATH;
+  const isAsset =
+    pathname.startsWith("/_next") || pathname.startsWith("/favicon");
 
-  // Maintenance mode — court-circuit total
-  if (MAINTENANCE_ENABLED) {
-    const isMaintenancePage = pathname === MAINTENANCE_PATH;
-    const isAsset =
-      pathname.startsWith("/_next") || pathname.startsWith("/favicon");
-
-    if (isMaintenancePage || isAsset) {
-      return applySecurityHeaders(NextResponse.next(), nonce);
-    }
-
-    if (pathname.startsWith("/api")) {
-      return applySecurityHeaders(
-        NextResponse.json(
-          {
-            success: false,
-            type: "MaintenanceError",
-            message: "Service en maintenance",
-          },
-          { status: 503 },
-        ),
-        nonce,
-      );
-    }
-
-    return NextResponse.redirect(new URL(MAINTENANCE_PATH, request.url));
+  // Maintenance — assets et page maintenance passent toujours
+  if (MAINTENANCE_ENABLED && (isMaintenancePage || isAsset)) {
+    return applySecurityHeaders(NextResponse.next(), nonce);
   }
 
-  // Redirige /maintenance vers / quand hors maintenance
-  if (pathname === MAINTENANCE_PATH) {
-    return NextResponse.redirect(new URL("/", request.url));
-  }
-
-  // Rate limiting IP — couvre pages, nuqs, API routes et server actions
-  const ip =
-    request.headers.get("x-forwarded-for") ??
-    request.headers.get("x-real-ip") ??
-    "anonymous";
-
-  const { success } = await ratelimit.limit(ip);
-
-  if (!success) {
-    if (pathname.startsWith("/api")) {
-      return applySecurityHeaders(
-        NextResponse.json(
-          {
-            success: false,
-            type: "TooManyRequestsError",
-            message: "Trop de requêtes, veuillez réessayer plus tard",
-          },
-          { status: 429 },
-        ),
-        nonce,
-      );
-    }
-
+  // Maintenance — API → 503
+  if (MAINTENANCE_ENABLED && isApi) {
     return applySecurityHeaders(
-      new NextResponse("Trop de requêtes, veuillez réessayer plus tard", {
-        status: 429,
-      }),
+      NextResponse.json(
+        {
+          success: false,
+          type: "MaintenanceError",
+          message: "Service en maintenance",
+        },
+        { status: 503 },
+      ),
       nonce,
     );
   }
 
+  // Maintenance — pages → redirection
+  if (MAINTENANCE_ENABLED) {
+    return NextResponse.redirect(new URL(MAINTENANCE_PATH, request.url));
+  }
+
+  // Redirige /maintenance vers / quand hors maintenance
+  if (isMaintenancePage) {
+    return NextResponse.redirect(new URL("/", request.url));
+  }
+
   // Auth check — routes protégées sans cookie de session
-  if (isProtectedRoute(pathname) || isProtectedApiRoute(pathname)) {
-    const sessionCookie = getSessionCookie(request);
+  const isProtected =
+    isProtectedRoute(pathname) || isProtectedApiRoute(pathname);
+  const sessionCookie = isProtected ? getSessionCookie(request) : null;
 
-    if (!sessionCookie) {
-      if (pathname.startsWith("/api")) {
-        return applySecurityHeaders(
-          NextResponse.json(
-            {
-              success: false,
-              type: "UnauthorizedError",
-              message: "Vous devez être connecté",
-            },
-            { status: 401 },
-          ),
-          nonce,
-        );
-      }
+  // Non authentifié — API protégée → 401
+  if (isProtected && !sessionCookie && isApi) {
+    return applySecurityHeaders(
+      NextResponse.json(
+        {
+          success: false,
+          type: "UnauthorizedError",
+          message: "Vous devez être connecté",
+        },
+        { status: 401 },
+      ),
+      nonce,
+    );
+  }
 
-      const signInUrl = new URL("/connexion", request.url);
-      signInUrl.searchParams.set("callbackUrl", pathname);
-      return NextResponse.redirect(signInUrl);
-    }
+  // Non authentifié — page protégée → redirection connexion
+  if (isProtected && !sessionCookie) {
+    const signInUrl = new URL("/connexion", request.url);
+    signInUrl.searchParams.set("callbackUrl", pathname);
+
+    return NextResponse.redirect(signInUrl);
   }
 
   // Passage normal avec headers de sécurité et nonce

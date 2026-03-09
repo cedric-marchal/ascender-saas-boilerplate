@@ -136,7 +136,7 @@ app/*/page.tsx (pages import from features)
 | **Service params**     | ALWAYS `userId: string` + `userRole: UserRole` (NEVER booleans like `isAdmin`)     |
 | **Authorization**      | Define `UNRESTRICTED_ROLES: UserRole[]` constant, check with `.includes(userRole)` |
 | **Filtering**          | Filter by `userId` by default UNLESS `userRole` in `UNRESTRICTED_ROLES`            |
-| **Rate limiting**      | ALWAYS `await checkRatelimit(filterRatelimit, userId)` in services                 |
+| **Rate limiting**      | At the **entry point**, never in services. Page routes: `filterRatelimit.limit(userId)` → return `<TooManyRequestsPage />`. Actions: `.use(checkRatelimit)`. API routes: `checkRatelimit()` at top. |
 | **Type safety**        | Import `UserRole` from `@/lib/generated/prisma/client` (NEVER strings/booleans)    |
 | **Extensibility**      | Pattern supports multiple roles (ADMIN, MANAGER, MODERATOR) without code changes   |
 | **Full documentation** | See `.claude/rules/security.md` for complete patterns and examples                 |
@@ -501,6 +501,34 @@ Rules:
 ## Page Rules
 
 **Full documentation**: `.claude/rules/page.md`
+
+### Rate Limiting in Page Routes (P0) 🔴
+
+**Rule**: Every route file that calls a service hitting the DB MUST rate limit at the top, after the auth guard.
+
+Use `filterRatelimit.limit()` directly (NOT `checkRatelimit` which throws — pages render, they don't throw).
+
+```tsx
+export default async function DashboardBillingRoute() {
+  const session = await requireCustomerVerifiedEmail(); // auth guard first
+
+  const { success } = await filterRatelimit.limit(session.user.id);
+
+  if (!success) {
+    return <TooManyRequestsPage />; // graceful render, not a throw
+  }
+
+  const billing = await getBilling(session.user.id);
+  // ...
+}
+```
+
+| Entry point | Pattern | Identifier |
+| --- | --- | --- |
+| Page route with DB call | `filterRatelimit.limit(userId)` → `return <TooManyRequestsPage />` | `session.user.id` |
+| Server Action | `.use(async ({ next }) => { await checkRatelimit(...); return next(); })` | `ctx.userId` or IP |
+| API Route | `await checkRatelimit(...)` at top of handler | `session.user.id` or IP |
+| Service | **Nothing** — services are pure, rate limit at entry point | — |
 
 ### Thin Shim Pattern (P0)
 

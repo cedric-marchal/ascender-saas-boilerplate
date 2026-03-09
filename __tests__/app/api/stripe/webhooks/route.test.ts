@@ -1,5 +1,3 @@
-import { NextResponse } from "next/server";
-
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Create mocks

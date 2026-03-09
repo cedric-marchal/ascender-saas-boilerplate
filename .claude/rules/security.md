@@ -103,9 +103,6 @@ async function getEntities(
 import "server-only";
 
 import { UserRole } from "@/lib/generated/prisma/client";
-import { filterRatelimit } from "@/lib/ratelimit";
-
-import { checkRatelimit } from "@/utils/ratelimit/check-ratelimit";
 
 const UNRESTRICTED_ROLES: UserRole[] = [UserRole.ADMIN];
 
@@ -114,8 +111,7 @@ async function getDocuments(
   userId: string, // ✅ MANDATORY
   userRole: UserRole, // ✅ MANDATORY
 ): Promise<GetDocumentsResult> {
-  // ✅ Rate limiting par userId
-  await checkRatelimit(filterRatelimit, userId);
+  // ✅ No rate limiting here — handled at entry point (page route / action / API route)
 
   const canAccessAllData = UNRESTRICTED_ROLES.includes(userRole);
 
@@ -159,16 +155,11 @@ const { documents } = await getDocuments(
 ```tsx
 import "server-only";
 
-import { filterRatelimit } from "@/lib/ratelimit";
-
-import { checkRatelimit } from "@/utils/ratelimit/check-ratelimit";
-
 async function getUsers(
   filters: GetUsersFilters,
-  userId: string, // ✅ Pour rate limiting (pas filtering)
+  userId: string, // ✅ Pour filtering / audit
 ): Promise<GetUsersResult> {
-  // ✅ Rate limiting par userId (empêche spam même admin)
-  await checkRatelimit(filterRatelimit, userId);
+  // ✅ No rate limiting here — handled at entry point (page route / action / API route)
 
   const safeSearch = filters.search.slice(0, MAX_SEARCH_LENGTH).trim();
   const safePage = Math.max(1, Math.min(filters.page, MAX_PAGE));
@@ -263,15 +254,22 @@ async function getProjects(
 ### Every Service MUST Have
 
 - ✅ `import "server-only"` at top
-- ✅ `userId: string` parameter (for rate limiting + filtering)
+- ✅ `userId: string` parameter (for filtering)
 - ✅ `userRole: UserRole` parameter (for authorization, NEVER boolean)
 - ✅ `UNRESTRICTED_ROLES` constant defined
-- ✅ `checkRatelimit(filterRatelimit, userId)` call
 - ✅ Filter by `userId` UNLESS `userRole` in `UNRESTRICTED_ROLES`
 - ✅ `select` explicit in Prisma queries
 - ✅ `take` limit in `findMany`
 - ✅ `$transaction` for parallel count + findMany
 - ✅ Re-validate ALL params server-side
+- ❌ NO `checkRatelimit` — rate limiting belongs at the entry point, not in services
+
+### Every Route File Calling a Service MUST Have
+
+- ✅ Auth guard first (`requireSession`, `requireAdmin`, etc.)
+- ✅ `const { success } = await filterRatelimit.limit(session.user.id)`
+- ✅ `if (!success) { return <TooManyRequestsPage />; }` immediately after
+- ✅ Service call only after rate limit check passes
 
 ### Page Guard + Service Call Pattern
 
@@ -331,10 +329,18 @@ async function getEntities(userId: string, role: string) {  // ❌ NOT type-safe
   }
 }
 
-// ❌ WRONG: No rate limiting
+// ❌ WRONG: Rate limiting inside a service
 async function getEntities(userId: string, userRole: UserRole) {
-  // ❌ Missing: await checkRatelimit(filterRatelimit, userId);
+  await checkRatelimit(filterRatelimit, userId); // ❌ belongs at entry point
   const entities = await prisma.entity.findMany({ ... });
+}
+
+// ✅ CORRECT: Rate limiting at the route file (entry point)
+export default async function DashboardRoute() {
+  const session = await requireSession();
+  const { success } = await filterRatelimit.limit(session.user.id);
+  if (!success) { return <TooManyRequestsPage />; }
+  const data = await getEntities(filters, session.user.id, session.user.role);
 }
 ```
 

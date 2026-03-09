@@ -178,14 +178,14 @@ describe("POST /api/avatar", () => {
     } as unknown as Request;
 
     mockCheckRatelimit.mockResolvedValue(undefined);
-    mockHandleApiError.mockImplementation((error: Error) => {
-      return Response.json(
+    mockHandleApiError.mockReturnValue(
+      Response.json(
         { success: false, message: "Validation failed" },
         { status: 400 },
-      );
-    });
+      ),
+    );
 
-    const response = await POST(mockRequest);
+    await POST(mockRequest);
 
     expect(mockHandleApiError).toHaveBeenCalled();
     expect(mockUpdateAvatar).not.toHaveBeenCalled();
@@ -264,14 +264,14 @@ describe("POST /api/avatar", () => {
     } as unknown as Request;
 
     mockCheckRatelimit.mockResolvedValue(undefined);
-    mockHandleApiError.mockImplementation((error: Error) => {
-      return Response.json(
+    mockHandleApiError.mockReturnValue(
+      Response.json(
         { success: false, message: "Validation failed" },
         { status: 400 },
-      );
-    });
+      ),
+    );
 
-    const response = await POST(mockRequest);
+    await POST(mockRequest);
 
     expect(mockHandleApiError).toHaveBeenCalled();
     expect(mockUpdateAvatar).not.toHaveBeenCalled();

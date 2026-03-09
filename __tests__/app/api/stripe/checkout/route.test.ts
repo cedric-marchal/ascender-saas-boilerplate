@@ -120,14 +120,14 @@ describe("POST /api/stripe/checkout", () => {
       formData: vi.fn().mockResolvedValue(formData),
     } as unknown as Request;
 
-    mockHandleApiError.mockImplementation((error: Error) => {
-      return Response.json(
+    mockHandleApiError.mockReturnValue(
+      Response.json(
         { success: false, message: "Validation failed" },
         { status: 400 },
-      );
-    });
+      ),
+    );
 
-    const response = await POST(mockRequest);
+    await POST(mockRequest);
 
     expect(mockHandleApiError).toHaveBeenCalled();
     expect(mockCreateCheckoutSession).not.toHaveBeenCalled();

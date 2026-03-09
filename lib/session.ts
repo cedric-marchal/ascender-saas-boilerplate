@@ -93,23 +93,20 @@ const requireCustomerVerifiedEmail = async (): Promise<Session> => {
   return session;
 };
 
+const getProSubscription = cache(async (userId: string) => {
+  return prisma.subscription.findFirst({
+    where: {
+      stripeCustomer: { userId },
+      stripePriceId: env.STRIPE_PRICE_ID_PRO,
+      status: { in: ACTIVE_SUBSCRIPTION_STATUSES },
+    },
+    select: { id: true },
+  });
+});
+
 const requireCustomerProSubscription = async (): Promise<Session> => {
   const session = await requireCustomer();
-
-  const subscription = await prisma.subscription.findFirst({
-    where: {
-      stripeCustomer: {
-        userId: session.user.id,
-      },
-      stripePriceId: env.STRIPE_PRICE_ID_PRO,
-      status: {
-        in: ACTIVE_SUBSCRIPTION_STATUSES,
-      },
-    },
-    select: {
-      id: true,
-    },
-  });
+  const subscription = await getProSubscription(session.user.id);
 
   if (!subscription) {
     return redirect("/tarifs");
