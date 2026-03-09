@@ -104,22 +104,25 @@ describe("createCheckoutSession", () => {
     });
 
     expect(result.url).toBe("https://checkout.stripe.com/session_123");
-    expect(mockStripeCheckoutCreate).toHaveBeenCalledWith({
-      customer: "cus_123",
-      line_items: [
-        {
-          price: "price_pro_123",
-          quantity: 1,
+    expect(mockStripeCheckoutCreate).toHaveBeenCalledWith(
+      {
+        customer: "cus_123",
+        line_items: [
+          {
+            price: "price_pro_123",
+            quantity: 1,
+          },
+        ],
+        mode: "subscription",
+        success_url:
+          "https://test.example.com/dashboard/facturation?success=true",
+        cancel_url: "https://test.example.com/tarifs?canceled=true",
+        metadata: {
+          userId: "user-123",
         },
-      ],
-      mode: "subscription",
-      success_url:
-        "https://test.example.com/dashboard/facturation?success=true",
-      cancel_url: "https://test.example.com/tarifs?canceled=true",
-      metadata: {
-        userId: "user-123",
       },
-    });
+      { idempotencyKey: "checkout-user-123-price_pro_123" },
+    );
   });
 
   it("throws UnauthorizedError if user not found", async () => {
