@@ -73,10 +73,13 @@ describe("createPortalSession", () => {
     const result = await createPortalSession({ userId: "user-123" });
 
     expect(result.url).toBe("https://billing.stripe.com/session/portal_123");
-    expect(mockStripeBillingPortalCreate).toHaveBeenCalledWith({
-      customer: "cus_123",
-      return_url: "https://test.example.com/dashboard/facturation",
-    });
+    expect(mockStripeBillingPortalCreate).toHaveBeenCalledWith(
+      {
+        customer: "cus_123",
+        return_url: "https://test.example.com/dashboard/facturation",
+      },
+      { idempotencyKey: "portal-user-123" },
+    );
   });
 
   it("throws UnauthorizedError if user not found", async () => {
