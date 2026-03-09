@@ -194,8 +194,6 @@ async function handleStripeWebhook(
         break;
       }
 
-      case "invoice.created":
-      case "invoice.updated":
       case "invoice.payment_succeeded":
       case "invoice.payment_failed": {
         const invoice = event.data.object as Stripe.Invoice;

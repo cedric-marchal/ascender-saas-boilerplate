@@ -84,19 +84,6 @@ model Verification {
   @@map("verification")
 }
 
-model RateLimit {
-  id        String   @id
-  key       String
-  count     Int      @default(0)
-  expiresAt DateTime
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@unique([key])
-  @@index([key, expiresAt])
-  @@map("rateLimit")
-}
-
 model StripeCustomer {
   id               String         @id @default(cuid())
   userId           String         @unique

@@ -19,18 +19,14 @@ async function GET(request: Request) {
 
     const now = new Date();
 
-    const [deletedSessions, deletedVerifications, deletedRateLimits] =
-      await prisma.$transaction([
-        prisma.session.deleteMany({
-          where: { expiresAt: { lt: now } },
-        }),
-        prisma.verification.deleteMany({
-          where: { expiresAt: { lt: now } },
-        }),
-        prisma.rateLimit.deleteMany({
-          where: { expiresAt: { lt: now } },
-        }),
-      ]);
+    const [deletedSessions, deletedVerifications] = await prisma.$transaction([
+      prisma.session.deleteMany({
+        where: { expiresAt: { lt: now } },
+      }),
+      prisma.verification.deleteMany({
+        where: { expiresAt: { lt: now } },
+      }),
+    ]);
 
     return NextResponse.json(
       {
@@ -38,7 +34,6 @@ async function GET(request: Request) {
         data: {
           deletedSessions: deletedSessions.count,
           deletedVerifications: deletedVerifications.count,
-          deletedRateLimits: deletedRateLimits.count,
         },
       },
       { status: 200 },

@@ -457,10 +457,10 @@ describe("handleStripeWebhook", () => {
       expect(mockRedisDel).toHaveBeenCalledWith("invoices:user_inv");
     });
 
-    it("handles customerId null", async () => {
+    it("does not process invoice.payment_succeeded with null customerId", async () => {
       const mockEvent = {
         id: "evt_inv_null",
-        type: "invoice.created",
+        type: "invoice.payment_succeeded",
         data: {
           object: {
             customer: null,
@@ -478,10 +478,10 @@ describe("handleStripeWebhook", () => {
       expect(mockRedisDel).not.toHaveBeenCalled();
     });
 
-    it("handles StripeCustomer not found for invoice", async () => {
+    it("does not process invoice.payment_failed when StripeCustomer not found", async () => {
       const mockEvent = {
         id: "evt_inv_missing",
-        type: "invoice.updated",
+        type: "invoice.payment_failed",
         data: {
           object: {
             customer: "cus_missing",

@@ -76,6 +76,7 @@ async function getOrCreateStripeCustomer(user: StripeUser): Promise<string> {
       existingStripeCustomer.stripeCustomerId,
       user,
     );
+
     return existingStripeCustomer.stripeCustomerId;
   }
 
@@ -149,21 +150,24 @@ async function createCheckoutSession(
     );
   }
 
-  const stripeSession = await stripe.checkout.sessions.create({
-    customer: stripeCustomerId,
-    line_items: [
-      {
-        price: input.priceId,
-        quantity: 1,
+  const stripeSession = await stripe.checkout.sessions.create(
+    {
+      customer: stripeCustomerId,
+      line_items: [
+        {
+          price: input.priceId,
+          quantity: 1,
+        },
+      ],
+      mode: "subscription",
+      success_url: `${env.NEXT_PUBLIC_BASE_URL}/dashboard/facturation?success=true`,
+      cancel_url: `${env.NEXT_PUBLIC_BASE_URL}/tarifs?canceled=true`,
+      metadata: {
+        userId: user.id,
       },
-    ],
-    mode: "subscription",
-    success_url: `${env.NEXT_PUBLIC_BASE_URL}/dashboard/facturation?success=true`,
-    cancel_url: `${env.NEXT_PUBLIC_BASE_URL}/tarifs?canceled=true`,
-    metadata: {
-      userId: user.id,
     },
-  });
+    { idempotencyKey: `checkout-${input.userId}-${input.priceId}` },
+  );
 
   if (!stripeSession.url) {
     throw new BadRequestError("Impossible de créer la session de paiement");

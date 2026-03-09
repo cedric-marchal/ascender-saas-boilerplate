@@ -1,12 +1,15 @@
 import "server-only";
 
+import { cache } from "react";
+
 import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
+
+import { ACTIVE_SUBSCRIPTION_STATUSES } from "@/features/billing/constants/subscription-status.constant";
 
 import { auth } from "@/lib/auth";
 import { env } from "@/lib/env";
 import { UserRole } from "@/lib/generated/prisma/client";
-import type { SubscriptionStatus } from "@/lib/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 
 type RawSession = typeof auth.$Infer.Session;
@@ -25,17 +28,11 @@ function parseUserRole(role: string): UserRole {
   return role as UserRole;
 }
 
-const VALID_SUBSCRIPTION_STATUSES: SubscriptionStatus[] = [
-  "active",
-  "trialing",
-  "past_due",
-];
-
 /**
  * Récupère la session (mémorisée pendant le rendu)
  * Retourne null si non connecté
  */
-const getSession = async (): Promise<Session | null> => {
+const getSession = cache(async (): Promise<Session | null> => {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
@@ -51,7 +48,7 @@ const getSession = async (): Promise<Session | null> => {
       role: parseUserRole(session.user.role),
     },
   };
-};
+});
 
 /**
  * Récupère la session ou redirige vers connexion
@@ -106,7 +103,7 @@ const requireCustomerProSubscription = async (): Promise<Session> => {
       },
       stripePriceId: env.STRIPE_PRICE_ID_PRO,
       status: {
-        in: VALID_SUBSCRIPTION_STATUSES,
+        in: ACTIVE_SUBSCRIPTION_STATUSES,
       },
     },
     select: {

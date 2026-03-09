@@ -59,10 +59,13 @@ async function createPortalSession(
     );
   }
 
-  const portalSession = await stripe.billingPortal.sessions.create({
-    customer: stripeCustomer.stripeCustomerId,
-    return_url: `${env.NEXT_PUBLIC_BASE_URL}/dashboard/facturation`,
-  });
+  const portalSession = await stripe.billingPortal.sessions.create(
+    {
+      customer: stripeCustomer.stripeCustomerId,
+      return_url: `${env.NEXT_PUBLIC_BASE_URL}/dashboard/facturation`,
+    },
+    { idempotencyKey: `portal-${input.userId}` },
+  );
 
   if (!portalSession.url) {
     throw new BadRequestError(
