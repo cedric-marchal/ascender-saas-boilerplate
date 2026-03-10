@@ -64,6 +64,41 @@ function mapSubscription(
   };
 }
 
+async function fetchInvoices(
+  stripeCustomerId: string,
+  userId: string,
+): Promise<BillingInvoice[]> {
+  const cacheKey = `invoices:${userId}`;
+  const cached = await redis.get<BillingInvoice[]>(cacheKey);
+
+  if (cached) {
+    return cached;
+  }
+
+  const { data } = await stripe.invoices.list({
+    customer: stripeCustomerId,
+    limit: 100,
+  });
+
+  const invoices = data.map((invoice: Stripe.Invoice) => mapInvoice(invoice));
+  await redis.set(cacheKey, invoices, { ex: 300 });
+
+  return invoices;
+}
+
+async function fetchSubscriptions(
+  stripeCustomerId: string,
+): Promise<BillingSubscription[]> {
+  const { data } = await stripe.subscriptions.list({
+    customer: stripeCustomerId,
+    limit: 100,
+  });
+
+  return data.map((subscription: Stripe.Subscription) =>
+    mapSubscription(subscription),
+  );
+}
+
 async function getBilling(userId: string): Promise<GetBillingResult | null> {
   const stripeCustomer = await prisma.stripeCustomer.findUnique({
     where: { userId },
@@ -74,32 +109,10 @@ async function getBilling(userId: string): Promise<GetBillingResult | null> {
     return null;
   }
 
-  const invoicesCacheKey = `invoices:${userId}`;
-  const cachedInvoices = await redis.get<BillingInvoice[]>(invoicesCacheKey);
-
-  let invoices: BillingInvoice[];
-
-  if (cachedInvoices) {
-    invoices = cachedInvoices;
-  } else {
-    const { data: fetchedInvoices } = await stripe.invoices.list({
-      customer: stripeCustomer.stripeCustomerId,
-      limit: 100,
-    });
-    invoices = fetchedInvoices.map((invoice: Stripe.Invoice) =>
-      mapInvoice(invoice),
-    );
-    await redis.set(invoicesCacheKey, invoices, { ex: 300 });
-  }
-
-  const { data: fetchedSubscriptions } = await stripe.subscriptions.list({
-    customer: stripeCustomer.stripeCustomerId,
-    limit: 100,
-  });
-
-  const subscriptions = fetchedSubscriptions.map(
-    (subscription: Stripe.Subscription) => mapSubscription(subscription),
-  );
+  const [invoices, subscriptions] = await Promise.all([
+    fetchInvoices(stripeCustomer.stripeCustomerId, userId),
+    fetchSubscriptions(stripeCustomer.stripeCustomerId),
+  ]);
 
   return { invoices, subscriptions };
 }
