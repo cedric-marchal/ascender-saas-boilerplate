@@ -20,6 +20,58 @@ type DeleteAccountInput = {
   confirmation: string;
 };
 
+async function checkLastAdmin(role: UserRole): Promise<void> {
+  if (role !== UserRole.ADMIN) {
+    return;
+  }
+
+  const adminCount = await prisma.user.count({
+    where: { role: UserRole.ADMIN },
+  });
+
+  if (adminCount <= 1) {
+    throw new ForbiddenError(
+      "Vous êtes le seul administrateur. Vous ne pouvez pas supprimer votre compte.",
+    );
+  }
+}
+
+async function cleanupStripeCustomer(
+  stripeCustomerId: string | undefined,
+  userId: string,
+): Promise<void> {
+  if (!stripeCustomerId) {
+    return;
+  }
+
+  try {
+    await stripe.customers.del(stripeCustomerId);
+  } catch (error: unknown) {
+    console.error("Failed to delete Stripe customer:", error);
+  }
+
+  try {
+    await Promise.all([
+      redis.del(`subscription:${userId}:pro`),
+      redis.del(`invoices:${userId}`),
+    ]);
+  } catch (error: unknown) {
+    console.error("Failed to delete Redis cache:", error);
+  }
+}
+
+async function cleanupAvatar(image: string | null): Promise<void> {
+  if (!image || !image.startsWith(AVATAR_FOLDER)) {
+    return;
+  }
+
+  try {
+    await deleteFile(image);
+  } catch (error: unknown) {
+    console.error("Failed to delete user avatar:", error);
+  }
+}
+
 async function deleteAccount(input: DeleteAccountInput): Promise<void> {
   const user = await prisma.user.findUnique({
     where: { id: input.userId },
@@ -44,48 +96,14 @@ async function deleteAccount(input: DeleteAccountInput): Promise<void> {
     );
   }
 
-  if (user.role === UserRole.ADMIN) {
-    const adminCount = await prisma.user.count({
-      where: { role: UserRole.ADMIN },
-    });
-
-    if (adminCount <= 1) {
-      throw new ForbiddenError(
-        "Vous êtes le seul administrateur. Vous ne pouvez pas supprimer votre compte.",
-      );
-    }
-  }
+  await checkLastAdmin(user.role);
 
   // Primary action: delete from DB (atomic, cascades to stripeCustomer, subscription, sessions)
   await prisma.user.delete({ where: { id: user.id } });
 
   // Compensation: clean up external resources (best-effort, non-blocking)
-  const stripeCustomerId = user.stripeCustomer?.stripeCustomerId;
-
-  if (stripeCustomerId) {
-    try {
-      await stripe.customers.del(stripeCustomerId);
-    } catch (error: unknown) {
-      console.error("Failed to delete Stripe customer:", error);
-    }
-
-    try {
-      await Promise.all([
-        redis.del(`subscription:${user.id}:pro`),
-        redis.del(`invoices:${user.id}`),
-      ]);
-    } catch (error: unknown) {
-      console.error("Failed to delete Redis cache:", error);
-    }
-  }
-
-  if (user.image && user.image.startsWith(AVATAR_FOLDER)) {
-    try {
-      await deleteFile(user.image);
-    } catch (error: unknown) {
-      console.error("Failed to delete user avatar:", error);
-    }
-  }
+  await cleanupStripeCustomer(user.stripeCustomer?.stripeCustomerId, user.id);
+  await cleanupAvatar(user.image);
 
   try {
     await sendEmail({
