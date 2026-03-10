@@ -11,8 +11,8 @@ async function GET(request: Request) {
     const authorizationHeader = request.headers.get("authorization");
 
     if (
-      !env.CRON_SECRET ||
-      authorizationHeader !== `Bearer ${env.CRON_SECRET}`
+      !env.VERCEL_CRON_SECRET ||
+      authorizationHeader !== `Bearer ${env.VERCEL_CRON_SECRET}`
     ) {
       throw new UnauthorizedError("Non autorisé");
     }
