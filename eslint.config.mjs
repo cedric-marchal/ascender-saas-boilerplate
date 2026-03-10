@@ -4,9 +4,6 @@ import prettier from "eslint-config-prettier";
 import { defineConfig, globalIgnores } from "eslint/config";
 
 const eslintConfig = defineConfig([
-  ...nextVitals,
-  ...nextTs,
-  prettier,
   // Override default ignores of eslint-config-next.
   globalIgnores([
     // Default ignores of eslint-config-next:
@@ -19,6 +16,9 @@ const eslintConfig = defineConfig([
     // Coverage reports.
     "coverage/**",
   ]),
+  ...nextVitals,
+  ...nextTs,
+  prettier,
   {
     rules: {
       "@typescript-eslint/consistent-type-imports": [

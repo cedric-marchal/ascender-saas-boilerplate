@@ -1,7 +1,7 @@
 import {
-  type SingleParserBuilder,
   createParser,
   parseAsStringLiteral,
+  type SingleParserBuilder,
 } from "nuqs/server";
 
 const MAX_PAGE = 1000;

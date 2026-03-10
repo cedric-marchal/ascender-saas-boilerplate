@@ -392,6 +392,7 @@ Form and Modal MUST be separate files.
 
 ```tsx
 "use client";
+
 import { useForm } from "@tanstack/react-form";
 import { useAction } from "next-safe-action/hooks";
 import { toast } from "sonner";
@@ -439,6 +440,7 @@ export { DeleteAccountForm };
 
 ```tsx
 "use client";
+
 import { useState } from "react";
 
 import { DeleteAccountForm } from "@/features/account/components/forms/delete-account-form";

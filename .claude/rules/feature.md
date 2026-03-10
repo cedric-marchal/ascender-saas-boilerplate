@@ -123,12 +123,11 @@ export type { CreateContactSchemaType, UpdateContactSchemaType };
 import "server-only";
 
 import {
-  type UserSortableField,
   isUserRole,
+  type UserSortableField,
 } from "@/features/users/constants/users-filters.constant";
 
-import { UserRole } from "@/lib/generated/prisma/client";
-import type { User } from "@/lib/generated/prisma/client";
+import { UserRole, type User } from "@/lib/generated/prisma/client";
 import {
   DEFAULT_PAGE_SIZE,
   MAX_PAGE,
@@ -334,7 +333,7 @@ export const updateProfileAction = authActionClient
 **Structure**:
 
 ```tsx
-import { type ChangeEvent, useState } from "react";
+import { useState, type ChangeEvent } from "react";
 
 import type { User } from "@/lib/generated/prisma/client";
 import { cn } from "@/lib/utils";

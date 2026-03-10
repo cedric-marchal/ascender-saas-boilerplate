@@ -284,7 +284,11 @@ const { data } = await getAdminData(filters, session.user.id);
 
 // ✅ Pattern 3: Customer-only data with verification
 const session = await requireCustomerVerifiedEmail();
-const { data } = await getCustomerData(filters, session.user.id, session.user.role);
+const { data } = await getCustomerData(
+  filters,
+  session.user.id,
+  session.user.role,
+);
 ```
 
 ## Anti-Patterns (CRITICAL - Never Do This)

@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  UpdatePasswordSchema,
   passwordSchema,
+  UpdatePasswordSchema,
 } from "@/features/auth/schemas/password.schema";
 
 describe("passwordSchema", () => {

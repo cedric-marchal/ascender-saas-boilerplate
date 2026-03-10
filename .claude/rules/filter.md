@@ -303,7 +303,7 @@ async function getUsers(filters: GetUsersFilters) {
 ## Layer 5: Server Page (P0)
 
 ```tsx
-import { type SearchParams, createLoader } from "nuqs/server";
+import { createLoader, type SearchParams } from "nuqs/server";
 
 import { usersSearchParams } from "@/features/users/constants/users-filters.constant";
 import { getUsers } from "@/features/users/services/get-users.service";
@@ -343,6 +343,7 @@ export default async function AdminUsersPage({
 
 ```tsx
 "use client";
+
 import { useForm } from "@tanstack/react-form";
 import { useQueryStates } from "nuqs";
 
@@ -393,6 +394,7 @@ function UsersFilters() {
 
 ```tsx
 "use client";
+
 import { useTransition } from "react";
 
 import { useQueryStates } from "nuqs";
@@ -447,6 +449,7 @@ const usersColumns: ColumnDef[] = [
 
 ```tsx
 "use client";
+
 import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
 
 function DataTable({ columns, data }) {
@@ -467,6 +470,7 @@ function DataTable({ columns, data }) {
 
 ```tsx
 "use client";
+
 import { useTransition } from "react";
 
 import { useQueryState } from "nuqs";
@@ -512,6 +516,7 @@ function Pagination({ currentPage, totalPages }) {
 
 ```tsx
 "use client";
+
 import { useTransition } from "react";
 
 import { useQueryState } from "nuqs";

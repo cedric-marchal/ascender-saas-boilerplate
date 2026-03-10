@@ -1,19 +1,19 @@
 "use client";
 
-import { type ChangeEvent, type SubmitEvent, useTransition } from "react";
+import { useTransition, type ChangeEvent, type SubmitEvent } from "react";
 
 import { useForm } from "@tanstack/react-form";
 import { Filter, Search, X } from "lucide-react";
 import { useQueryStates } from "nuqs";
 
 import {
-  type UserRoleFilter,
-  type VerificationFilter,
   roleLabels,
   userRoleFilters,
   usersSearchParams,
   verificationFilters,
   verificationLabels,
+  type UserRoleFilter,
+  type VerificationFilter,
 } from "@/features/users/constants/users-filters.constant";
 import { FilterUsersSchema } from "@/features/users/schemas/users-filter.schema";
 

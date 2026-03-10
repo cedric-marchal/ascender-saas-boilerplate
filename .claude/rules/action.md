@@ -22,7 +22,9 @@ Verbs: `create`, `update`, `delete`, `toggle`, `archive`, `send`
 ## Structure (P0)
 
 ```tsx
-"use server"; // ← LINE 1 (MANDATORY)
+"use server";
+
+// ← LINE 1 (MANDATORY)
 import { CreateContactSchema } from "@/features/contact/schemas/contact.schema";
 import { createContact } from "@/features/contact/services/create-contact.service";
 

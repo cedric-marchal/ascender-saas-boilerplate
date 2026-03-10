@@ -1,7 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { getUsers } from "@/features/users/services/get-users.service";
-import type { GetUsersFilters } from "@/features/users/services/get-users.service";
+import {
+  getUsers,
+  type GetUsersFilters,
+} from "@/features/users/services/get-users.service";
 
 import { DEFAULT_PAGE_SIZE } from "@/lib/parsers/nuqs";
 import { prisma } from "@/lib/prisma";

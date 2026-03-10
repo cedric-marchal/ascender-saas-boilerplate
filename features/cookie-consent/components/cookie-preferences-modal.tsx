@@ -2,8 +2,8 @@
 
 import {
   COOKIE_CATEGORIES,
-  type CookieCategoryId,
   useCookieConsent,
+  type CookieCategoryId,
 } from "@/features/cookie-consent/hooks/use-cookie-consent";
 
 import { Button } from "@/components/ui/button";

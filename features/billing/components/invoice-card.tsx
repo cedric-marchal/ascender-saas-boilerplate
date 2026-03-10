@@ -3,8 +3,8 @@ import Link from "next/link";
 import { Calendar, Download, FileText } from "lucide-react";
 
 import {
-  type InvoiceStatus,
   invoiceStatusLabels,
+  type InvoiceStatus,
 } from "@/features/billing/constants/invoice-status.constant";
 import type { BillingInvoice } from "@/features/billing/services/get-billing.service";
 

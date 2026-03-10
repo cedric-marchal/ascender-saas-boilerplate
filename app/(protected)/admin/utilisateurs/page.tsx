@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { type SearchParams, createLoader } from "nuqs/server";
+import { createLoader, type SearchParams } from "nuqs/server";
 
 import { usersSearchParams } from "@/features/users/constants/users-filters.constant";
 import { UsersPage } from "@/features/users/pages/users-page";

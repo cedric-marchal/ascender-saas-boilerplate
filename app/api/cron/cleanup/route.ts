@@ -1,6 +1,6 @@
-import { NextResponse } from "next/server";
-
 import { timingSafeEqual } from "crypto";
+
+import { NextResponse } from "next/server";
 
 import { env } from "@/lib/env";
 import { prisma } from "@/lib/prisma";

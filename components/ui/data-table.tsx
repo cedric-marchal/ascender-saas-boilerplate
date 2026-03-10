@@ -3,11 +3,11 @@
 import { useState } from "react";
 
 import {
-  type ColumnDef,
-  type VisibilityState,
   flexRender,
   getCoreRowModel,
   useReactTable,
+  type ColumnDef,
+  type VisibilityState,
 } from "@tanstack/react-table";
 
 import {

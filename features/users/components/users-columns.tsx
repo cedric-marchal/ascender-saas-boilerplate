@@ -7,12 +7,12 @@ import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import { useQueryStates } from "nuqs";
 
 import {
-  type UserSortableField,
   roleLabels,
   usersSearchParams,
+  type UserSortableField,
 } from "@/features/users/constants/users-filters.constant";
 
-import { type User, UserRole } from "@/lib/generated/prisma/browser";
+import { UserRole, type User } from "@/lib/generated/prisma/client";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -20,7 +20,7 @@ import { Button } from "@/components/ui/button";
 
 import { getInitials } from "@/utils/string/get-initials";
 
-export type UserTableData = Pick<
+type UserTableData = Pick<
   User,
   "id" | "name" | "email" | "role" | "emailVerified" | "image" | "createdAt"
 >;
@@ -144,3 +144,4 @@ const usersColumns: ColumnDef<UserTableData>[] = [
 ];
 
 export { usersColumns };
+export type { UserTableData };

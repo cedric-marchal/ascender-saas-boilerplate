@@ -135,15 +135,15 @@ importers:
         specifier: ^5.0.11
         version: 5.0.11(@types/react@19.2.14)(react@19.2.3)(use-sync-external-store@1.6.0(react@19.2.3))
     devDependencies:
+      '@ianvs/prettier-plugin-sort-imports':
+        specifier: ^4.7.0
+        version: 4.7.0(prettier@3.8.1)
       '@tailwindcss/postcss':
         specifier: ^4.2.1
         version: 4.2.1
       '@total-typescript/ts-reset':
         specifier: ^0.6.1
         version: 0.6.1
-      '@trivago/prettier-plugin-sort-imports':
-        specifier: ^6.0.2
-        version: 6.0.2(prettier@3.8.1)
       '@types/node':
         specifier: ^20.19.37
         version: 20.19.37
@@ -6360,7 +6360,6 @@ snapshots:
       semver: 7.7.4
     transitivePeerDependencies:
       - supports-color
-    optional: true
 
   '@img/colour@1.1.0': {}
 
@@ -8255,6 +8254,7 @@ snapshots:
       prettier: 3.8.1
     transitivePeerDependencies:
       - supports-color
+    optional: true
 
   '@tybys/wasm-util@0.10.1':
     dependencies:
@@ -8865,6 +8865,7 @@ snapshots:
   brace-expansion@2.0.2:
     dependencies:
       balanced-match: 1.0.2
+    optional: true
 
   brace-expansion@5.0.4:
     dependencies:
@@ -9866,7 +9867,8 @@ snapshots:
       has-symbols: 1.1.0
       set-function-name: 2.0.2
 
-  javascript-natural-sort@0.7.1: {}
+  javascript-natural-sort@0.7.1:
+    optional: true
 
   jest-worker@27.5.1:
     dependencies:
@@ -9987,7 +9989,8 @@ snapshots:
     dependencies:
       p-locate: 5.0.0
 
-  lodash-es@4.17.23: {}
+  lodash-es@4.17.23:
+    optional: true
 
   lodash.merge@4.6.2: {}
 
@@ -10057,6 +10060,7 @@ snapshots:
   minimatch@9.0.9:
     dependencies:
       brace-expansion: 2.0.2
+    optional: true
 
   minimist@1.2.8: {}
 
@@ -10244,8 +10248,10 @@ snapshots:
   parse-imports-exports@0.2.4:
     dependencies:
       parse-statements: 1.0.11
+    optional: true
 
-  parse-statements@1.0.11: {}
+  parse-statements@1.0.11:
+    optional: true
 
   parseley@0.12.1:
     dependencies:

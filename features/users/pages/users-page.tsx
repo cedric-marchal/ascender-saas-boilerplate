@@ -1,6 +1,6 @@
 import {
-  type UserTableData,
   usersColumns,
+  type UserTableData,
 } from "@/features/users/components/users-columns";
 import { UsersFilters } from "@/features/users/components/users-filters";
 

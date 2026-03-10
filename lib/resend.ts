@@ -1,6 +1,6 @@
 import "server-only";
 
-import { type CreateEmailOptions, Resend } from "resend";
+import { Resend, type CreateEmailOptions } from "resend";
 
 import { env } from "@/lib/env";
 

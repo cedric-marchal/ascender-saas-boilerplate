@@ -1,7 +1,7 @@
 import * as Sentry from "@sentry/nextjs";
 import {
-  DEFAULT_SERVER_ERROR_MESSAGE,
   createSafeActionClient,
+  DEFAULT_SERVER_ERROR_MESSAGE,
 } from "next-safe-action";
 
 import { auth } from "@/lib/auth";
