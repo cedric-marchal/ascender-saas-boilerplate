@@ -124,32 +124,43 @@ async function handleStripeWebhook(
 
         const subscriptionStatus = subscription.status as SubscriptionStatus;
 
-        await prisma.subscription.upsert({
-          where: { stripeSubscriptionId: subscription.id },
-          create: {
-            stripeSubscriptionId: subscription.id,
-            stripeCustomerId: stripeCustomer.stripeCustomerId,
-            stripePriceId: priceId,
-            status: subscriptionStatus,
-            currentPeriodStart: new Date(
-              subscriptionItem.current_period_start * 1000,
-            ),
-            currentPeriodEnd: new Date(
-              subscriptionItem.current_period_end * 1000,
-            ),
-            cancelAtPeriodEnd: subscription.cancel_at_period_end,
-          },
-          update: {
-            stripePriceId: priceId,
-            status: subscriptionStatus,
-            currentPeriodStart: new Date(
-              subscriptionItem.current_period_start * 1000,
-            ),
-            currentPeriodEnd: new Date(
-              subscriptionItem.current_period_end * 1000,
-            ),
-            cancelAtPeriodEnd: subscription.cancel_at_period_end,
-          },
+        await prisma.$transaction(async (tx) => {
+          const user = await tx.user.findUnique({
+            where: { id: stripeCustomer.userId },
+            select: { id: true },
+          });
+
+          if (!user) {
+            return;
+          }
+
+          await tx.subscription.upsert({
+            where: { stripeSubscriptionId: subscription.id },
+            create: {
+              stripeSubscriptionId: subscription.id,
+              stripeCustomerId: stripeCustomer.stripeCustomerId,
+              stripePriceId: priceId,
+              status: subscriptionStatus,
+              currentPeriodStart: new Date(
+                subscriptionItem.current_period_start * 1000,
+              ),
+              currentPeriodEnd: new Date(
+                subscriptionItem.current_period_end * 1000,
+              ),
+              cancelAtPeriodEnd: subscription.cancel_at_period_end,
+            },
+            update: {
+              stripePriceId: priceId,
+              status: subscriptionStatus,
+              currentPeriodStart: new Date(
+                subscriptionItem.current_period_start * 1000,
+              ),
+              currentPeriodEnd: new Date(
+                subscriptionItem.current_period_end * 1000,
+              ),
+              cancelAtPeriodEnd: subscription.cancel_at_period_end,
+            },
+          });
         });
 
         if (process.env.NODE_ENV === "development") {
