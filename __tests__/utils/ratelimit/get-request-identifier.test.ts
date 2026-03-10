@@ -24,28 +24,28 @@ describe("getRequestIdentifier", () => {
     vi.unstubAllEnvs();
   });
 
-  it("returns first IP from x-forwarded-for", () => {
+  it("returns last IP from x-forwarded-for", () => {
     const request = createMockRequest({
-      "x-forwarded-for": "192.168.1.1, 10.0.0.1",
+      "x-forwarded-for": "1.2.3.4, 10.0.0.1",
     });
-    expect(getRequestIdentifier(request)).toBe("192.168.1.1");
+    expect(getRequestIdentifier(request)).toBe("10.0.0.1");
   });
 
-  it("trims IP from x-forwarded-for", () => {
+  it("trims last IP from x-forwarded-for", () => {
     const request = createMockRequest({
-      "x-forwarded-for": "  192.168.1.1  , 10.0.0.1",
+      "x-forwarded-for": "1.2.3.4,  10.0.0.1  ",
     });
-    expect(getRequestIdentifier(request)).toBe("192.168.1.1");
+    expect(getRequestIdentifier(request)).toBe("10.0.0.1");
   });
 
-  it("returns cf-connecting-ip when no x-forwarded-for", () => {
+  it("returns cf-connecting-ip when present", () => {
     const request = createMockRequest({
       "cf-connecting-ip": "172.16.0.1",
     });
     expect(getRequestIdentifier(request)).toBe("172.16.0.1");
   });
 
-  it("returns x-real-ip when no x-forwarded-for or cf-connecting-ip", () => {
+  it("returns x-real-ip when no cf-connecting-ip", () => {
     const request = createMockRequest({
       "x-real-ip": "10.0.0.1",
     });
@@ -66,21 +66,21 @@ describe("getRequestIdentifier", () => {
     expect(getRequestIdentifier(request)).toBe("unknown");
   });
 
-  it("prefers x-forwarded-for over cf-connecting-ip and x-real-ip", () => {
-    const request = createMockRequest({
-      "x-forwarded-for": "192.168.1.1",
-      "cf-connecting-ip": "172.16.0.1",
-      "x-real-ip": "10.0.0.1",
-    });
-    expect(getRequestIdentifier(request)).toBe("192.168.1.1");
-  });
-
-  it("prefers cf-connecting-ip over x-real-ip", () => {
+  it("prefers cf-connecting-ip over x-real-ip and x-forwarded-for", () => {
     const request = createMockRequest({
       "cf-connecting-ip": "172.16.0.1",
       "x-real-ip": "10.0.0.1",
+      "x-forwarded-for": "1.2.3.4, 5.6.7.8",
     });
     expect(getRequestIdentifier(request)).toBe("172.16.0.1");
+  });
+
+  it("prefers x-real-ip over x-forwarded-for", () => {
+    const request = createMockRequest({
+      "x-real-ip": "10.0.0.1",
+      "x-forwarded-for": "1.2.3.4, 5.6.7.8",
+    });
+    expect(getRequestIdentifier(request)).toBe("10.0.0.1");
   });
 });
 
@@ -89,11 +89,11 @@ describe("getActionIdentifier", () => {
     vi.unstubAllEnvs();
   });
 
-  it("returns first IP from x-forwarded-for header", async () => {
+  it("returns last IP from x-forwarded-for header", async () => {
     const mockHeaders = {
       get: (name: string) => {
         if (name === "x-forwarded-for") {
-          return "192.168.1.1, 10.0.0.1";
+          return "1.2.3.4, 10.0.0.1";
         }
         return null;
       },
@@ -101,10 +101,10 @@ describe("getActionIdentifier", () => {
     vi.mocked(headers).mockResolvedValue(mockHeaders as any);
 
     const result = await getActionIdentifier();
-    expect(result).toBe("192.168.1.1");
+    expect(result).toBe("10.0.0.1");
   });
 
-  it("returns cf-connecting-ip when no x-forwarded-for", async () => {
+  it("returns cf-connecting-ip when present", async () => {
     const mockHeaders = {
       get: (name: string) => {
         if (name === "cf-connecting-ip") {
@@ -119,7 +119,7 @@ describe("getActionIdentifier", () => {
     expect(result).toBe("172.16.0.1");
   });
 
-  it("returns x-real-ip as fallback", async () => {
+  it("returns x-real-ip as fallback before x-forwarded-for", async () => {
     const mockHeaders = {
       get: (name: string) => {
         if (name === "x-real-ip") {

@@ -3,15 +3,9 @@ import "server-only";
 import { headers } from "next/headers";
 
 function getRequestIdentifier(request: Request): string {
-  const forwardedFor = request.headers.get("x-forwarded-for");
-  const realIp = request.headers.get("x-real-ip");
   const cfConnectingIp = request.headers.get("cf-connecting-ip");
-
-  const firstIp = forwardedFor?.split(",")[0]?.trim();
-
-  if (firstIp) {
-    return firstIp;
-  }
+  const realIp = request.headers.get("x-real-ip");
+  const forwardedFor = request.headers.get("x-forwarded-for");
 
   if (cfConnectingIp) {
     return cfConnectingIp.trim();
@@ -19,6 +13,12 @@ function getRequestIdentifier(request: Request): string {
 
   if (realIp) {
     return realIp.trim();
+  }
+
+  const lastIp = forwardedFor?.split(",").at(-1)?.trim();
+
+  if (lastIp) {
+    return lastIp;
   }
 
   if (process.env.NODE_ENV === "development") {
@@ -34,15 +34,9 @@ function getRequestIdentifier(request: Request): string {
 
 async function getActionIdentifier(): Promise<string> {
   const headersList = await headers();
-  const forwardedFor = headersList.get("x-forwarded-for");
-  const realIp = headersList.get("x-real-ip");
   const cfConnectingIp = headersList.get("cf-connecting-ip");
-
-  const firstIp = forwardedFor?.split(",")[0]?.trim();
-
-  if (firstIp) {
-    return firstIp;
-  }
+  const realIp = headersList.get("x-real-ip");
+  const forwardedFor = headersList.get("x-forwarded-for");
 
   if (cfConnectingIp) {
     return cfConnectingIp.trim();
@@ -50,6 +44,12 @@ async function getActionIdentifier(): Promise<string> {
 
   if (realIp) {
     return realIp.trim();
+  }
+
+  const lastIp = forwardedFor?.split(",").at(-1)?.trim();
+
+  if (lastIp) {
+    return lastIp;
   }
 
   if (process.env.NODE_ENV === "development") {
