@@ -20,36 +20,6 @@ type DeleteAccountInput = {
   confirmation: string;
 };
 
-async function deleteStripeData(userId: string): Promise<void> {
-  const stripeCustomer = await prisma.stripeCustomer.findUnique({
-    where: { userId },
-    select: { stripeCustomerId: true },
-  });
-
-  if (!stripeCustomer) {
-    return;
-  }
-
-  await stripe.customers.del(stripeCustomer.stripeCustomerId);
-
-  await Promise.all([
-    redis.del(`subscription:${userId}:pro`),
-    redis.del(`invoices:${userId}`),
-  ]);
-}
-
-async function deleteUserAvatar(image: string | null): Promise<void> {
-  if (!image || !image.startsWith(AVATAR_FOLDER)) {
-    return;
-  }
-
-  try {
-    await deleteFile(image);
-  } catch (error: unknown) {
-    console.error("Failed to delete user avatar:", error);
-  }
-}
-
 async function deleteAccount(input: DeleteAccountInput): Promise<void> {
   const user = await prisma.user.findUnique({
     where: { id: input.userId },
@@ -58,6 +28,9 @@ async function deleteAccount(input: DeleteAccountInput): Promise<void> {
       email: true,
       image: true,
       role: true,
+      stripeCustomer: {
+        select: { stripeCustomerId: true },
+      },
     },
   });
 
@@ -83,13 +56,36 @@ async function deleteAccount(input: DeleteAccountInput): Promise<void> {
     }
   }
 
-  if (user.role === UserRole.CUSTOMER) {
-    await deleteStripeData(user.id);
+  // Primary action: delete from DB (atomic, cascades to stripeCustomer, subscription, sessions)
+  await prisma.user.delete({ where: { id: user.id } });
+
+  // Compensation: clean up external resources (best-effort, non-blocking)
+  const stripeCustomerId = user.stripeCustomer?.stripeCustomerId;
+
+  if (stripeCustomerId) {
+    try {
+      await stripe.customers.del(stripeCustomerId);
+    } catch (error: unknown) {
+      console.error("Failed to delete Stripe customer:", error);
+    }
+
+    try {
+      await Promise.all([
+        redis.del(`subscription:${user.id}:pro`),
+        redis.del(`invoices:${user.id}`),
+      ]);
+    } catch (error: unknown) {
+      console.error("Failed to delete Redis cache:", error);
+    }
   }
 
-  await deleteUserAvatar(user.image);
-
-  await prisma.user.delete({ where: { id: user.id } });
+  if (user.image && user.image.startsWith(AVATAR_FOLDER)) {
+    try {
+      await deleteFile(user.image);
+    } catch (error: unknown) {
+      console.error("Failed to delete user avatar:", error);
+    }
+  }
 
   try {
     await sendEmail({
@@ -98,8 +94,8 @@ async function deleteAccount(input: DeleteAccountInput): Promise<void> {
       subject: `Votre compte ${env.NEXT_PUBLIC_APP_NAME} a été supprimé`,
       react: AccountDeletedEmail({ name: input.userName }),
     });
-  } catch (emailError: unknown) {
-    console.error("Failed to send account deletion email:", emailError);
+  } catch (error: unknown) {
+    console.error("Failed to send account deletion email:", error);
   }
 }
 

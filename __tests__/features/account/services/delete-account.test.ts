@@ -6,7 +6,6 @@ import { BadRequestError, ForbiddenError } from "@/utils/errors/errors";
 const mockPrismaUserFindUnique = vi.fn();
 const mockPrismaUserCount = vi.fn();
 const mockPrismaUserDelete = vi.fn();
-const mockPrismaStripeCustomerFindUnique = vi.fn();
 const mockStripeCustomersDel = vi.fn();
 const mockRedisDel = vi.fn();
 const mockDeleteFile = vi.fn();
@@ -18,9 +17,6 @@ vi.mock("@/lib/prisma", () => ({
       findUnique: mockPrismaUserFindUnique,
       count: mockPrismaUserCount,
       delete: mockPrismaUserDelete,
-    },
-    stripeCustomer: {
-      findUnique: mockPrismaStripeCustomerFindUnique,
     },
   },
 }));
@@ -77,8 +73,8 @@ describe("deleteAccount", () => {
       email: "user@example.com",
       image: null,
       role: "CUSTOMER",
+      stripeCustomer: null,
     });
-    mockPrismaStripeCustomerFindUnique.mockResolvedValue(null);
 
     await deleteAccount({
       userId: "user-123",
@@ -97,9 +93,7 @@ describe("deleteAccount", () => {
       email: "user@example.com",
       image: null,
       role: "CUSTOMER",
-    });
-    mockPrismaStripeCustomerFindUnique.mockResolvedValue({
-      stripeCustomerId: "cus_123",
+      stripeCustomer: { stripeCustomerId: "cus_123" },
     });
 
     await deleteAccount({
@@ -119,6 +113,7 @@ describe("deleteAccount", () => {
       email: "admin@example.com",
       image: null,
       role: "ADMIN",
+      stripeCustomer: null,
     });
     mockPrismaUserCount.mockResolvedValue(2);
 
@@ -128,7 +123,6 @@ describe("deleteAccount", () => {
       confirmation: "admin@example.com",
     });
 
-    expect(mockPrismaStripeCustomerFindUnique).not.toHaveBeenCalled();
     expect(mockStripeCustomersDel).not.toHaveBeenCalled();
   });
 
@@ -138,9 +132,7 @@ describe("deleteAccount", () => {
       email: "user@example.com",
       image: null,
       role: "CUSTOMER",
-    });
-    mockPrismaStripeCustomerFindUnique.mockResolvedValue({
-      stripeCustomerId: "cus_123",
+      stripeCustomer: { stripeCustomerId: "cus_123" },
     });
 
     await deleteAccount({
@@ -159,8 +151,8 @@ describe("deleteAccount", () => {
       email: "user@example.com",
       image: "avatars/user-123.webp",
       role: "CUSTOMER",
+      stripeCustomer: null,
     });
-    mockPrismaStripeCustomerFindUnique.mockResolvedValue(null);
 
     await deleteAccount({
       userId: "user-123",
@@ -177,8 +169,8 @@ describe("deleteAccount", () => {
       email: "user@example.com",
       image: null,
       role: "CUSTOMER",
+      stripeCustomer: null,
     });
-    mockPrismaStripeCustomerFindUnique.mockResolvedValue(null);
 
     await deleteAccount({
       userId: "user-123",
@@ -195,8 +187,8 @@ describe("deleteAccount", () => {
       email: "user@example.com",
       image: "other/path.jpg",
       role: "CUSTOMER",
+      stripeCustomer: null,
     });
-    mockPrismaStripeCustomerFindUnique.mockResolvedValue(null);
 
     await deleteAccount({
       userId: "user-123",
@@ -213,8 +205,8 @@ describe("deleteAccount", () => {
       email: "user@example.com",
       image: null,
       role: "CUSTOMER",
+      stripeCustomer: null,
     });
-    mockPrismaStripeCustomerFindUnique.mockResolvedValue(null);
 
     await deleteAccount({
       userId: "user-123",
@@ -236,8 +228,8 @@ describe("deleteAccount", () => {
       email: "user@example.com",
       image: null,
       role: "CUSTOMER",
+      stripeCustomer: null,
     });
-    mockPrismaStripeCustomerFindUnique.mockResolvedValue(null);
     mockSendEmail.mockRejectedValue(new Error("Email failed"));
 
     await expect(
@@ -274,6 +266,7 @@ describe("deleteAccount", () => {
       email: "user@example.com",
       image: null,
       role: "CUSTOMER",
+      stripeCustomer: null,
     });
 
     await expect(
@@ -298,6 +291,7 @@ describe("deleteAccount", () => {
       email: "admin@example.com",
       image: null,
       role: "ADMIN",
+      stripeCustomer: null,
     });
     mockPrismaUserCount.mockResolvedValue(1);
 
