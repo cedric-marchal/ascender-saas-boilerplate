@@ -1,3 +1,5 @@
+import { timingSafeEqual } from "crypto";
+
 import { NextResponse } from "next/server";
 
 import { env } from "@/lib/env";
@@ -10,9 +12,16 @@ async function GET(request: Request) {
   try {
     const authorizationHeader = request.headers.get("authorization");
 
+    if (!env.VERCEL_CRON_SECRET || !authorizationHeader) {
+      throw new UnauthorizedError("Non autorisé");
+    }
+
+    const expected = Buffer.from(`Bearer ${env.VERCEL_CRON_SECRET}`);
+    const received = Buffer.from(authorizationHeader);
+
     if (
-      !env.VERCEL_CRON_SECRET ||
-      authorizationHeader !== `Bearer ${env.VERCEL_CRON_SECRET}`
+      expected.length !== received.length ||
+      !timingSafeEqual(expected, received)
     ) {
       throw new UnauthorizedError("Non autorisé");
     }
