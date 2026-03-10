@@ -107,39 +107,39 @@ app/*/page.tsx (pages import from features)
 
 ## Core Conventions
 
-| Rule              | Convention                                                                         |
-| ----------------- | ---------------------------------------------------------------------------------- |
-| **Imports**       | Absolute paths (`@/`), combine types+values, `import { value, type Type }`         |
-| **Exports**       | Named only (never default)                                                         |
-| **Naming**        | Full words (no abbreviations: `event` not `e`, `index` not `i`)                    |
-| **Components**    | Server by default, `"use client"` only for hooks/events/browser APIs               |
-| **Props**         | Inline if ≤2, separate `{Name}Props` type if >2, use `type` (never `interface`)    |
-| **Event types**   | `SubmitEvent<HTMLFormElement>`, `ChangeEvent<HTMLInputElement>`, etc.              |
-| **Callbacks**     | Always type params: `.map((item: Item) => ...)`, `.map((_, index: number) => ...)` |
-| **Buttons**       | `type="button"` (except submit), `aria-hidden="true"` on decorative icons          |
-| **Forms**         | TanStack Form + Zod + `useAction` + `getActionResult` + `getErrorMessage`          |
-| **If braces**     | Always use braces, even single-line: `if (cond) {\n  return;\n}` never `if (cond) return;` |
-| **Spacing**       | Blank line after `}` if code follows. Blank line before final `return` if code above |
-| **Strings concat** | Template strings for interpolation, never concatenation (`+`)                     |
-| **Error pattern** | Components: early return. Async: throw (no multiple returns in try)                |
-| **Prisma**        | Always `select` + `take` on `findMany`, `$transaction` for parallel count+findMany |
-| **Strings**       | `.min().max().trim()` (always French error messages)                               |
-| **User messages** | French. Code: English.                                                             |
-| **File naming**   | kebab-case.tsx                                                                     |
-| **Booleans**      | Prefixes `is`, `has`, `can`, `should` (e.g., `isLoading`, `hasError`, `canSubmit`) |
-| **Async naming**  | Clear action verbs: `fetchUsers`, `createUser`, `updateProfile`, `deleteAccount`   |
+| Rule               | Convention                                                                                 |
+| ------------------ | ------------------------------------------------------------------------------------------ |
+| **Imports**        | Absolute paths (`@/`), combine types+values, `import { value, type Type }`                 |
+| **Exports**        | Named only (never default)                                                                 |
+| **Naming**         | Full words (no abbreviations: `event` not `e`, `index` not `i`)                            |
+| **Components**     | Server by default, `"use client"` only for hooks/events/browser APIs                       |
+| **Props**          | Inline if ≤2, separate `{Name}Props` type if >2, use `type` (never `interface`)            |
+| **Event types**    | `SubmitEvent<HTMLFormElement>`, `ChangeEvent<HTMLInputElement>`, etc.                      |
+| **Callbacks**      | Always type params: `.map((item: Item) => ...)`, `.map((_, index: number) => ...)`         |
+| **Buttons**        | `type="button"` (except submit), `aria-hidden="true"` on decorative icons                  |
+| **Forms**          | TanStack Form + Zod + `useAction` + `getActionResult` + `getErrorMessage`                  |
+| **If braces**      | Always use braces, even single-line: `if (cond) {\n  return;\n}` never `if (cond) return;` |
+| **Spacing**        | Blank line after `}` if code follows. Blank line before final `return` if code above       |
+| **Strings concat** | Template strings for interpolation, never concatenation (`+`)                              |
+| **Error pattern**  | Components: early return. Async: throw (no multiple returns in try)                        |
+| **Prisma**         | Always `select` + `take` on `findMany`, `$transaction` for parallel count+findMany         |
+| **Strings**        | `.min().max().trim()` (always French error messages)                                       |
+| **User messages**  | French. Code: English.                                                                     |
+| **File naming**    | kebab-case.tsx                                                                             |
+| **Booleans**       | Prefixes `is`, `has`, `can`, `should` (e.g., `isLoading`, `hasError`, `canSubmit`)         |
+| **Async naming**   | Clear action verbs: `fetchUsers`, `createUser`, `updateProfile`, `deleteAccount`           |
 
 ## Security: IDOR Prevention (P0) 🔴
 
-| Rule                   | Convention                                                                         |
-| ---------------------- | ---------------------------------------------------------------------------------- |
-| **Service params**     | ALWAYS `userId: string` + `userRole: UserRole` (NEVER booleans like `isAdmin`)     |
-| **Authorization**      | Define `UNRESTRICTED_ROLES: UserRole[]` constant, check with `.includes(userRole)` |
-| **Filtering**          | Filter by `userId` by default UNLESS `userRole` in `UNRESTRICTED_ROLES`            |
+| Rule                   | Convention                                                                                                                                                                                          |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Service params**     | ALWAYS `userId: string` + `userRole: UserRole` (NEVER booleans like `isAdmin`)                                                                                                                      |
+| **Authorization**      | Define `UNRESTRICTED_ROLES: UserRole[]` constant, check with `.includes(userRole)`                                                                                                                  |
+| **Filtering**          | Filter by `userId` by default UNLESS `userRole` in `UNRESTRICTED_ROLES`                                                                                                                             |
 | **Rate limiting**      | At the **entry point**, never in services. Page routes: `filterRatelimit.limit(userId)` → return `<TooManyRequestsPage />`. Actions: `.use(checkRatelimit)`. API routes: `checkRatelimit()` at top. |
-| **Type safety**        | Import `UserRole` from `@/lib/generated/prisma/client` (NEVER strings/booleans)    |
-| **Extensibility**      | Pattern supports multiple roles (ADMIN, MANAGER, MODERATOR) without code changes   |
-| **Full documentation** | See `.claude/rules/security.md` for complete patterns and examples                 |
+| **Type safety**        | Import `UserRole` from `@/lib/generated/prisma/client` (NEVER strings/booleans)                                                                                                                     |
+| **Extensibility**      | Pattern supports multiple roles (ADMIN, MANAGER, MODERATOR) without code changes                                                                                                                    |
+| **Full documentation** | See `.claude/rules/security.md` for complete patterns and examples                                                                                                                                  |
 
 **Critical Example** :
 
@@ -219,20 +219,20 @@ const STATUS_CONFIG: Record<string, StatusConfig> = { ... };
 
 ### File Locations
 
-| Type         | Path                                                           | Example                                                          |
-| ------------ | -------------------------------------------------------------- | ---------------------------------------------------------------- |
-| Schema       | `features/{feature}/schemas/{entity}.schema.ts`                | `features/contact/schemas/contact.schema.ts`                     |
-| Action       | `features/{feature}/actions/{verb}-{entity}.action.ts`         | `features/contact/actions/create-contact.action.ts`              |
-| Service      | `features/{feature}/services/{verb}-{entity}.service.ts`       | `features/contact/services/create-contact.service.ts`            |
-| Page         | `features/{feature}/pages/{name}-page.tsx`                     | `features/pricing/pages/pricing-page.tsx`                        |
-| Loading      | `features/{feature}/pages/{name}-loading.tsx`                  | `features/pricing/pages/pricing-loading.tsx`                     |
-| SEO constant | `features/{feature}/constants/{page}-seo.constant.ts`          | `features/pricing/constants/pricing-seo.constant.ts`             |
-| Component    | `features/{feature}/components/{name}.tsx`                     | `features/contact/components/forms/contact-form.tsx`             |
-| Form         | `features/{feature}/components/forms/{entity}-form.tsx`        | `features/account/components/forms/profile-form.tsx`             |
-| Modal        | `features/{feature}/components/modals/{entity}-modal.tsx`      | `features/account/components/modals/delete-account-modal.tsx`    |
-| Email        | `features/{feature}/emails/{entity}-email.tsx`                 | `features/contact/emails/contact-email.tsx`                      |
-| Constant     | `features/{feature}/constants/{entity}-filters.constant.ts`    | `features/users/constants/users-filters.constant.ts`             |
-| Global page  | `components/pages/{name}-page.tsx`                             | `components/pages/not-found-page.tsx`                            |
+| Type         | Path                                                        | Example                                                       |
+| ------------ | ----------------------------------------------------------- | ------------------------------------------------------------- |
+| Schema       | `features/{feature}/schemas/{entity}.schema.ts`             | `features/contact/schemas/contact.schema.ts`                  |
+| Action       | `features/{feature}/actions/{verb}-{entity}.action.ts`      | `features/contact/actions/create-contact.action.ts`           |
+| Service      | `features/{feature}/services/{verb}-{entity}.service.ts`    | `features/contact/services/create-contact.service.ts`         |
+| Page         | `features/{feature}/pages/{name}-page.tsx`                  | `features/pricing/pages/pricing-page.tsx`                     |
+| Loading      | `features/{feature}/pages/{name}-loading.tsx`               | `features/pricing/pages/pricing-loading.tsx`                  |
+| SEO constant | `features/{feature}/constants/{page}-seo.constant.ts`       | `features/pricing/constants/pricing-seo.constant.ts`          |
+| Component    | `features/{feature}/components/{name}.tsx`                  | `features/contact/components/forms/contact-form.tsx`          |
+| Form         | `features/{feature}/components/forms/{entity}-form.tsx`     | `features/account/components/forms/profile-form.tsx`          |
+| Modal        | `features/{feature}/components/modals/{entity}-modal.tsx`   | `features/account/components/modals/delete-account-modal.tsx` |
+| Email        | `features/{feature}/emails/{entity}-email.tsx`              | `features/contact/emails/contact-email.tsx`                   |
+| Constant     | `features/{feature}/constants/{entity}-filters.constant.ts` | `features/users/constants/users-filters.constant.ts`          |
+| Global page  | `components/pages/{name}-page.tsx`                          | `components/pages/not-found-page.tsx`                         |
 
 ### Naming Patterns
 
@@ -523,12 +523,12 @@ export default async function DashboardBillingRoute() {
 }
 ```
 
-| Entry point | Pattern | Identifier |
-| --- | --- | --- |
-| Page route with DB call | `filterRatelimit.limit(userId)` → `return <TooManyRequestsPage />` | `session.user.id` |
-| Server Action | `.use(async ({ next }) => { await checkRatelimit(...); return next(); })` | `ctx.userId` or IP |
-| API Route | `await checkRatelimit(...)` at top of handler | `session.user.id` or IP |
-| Service | **Nothing** — services are pure, rate limit at entry point | — |
+| Entry point             | Pattern                                                                   | Identifier              |
+| ----------------------- | ------------------------------------------------------------------------- | ----------------------- |
+| Page route with DB call | `filterRatelimit.limit(userId)` → `return <TooManyRequestsPage />`        | `session.user.id`       |
+| Server Action           | `.use(async ({ next }) => { await checkRatelimit(...); return next(); })` | `ctx.userId` or IP      |
+| API Route               | `await checkRatelimit(...)` at top of handler                             | `session.user.id` or IP |
+| Service                 | **Nothing** — services are pure, rate limit at entry point                | —                       |
 
 ### Thin Shim Pattern (P0)
 

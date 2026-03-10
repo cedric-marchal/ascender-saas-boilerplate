@@ -1,5 +1,6 @@
 import { Activity, DollarSign, TrendingUp, Users } from "lucide-react";
 
+import { Main } from "@/components/main";
 import {
   Card,
   CardContent,
@@ -7,7 +8,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Main } from "@/components/main";
 
 function AdminDashboardPage() {
   return (

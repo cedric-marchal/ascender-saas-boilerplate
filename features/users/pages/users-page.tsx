@@ -4,9 +4,9 @@ import {
 } from "@/features/users/components/users-columns";
 import { UsersFilters } from "@/features/users/components/users-filters";
 
+import { Main } from "@/components/main";
 import { Pagination } from "@/components/pagination";
 import { DataTable } from "@/components/ui/data-table";
-import { Main } from "@/components/main";
 
 type UsersPageProps = {
   users: UserTableData[];

@@ -1,9 +1,10 @@
 import Link from "next/link";
 
-import { Main } from "@/components/main";
-import { Button } from "@/components/ui/button";
 import { SubscriptionListEmpty } from "@/features/billing/components/subscription-list-empty";
 import { SubscriptionStatusCard } from "@/features/billing/components/subscription-status-card";
+
+import { Main } from "@/components/main";
+import { Button } from "@/components/ui/button";
 
 function BillingEmptyPage() {
   return (

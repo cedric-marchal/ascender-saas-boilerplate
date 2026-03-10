@@ -1,5 +1,5 @@
-import { Skeleton } from "@/components/ui/skeleton";
 import { Main } from "@/components/main";
+import { Skeleton } from "@/components/ui/skeleton";
 
 function SettingsLoading() {
   return (

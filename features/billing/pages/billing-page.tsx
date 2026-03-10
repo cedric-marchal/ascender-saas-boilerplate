@@ -13,9 +13,9 @@ import type {
   GetBillingResult,
 } from "@/features/billing/services/get-billing.service";
 
+import { Main } from "@/components/main";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Main } from "@/components/main";
 
 type BillingPageProps = {
   billing: GetBillingResult;

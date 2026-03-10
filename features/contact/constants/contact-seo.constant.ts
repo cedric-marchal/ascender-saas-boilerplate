@@ -6,7 +6,13 @@ const APP_NAME = env.NEXT_PUBLIC_APP_NAME;
 const BASE_URL = env.NEXT_PUBLIC_BASE_URL;
 
 const CONTACT_DESCRIPTION = `Contactez l'équipe ${APP_NAME}. Une question, un projet ou un besoin spécifique ? Nous vous répondons sous 24h.`;
-const CONTACT_KEYWORDS = ["contact", APP_NAME.toLowerCase(), "support", "aide", "question"];
+const CONTACT_KEYWORDS = [
+  "contact",
+  APP_NAME.toLowerCase(),
+  "support",
+  "aide",
+  "question",
+];
 
 function getContactSchema(): WithContext<ContactPageSchema> {
   return {

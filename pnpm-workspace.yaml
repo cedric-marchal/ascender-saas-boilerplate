@@ -6,7 +6,7 @@ ignoredBuiltDependencies:
   - unrs-resolver
 
 onlyBuiltDependencies:
-  - '@prisma/engines'
-  - '@sentry/cli'
+  - "@prisma/engines"
+  - "@sentry/cli"
   - esbuild
   - prisma

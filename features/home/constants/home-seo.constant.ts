@@ -6,8 +6,14 @@ const APP_NAME = env.NEXT_PUBLIC_APP_NAME;
 const BASE_URL = env.NEXT_PUBLIC_BASE_URL;
 
 const HOME_TITLE = "Accueil";
-const HOME_DESCRIPTION = "Découvrez les solutions innovantes d'Ascender SaaS Boilerplate pour transformer votre entreprise.";
-const HOME_KEYWORDS = [APP_NAME.toLowerCase(), "saas", "solution", "innovation"];
+const HOME_DESCRIPTION =
+  "Découvrez les solutions innovantes d'Ascender SaaS Boilerplate pour transformer votre entreprise.";
+const HOME_KEYWORDS = [
+  APP_NAME.toLowerCase(),
+  "saas",
+  "solution",
+  "innovation",
+];
 
 function getHomeWebsiteSchema(): WithContext<WebSite> {
   return {

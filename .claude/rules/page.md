@@ -7,6 +7,7 @@ Rules for `page.tsx`, `loading.tsx`, feature page components, and global page co
 ## Architecture: Thin Shim Pattern (P0)
 
 `app/` route files are **thin shims** — they only contain Next.js concerns:
+
 - `metadata` export
 - `export default function {Path}Route()`
 - Auth guards (`requireSession`, `requireAdmin`)
@@ -27,23 +28,23 @@ Function: `{Path}Route` in **English** PascalCase.
 
 For French URLs, translate to English:
 
-| URL | Function |
-|---|---|
-| `app/(public)/page.tsx` | `HomeRoute` |
-| `app/(public)/tarifs/page.tsx` | `PricingRoute` |
-| `app/(public)/contact/page.tsx` | `ContactRoute` |
-| `app/(public)/plan-du-site/page.tsx` | `SitemapRoute` |
-| `app/(public)/(auth)/connexion/page.tsx` | `SignInRoute` |
-| `app/(public)/(auth)/inscription/page.tsx` | `SignUpRoute` |
-| `app/(public)/(auth)/mot-de-passe-oublie/page.tsx` | `ForgotPasswordRoute` |
-| `app/(public)/(auth)/nouveau-mot-de-passe/page.tsx` | `ResetPasswordRoute` |
-| `app/(public)/(legal)/mentions-legales/page.tsx` | `LegalNoticeRoute` |
-| `app/(public)/(legal)/conditions-de-vente/page.tsx` | `TermsOfSaleRoute` |
-| `app/(protected)/dashboard/page.tsx` | `DashboardRoute` |
-| `app/(protected)/dashboard/parametres/page.tsx` | `DashboardSettingsRoute` |
-| `app/(protected)/dashboard/facturation/page.tsx` | `DashboardBillingRoute` |
-| `app/(protected)/admin/page.tsx` | `AdminRoute` |
-| `app/(protected)/admin/utilisateurs/page.tsx` | `AdminUsersRoute` |
+| URL                                                 | Function                 |
+| --------------------------------------------------- | ------------------------ |
+| `app/(public)/page.tsx`                             | `HomeRoute`              |
+| `app/(public)/tarifs/page.tsx`                      | `PricingRoute`           |
+| `app/(public)/contact/page.tsx`                     | `ContactRoute`           |
+| `app/(public)/plan-du-site/page.tsx`                | `SitemapRoute`           |
+| `app/(public)/(auth)/connexion/page.tsx`            | `SignInRoute`            |
+| `app/(public)/(auth)/inscription/page.tsx`          | `SignUpRoute`            |
+| `app/(public)/(auth)/mot-de-passe-oublie/page.tsx`  | `ForgotPasswordRoute`    |
+| `app/(public)/(auth)/nouveau-mot-de-passe/page.tsx` | `ResetPasswordRoute`     |
+| `app/(public)/(legal)/mentions-legales/page.tsx`    | `LegalNoticeRoute`       |
+| `app/(public)/(legal)/conditions-de-vente/page.tsx` | `TermsOfSaleRoute`       |
+| `app/(protected)/dashboard/page.tsx`                | `DashboardRoute`         |
+| `app/(protected)/dashboard/parametres/page.tsx`     | `DashboardSettingsRoute` |
+| `app/(protected)/dashboard/facturation/page.tsx`    | `DashboardBillingRoute`  |
+| `app/(protected)/admin/page.tsx`                    | `AdminRoute`             |
+| `app/(protected)/admin/utilisateurs/page.tsx`       | `AdminUsersRoute`        |
 
 ## Feature Page Components (P0)
 
@@ -52,6 +53,7 @@ Location: `features/{feature}/pages/{name}-page.tsx`
 Naming: `{Feature}Page` (e.g., `PricingPage`, `ContactPage`, `SignInPage`)
 
 Contains:
+
 - JSON-LD `<script>` tags (public pages only)
 - `<Main>` with all UI content
 - Imports SEO schema functions from `features/{feature}/constants/{page}-seo.constant.ts`
@@ -75,9 +77,7 @@ function PricingPage() {
         }}
       />
 
-      <Main>
-        {/* content */}
-      </Main>
+      <Main>{/* content */}</Main>
     </>
   );
 }
@@ -293,13 +293,13 @@ dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
 
 ## Auth Guards (P0)
 
-| Guard | Usage |
-|---|---|
-| `requireSession()` | Any authenticated user |
-| `requireCustomer()` | Customer role |
+| Guard                            | Usage                        |
+| -------------------------------- | ---------------------------- |
+| `requireSession()`               | Any authenticated user       |
+| `requireCustomer()`              | Customer role                |
 | `requireCustomerVerifiedEmail()` | Customer with verified email |
-| `requireAdmin()` | Admin role |
-| `requireAdminVerifiedEmail()` | Admin with verified email |
+| `requireAdmin()`                 | Admin role                   |
+| `requireAdminVerifiedEmail()`    | Admin with verified email    |
 
 ## Loading Pages (P0)
 
@@ -322,9 +322,8 @@ export default function PricingLoadingRoute() {
 - NO data fetching, NO async/await, NO metadata
 
 ```tsx
-import { Skeleton } from "@/components/ui/skeleton";
-
 import { Main } from "@/components/main";
+import { Skeleton } from "@/components/ui/skeleton";
 
 function PricingLoading() {
   return (

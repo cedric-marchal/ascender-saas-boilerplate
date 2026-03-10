@@ -7,6 +7,9 @@ type GlobalErrorRouteProps = {
   reset: () => void;
 };
 
-export default function GlobalErrorRoute({ error, reset }: GlobalErrorRouteProps) {
+export default function GlobalErrorRoute({
+  error,
+  reset,
+}: GlobalErrorRouteProps) {
   return <GlobalErrorPage error={error} reset={reset} />;
 }

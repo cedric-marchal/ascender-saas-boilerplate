@@ -6,8 +6,9 @@ import {
   getPricingWebPageSchema,
 } from "@/features/pricing/constants/pricing-seo.constant";
 
-import { Main } from "@/components/main";
 import { env } from "@/lib/env";
+
+import { Main } from "@/components/main";
 
 const APP_NAME = env.NEXT_PUBLIC_APP_NAME;
 

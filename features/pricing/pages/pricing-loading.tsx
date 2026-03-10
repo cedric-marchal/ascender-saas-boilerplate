@@ -1,12 +1,9 @@
-import { Skeleton } from "@/components/ui/skeleton";
 import { Main } from "@/components/main";
+import { Skeleton } from "@/components/ui/skeleton";
 
 function PricingLoading() {
   return (
-    <Main
-      aria-busy="true"
-      aria-label="Chargement des tarifs"
-    >
+    <Main aria-busy="true" aria-label="Chargement des tarifs">
       <section className="mx-auto flex w-full max-w-5xl flex-col gap-10 px-4 py-12 sm:px-6 md:gap-12 md:py-16 lg:px-8 lg:py-20">
         <header className="space-y-4 text-center">
           <Skeleton className="mx-auto h-10 w-3/4 sm:w-1/2" />
@@ -16,7 +13,7 @@ function PricingLoading() {
 
         <div className="grid gap-6 md:grid-cols-3">
           {Array.from({ length: 3 }).map((_, index: number) => (
-            <div key={index} className="rounded-lg border p-6 space-y-4">
+            <div key={index} className="space-y-4 rounded-lg border p-6">
               <div className="space-y-2">
                 <Skeleton className="h-3 w-16" />
                 <Skeleton className="h-5 w-24" />

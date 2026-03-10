@@ -4,6 +4,7 @@ import { ProfileForm } from "@/features/account/components/forms/profile-form";
 import { DeleteAccountModal } from "@/features/account/components/modals/delete-account-modal";
 import { SettingsHeader } from "@/features/account/components/settings-header";
 
+import { Main } from "@/components/main";
 import {
   Card,
   CardContent,
@@ -11,7 +12,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Main } from "@/components/main";
 
 type SettingsPageProps = {
   user: {
@@ -84,7 +84,10 @@ function SettingsPage({ user, showStripeWarning = false }: SettingsPageProps) {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <DeleteAccountModal email={user.email} showStripeWarning={showStripeWarning} />
+          <DeleteAccountModal
+            email={user.email}
+            showStripeWarning={showStripeWarning}
+          />
         </CardContent>
       </Card>
     </Main>

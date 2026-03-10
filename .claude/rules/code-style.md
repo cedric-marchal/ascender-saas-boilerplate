@@ -39,9 +39,7 @@ if (!user.isActive) {
 
 const displayName = `${user.firstName} ${user.lastName}`;
 
-return (
-  <div>{displayName}</div>
-);
+return <div>{displayName}</div>;
 ```
 
 ### Blank line before final `return` if code exists above
@@ -154,11 +152,13 @@ const PricingCard = ({ title }: { title: string }) => { ... };
 
 ```tsx
 // ✅ Correct
-items.map((item: Item) => <li key={item.id}>{item.name}</li>)
-items.filter((item: Item) => item.isActive)
+items.map((item: Item) => <li key={item.id}>{item.name}</li>);
+items.filter((item: Item) => item.isActive);
 
 // ❌ Wrong
-items.map(function(item: Item) { return <li>{item.name}</li>; })
+items.map(function (item: Item) {
+  return <li>{item.name}</li>;
+});
 ```
 
 ### Handler naming: `handle{Action}`
@@ -191,21 +191,31 @@ if (condition) return;
 
 ```tsx
 // ✅ Correct
-{isLoading ? "Chargement..." : "Envoyer"}
-{hasItems ? <ItemList items={items} /> : <EmptyState />}
+{
+  isLoading ? "Chargement..." : "Envoyer";
+}
+{
+  hasItems ? <ItemList items={items} /> : <EmptyState />;
+}
 
 // ❌ Wrong: nested ternary
-{a ? b ? <C /> : <D /> : <E />}
+{
+  a ? b ? <C /> : <D /> : <E />;
+}
 ```
 
 ### `&&` in JSX: beware the 0 trap
 
 ```tsx
 // ❌ Wrong: renders "0"
-{items.length && <ItemList />}
+{
+  items.length && <ItemList />;
+}
 
 // ✅ Correct
-{items.length > 0 && <ItemList />}
+{
+  items.length > 0 && <ItemList />;
+}
 ```
 
 ## Early Return (P0)

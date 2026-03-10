@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 
-import { SitemapPage } from "@/components/pages/sitemap-page";
-
 import { env } from "@/lib/env";
+
+import { SitemapPage } from "@/components/pages/sitemap-page";
 
 const APP_NAME = env.NEXT_PUBLIC_APP_NAME;
 const DESCRIPTION = `Plan du site de ${APP_NAME}. Accédez rapidement à toutes les pages disponibles.`;

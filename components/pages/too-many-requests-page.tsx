@@ -1,8 +1,9 @@
+import Link from "next/link";
+
 import { Clock } from "lucide-react";
 
 import { Main } from "@/components/main";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
 
 function TooManyRequestsPage() {
   return (

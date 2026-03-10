@@ -7,7 +7,12 @@ const BASE_URL = env.NEXT_PUBLIC_BASE_URL;
 
 // Sign In
 const SIGN_IN_DESCRIPTION = `Connectez-vous à votre compte ${APP_NAME}. Accédez à votre tableau de bord et gérez vos projets.`;
-const SIGN_IN_KEYWORDS = [APP_NAME.toLowerCase(), "connexion", "login", "sign in"];
+const SIGN_IN_KEYWORDS = [
+  APP_NAME.toLowerCase(),
+  "connexion",
+  "login",
+  "sign in",
+];
 
 function getSignInSchema(): WithContext<WebPage> {
   return {
@@ -27,7 +32,12 @@ function getSignInSchema(): WithContext<WebPage> {
 
 // Sign Up
 const SIGN_UP_DESCRIPTION = `Créez votre compte ${APP_NAME} gratuitement. Accédez à toutes les fonctionnalités en quelques secondes.`;
-const SIGN_UP_KEYWORDS = [APP_NAME.toLowerCase(), "inscription", "sign up", "créer un compte"];
+const SIGN_UP_KEYWORDS = [
+  APP_NAME.toLowerCase(),
+  "inscription",
+  "sign up",
+  "créer un compte",
+];
 
 function getSignUpSchema(): WithContext<WebPage> {
   return {
@@ -47,7 +57,10 @@ function getSignUpSchema(): WithContext<WebPage> {
 
 // Forgot Password
 const FORGOT_PASSWORD_DESCRIPTION = `Réinitialisez votre mot de passe ${APP_NAME}. Recevez un lien de réinitialisation par email.`;
-const FORGOT_PASSWORD_KEYWORDS = [APP_NAME.toLowerCase(), "mot de passe oublié"];
+const FORGOT_PASSWORD_KEYWORDS = [
+  APP_NAME.toLowerCase(),
+  "mot de passe oublié",
+];
 
 function getForgotPasswordSchema(): WithContext<WebPage> {
   return {
@@ -67,7 +80,10 @@ function getForgotPasswordSchema(): WithContext<WebPage> {
 
 // Reset Password
 const RESET_PASSWORD_DESCRIPTION = `Créez un nouveau mot de passe pour votre compte ${APP_NAME}.`;
-const RESET_PASSWORD_KEYWORDS = [APP_NAME.toLowerCase(), "nouveau mot de passe"];
+const RESET_PASSWORD_KEYWORDS = [
+  APP_NAME.toLowerCase(),
+  "nouveau mot de passe",
+];
 
 function getResetPasswordSchema(): WithContext<WebPage> {
   return {

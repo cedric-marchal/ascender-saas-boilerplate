@@ -75,7 +75,11 @@ async function handleStripeWebhook(
     await redis.set(eventKey, 1, { ex: EVENT_TTL_SECONDS });
   } catch (redisError: unknown) {
     Sentry.captureException(redisError, {
-      extra: { eventType: event.type, eventId: event.id, context: "idempotency-check" },
+      extra: {
+        eventType: event.type,
+        eventId: event.id,
+        context: "idempotency-check",
+      },
     });
     // Redis indisponible → on continue sans idempotence (mieux que bloquer)
   }
@@ -258,7 +262,10 @@ async function handleStripeWebhook(
     if (isTransientDbError(error)) {
       return {
         status: 503,
-        body: { success: false, message: "Service temporairement indisponible" },
+        body: {
+          success: false,
+          message: "Service temporairement indisponible",
+        },
       };
     }
 
