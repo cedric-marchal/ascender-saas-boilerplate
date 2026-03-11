@@ -165,6 +165,33 @@ async function getDocuments(
 }
 ```
 
+## Prisma Enum Convention (P0)
+
+**Toutes les valeurs d'enum Prisma sont en MAJUSCULES.** C'est la convention du projet.
+
+```prisma
+// ✅ CORRECT
+enum SubscriptionStatus {
+  INCOMPLETE
+  INCOMPLETE_EXPIRED
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  UNPAID
+  PAUSED
+}
+
+// ❌ WRONG: lowercase (convention Stripe, pas Prisma)
+enum SubscriptionStatus {
+  incomplete
+  active
+  canceled
+}
+```
+
+Conséquence : quand une API externe (Stripe) envoie des valeurs lowercase, **toujours mapper** vers l'enum DB via une constante `STRIPE_TO_DB_*` dans `features/{feature}/constants/`.
+
 ## Enum Usage (P0)
 
 ### UserRole

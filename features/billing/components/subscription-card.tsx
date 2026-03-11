@@ -21,43 +21,43 @@ type SubscriptionStatusConfig = {
 };
 
 const STATUS_CONFIG: Record<SubscriptionStatus, SubscriptionStatusConfig> = {
-  active: {
-    label: subscriptionStatusLabels.active,
+  ACTIVE: {
+    label: subscriptionStatusLabels.ACTIVE,
     variant: "default",
     icon: CheckCircle2,
   },
-  canceled: {
-    label: subscriptionStatusLabels.canceled,
+  CANCELED: {
+    label: subscriptionStatusLabels.CANCELED,
     variant: "destructive",
     icon: XCircle,
   },
-  incomplete: {
-    label: subscriptionStatusLabels.incomplete,
+  INCOMPLETE: {
+    label: subscriptionStatusLabels.INCOMPLETE,
     variant: "secondary",
     icon: XCircle,
   },
-  incomplete_expired: {
-    label: subscriptionStatusLabels.incomplete_expired,
+  INCOMPLETE_EXPIRED: {
+    label: subscriptionStatusLabels.INCOMPLETE_EXPIRED,
     variant: "secondary",
     icon: XCircle,
   },
-  past_due: {
-    label: subscriptionStatusLabels.past_due,
+  PAST_DUE: {
+    label: subscriptionStatusLabels.PAST_DUE,
     variant: "destructive",
     icon: XCircle,
   },
-  trialing: {
-    label: subscriptionStatusLabels.trialing,
+  TRIALING: {
+    label: subscriptionStatusLabels.TRIALING,
     variant: "default",
     icon: CheckCircle2,
   },
-  unpaid: {
-    label: subscriptionStatusLabels.unpaid,
+  UNPAID: {
+    label: subscriptionStatusLabels.UNPAID,
     variant: "destructive",
     icon: XCircle,
   },
-  paused: {
-    label: subscriptionStatusLabels.paused,
+  PAUSED: {
+    label: subscriptionStatusLabels.PAUSED,
     variant: "secondary",
     icon: XCircle,
   },
@@ -68,7 +68,7 @@ function SubscriptionCard({
 }: {
   subscription: BillingSubscription;
 }) {
-  const config = STATUS_CONFIG[subscription.status] ?? STATUS_CONFIG.canceled;
+  const config = STATUS_CONFIG[subscription.status] ?? STATUS_CONFIG.CANCELED;
   const StatusIcon = config.icon;
 
   return (

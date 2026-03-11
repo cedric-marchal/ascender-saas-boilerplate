@@ -3,7 +3,7 @@ import "server-only";
 import * as Sentry from "@sentry/nextjs";
 import type Stripe from "stripe";
 
-import { ALL_SUBSCRIPTION_STATUSES } from "@/features/billing/constants/subscription-status.constant";
+import { STRIPE_TO_DB_SUBSCRIPTION_STATUS } from "@/features/billing/constants/subscription-status.constant";
 
 import { env } from "@/lib/env";
 import type { SubscriptionStatus } from "@/lib/generated/prisma/client";
@@ -21,10 +21,6 @@ function isTransientDbError(error: unknown): boolean {
     error.name === "PrismaClientRustPanicError"
   );
 }
-
-const VALID_SUBSCRIPTION_STATUSES = new Set<SubscriptionStatus>(
-  ALL_SUBSCRIPTION_STATUSES,
-);
 
 const EVENT_TTL_SECONDS = 86400;
 
@@ -118,15 +114,20 @@ async function handleStripeWebhook(
           break;
         }
 
-        if (!VALID_SUBSCRIPTION_STATUSES.has(subscription.status)) {
+        const subscriptionStatus = (
+          STRIPE_TO_DB_SUBSCRIPTION_STATUS as Record<
+            string,
+            SubscriptionStatus | undefined
+          >
+        )[subscription.status];
+
+        if (!subscriptionStatus) {
           Sentry.captureMessage(
             `Unknown subscription status "${subscription.status}" for ${subscription.id}. Event: ${event.type}`,
             "warning",
           );
           break;
         }
-
-        const subscriptionStatus = subscription.status as SubscriptionStatus;
 
         await prisma.$transaction(async (tx) => {
           const user = await tx.user.findUnique({

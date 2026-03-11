@@ -155,7 +155,7 @@ describe("getBilling", () => {
     expect(result!.subscriptions).toHaveLength(1);
     expect(result!.subscriptions[0]).toEqual({
       id: "sub_1",
-      status: "active",
+      status: "ACTIVE",
       currentPeriodStart: 1700000000,
       currentPeriodEnd: 1702592000,
       cancelAtPeriodEnd: false,

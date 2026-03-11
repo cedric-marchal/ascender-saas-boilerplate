@@ -11,14 +11,14 @@ import type { SubscriptionStatus } from "@/lib/generated/prisma/client";
 describe("subscriptionStatusLabels", () => {
   it("has an entry for each SubscriptionStatus", () => {
     const statuses: SubscriptionStatus[] = [
-      "incomplete",
-      "incomplete_expired",
-      "trialing",
-      "active",
-      "past_due",
-      "canceled",
-      "unpaid",
-      "paused",
+      "INCOMPLETE",
+      "INCOMPLETE_EXPIRED",
+      "TRIALING",
+      "ACTIVE",
+      "PAST_DUE",
+      "CANCELED",
+      "UNPAID",
+      "PAUSED",
     ];
 
     for (const status of statuses) {
@@ -28,14 +28,14 @@ describe("subscriptionStatusLabels", () => {
   });
 
   it("has French labels", () => {
-    expect(subscriptionStatusLabels.incomplete).toBe("Incomplet");
-    expect(subscriptionStatusLabels.incomplete_expired).toBe("Expiré");
-    expect(subscriptionStatusLabels.trialing).toBe("Essai");
-    expect(subscriptionStatusLabels.active).toBe("Actif");
-    expect(subscriptionStatusLabels.past_due).toBe("En retard");
-    expect(subscriptionStatusLabels.canceled).toBe("Annulé");
-    expect(subscriptionStatusLabels.unpaid).toBe("Impayé");
-    expect(subscriptionStatusLabels.paused).toBe("En pause");
+    expect(subscriptionStatusLabels.INCOMPLETE).toBe("Incomplet");
+    expect(subscriptionStatusLabels.INCOMPLETE_EXPIRED).toBe("Expiré");
+    expect(subscriptionStatusLabels.TRIALING).toBe("Essai");
+    expect(subscriptionStatusLabels.ACTIVE).toBe("Actif");
+    expect(subscriptionStatusLabels.PAST_DUE).toBe("En retard");
+    expect(subscriptionStatusLabels.CANCELED).toBe("Annulé");
+    expect(subscriptionStatusLabels.UNPAID).toBe("Impayé");
+    expect(subscriptionStatusLabels.PAUSED).toBe("En pause");
   });
 
   it("has exactly 8 entries", () => {
@@ -45,11 +45,11 @@ describe("subscriptionStatusLabels", () => {
 });
 
 describe("ACTIVE_SUBSCRIPTION_STATUSES", () => {
-  it("contains exactly active, trialing, past_due", () => {
+  it("contains exactly ACTIVE, TRIALING, PAST_DUE", () => {
     expect(ACTIVE_SUBSCRIPTION_STATUSES).toEqual([
-      "active",
-      "trialing",
-      "past_due",
+      "ACTIVE",
+      "TRIALING",
+      "PAST_DUE",
     ]);
   });
 
@@ -67,14 +67,14 @@ describe("ACTIVE_SUBSCRIPTION_STATUSES", () => {
 describe("ALL_SUBSCRIPTION_STATUSES", () => {
   it("contains all 8 subscription statuses", () => {
     expect(ALL_SUBSCRIPTION_STATUSES).toEqual([
-      "incomplete",
-      "incomplete_expired",
-      "trialing",
-      "active",
-      "past_due",
-      "canceled",
-      "unpaid",
-      "paused",
+      "INCOMPLETE",
+      "INCOMPLETE_EXPIRED",
+      "TRIALING",
+      "ACTIVE",
+      "PAST_DUE",
+      "CANCELED",
+      "UNPAID",
+      "PAUSED",
     ]);
   });
 

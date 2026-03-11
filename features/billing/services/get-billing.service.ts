@@ -3,8 +3,9 @@ import "server-only";
 import type Stripe from "stripe";
 
 import type { InvoiceStatus } from "@/features/billing/constants/invoice-status.constant";
+import { STRIPE_TO_DB_SUBSCRIPTION_STATUS } from "@/features/billing/constants/subscription-status.constant";
 
-import type { SubscriptionStatus } from "@/lib/generated/prisma/client";
+import { SubscriptionStatus } from "@/lib/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { redis } from "@/lib/redis";
 import { stripe } from "@/lib/stripe";
@@ -55,7 +56,13 @@ function mapSubscription(
 
   return {
     id: subscription.id,
-    status: subscription.status,
+    status:
+      (
+        STRIPE_TO_DB_SUBSCRIPTION_STATUS as Record<
+          string,
+          SubscriptionStatus | undefined
+        >
+      )[subscription.status] ?? SubscriptionStatus.CANCELED,
     currentPeriodStart: subscriptionItem?.current_period_start ?? 0,
     currentPeriodEnd: subscriptionItem?.current_period_end ?? 0,
     cancelAtPeriodEnd: subscription.cancel_at_period_end,
