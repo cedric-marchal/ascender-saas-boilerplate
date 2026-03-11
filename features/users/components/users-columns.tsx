@@ -12,7 +12,7 @@ import {
   type UserSortableField,
 } from "@/features/users/constants/users-filters.constant";
 
-import { UserRole, type User } from "@/lib/generated/prisma/client";
+import { UserRole, type User } from "@/lib/generated/prisma/browser";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
