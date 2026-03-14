@@ -3,7 +3,7 @@ import { Calendar, CheckCircle2, XCircle } from "lucide-react";
 import { subscriptionStatusLabels } from "@/features/billing/constants/subscription-status.constant";
 import type { BillingSubscription } from "@/features/billing/services/get-billing.service";
 
-import type { SubscriptionStatus } from "@/lib/generated/prisma/client";
+import type { SubscriptionStatus } from "@/lib/generated/prisma/browser";
 
 import { Badge } from "@/components/ui/badge";
 import {

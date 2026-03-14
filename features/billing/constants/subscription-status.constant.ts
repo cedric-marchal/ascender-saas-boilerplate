@@ -1,4 +1,4 @@
-import { SubscriptionStatus } from "@/lib/generated/prisma/client";
+import { SubscriptionStatus } from "@/lib/generated/prisma/browser";
 
 const subscriptionStatusLabels: Record<SubscriptionStatus, string> = {
   INCOMPLETE: "Incomplet",

@@ -1,4 +1,4 @@
-import { UserRole } from "@/lib/generated/prisma/client";
+import { UserRole } from "@/lib/generated/prisma/browser";
 import {
   createEnumParser,
   createSortByParser,

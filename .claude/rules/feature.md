@@ -609,7 +609,7 @@ export { WelcomeEmail };
 
 ## Constant Rules (P0)
 
-**Prisma enums**: Import `UserRole`, `SubscriptionStatus` directly from `@/lib/generated/prisma/client`. No intermediate re-export layer.
+**Prisma enums**: Import `UserRole`, `SubscriptionStatus` from `@/lib/generated/prisma/browser` in constants and components (browser-safe). Use `@/lib/generated/prisma/client` only in server-side files (`services/`, `actions/`, `app/api/`). No intermediate re-export layer.
 
 **Domain constants**: `features/{feature}/constants/{entity}-filters.constant.ts`
 
@@ -626,7 +626,7 @@ export { WelcomeEmail };
 **Example**:
 
 ```tsx
-import { UserRole } from "@/lib/generated/prisma/client";
+import { UserRole } from "@/lib/generated/prisma/browser"; // ✅ browser-safe for constants
 import {
   createEnumParser,
   createSortByParser,

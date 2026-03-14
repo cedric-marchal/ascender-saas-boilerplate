@@ -192,16 +192,39 @@ enum SubscriptionStatus {
 
 Conséquence : quand une API externe (Stripe) envoie des valeurs lowercase, **toujours mapper** vers l'enum DB via une constante `STRIPE_TO_DB_*` dans `features/{feature}/constants/`.
 
+## Prisma Import: server vs client (P0) 🔴
+
+| Contexte                                                                     | Import                           | Pourquoi                           |
+| ---------------------------------------------------------------------------- | -------------------------------- | ---------------------------------- |
+| Services, actions, API routes (`"server-only"`, `"use server"`)              | `@/lib/generated/prisma/client`  | Runtime Node.js complet            |
+| Constants, components, tout ce qui peut être importé par un Client Component | `@/lib/generated/prisma/browser` | Browser-safe, pas de `node:module` |
+
+```tsx
+// ✅ Server-side (services, actions, API routes)
+
+// ✅ Client-safe (constants/, components/, hooks/)
+import { UserRole } from "@/lib/generated/prisma/browser";
+import { UserRole } from "@/lib/generated/prisma/client";
+
+// ❌ WRONG: prisma/client dans un fichier importé par un Client Component
+// → Build error: "does not support external modules (request: node:module)"
+```
+
+**Règle pratique** : si le fichier est dans `features/{feature}/constants/` ou `features/{feature}/components/`, utiliser `prisma/browser`.
+
 ## Enum Usage (P0)
 
 ### UserRole
 
 ```tsx
-// ✅ Import direct depuis Prisma (valeur)
+// ✅ Import direct depuis Prisma (valeur) — server-side
 import { UserRole } from "@/lib/generated/prisma/client";
 
+// ✅ Import direct depuis Prisma (valeur) — client-safe
+import { UserRole } from "@/lib/generated/prisma/browser";
+
 // ✅ Import direct depuis Prisma (type uniquement)
-import type { UserRole } from "@/lib/generated/prisma/client";
+import type { UserRole } from "@/lib/generated/prisma/browser";
 
 if (user.role === UserRole.ADMIN) { ... }
 
@@ -212,8 +235,8 @@ if (user.role === "ADMIN") { ... }
 ### SubscriptionStatus
 
 ```tsx
-// ✅ Type depuis Prisma
-import type { SubscriptionStatus } from "@/lib/generated/prisma/client";
+// ✅ Type depuis Prisma (client-safe)
+import type { SubscriptionStatus } from "@/lib/generated/prisma/browser";
 
 // ✅ Constantes depuis features/billing
 import {
