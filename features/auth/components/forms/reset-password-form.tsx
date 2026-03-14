@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, type ChangeEvent, type SubmitEvent } from "react";
+import type { ChangeEvent, SubmitEvent } from "react";
 
 import { useRouter } from "next/navigation";
 
 import { useForm } from "@tanstack/react-form";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { toast } from "sonner";
 
@@ -17,7 +17,7 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 
 import { getActionResult } from "@/utils/errors/get-action-result";
 import { getErrorMessage } from "@/utils/errors/get-error-message";
@@ -29,10 +29,6 @@ type ResetPasswordFormProps = {
 function ResetPasswordForm({ token }: ResetPasswordFormProps) {
   const router = useRouter();
   const { executeAsync, isExecuting } = useAction(resetPasswordAction);
-
-  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-  const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] =
-    useState(false);
 
   const form = useForm({
     defaultValues: {
@@ -77,38 +73,16 @@ function ResetPasswordForm({ token }: ResetPasswordFormProps) {
               <FieldLabel htmlFor="reset-password-password">
                 Nouveau mot de passe
               </FieldLabel>
-              <div className="relative">
-                <Input
-                  id="reset-password-password"
-                  type={isPasswordVisible ? "text" : "password"}
-                  name={field.name}
-                  value={field.state.value}
-                  onBlur={field.handleBlur}
-                  onChange={handleChange}
-                  aria-invalid={isInvalid}
-                  placeholder="••••••••••••"
-                  autoComplete="new-password"
-                  className="pr-10"
-                />
-                <button
-                  type="button"
-                  onClick={() =>
-                    setIsPasswordVisible((previous: boolean) => !previous)
-                  }
-                  className="text-muted-foreground hover:text-foreground absolute top-0 right-0 flex h-9 w-9 items-center justify-center"
-                  aria-label={
-                    isPasswordVisible
-                      ? "Masquer le mot de passe"
-                      : "Afficher le mot de passe"
-                  }
-                >
-                  {isPasswordVisible ? (
-                    <EyeOff className="h-4 w-4" aria-hidden="true" />
-                  ) : (
-                    <Eye className="h-4 w-4" aria-hidden="true" />
-                  )}
-                </button>
-              </div>
+              <PasswordInput
+                id="reset-password-password"
+                name={field.name}
+                value={field.state.value}
+                onBlur={field.handleBlur}
+                onChange={handleChange}
+                aria-invalid={isInvalid}
+                placeholder="••••••••••••"
+                autoComplete="new-password"
+              />
               {isInvalid && <FieldError errors={field.state.meta.errors} />}
             </Field>
           );
@@ -130,40 +104,16 @@ function ResetPasswordForm({ token }: ResetPasswordFormProps) {
               <FieldLabel htmlFor="reset-password-confirm">
                 Confirmer le mot de passe
               </FieldLabel>
-              <div className="relative">
-                <Input
-                  id="reset-password-confirm"
-                  type={isConfirmPasswordVisible ? "text" : "password"}
-                  name={field.name}
-                  value={field.state.value}
-                  onBlur={field.handleBlur}
-                  onChange={handleChange}
-                  aria-invalid={isInvalid}
-                  placeholder="••••••••••••"
-                  autoComplete="new-password"
-                  className="pr-10"
-                />
-                <button
-                  type="button"
-                  onClick={() =>
-                    setIsConfirmPasswordVisible(
-                      (previous: boolean) => !previous,
-                    )
-                  }
-                  className="text-muted-foreground hover:text-foreground absolute top-0 right-0 flex h-9 w-9 items-center justify-center"
-                  aria-label={
-                    isConfirmPasswordVisible
-                      ? "Masquer le mot de passe"
-                      : "Afficher le mot de passe"
-                  }
-                >
-                  {isConfirmPasswordVisible ? (
-                    <EyeOff className="h-4 w-4" aria-hidden="true" />
-                  ) : (
-                    <Eye className="h-4 w-4" aria-hidden="true" />
-                  )}
-                </button>
-              </div>
+              <PasswordInput
+                id="reset-password-confirm"
+                name={field.name}
+                value={field.state.value}
+                onBlur={field.handleBlur}
+                onChange={handleChange}
+                aria-invalid={isInvalid}
+                placeholder="••••••••••••"
+                autoComplete="new-password"
+              />
               {isInvalid && <FieldError errors={field.state.meta.errors} />}
             </Field>
           );

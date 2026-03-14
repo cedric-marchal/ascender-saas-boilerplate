@@ -115,7 +115,7 @@ export type { CreateContactSchemaType, UpdateContactSchemaType };
 
 - Always `select` + `take` on `findMany`
 - `$transaction` for parallel count + findMany
-- Re-validate all params server-side (defense in depth)
+- No re-validation needed — nuqs parsers already validate and bound all filter values
 
 **Structure (Generic Entity)**:
 
@@ -177,32 +177,22 @@ export { getEntities };
 
 **Structure (Admin-Only Service)**:
 
-For admin-only pages (like user management), still receive `userId` for rate limiting:
+For admin-only pages (like user management), the service only receives `filters`. Auth guard and rate limiting are handled at the route level.
 
 ```tsx
 import "server-only";
 
-import { UserRole } from "@/lib/generated/prisma/client";
-import { filterRatelimit } from "@/lib/ratelimit";
+import { DEFAULT_PAGE_SIZE } from "@/lib/parsers/nuqs";
+import { prisma } from "@/lib/prisma";
 
-import { checkRatelimit } from "@/utils/ratelimit/check-ratelimit";
-
-async function getUsers(
-  filters: GetUsersFilters,
-  userId: string, // ✅ For rate limiting (not filtering)
-): Promise<GetUsersResult> {
-  // ✅ Rate limit per user (prevent abuse)
-  await checkRatelimit(filterRatelimit, userId);
-
-  const safeSearch = filters.search.slice(0, MAX_SEARCH_LENGTH).trim();
-  const safePage = Math.max(1, Math.min(filters.page, MAX_PAGE));
-
-  // ❌ NO userId filter (admin sees all users)
+async function getUsers(filters: GetUsersFilters): Promise<GetUsersResult> {
+  // No userId filter (admin sees all users)
+  // No rate limiting (handled at route level)
   const whereClause = {
-    ...(safeSearch && {
+    ...(filters.search && {
       OR: [
-        { name: { contains: safeSearch, mode: "insensitive" as const } },
-        { email: { contains: safeSearch, mode: "insensitive" as const } },
+        { name: { contains: filters.search, mode: "insensitive" as const } },
+        { email: { contains: filters.search, mode: "insensitive" as const } },
       ],
     }),
   };
@@ -211,14 +201,16 @@ async function getUsers(
     prisma.user.findMany({
       where: whereClause,
       select: { id: true, name: true, email: true },
-      orderBy: { [safeSortBy]: safeOrder },
-      skip: (safePage - 1) * DEFAULT_PAGE_SIZE,
+      orderBy: { [filters.sortBy]: filters.order },
+      skip: (filters.page - 1) * DEFAULT_PAGE_SIZE,
       take: DEFAULT_PAGE_SIZE,
     }),
     prisma.user.count({ where: whereClause }),
   ]);
 
-  return { users, totalCount, totalPages, currentPage: safePage };
+  const totalPages = Math.max(1, Math.ceil(totalCount / DEFAULT_PAGE_SIZE));
+
+  return { users, totalCount, totalPages, currentPage: filters.page };
 }
 
 export { getUsers };

@@ -150,26 +150,22 @@ const { documents } = await getDocuments(
 
 **Use case** : Gestion des utilisateurs, analytics globales, settings système.
 
-**Rule** : Accessible seulement via `requireAdmin()`, mais reçoit `userId` pour rate limiting.
+**Rule** : Accessible seulement via `requireAdmin()`. Le service ne reçoit que les filtres — l'auth et le rate limiting sont gérés au niveau de la route.
 
 ```tsx
 import "server-only";
 
-async function getUsers(
-  filters: GetUsersFilters,
-  userId: string, // ✅ Pour filtering / audit
-): Promise<GetUsersResult> {
-  // ✅ No rate limiting here — handled at entry point (page route / action / API route)
+import { DEFAULT_PAGE_SIZE } from "@/lib/parsers/nuqs";
+import { prisma } from "@/lib/prisma";
 
-  const safeSearch = filters.search.slice(0, MAX_SEARCH_LENGTH).trim();
-  const safePage = Math.max(1, Math.min(filters.page, MAX_PAGE));
-
-  // ❌ PAS de filtre userId (admin voit tous les users)
+async function getUsers(filters: GetUsersFilters): Promise<GetUsersResult> {
+  // Pas de filtre userId (admin voit tous les users)
+  // Pas de rate limiting (géré au niveau de la route)
   const whereClause = {
-    ...(safeSearch && {
+    ...(filters.search && {
       OR: [
-        { name: { contains: safeSearch, mode: "insensitive" as const } },
-        { email: { contains: safeSearch, mode: "insensitive" as const } },
+        { name: { contains: filters.search, mode: "insensitive" as const } },
+        { email: { contains: filters.search, mode: "insensitive" as const } },
       ],
     }),
   };
@@ -178,19 +174,21 @@ async function getUsers(
     prisma.user.findMany({
       where: whereClause,
       select: { id: true, name: true, email: true, role: true },
-      orderBy: { [safeSortBy]: safeOrder },
-      skip: (safePage - 1) * DEFAULT_PAGE_SIZE,
+      orderBy: { [filters.sortBy]: filters.order },
+      skip: (filters.page - 1) * DEFAULT_PAGE_SIZE,
       take: DEFAULT_PAGE_SIZE,
     }),
     prisma.user.count({ where: whereClause }),
   ]);
 
-  return { users, totalCount, totalPages, currentPage: safePage };
+  const totalPages = Math.max(1, Math.ceil(totalCount / DEFAULT_PAGE_SIZE));
+
+  return { users, totalCount, totalPages, currentPage: filters.page };
 }
 
 // Usage dans la page ADMIN
-const session = await requireAdminVerifiedEmail(); // ✅ Guard avant service
-const { users } = await getUsers(filters, session.user.id);
+const session = await requireAdminVerifiedEmail(); // ✅ Guard + rate limit dans la route
+const { users } = await getUsers(filters);
 ```
 
 ### Pattern 3 : Service Multi-Rôles (Complex Permissions)
@@ -254,14 +252,14 @@ async function getProjects(
 ### Every Service MUST Have
 
 - ✅ `import "server-only"` at top
-- ✅ `userId: string` parameter (for filtering)
-- ✅ `userRole: UserRole` parameter (for authorization, NEVER boolean)
-- ✅ `UNRESTRICTED_ROLES` constant defined
+- ✅ `userId: string` + `userRole: UserRole` parameters (for user-scoped services)
+- ✅ `UNRESTRICTED_ROLES` constant defined (for user-scoped services)
 - ✅ Filter by `userId` UNLESS `userRole` in `UNRESTRICTED_ROLES`
+- ✅ Admin-only services: only `filters` param needed (auth + rate limit at route level)
 - ✅ `select` explicit in Prisma queries
 - ✅ `take` limit in `findMany`
 - ✅ `$transaction` for parallel count + findMany
-- ✅ Re-validate ALL params server-side
+- ❌ NO re-validation of filter params — nuqs parsers already validate, sanitize, and bound all values
 - ❌ NO `checkRatelimit` — rate limiting belongs at the entry point, not in services
 
 ### Every Route File Calling a Service MUST Have
@@ -278,9 +276,9 @@ async function getProjects(
 const session = await requireSession();
 const { data } = await getUserData(filters, session.user.id, session.user.role);
 
-// ✅ Pattern 2: Admin-only data
+// ✅ Pattern 2: Admin-only data (no userId needed — auth + rate limit at route level)
 const session = await requireAdminVerifiedEmail();
-const { data } = await getAdminData(filters, session.user.id);
+const { data } = await getAdminData(filters);
 
 // ✅ Pattern 3: Customer-only data with verification
 const session = await requireCustomerVerifiedEmail();

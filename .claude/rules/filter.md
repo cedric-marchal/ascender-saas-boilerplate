@@ -227,65 +227,41 @@ export type { FilterUsersSchemaType };
 
 `features/*/services/get-{entity}.service.ts`
 
-| Rule              | Convention                                                 |
-| ----------------- | ---------------------------------------------------------- |
-| **Protection**    | `import "server-only"` at top                              |
-| **Re-validation** | ALL params re-validated server-side (defense in depth)     |
-| **Prisma**        | `$transaction` for parallel `findMany` + `count`           |
-| **Select**        | Always `select` + `take` on `findMany`                     |
-| **OrderBy**       | Dynamic: `{ [safeSortBy]: safeOrder }`                     |
-| **Type guards**   | Use from feature constants (e.g., `isUserRole()`)          |
-| **Defaults**      | Fall back to `DEFAULT_SORT_BY`, `DEFAULT_SORT_ORDER`, etc. |
+| Rule            | Convention                                        |
+| --------------- | ------------------------------------------------- |
+| **Protection**  | `import "server-only"` at top                     |
+| **Prisma**      | `$transaction` for parallel `findMany` + `count`  |
+| **Select**      | Always `select` + `take` on `findMany`            |
+| **OrderBy**     | Dynamic: `{ [filters.sortBy]: filters.order }`    |
+| **Type guards** | Use from feature constants (e.g., `isUserRole()`) |
+
+Note: No server-side re-validation needed — nuqs parsers (`parseAsPage`, `parseAsSafeSearch`, `parseAsStringLiteral`) already validate, sanitize, and bound all values before the service is called. Services are `import "server-only"` and only called from server pages via `createLoader(searchParams)`.
 
 ```tsx
 import "server-only";
 
-import {
-  isUserRole,
-  usersSortableFields,
-} from "@/features/users/constants/users-filters.constant";
+import { isUserRole } from "@/features/users/constants/users-filters.constant";
 
-import {
-  DEFAULT_PAGE_SIZE,
-  DEFAULT_SORT_BY,
-  DEFAULT_SORT_ORDER,
-  MAX_PAGE,
-  MAX_SEARCH_LENGTH,
-  SORT_ORDERS,
-  type SortOrder,
-} from "@/lib/parsers/nuqs";
+import { DEFAULT_PAGE_SIZE } from "@/lib/parsers/nuqs";
 import { prisma } from "@/lib/prisma";
 
 async function getUsers(filters: GetUsersFilters) {
-  const safeSearch = filters.search.slice(0, MAX_SEARCH_LENGTH).trim();
-  const safePage = Math.max(1, Math.min(filters.page, MAX_PAGE));
-  const safeRole = isUserRoleFilter(filters.role) ? filters.role : "all";
-
-  const safeSortBy = (usersSortableFields as readonly string[]).includes(
-    filters.sortBy,
-  )
-    ? filters.sortBy
-    : DEFAULT_SORT_BY;
-
-  const safeOrder: SortOrder = (SORT_ORDERS as readonly string[]).includes(
-    filters.order,
-  )
-    ? (filters.order as SortOrder)
-    : DEFAULT_SORT_ORDER;
-
   const whereClause = {
-    ...(safeSearch && {
-      OR: [{ name: { contains: safeSearch, mode: "insensitive" as const } }],
+    ...(filters.search && {
+      OR: [
+        { name: { contains: filters.search, mode: "insensitive" as const } },
+      ],
     }),
-    ...(safeRole !== "all" && isUserRole(safeRole) && { role: safeRole }),
+    ...(filters.role !== "all" &&
+      isUserRole(filters.role) && { role: filters.role }),
   };
 
   const [users, totalCount] = await prisma.$transaction([
     prisma.user.findMany({
       where: whereClause,
       select: { id: true, name: true },
-      orderBy: { [safeSortBy]: safeOrder },
-      skip: (safePage - 1) * DEFAULT_PAGE_SIZE,
+      orderBy: { [filters.sortBy]: filters.order },
+      skip: (filters.page - 1) * DEFAULT_PAGE_SIZE,
       take: DEFAULT_PAGE_SIZE,
     }),
     prisma.user.count({ where: whereClause }),
@@ -295,7 +271,7 @@ async function getUsers(filters: GetUsersFilters) {
     users,
     totalCount,
     totalPages: Math.max(1, Math.ceil(totalCount / DEFAULT_PAGE_SIZE)),
-    currentPage: safePage,
+    currentPage: filters.page,
   };
 }
 ```
@@ -332,7 +308,7 @@ export default async function AdminUsersPage({
 **Rules**:
 
 - `createLoader(searchParams)` is ONLY place parsers connect to page
-- Page does NOT re-validate (service does it)
+- Page does NOT re-validate (parsers already validated all values)
 - DataTable receives raw data (no client-side sort/filter/pagination)
 
 ## Layer 6: Client Components
@@ -585,7 +561,7 @@ export { PageSizeSelector };
 
 ## Security (P0)
 
-Validate at EVERY layer: Parser (bounds/length/enum) → Schema (Zod) → Server (re-validate all) → Prisma (parameterized queries) → React (auto-escaping)
+Validate at entry points: Parser (bounds/length/enum) → Schema (Zod) → Prisma (parameterized queries) → React (auto-escaping)
 
 | Attack         | Protection                     |
 | -------------- | ------------------------------ |
@@ -609,7 +585,7 @@ Validate at EVERY layer: Parser (bounds/length/enum) → Schema (Zod) → Server
 // ❌ history: "replace" → breaks back button
 // ❌ Not resetting page on filter change → setFilters({ role: value }) missing page: 1
 // ❌ Empty string to clear → setFilters({ search: "" }) use null
-// ❌ Trusting parsed values → prisma.findMany({ skip: (page - 1) * SIZE }) MUST re-validate
+// ✅ Parsed values from nuqs are already validated — no need to re-validate in services
 // ❌ findMany without select+take → prisma.user.findMany({ where })
 // ❌ Sequential count+findMany → use $transaction
 // ❌ 2-state sort → MUST be 3-state (unsorted → asc → desc → reset)
@@ -619,7 +595,7 @@ Validate at EVERY layer: Parser (bounds/length/enum) → Schema (Zod) → Server
 
 1. **Single source of truth**: Prisma → `lib/generated/prisma/client` → `lib/parsers/nuqs.ts` → `features/*/constants/` → Schema → Components
 2. **Domino effect**: Changing one layer cascades automatically
-3. **Defense in depth**: Validate at parser, schema, AND server
+3. **Parsers are the source of truth**: nuqs parsers validate, sanitize, and bound all values — no re-validation needed in services
 4. **Server-side everything**: DataTable is dumb renderer
 5. **3-state sort**: unsorted → asc → desc → reset
 6. **useTransition everywhere**: All URL mutations use startTransition
