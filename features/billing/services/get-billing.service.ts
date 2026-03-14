@@ -95,15 +95,26 @@ async function fetchInvoices(
 
 async function fetchSubscriptions(
   stripeCustomerId: string,
+  userId: string,
 ): Promise<BillingSubscription[]> {
+  const cacheKey = `subscriptions:${userId}`;
+  const cached = await redis.get<BillingSubscription[]>(cacheKey);
+
+  if (cached) {
+    return cached;
+  }
+
   const { data } = await stripe.subscriptions.list({
     customer: stripeCustomerId,
     limit: 100,
   });
 
-  return data.map((subscription: Stripe.Subscription) =>
+  const subscriptions = data.map((subscription: Stripe.Subscription) =>
     mapSubscription(subscription),
   );
+  await redis.set(cacheKey, subscriptions, { ex: 300 });
+
+  return subscriptions;
 }
 
 async function getBilling(userId: string): Promise<GetBillingResult | null> {
@@ -118,7 +129,7 @@ async function getBilling(userId: string): Promise<GetBillingResult | null> {
 
   const [invoices, subscriptions] = await Promise.all([
     fetchInvoices(stripeCustomer.stripeCustomerId, userId),
-    fetchSubscriptions(stripeCustomer.stripeCustomerId),
+    fetchSubscriptions(stripeCustomer.stripeCustomerId, userId),
   ]);
 
   return { invoices, subscriptions };

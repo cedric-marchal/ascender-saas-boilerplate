@@ -29,6 +29,11 @@ function BillingPage({ billing }: BillingPageProps) {
       ACTIVE_SUBSCRIPTION_STATUSES.includes(subscription.status),
   );
 
+  const inactiveSubscriptions = subscriptions.filter(
+    (subscription: BillingSubscription) =>
+      !ACTIVE_SUBSCRIPTION_STATUSES.includes(subscription.status),
+  );
+
   return (
     <Main className="flex flex-col gap-6 p-6">
       <header className="space-y-2">
@@ -101,27 +106,19 @@ function BillingPage({ billing }: BillingPageProps) {
             <InvoiceList invoices={invoices} />
           </div>
 
-          {subscriptions.filter(
-            (subscription: BillingSubscription) =>
-              !ACTIVE_SUBSCRIPTION_STATUSES.includes(subscription.status),
-          ).length > 0 && (
+          {inactiveSubscriptions.length > 0 && (
             <div className="space-y-4">
               <h2 className="text-xl font-semibold">Anciens abonnements</h2>
 
               <div className="grid gap-4">
-                {subscriptions
-                  .filter(
-                    (subscription: BillingSubscription) =>
-                      !ACTIVE_SUBSCRIPTION_STATUSES.includes(
-                        subscription.status,
-                      ),
-                  )
-                  .map((subscription: BillingSubscription) => (
+                {inactiveSubscriptions.map(
+                  (subscription: BillingSubscription) => (
                     <SubscriptionCard
                       key={subscription.id}
                       subscription={subscription}
                     />
-                  ))}
+                  ),
+                )}
               </div>
             </div>
           )}

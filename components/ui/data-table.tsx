@@ -1,13 +1,10 @@
 "use client";
 
-import { useState } from "react";
-
 import {
   flexRender,
   getCoreRowModel,
   useReactTable,
   type ColumnDef,
-  type VisibilityState,
 } from "@tanstack/react-table";
 
 import {
@@ -30,19 +27,10 @@ function DataTable<TData, TValue>({
   data,
   emptyMessage = "Aucun résultat",
 }: DataTableProps<TData, TValue>) {
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
-  const [rowSelection, setRowSelection] = useState({});
-
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    onColumnVisibilityChange: setColumnVisibility,
-    onRowSelectionChange: setRowSelection,
-    state: {
-      columnVisibility,
-      rowSelection,
-    },
   });
 
   return (

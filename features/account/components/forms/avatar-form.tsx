@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  useEffect,
   useState,
   type ChangeEvent,
   type DragEvent,
@@ -40,7 +41,19 @@ function AvatarForm({ name, image }: AvatarFormProps) {
 
   const initials = getInitials(name);
 
+  useEffect(() => {
+    return () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [previewUrl]);
+
   function handleFileChange(file: File | null) {
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+    }
+
     if (!file) {
       setPreviewUrl(null);
       return;
