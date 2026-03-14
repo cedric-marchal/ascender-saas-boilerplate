@@ -5,6 +5,7 @@ const mockConstructEvent = vi.fn();
 const mockPrismaUpsert = vi.fn();
 const mockPrismaDeleteMany = vi.fn();
 const mockPrismaFindUnique = vi.fn();
+const mockTxUserFindUnique = vi.fn();
 const mockRedisGet = vi.fn();
 const mockRedisSet = vi.fn();
 const mockRedisDel = vi.fn();
@@ -28,6 +29,16 @@ vi.mock("@/lib/prisma", () => ({
       upsert: mockPrismaUpsert,
       deleteMany: mockPrismaDeleteMany,
     },
+    $transaction: vi
+      .fn()
+      .mockImplementation(
+        async (callback: (tx: unknown) => Promise<unknown>) => {
+          return callback({
+            user: { findUnique: mockTxUserFindUnique },
+            subscription: { upsert: mockPrismaUpsert },
+          });
+        },
+      ),
   },
 }));
 
@@ -59,6 +70,7 @@ describe("handleStripeWebhook", () => {
     vi.clearAllMocks();
     mockRedisGet.mockResolvedValue(null);
     mockRedisSet.mockResolvedValue("OK");
+    mockTxUserFindUnique.mockResolvedValue({ id: "user_123" });
   });
 
   describe("signature validation", () => {

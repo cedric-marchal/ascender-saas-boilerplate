@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const mockGetSession = vi.fn();
 const mockCreateCheckoutSession = vi.fn();
 const mockHandleApiError = vi.fn();
+const mockCheckRatelimit = vi.fn();
 
 vi.mock("@/lib/session", () => ({
   getSession: mockGetSession,
@@ -26,12 +27,21 @@ vi.mock("@/lib/env", () => ({
   },
 }));
 
+vi.mock("@/utils/ratelimit/check-ratelimit", () => ({
+  checkRatelimit: mockCheckRatelimit,
+}));
+
+vi.mock("@/lib/ratelimit", () => ({
+  authenticatedRatelimit: {},
+}));
+
 // Import after mocks
 const { POST } = await import("@/app/api/stripe/checkout/route");
 
 describe("POST /api/stripe/checkout", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockCheckRatelimit.mockResolvedValue(undefined);
   });
 
   it("returns 401 if no session", async () => {
@@ -183,5 +193,27 @@ describe("POST /api/stripe/checkout", () => {
       userId,
       priceId: "price_pro_123",
     });
+  });
+
+  it("calls checkRatelimit with authenticated limiter and userId", async () => {
+    const userId = "user-rate-limit-test";
+    mockGetSession.mockResolvedValue({
+      user: { id: userId, email: "test@example.com" },
+    });
+
+    const formData = new FormData();
+    formData.append("priceId", "price_pro_123");
+
+    const mockRequest = {
+      formData: vi.fn().mockResolvedValue(formData),
+    } as unknown as Request;
+
+    mockCreateCheckoutSession.mockResolvedValue({
+      url: "https://checkout.stripe.com/session",
+    });
+
+    await POST(mockRequest);
+
+    expect(mockCheckRatelimit).toHaveBeenCalledWith({}, userId);
   });
 });
