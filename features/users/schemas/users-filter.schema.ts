@@ -23,8 +23,4 @@ const FilterUsersSchema = z.object({
   }),
 });
 
-type FilterUsersSchemaType = z.infer<typeof FilterUsersSchema>;
-
 export { FilterUsersSchema };
-
-export type { FilterUsersSchemaType };

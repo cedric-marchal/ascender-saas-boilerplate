@@ -28,5 +28,3 @@ async function createContact(input: CreateContactInput): Promise<void> {
 }
 
 export { createContact };
-
-export type { CreateContactInput };

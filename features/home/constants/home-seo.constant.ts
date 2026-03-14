@@ -5,15 +5,8 @@ import { env } from "@/lib/env";
 const APP_NAME = env.NEXT_PUBLIC_APP_NAME;
 const BASE_URL = env.NEXT_PUBLIC_BASE_URL;
 
-const HOME_TITLE = "Accueil";
 const HOME_DESCRIPTION =
   "Découvrez les solutions innovantes d'Ascender SaaS Boilerplate pour transformer votre entreprise.";
-const HOME_KEYWORDS = [
-  APP_NAME.toLowerCase(),
-  "saas",
-  "solution",
-  "innovation",
-];
 
 function getHomeWebsiteSchema(): WithContext<WebSite> {
   return {
@@ -41,10 +34,4 @@ function getHomeOrganizationSchema(): WithContext<Organization> {
   };
 }
 
-export {
-  getHomeOrganizationSchema,
-  getHomeWebsiteSchema,
-  HOME_DESCRIPTION,
-  HOME_KEYWORDS,
-  HOME_TITLE,
-};
+export { getHomeOrganizationSchema, getHomeWebsiteSchema };

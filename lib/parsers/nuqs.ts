@@ -19,8 +19,6 @@ const PAGE_SIZES = Object.values(PAGE_SIZE);
 const DEFAULT_PAGE_SIZE = PAGE_SIZE.SMALL;
 
 const SORT_ORDERS = ["asc", "desc"] as const;
-const DEFAULT_SORT_ORDER = "desc" as const;
-const DEFAULT_SORT_BY = "createdAt" as const;
 
 type PageSize = (typeof PAGE_SIZES)[number];
 type SortOrder = (typeof SORT_ORDERS)[number];
@@ -87,8 +85,6 @@ export {
   createEnumParser,
   createSortByParser,
   DEFAULT_PAGE_SIZE,
-  DEFAULT_SORT_BY,
-  DEFAULT_SORT_ORDER,
   MAX_ARRAY_LENGTH,
   MAX_PAGE,
   MAX_SEARCH_LENGTH,
