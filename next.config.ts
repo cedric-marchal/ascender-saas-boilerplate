@@ -29,6 +29,8 @@ const nextConfig: NextConfig = {
       "@radix-ui/react-slot",
       "@radix-ui/react-switch",
       "@radix-ui/react-tooltip",
+      "@tanstack/react-table",
+      "@tanstack/react-form",
     ],
   },
   images: {

@@ -47,6 +47,15 @@ const eslintConfig = defineConfig([
       "react/no-unescaped-entities": "off",
     },
   },
+  // TanStack Table: useReactTable() returns functions that cannot be safely
+  // memoized by React Compiler. This is a known incompatibility — the warning
+  // is a false positive since React Compiler is not enabled in this project.
+  {
+    files: ["components/ui/data-table.tsx"],
+    rules: {
+      "react-hooks/incompatible-library": "off",
+    },
+  },
   // Tests: allow `any` for mocks and stubs.
   {
     files: ["__tests__/**"],

@@ -2,15 +2,23 @@
 
 import { useEffect, useState } from "react";
 
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { Cookie, Shield } from "lucide-react";
 
-import { CookiePreferencesModal } from "@/features/cookie-consent/components/cookie-preferences-modal";
 import { useCookieConsent } from "@/features/cookie-consent/hooks/use-cookie-consent";
 
 import { Button } from "@/components/ui/button";
+
+const CookiePreferencesModal = dynamic(
+  () =>
+    import("@/features/cookie-consent/components/cookie-preferences-modal").then(
+      (module) => ({ default: module.CookiePreferencesModal }),
+    ),
+  { loading: () => null },
+);
 
 function CookieBanner() {
   const pathname = usePathname();

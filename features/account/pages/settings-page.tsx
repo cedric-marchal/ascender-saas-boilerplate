@@ -1,7 +1,8 @@
+import dynamic from "next/dynamic";
+
 import { AvatarForm } from "@/features/account/components/forms/avatar-form";
 import { PasswordForm } from "@/features/account/components/forms/password-form";
 import { ProfileForm } from "@/features/account/components/forms/profile-form";
-import { DeleteAccountModal } from "@/features/account/components/modals/delete-account-modal";
 import { SettingsHeader } from "@/features/account/components/settings-header";
 
 import { Main } from "@/components/main";
@@ -12,6 +13,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+
+const DeleteAccountModal = dynamic(() =>
+  import("@/features/account/components/modals/delete-account-modal").then(
+    (module) => ({ default: module.DeleteAccountModal }),
+  ),
+);
 
 type SettingsPageProps = {
   user: {
