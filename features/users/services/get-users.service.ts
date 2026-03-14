@@ -23,7 +23,14 @@ type GetUsersFilters = {
 type GetUsersResult = {
   users: Pick<
     User,
-    "id" | "name" | "email" | "role" | "emailVerified" | "image" | "createdAt"
+    | "id"
+    | "name"
+    | "email"
+    | "role"
+    | "emailVerified"
+    | "image"
+    | "slug"
+    | "createdAt"
   >[];
   totalCount: number;
   totalPages: number;
@@ -53,6 +60,7 @@ async function getUsers(filters: GetUsersFilters): Promise<GetUsersResult> {
         role: true,
         emailVerified: true,
         image: true,
+        slug: true,
         createdAt: true,
       },
       orderBy: { [filters.sortBy]: filters.order },

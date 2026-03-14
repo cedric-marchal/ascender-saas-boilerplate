@@ -2,6 +2,8 @@
 
 import { useTransition } from "react";
 
+import Link from "next/link";
+
 import type { ColumnDef } from "@tanstack/react-table";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import { useQueryStates } from "nuqs";
@@ -22,7 +24,14 @@ import { getInitials } from "@/utils/string/get-initials";
 
 type UserTableData = Pick<
   User,
-  "id" | "name" | "email" | "role" | "emailVerified" | "image" | "createdAt"
+  | "id"
+  | "name"
+  | "email"
+  | "role"
+  | "emailVerified"
+  | "image"
+  | "slug"
+  | "createdAt"
 >;
 
 function SortableHeader({
@@ -85,7 +94,10 @@ const usersColumns: ColumnDef<UserTableData>[] = [
     cell: ({ row }) => {
       const user = row.original;
       return (
-        <div className="flex items-center gap-3">
+        <Link
+          href={`/admin/utilisateurs/${user.slug}`}
+          className="flex items-center gap-3 hover:underline"
+        >
           <Avatar className="h-8 w-8">
             {user.image ? (
               <AvatarImage
@@ -97,7 +109,7 @@ const usersColumns: ColumnDef<UserTableData>[] = [
             )}
           </Avatar>
           <span className="font-medium">{user.name}</span>
-        </div>
+        </Link>
       );
     },
   },
