@@ -12,11 +12,11 @@ async function GET(request: Request) {
   try {
     const authorizationHeader = request.headers.get("authorization");
 
-    if (!env.VERCEL_CRON_SECRET || !authorizationHeader) {
+    if (!env.CRON_SECRET || !authorizationHeader) {
       throw new UnauthorizedError("Non autorisé");
     }
 
-    const expected = Buffer.from(`Bearer ${env.VERCEL_CRON_SECRET}`);
+    const expected = Buffer.from(`Bearer ${env.CRON_SECRET}`);
     const received = Buffer.from(authorizationHeader);
 
     if (

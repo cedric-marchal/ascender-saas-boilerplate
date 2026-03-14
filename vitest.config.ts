@@ -11,7 +11,7 @@ export default defineConfig({
   test: {
     globals: true,
     environment: "node",
-    include: ["__tests__/**/*.test.ts"],
+    include: ["__tests__/**/*.test.{ts,tsx}"],
     exclude: ["node_modules", ".next"],
     setupFiles: ["__tests__/setup.ts"],
     coverage: {
