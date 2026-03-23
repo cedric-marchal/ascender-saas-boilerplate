@@ -5,6 +5,8 @@ import { withSentryConfig } from "@sentry/nextjs";
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  cacheComponents: true,
+  typedRoutes: true,
   serverExternalPackages: [
     "@prisma/client",
     "@neondatabase/serverless",
@@ -17,6 +19,8 @@ const nextConfig: NextConfig = {
   ],
   experimental: {
     optimizePackageImports: [
+      "nuqs",
+      "next-safe-action",
       "lucide-react",
       "@radix-ui/react-alert-dialog",
       "@radix-ui/react-avatar",
@@ -37,11 +41,14 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "**.r2.cloudflarestorage.com",
+        hostname: `${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
       },
       {
         protocol: "https",
-        hostname: "**.r2.dev",
+        hostname:
+          (process.env.NEXT_PUBLIC_R2_PUBLIC_URL ?? "")
+            .replace("https://", "")
+            .split("/")[0] ?? "",
       },
     ],
   },
@@ -51,7 +58,7 @@ export default withSentryConfig(nextConfig, {
   org: process.env.SENTRY_ORG,
   project: process.env.SENTRY_PROJECT,
   silent: !process.env.CI,
-  widenClientFileUpload: true,
+  widenClientFileUpload: false,
   tunnelRoute: "/monitoring",
   webpack: {
     automaticVercelMonitors: true,

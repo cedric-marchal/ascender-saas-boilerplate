@@ -86,6 +86,7 @@ const getUserBySlug = cache(
             createdAt: true,
           },
           orderBy: { createdAt: "desc" },
+          take: 10,
         },
         stripeCustomer: {
           select: {
@@ -102,6 +103,7 @@ const getUserBySlug = cache(
                 createdAt: true,
               },
               orderBy: { createdAt: "desc" },
+              take: 10,
             },
           },
         },

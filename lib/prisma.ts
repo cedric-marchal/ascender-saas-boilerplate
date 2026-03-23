@@ -13,7 +13,7 @@ export const prisma =
   globalForPrisma.prisma ??
   new PrismaClient({
     adapter: new PrismaNeon({ connectionString: env.DATABASE_URL }),
-    log: ["warn", "error"],
+    log: process.env.NODE_ENV === "production" ? ["error"] : ["warn", "error"],
   });
 
 if (process.env.NODE_ENV !== "production") {
