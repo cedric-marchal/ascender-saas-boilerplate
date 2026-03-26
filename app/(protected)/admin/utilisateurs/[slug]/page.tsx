@@ -9,8 +9,6 @@ import { requireAdminVerifiedEmail } from "@/lib/session";
 
 import { TooManyRequestsPage } from "@/components/pages/too-many-requests-page";
 
-export const dynamic = "force-dynamic";
-
 type AdminUserDetailRouteProps = {
   params: Promise<{ slug: string }>;
 };

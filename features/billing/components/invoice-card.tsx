@@ -1,5 +1,3 @@
-import Link from "next/link";
-
 import { Calendar, Download, FileText } from "lucide-react";
 
 import {
@@ -100,14 +98,14 @@ function InvoiceCard({ invoice }: { invoice: BillingInvoice }) {
 
           {invoice.invoicePdfUrl && (
             <Button type="button" variant="outline" size="sm" asChild>
-              <Link
+              <a
                 href={invoice.invoicePdfUrl}
                 target="_blank"
                 rel="noopener noreferrer"
               >
                 <Download className="mr-2 h-4 w-4" aria-hidden="true" />
                 Télécharger
-              </Link>
+              </a>
             </Button>
           )}
         </div>

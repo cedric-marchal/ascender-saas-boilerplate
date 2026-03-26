@@ -6,8 +6,6 @@ import { DashboardHomePage } from "@/features/dashboard/pages/dashboard-home-pag
 import { UserRole } from "@/lib/generated/prisma/client";
 import { requireSession } from "@/lib/session";
 
-export const dynamic = "force-dynamic";
-
 export const metadata: Metadata = {
   title: "Dashboard",
   robots: {

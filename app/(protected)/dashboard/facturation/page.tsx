@@ -9,8 +9,6 @@ import { requireCustomerVerifiedEmail } from "@/lib/session";
 
 import { TooManyRequestsPage } from "@/components/pages/too-many-requests-page";
 
-export const dynamic = "force-dynamic";
-
 export const metadata: Metadata = {
   title: "Facturation",
   robots: {

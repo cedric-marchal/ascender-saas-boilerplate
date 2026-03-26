@@ -5,8 +5,6 @@ import { env } from "@/lib/env";
 import { Separator } from "@/components/ui/separator";
 
 function Footer() {
-  const currentYear = new Date().getFullYear();
-
   return (
     <footer className="bg-background/80 border-t backdrop-blur-sm">
       <div className="container mx-auto max-w-6xl px-4 py-10 md:py-14">
@@ -131,9 +129,9 @@ function Footer() {
           <div />
 
           <div className="text-muted-foreground flex flex-1 flex-col items-start gap-3 text-xs md:items-end">
-            <p>
-              &copy; {currentYear} {env.NEXT_PUBLIC_APP_NAME}. Tous droits
-              réservés.
+            <p suppressHydrationWarning>
+              &copy; {new Date().getFullYear()} {env.NEXT_PUBLIC_APP_NAME}.
+              Tous droits réservés.
             </p>
             <div className="flex flex-wrap gap-4">
               <Link

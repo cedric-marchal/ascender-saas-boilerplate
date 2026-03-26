@@ -13,8 +13,6 @@ import { TooManyRequestsPage } from "@/components/pages/too-many-requests-page";
 
 const loadSearchParams = createLoader(usersSearchParams);
 
-export const dynamic = "force-dynamic";
-
 export const metadata: Metadata = {
   title: "Gestion des utilisateurs",
   robots: {

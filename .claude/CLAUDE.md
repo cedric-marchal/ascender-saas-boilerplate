@@ -107,27 +107,28 @@ app/*/page.tsx (pages import from features)
 
 ## Core Conventions
 
-| Rule               | Convention                                                                                 |
-| ------------------ | ------------------------------------------------------------------------------------------ |
-| **Imports**        | Absolute paths (`@/`), combine types+values, `import { value, type Type }`                 |
-| **Exports**        | Named only (never default)                                                                 |
-| **Naming**         | Full words (no abbreviations: `event` not `e`, `index` not `i`)                            |
-| **Components**     | Server by default, `"use client"` only for hooks/events/browser APIs                       |
-| **Props**          | Inline if ≤2, separate `{Name}Props` type if >2, use `type` (never `interface`)            |
-| **Event types**    | `SubmitEvent<HTMLFormElement>`, `ChangeEvent<HTMLInputElement>`, etc.                      |
-| **Callbacks**      | Always type params: `.map((item: Item) => ...)`, `.map((_, index: number) => ...)`         |
-| **Buttons**        | `type="button"` (except submit), `aria-hidden="true"` on decorative icons                  |
-| **Forms**          | TanStack Form + Zod + `useAction` + `getActionResult` + `getErrorMessage`                  |
-| **If braces**      | Always use braces, even single-line: `if (cond) {\n  return;\n}` never `if (cond) return;` |
-| **Spacing**        | Blank line after `}` if code follows. Blank line before final `return` if code above       |
-| **Strings concat** | Template strings for interpolation, never concatenation (`+`)                              |
-| **Error pattern**  | Components: early return. Async: throw (no multiple returns in try)                        |
-| **Prisma**         | Always `select` + `take` on `findMany`, `$transaction` for parallel count+findMany         |
-| **Strings**        | `.min().max().trim()` (always French error messages)                                       |
-| **User messages**  | French. Code: English.                                                                     |
-| **File naming**    | kebab-case.tsx                                                                             |
-| **Booleans**       | Prefixes `is`, `has`, `can`, `should` (e.g., `isLoading`, `hasError`, `canSubmit`)         |
-| **Async naming**   | Clear action verbs: `fetchUsers`, `createUser`, `updateProfile`, `deleteAccount`           |
+| Rule               | Convention                                                                                                                      |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------- |
+| **Imports**        | Absolute paths (`@/`), combine types+values, `import { value, type Type }`                                                      |
+| **Exports**        | Named only (never default)                                                                                                      |
+| **Naming**         | Full words (no abbreviations: `event` not `e`, `index` not `i`)                                                                 |
+| **Components**     | Server by default, `"use client"` only for hooks/events/browser APIs                                                            |
+| **Props**          | Inline if ≤2, separate `{Name}Props` type if >2, use `type` (never `interface`)                                                 |
+| **Event types**    | `SubmitEvent<HTMLFormElement>`, `ChangeEvent<HTMLInputElement>`, etc.                                                           |
+| **Callbacks**      | Always type params: `.map((item: Item) => ...)`, `.map((_, index: number) => ...)`                                              |
+| **Buttons**        | `type="button"` (except submit), `aria-hidden="true"` on decorative icons                                                       |
+| **Forms**          | TanStack Form + Zod + `useAction` + `getActionResult` + `getErrorMessage`                                                       |
+| **If braces**      | Always use braces, even single-line: `if (cond) {\n  return;\n}` never `if (cond) return;`                                      |
+| **Spacing**        | Blank line after `}` if code follows. Blank line before final `return` if code above                                            |
+| **Strings concat** | Template strings for interpolation, never concatenation (`+`)                                                                   |
+| **Error pattern**  | Components: early return. Async: throw (no multiple returns in try)                                                             |
+| **Prisma**         | Always `select` + `take` on `findMany`, `$transaction` for parallel count+findMany                                              |
+| **Strings**        | `.min().max().trim()` (always French error messages)                                                                            |
+| **User messages**  | French. Code: English.                                                                                                          |
+| **File naming**    | kebab-case.tsx                                                                                                                  |
+| **Booleans**       | Prefixes `is`, `has`, `can`, `should` (e.g., `isLoading`, `hasError`, `canSubmit`)                                              |
+| **Async naming**   | Clear action verbs: `fetchUsers`, `createUser`, `updateProfile`, `deleteAccount`                                                |
+| **Links**          | `<Link>` (`next/link`) for internal routes only. `<a>` for external URLs. Typed routes: use literal union types, never `string` |
 
 ## Security: IDOR Prevention (P0) 🔴
 
@@ -702,6 +703,14 @@ function Component() {
   const value = compute();
   return <div>{value}</div>; // ❌ needs blank line above
 }
+
+// ❌ NEVER <Link> for external URLs
+<Link href={externalUrl}>Download</Link>
+// ✅ Use: <a href={externalUrl} target="_blank" rel="noopener noreferrer">
+
+// ❌ NEVER url: string in navigation items (breaks typedRoutes)
+type MenuItem = { url: string };
+// ✅ Use: type MenuItem = { url: "/dashboard" | "/dashboard/projets" };
 
 // ❌ NEVER wrong file locations
 lib/schemas/contact.schema.ts                    # → features/contact/schemas/

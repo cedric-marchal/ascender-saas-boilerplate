@@ -8,7 +8,17 @@ import { Main } from "@/components/main";
 
 type SitemapLink = {
   label: string;
-  href: string;
+  href:
+    | "/"
+    | "/tarifs"
+    | "/contact"
+    | "/inscription"
+    | "/connexion"
+    | "/mentions-legales"
+    | "/politique-de-confidentialite"
+    | "/politique-des-cookies"
+    | "/conditions-d-utilisation"
+    | "/conditions-de-vente";
 };
 
 type SitemapSection = {

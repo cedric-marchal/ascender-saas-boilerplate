@@ -40,11 +40,11 @@ import { truncateName } from "@/utils/string/truncate";
 
 type MenuItem = {
   title: string;
-  url: string;
+  url: "/admin" | "/admin/utilisateurs" | "/admin/parametres";
   icon: ComponentType<React.SVGProps<SVGSVGElement>>;
 };
 
-const items = [
+const items: MenuItem[] = [
   {
     title: "Tableau de bord",
     url: "/admin",

@@ -46,11 +46,6 @@ function getPricingProductSchemas(): WithContext<Product>[] {
         "@type": "Offer",
         price: plan.price,
         priceCurrency: "EUR",
-        priceValidUntil: new Date(
-          new Date().setFullYear(new Date().getFullYear() + 1),
-        )
-          .toISOString()
-          .split("T")[0],
         availability: "https://schema.org/InStock",
         url: `${BASE_URL}/tarifs`,
       },

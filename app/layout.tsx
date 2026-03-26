@@ -1,18 +1,11 @@
-import type { ReactNode } from "react";
+import { Suspense, type ReactNode } from "react";
 
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { headers } from "next/headers";
-
-import { ThemeProvider } from "next-themes";
-import { NuqsAdapter } from "nuqs/adapters/next/app";
-
-import { CookieBanner } from "@/features/cookie-consent/components/cookie-banner";
-import { GoogleAnalytics } from "@/features/cookie-consent/components/google-analytics";
 
 import { env } from "@/lib/env";
 
-import { Toaster } from "@/components/ui/sonner";
+import { Providers } from "@/app/providers";
 
 import "./globals.css";
 
@@ -81,35 +74,16 @@ type RootLayoutProps = {
   children: ReactNode;
 };
 
-export default async function RootLayout({ children }: RootLayoutProps) {
-  const nonce = (await headers()).get("x-nonce") ?? undefined;
-
+export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="fr" suppressHydrationWarning>
       <body
         suppressHydrationWarning
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <NuqsAdapter>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="dark"
-            enableSystem
-            disableTransitionOnChange
-            nonce={nonce}
-          >
-            {children}
-            <Toaster />
-
-            <CookieBanner />
-
-            {env.NEXT_PUBLIC_GA_MEASUREMENT_ID && (
-              <GoogleAnalytics
-                measurementId={env.NEXT_PUBLIC_GA_MEASUREMENT_ID}
-              />
-            )}
-          </ThemeProvider>
-        </NuqsAdapter>
+        <Suspense>
+          <Providers>{children}</Providers>
+        </Suspense>
       </body>
     </html>
   );
