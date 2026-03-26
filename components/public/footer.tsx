@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { env } from "@/lib/env";
 
+import { CopyrightYear } from "@/components/public/copyright-year";
 import { Separator } from "@/components/ui/separator";
 
 function Footer() {
@@ -129,9 +130,9 @@ function Footer() {
           <div />
 
           <div className="text-muted-foreground flex flex-1 flex-col items-start gap-3 text-xs md:items-end">
-            <p suppressHydrationWarning>
-              &copy; {new Date().getFullYear()} {env.NEXT_PUBLIC_APP_NAME}.
-              Tous droits réservés.
+            <p>
+              &copy; <CopyrightYear /> {env.NEXT_PUBLIC_APP_NAME}. Tous droits
+              réservés.
             </p>
             <div className="flex flex-wrap gap-4">
               <Link
