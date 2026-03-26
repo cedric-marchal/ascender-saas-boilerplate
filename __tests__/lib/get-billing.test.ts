@@ -144,7 +144,7 @@ describe("getBilling", () => {
     vi.mocked(prisma.stripeCustomer.findUnique).mockResolvedValue({
       stripeCustomerId: mockStripeCustomerId,
     } as any);
-    vi.mocked(redis.get).mockResolvedValue([]);
+    vi.mocked(redis.get).mockResolvedValueOnce([]).mockResolvedValueOnce(null);
     vi.mocked(stripe.subscriptions.list).mockResolvedValue({
       data: [mockSubscription],
     } as any);
@@ -176,7 +176,7 @@ describe("getBilling", () => {
     vi.mocked(prisma.stripeCustomer.findUnique).mockResolvedValue({
       stripeCustomerId: mockStripeCustomerId,
     } as any);
-    vi.mocked(redis.get).mockResolvedValue([]);
+    vi.mocked(redis.get).mockResolvedValueOnce([]).mockResolvedValueOnce(null);
     vi.mocked(stripe.subscriptions.list).mockResolvedValue({
       data: [mockSubscription],
     } as any);
