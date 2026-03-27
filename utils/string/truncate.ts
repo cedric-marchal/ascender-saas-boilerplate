@@ -19,7 +19,7 @@ function truncate(text: string, maxLength: number): string {
     return trimmedText;
   }
 
-  return trimmedText.slice(0, maxLength - 3) + "...";
+  return `${trimmedText.slice(0, maxLength - 3)}...`;
 }
 
 function truncateTitle(text: string): string {

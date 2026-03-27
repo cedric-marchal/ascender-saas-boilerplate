@@ -1,122 +1,62 @@
+---
+paths:
+  - "features/*/services/**"
+---
+
 # Security Rules — IDOR Prevention & Authorization
 
-## Context
+## Core Principles
 
-Règles critiques pour prévenir les vulnérabilités IDOR (Insecure Direct Object Reference) et gérer les autorisations basées sur les rôles.
-
-## Core Principles (P0)
-
-### 1. JAMAIS de Booléens pour les Permissions
-
-**❌ INTERDIT** :
+### 1. NEVER Use Booleans for Permissions
 
 ```tsx
-async function getEntity(
-  filters: GetEntityFilters,
-  userId: string,
-  isAdmin: boolean = false, // ❌ NON EXTENSIBLE
-) {}
-
-async function canDelete(isAdmin: boolean) {} // ❌ NON TYPE-SAFE
-```
-
-**Problèmes** :
-
-- ❌ Non extensible (que faire avec MANAGER, MODERATOR ?)
-- ❌ Non type-safe (`boolean` accepte n'importe quel booléen)
-- ❌ Logique dupliquée dans chaque service
-- ❌ Difficile à auditer (booléens éparpillés partout)
-
-**✅ OBLIGATOIRE : Utiliser `UserRole`**
-
-```tsx
+// ✅ CORRECT: extensible, type-safe
 import { UserRole } from "@/lib/generated/prisma/client";
 
-async function getEntity(
-  filters: GetEntityFilters,
-  userId: string,
-  userRole: UserRole, // ✅ TYPE-SAFE, EXTENSIBLE
-) {}
+// ❌ WRONG: not extensible, not type-safe
+async function getEntities(userId: string, isAdmin: boolean = false) {}
+
+async function getEntities(userId: string, userRole: UserRole) {}
 ```
 
-### 2. Pattern UNRESTRICTED_ROLES
+### 2. UNRESTRICTED_ROLES Pattern
 
-**Définir explicitement** quels rôles ont accès à quelles données :
+Define which roles can access all data. Everyone else sees only their own.
 
 ```tsx
 import "server-only";
 
 import { UserRole } from "@/lib/generated/prisma/client";
 
-// ✅ Rôles qui peuvent accéder à TOUTES les données (pas seulement les leurs)
 const UNRESTRICTED_ROLES: UserRole[] = [UserRole.ADMIN];
-
-// ✅ Rôles qui peuvent voir le count exact (pas fuzzy)
 const EXACT_COUNT_ROLES: UserRole[] = [UserRole.ADMIN];
-
-// ✅ Rôles qui peuvent combiner plusieurs filtres
-const UNRESTRICTED_FILTER_ROLES: UserRole[] = [UserRole.ADMIN];
-
-// ✅ Rôles qui peuvent exporter des données
 const EXPORT_ALLOWED_ROLES: UserRole[] = [UserRole.ADMIN, UserRole.MANAGER];
-
-async function getEntities(
-  filters: GetEntitiesFilters,
-  userId: string,
-  userRole: UserRole,
-): Promise<GetEntitiesResult> {
-  // Logique claire et maintenable
-  const canAccessAllData = UNRESTRICTED_ROLES.includes(userRole);
-  const canCombineFilters = UNRESTRICTED_FILTER_ROLES.includes(userRole);
-  const canExport = EXPORT_ALLOWED_ROLES.includes(userRole);
-
-  // Appliquer les permissions
-  if (!canAccessAllData) {
-    // Filtrer par userId
-  }
-  if (!canCombineFilters && filters.search && filters.role !== "all") {
-    throw new ForbiddenError("Combinaison de filtres non autorisée");
-  }
-  if (!canExport) {
-    // Bloquer export
-  }
-}
 ```
 
-**Avantages** :
+## Service Patterns
 
-- ✅ Type-safe : TypeScript force `UserRole`
-- ✅ Extensible : Ajouter un rôle = 1 ligne
-- ✅ Maintenable : Logique centralisée
-- ✅ Auditable : Facile de voir qui a quoi
-- ✅ Single Source of Truth : Rôles définis dans Prisma
+### Pattern 1: User-Scoped Data (Generic Entity)
 
-## Service Types & Patterns
-
-### Pattern 1 : Service Générique (User-Scoped Data)
-
-**Use case** : Documents, posts, orders appartenant à un utilisateur spécifique.
-
-**Rule** : ADMIN voit tout, autres rôles voient seulement leurs données.
+For documents, posts, orders — data owned by a specific user.
+ADMIN sees all, other roles see only their own data.
 
 ```tsx
 import "server-only";
 
 import { UserRole } from "@/lib/generated/prisma/client";
+import { DEFAULT_PAGE_SIZE } from "@/lib/parsers/nuqs";
+import { prisma } from "@/lib/prisma";
 
 const UNRESTRICTED_ROLES: UserRole[] = [UserRole.ADMIN];
 
 async function getDocuments(
   filters: GetDocumentsFilters,
-  userId: string, // ✅ MANDATORY
-  userRole: UserRole, // ✅ MANDATORY
+  userId: string,
+  userRole: UserRole,
 ): Promise<GetDocumentsResult> {
-  // ✅ No rate limiting here — handled at entry point (page route / action / API route)
-
   const canAccessAllData = UNRESTRICTED_ROLES.includes(userRole);
 
   const whereClause = {
-    // ✅ Filtrer par userId SAUF pour ADMIN
     ...(!canAccessAllData && { userId }),
     ...(filters.search && {
       name: { contains: filters.search, mode: "insensitive" as const },
@@ -125,32 +65,22 @@ async function getDocuments(
 
   const [documents, totalCount] = await prisma.$transaction([
     prisma.document.findMany({
-      where: whereClause, // ✅ userId forcé pour non-admin
+      where: whereClause,
       select: { id: true, name: true, content: true },
-      orderBy: { [safeSortBy]: safeOrder },
-      skip: (safePage - 1) * DEFAULT_PAGE_SIZE,
+      orderBy: { [filters.sortBy]: filters.order },
+      skip: (filters.page - 1) * DEFAULT_PAGE_SIZE,
       take: DEFAULT_PAGE_SIZE,
     }),
     prisma.document.count({ where: whereClause }),
   ]);
 
-  return { documents, totalCount, totalPages, currentPage: safePage };
+  return { documents, totalCount, totalPages, currentPage: filters.page };
 }
-
-// Usage dans la page
-const session = await requireSession();
-const { documents } = await getDocuments(
-  filters,
-  session.user.id,
-  session.user.role,
-);
 ```
 
-### Pattern 2 : Service Admin-Only (Global Data)
+### Pattern 2: Admin-Only Data
 
-**Use case** : Gestion des utilisateurs, analytics globales, settings système.
-
-**Rule** : Accessible seulement via `requireAdmin()`. Le service ne reçoit que les filtres — l'auth et le rate limiting sont gérés au niveau de la route.
+For user management, global analytics. Auth + rate limiting handled at route level.
 
 ```tsx
 import "server-only";
@@ -159,8 +89,6 @@ import { DEFAULT_PAGE_SIZE } from "@/lib/parsers/nuqs";
 import { prisma } from "@/lib/prisma";
 
 async function getUsers(filters: GetUsersFilters): Promise<GetUsersResult> {
-  // Pas de filtre userId (admin voit tous les users)
-  // Pas de rate limiting (géré au niveau de la route)
   const whereClause = {
     ...(filters.search && {
       OR: [
@@ -185,21 +113,13 @@ async function getUsers(filters: GetUsersFilters): Promise<GetUsersResult> {
 
   return { users, totalCount, totalPages, currentPage: filters.page };
 }
-
-// Usage dans la page ADMIN
-const session = await requireAdminVerifiedEmail(); // ✅ Guard + rate limit dans la route
-const { users } = await getUsers(filters);
 ```
 
-### Pattern 3 : Service Multi-Rôles (Complex Permissions)
+### Pattern 3: Multi-Role Access (Team Scoping)
 
-**Use case** : Certains rôles (MANAGER) peuvent voir les données de leur équipe, ADMIN voit tout.
+For cases where MANAGER sees team data, ADMIN sees all, CUSTOMER sees own.
 
 ```tsx
-import "server-only";
-
-import { UserRole } from "@/lib/generated/prisma/client";
-
 const UNRESTRICTED_ROLES: UserRole[] = [UserRole.ADMIN];
 const TEAM_SCOPED_ROLES: UserRole[] = [UserRole.MANAGER];
 
@@ -214,276 +134,73 @@ async function getProjects(
   let whereClause = {};
 
   if (canAccessAllData) {
-    // ADMIN: voit tous les projets
     whereClause = {
       ...(filters.search && { name: { contains: filters.search } }),
     };
   } else if (canAccessTeamData) {
-    // MANAGER: voit projets de son équipe
     const teamMemberIds = await getTeamMemberIds(userId);
     whereClause = {
       userId: { in: [...teamMemberIds, userId] },
       ...(filters.search && { name: { contains: filters.search } }),
     };
   } else {
-    // CUSTOMER: voit seulement ses propres projets
     whereClause = {
       userId,
       ...(filters.search && { name: { contains: filters.search } }),
     };
   }
 
-  const [projects, totalCount] = await prisma.$transaction([
-    prisma.project.findMany({
-      where: whereClause,
-      select: { id: true, name: true, userId: true },
-      skip: (safePage - 1) * DEFAULT_PAGE_SIZE,
-      take: DEFAULT_PAGE_SIZE,
-    }),
-    prisma.project.count({ where: whereClause }),
-  ]);
-
-  return { projects, totalCount };
+  // ... prisma.$transaction as usual
 }
 ```
 
-## Security Checklist (P0)
+## Rate Limiting (Entry Points Only)
 
-### Every Service MUST Have
+| Entry Point | Pattern                                                                   | Identifier        |
+| ----------- | ------------------------------------------------------------------------- | ----------------- |
+| Page route  | `filterRatelimit.limit(userId)` → `return <TooManyRequestsPage />`        | `session.user.id` |
+| Action      | `.use(async ({ next }) => { await checkRatelimit(...); return next(); })` | `ctx.userId`      |
+| API route   | `await checkRatelimit(...)` at top of handler                             | `session.user.id` |
+| **Service** | **Nothing** — services are pure                                           | —                 |
 
-- ✅ `import "server-only"` at top
-- ✅ `userId: string` + `userRole: UserRole` parameters (for user-scoped services)
-- ✅ `UNRESTRICTED_ROLES` constant defined (for user-scoped services)
-- ✅ Filter by `userId` UNLESS `userRole` in `UNRESTRICTED_ROLES`
-- ✅ Admin-only services: only `filters` param needed (auth + rate limit at route level)
-- ✅ `select` explicit in Prisma queries
-- ✅ `take` limit in `findMany`
-- ✅ `$transaction` for parallel count + findMany
-- ❌ NO re-validation of filter params — nuqs parsers already validate, sanitize, and bound all values
-- ❌ NO `checkRatelimit` — rate limiting belongs at the entry point, not in services
+## Service Checklist
 
-### Every Route File Calling a Service MUST Have
+Every service MUST have:
 
-- ✅ Auth guard first (`requireSession`, `requireAdmin`, etc.)
-- ✅ `const { success } = await filterRatelimit.limit(session.user.id)`
-- ✅ `if (!success) { return <TooManyRequestsPage />; }` immediately after
-- ✅ Service call only after rate limit check passes
+- `import "server-only"` at top
+- `userId: string` + `userRole: UserRole` parameters (user-scoped services)
+- `UNRESTRICTED_ROLES` constant defined
+- Filter by `userId` UNLESS role in `UNRESTRICTED_ROLES`
+- Explicit `select` in Prisma queries
+- `take` limit on `findMany`
+- `$transaction` for parallel count + findMany
 
-### Page Guard + Service Call Pattern
+Every service MUST NOT have:
 
-```tsx
-// ✅ Pattern 1: User-scoped data
-const session = await requireSession();
-const { data } = await getUserData(filters, session.user.id, session.user.role);
+- Rate limiting (belongs at entry point)
+- Re-validation of filter params (nuqs parsers already validate)
 
-// ✅ Pattern 2: Admin-only data (no userId needed — auth + rate limit at route level)
-const session = await requireAdminVerifiedEmail();
-const { data } = await getAdminData(filters);
-
-// ✅ Pattern 3: Customer-only data with verification
-const session = await requireCustomerVerifiedEmail();
-const { data } = await getCustomerData(
-  filters,
-  session.user.id,
-  session.user.role,
-);
-```
-
-## Anti-Patterns (CRITICAL - Never Do This)
+## Anti-Patterns
 
 ```tsx
-// ❌ WRONG: Boolean for permissions
-async function getEntities(
-  filters: GetEntitiesFilters,
-  userId: string,
-  isAdmin: boolean = false
-) { }
+// ❌ Boolean permissions
+async function getEntities(userId: string, isAdmin: boolean = false) {}
 
-// ❌ WRONG: Missing userId parameter
+// ❌ Missing userId — IDOR vulnerability
 async function getEntities(filters: GetEntitiesFilters) {
-  const entities = await prisma.entity.findMany({
-    where: { name: filters.search },  // ❌ IDOR!
-  });
+  await prisma.entity.findMany({ where: { name: filters.search } });
 }
 
-// ❌ WRONG: Not filtering by userId for non-admin
-async function getEntities(
-  filters: GetEntitiesFilters,
-  userId: string,
-  userRole: UserRole
-) {
-  const entities = await prisma.entity.findMany({
-    where: { name: filters.search },  // ❌ Missing userId check!
-  });
+// ❌ Hardcoded role check
+if (userRole === UserRole.ADMIN) {
+  /* what about MANAGER? */
 }
 
-// ❌ WRONG: Hardcoded role check
+// ❌ String instead of UserRole
+async function getEntities(userId: string, role: string) {}
+
+// ❌ Rate limiting inside service
 async function getEntities(userId: string, userRole: UserRole) {
-  if (userRole === UserRole.ADMIN) {  // ❌ What about future roles?
-    // ...
-  }
-}
-
-// ❌ WRONG: Using string instead of UserRole
-async function getEntities(userId: string, role: string) {  // ❌ NOT type-safe
-  if (role === "ADMIN") {  // ❌ Magic string
-    // ...
-  }
-}
-
-// ❌ WRONG: Rate limiting inside a service
-async function getEntities(userId: string, userRole: UserRole) {
-  await checkRatelimit(filterRatelimit, userId); // ❌ belongs at entry point
-  const entities = await prisma.entity.findMany({ ... });
-}
-
-// ✅ CORRECT: Rate limiting at the route file (entry point)
-export default async function DashboardRoute() {
-  const session = await requireSession();
-  const { success } = await filterRatelimit.limit(session.user.id);
-  if (!success) { return <TooManyRequestsPage />; }
-  const data = await getEntities(filters, session.user.id, session.user.role);
+  await checkRatelimit(filterRatelimit, userId); // belongs at entry point
 }
 ```
-
-## Testing IDOR Vulnerabilities
-
-### Manual Test Script
-
-```bash
-# Test 1: User A cannot see User B's data
-curl -H "Cookie: session-user-a" /api/documents
-# Expected: Only User A's documents
-
-curl -H "Cookie: session-user-b" /api/documents
-# Expected: Only User B's documents (NOT User A's)
-
-# Test 2: Admin can see all data
-curl -H "Cookie: session-admin" /api/documents
-# Expected: ALL documents from all users
-
-# Test 3: Non-admin cannot bypass with query params
-curl -H "Cookie: session-user-a" /api/documents?userId=user-b-id
-# Expected: Still only User A's documents (userId param ignored)
-```
-
-### Automated Tests (Vitest)
-
-```tsx
-import { describe, expect, it } from "vitest";
-
-import { UserRole } from "@/lib/generated/prisma/client";
-
-import { getDocuments } from "./get-documents.service";
-
-describe("getDocuments - IDOR Prevention", () => {
-  it("should return only user's documents for CUSTOMER role", async () => {
-    const result = await getDocuments(
-      { search: "", page: 1 },
-      "user-a-id",
-      UserRole.CUSTOMER,
-    );
-
-    // Verify all returned documents belong to user-a-id
-    expect(result.documents.every((doc) => doc.userId === "user-a-id")).toBe(
-      true,
-    );
-  });
-
-  it("should return all documents for ADMIN role", async () => {
-    const result = await getDocuments(
-      { search: "", page: 1 },
-      "admin-id",
-      UserRole.ADMIN,
-    );
-
-    // Verify documents from multiple users are returned
-    const uniqueUserIds = new Set(result.documents.map((doc) => doc.userId));
-    expect(uniqueUserIds.size).toBeGreaterThan(1);
-  });
-
-  it("should never leak other users' data", async () => {
-    const userADocs = await getDocuments(
-      { search: "", page: 1 },
-      "user-a-id",
-      UserRole.CUSTOMER,
-    );
-
-    const userBDocs = await getDocuments(
-      { search: "", page: 1 },
-      "user-b-id",
-      UserRole.CUSTOMER,
-    );
-
-    // Verify no overlap between users
-    const userAIds = new Set(userADocs.documents.map((d) => d.id));
-    const userBIds = new Set(userBDocs.documents.map((d) => d.id));
-
-    const intersection = [...userAIds].filter((id) => userBIds.has(id));
-    expect(intersection.length).toBe(0);
-  });
-});
-```
-
-## Migration Guide
-
-### Existing Service Using Boolean
-
-**Before** :
-
-```tsx
-async function getEntities(
-  filters: GetEntitiesFilters,
-  userId: string,
-  isAdmin: boolean = false,
-) {
-  const whereClause = {
-    ...(!isAdmin && { userId }),
-  };
-}
-```
-
-**After** :
-
-```tsx
-import { UserRole } from "@/lib/generated/prisma/client";
-
-const UNRESTRICTED_ROLES: UserRole[] = [UserRole.ADMIN];
-
-async function getEntities(
-  filters: GetEntitiesFilters,
-  userId: string,
-  userRole: UserRole, // ✅ Changed from boolean
-) {
-  const canAccessAllData = UNRESTRICTED_ROLES.includes(userRole);
-  const whereClause = {
-    ...(!canAccessAllData && { userId }),
-  };
-}
-```
-
-**Page Update** :
-
-```tsx
-// Before
-const session = await requireSession();
-const isAdmin = session.user.role === UserRole.ADMIN;
-const { data } = await getEntities(filters, session.user.id, isAdmin);
-
-// After
-const session = await requireSession();
-const { data } = await getEntities(filters, session.user.id, session.user.role);
-```
-
-## References
-
-- [OWASP: Insecure Direct Object References](https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/05-Authorization_Testing/04-Testing_for_Insecure_Direct_Object_References)
-- [CWE-639: Authorization Bypass Through User-Controlled Key](https://cwe.mitre.org/data/definitions/639.html)
-- Prisma Best Practices: Always use `select`, never `select *`
-- Defense in Depth: Validate at parsers → schemas → services → Prisma
-
-## Related Rules
-
-- `.claude/rules/feature.md` — Feature module structure
-- `.claude/rules/filter.md` — Filter/Sort/Pagination architecture
-- `SECURITY-AUDIT.md` — Complete security audit with all vulnerabilities

@@ -1,3 +1,11 @@
+---
+paths:
+  - "app/**/page.tsx"
+  - "app/**/loading.tsx"
+  - "features/*/pages/**"
+  - "features/*/constants/*-seo*"
+---
+
 # Page & Loading Page Rules
 
 ## Context
@@ -195,6 +203,7 @@ export default function PricingRoute() {
 ```tsx
 export default async function PricingRoute() {
   const session = await getSession();
+
   const { isAuthenticated, isEmailVerified, isCustomer } =
     await getPricingUserStatus(session?.user.id ?? null);
 
@@ -213,6 +222,7 @@ export default async function PricingRoute() {
 ```tsx
 export default async function DashboardBillingRoute() {
   const session = await requireCustomerVerifiedEmail();
+
   const billing = await getBilling(session.user.id);
 
   if (!billing) {

@@ -1,3 +1,8 @@
+---
+paths:
+  - "app/api/**"
+---
+
 # API Route Rules
 
 ## Context
@@ -26,10 +31,17 @@ type RouteParams = {
 async function POST(request: Request) {
   try {
     const session = await getSession();
-    if (!session) throw new UnauthorizedError("Vous devez être connecté");
+
+    if (!session) {
+      throw new UnauthorizedError("Vous devez être connecté");
+    }
 
     const formData = await request.formData();
-    const data = UpdateAvatarSchema.parse({ avatar: formData.get("avatar") });
+
+    const data = UpdateAvatarSchema.parse({
+      avatar: formData.get("avatar"),
+    });
+
     const result = await updateAvatar({
       userId: session.user.id,
       avatar: data.avatar,
@@ -87,7 +99,10 @@ type RouteParams = {
 
 async function GET(request: Request, { params }: RouteParams) {
   const { id } = await params; // ← Always await
-  if (!id) throw new BadRequestError("ID requis");
+
+  if (!id) {
+    throw new BadRequestError("ID requis");
+  }
   // ...
 }
 ```
@@ -132,20 +147,37 @@ type RouteParams = {
 async function GET(request: Request, { params }: RouteParams) {
   try {
     const { id } = await params;
-    if (!id) throw new BadRequestError("ID requis");
 
-    const authSession = await auth.api.getSession({ headers: await headers() });
-    if (!authSession?.user)
-      throw new UnauthorizedError("Vous devez être connecté");
+    if (!id) {
+      throw new BadRequestError("ID requis");
+    }
 
-    const document = await prisma.document.findUnique({
-      where: { id },
-      select: { id: true, name: true, userId: true },
+    const authSession = await auth.api.getSession({
+      headers: await headers(),
     });
 
-    if (!document) throw new NotFoundError("Document introuvable");
-    if (document.userId !== authSession.user.id)
+    if (!authSession?.user) {
+      throw new UnauthorizedError("Vous devez être connecté");
+    }
+
+    const document = await prisma.document.findUnique({
+      where: {
+        id,
+      },
+      select: {
+        id: true,
+        name: true,
+        userId: true,
+      },
+    });
+
+    if (!document) {
+      throw new NotFoundError("Document introuvable");
+    }
+
+    if (document.userId !== authSession.user.id) {
       throw new ForbiddenError("Accès non autorisé");
+    }
 
     return NextResponse.json(
       { success: true, data: document },
@@ -182,22 +214,40 @@ async function POST(request: Request) {
 async function DELETE(request: Request, { params }: RouteParams) {
   try {
     const { id } = await params;
-    if (!id) throw new BadRequestError("ID requis");
+
+    if (!id) {
+      throw new BadRequestError("ID requis");
+    }
 
     const authSession = await auth.api.getSession({ headers: await headers() });
-    if (!authSession?.user)
+
+    if (!authSession?.user) {
       throw new UnauthorizedError("Vous devez être connecté");
+    }
 
     const document = await prisma.document.findUnique({
-      where: { id },
-      select: { id: true, userId: true },
+      where: {
+        id,
+      },
+      select: {
+        id: true,
+        userId: true,
+      },
     });
 
-    if (!document) throw new NotFoundError("Document introuvable");
-    if (document.userId !== authSession.user.id)
-      throw new ForbiddenError("Accès non autorisé");
+    if (!document) {
+      throw new NotFoundError("Document introuvable");
+    }
 
-    await prisma.document.delete({ where: { id } });
+    if (document.userId !== authSession.user.id) {
+      throw new ForbiddenError("Accès non autorisé");
+    }
+
+    await prisma.document.delete({
+      where: {
+        id,
+      },
+    });
 
     return new NextResponse(null, { status: 204 });
   } catch (error: unknown) {
@@ -231,7 +281,11 @@ import { ContactEmail } from "@/features/contact/emails/contact-email";
 const data = await request.json();
 
 // ❌ Wrong: Prisma without select
-const user = await prisma.user.findUnique({ where: { id } });
+const user = await prisma.user.findUnique({
+  where: {
+    id
+  }
+});
 
 // ❌ Wrong: Not awaiting params
 async function GET(request: Request, { params }: RouteParams) {

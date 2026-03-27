@@ -36,6 +36,7 @@ function formatAmount(amount: number | null): string {
   if (amount === null) {
     return "0,00 €";
   }
+
   return new Intl.NumberFormat("fr-FR", {
     style: "currency",
     currency: "eur",

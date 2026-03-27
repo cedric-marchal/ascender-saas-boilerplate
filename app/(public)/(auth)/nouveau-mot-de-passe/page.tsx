@@ -21,13 +21,13 @@ export const metadata: Metadata = {
   },
 };
 
-type NouveauMotDePasseRouteProps = {
+type ResetPasswordRouteProps = {
   searchParams: Promise<{ token?: string }>;
 };
 
 export default async function ResetPasswordRoute({
   searchParams,
-}: NouveauMotDePasseRouteProps) {
+}: ResetPasswordRouteProps) {
   const session = await getSession();
 
   if (session) {

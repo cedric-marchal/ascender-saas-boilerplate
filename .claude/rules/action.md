@@ -1,3 +1,9 @@
+---
+paths:
+  - "features/*/actions/**"
+  - "lib/safe-action*"
+---
+
 # Server Action Rules (next-safe-action)
 
 ## Context
@@ -34,7 +40,10 @@ export const createContactAction = actionClient
   .inputSchema(CreateContactSchema)
   .action(async ({ parsedInput }) => {
     await createContact(parsedInput);
-    return { success: true };
+
+    return {
+      success: true,
+    };
   });
 ```
 
@@ -53,7 +62,10 @@ export const createContactAction = actionClient
   .inputSchema(CreateContactSchema)
   .action(async ({ parsedInput }) => {
     await sendEmail({ ... });
-    return { success: true };
+
+    return {
+      success: true
+    };
   });
 ```
 
@@ -63,8 +75,15 @@ export const createContactAction = actionClient
 export const updateProfileAction = authActionClient
   .inputSchema(UpdateProfileSchema)
   .action(async ({ parsedInput, ctx }) => {
-    const user = await updateProfile({ userId: ctx.userId, data: parsedInput });
-    return { success: true, user };
+    const user = await updateProfile({
+      userId: ctx.userId,
+      data: parsedInput,
+    });
+
+    return {
+      success: true,
+      user,
+    };
   });
 ```
 
@@ -74,8 +93,15 @@ export const updateProfileAction = authActionClient
 export const deleteUserAction = adminActionClient
   .inputSchema(DeleteUserSchema)
   .action(async ({ parsedInput, ctx }) => {
-    await prisma.user.delete({ where: { id: parsedInput.userId } });
-    return { success: true };
+    await prisma.user.delete({
+      where: {
+        id: parsedInput.userId,
+      },
+    });
+
+    return {
+      success: true,
+    };
   });
 ```
 
@@ -96,8 +122,12 @@ export const createContactAction = authActionClient
   .inputSchema(CreateContactSchema)
   .action(async ({ parsedInput, ctx }) => {
     const existing = await prisma.contact.findUnique({
-      where: { email: parsedInput.email },
-      select: { id: true },
+      where: {
+        email: parsedInput.email,
+      },
+      select: {
+        id: true,
+      },
     });
 
     if (existing) {
@@ -105,11 +135,20 @@ export const createContactAction = authActionClient
     }
 
     const contact = await prisma.contact.create({
-      data: { ...parsedInput, userId: ctx.userId },
-      select: { id: true, email: true },
+      data: {
+        ...parsedInput,
+        userId: ctx.userId,
+      },
+      select: {
+        id: true,
+        email: true,
+      },
     });
 
-    return { success: true, contact };
+    return {
+      success: true,
+      contact,
+    };
   });
 ```
 
@@ -119,8 +158,14 @@ export const createContactAction = authActionClient
 - next-safe-action wraps in `{ data: <return> }`
 
 ```tsx
-return { success: true }; // Simple
-return { success: true, user }; // With data
+return {
+  success: true,
+}; // Simple
+
+return {
+  success: true,
+  user,
+}; // With data
 ```
 
 ## Middleware (P1)
@@ -131,10 +176,13 @@ Use `.use()` for rate limiting, logging:
 export const createContactAction = actionClient
   .use(async ({ next }) => {
     await checkRatelimit(contactRatelimit, "identifier");
+
     return next();
   })
   .inputSchema(CreateContactSchema)
-  .action(async ({ parsedInput }) => { ... });
+  .action(async ({ parsedInput }) => {
+    ...
+  });
 ```
 
 ## Revalidation (P1)
@@ -147,9 +195,16 @@ import { revalidatePath } from "next/cache";
 export const updateProfileAction = authActionClient
   .inputSchema(UpdateProfileSchema)
   .action(async ({ parsedInput, ctx }) => {
-    const user = await prisma.user.update({ ... });
+    const user = await prisma.user.update({
+      ...
+    });
+
     revalidatePath("/dashboard/settings");  // ← After mutation
-    return { success: true, user };
+
+    return {
+      success: true,
+      user
+    };
   });
 ```
 
@@ -161,14 +216,22 @@ export const updateProfileAction = authActionClient
 ```tsx
 // ✅ Correct
 const user = await prisma.user.update({
-  where: { id: ctx.userId },
+  where: {
+    id: ctx.userId,
+  },
   data: parsedInput,
-  select: { id: true, name: true, email: true },
+  select: {
+    id: true,
+    name: true,
+    email: true,
+  },
 });
 
 // ❌ Wrong: no select
 const user = await prisma.user.update({
-  where: { id: ctx.userId },
+  where: {
+    id: ctx.userId,
+  },
   data: parsedInput,
 });
 ```
@@ -197,12 +260,19 @@ function ContactForm() {
   const { executeAsync, isExecuting } = useAction(createContactAction);
 
   const form = useForm({
-    defaultValues: { name: "", email: "" } as CreateContactSchemaType,
-    validators: { onSubmit: CreateContactSchema },
+    defaultValues: {
+      name: "",
+      email: "",
+    } as CreateContactSchemaType,
+    validators: {
+      onSubmit: CreateContactSchema,
+    },
     onSubmit: async ({ value }) => {
       try {
         getActionResult(await executeAsync(value)); // Throw on error
+
         toast.success("Message envoyé avec succès !");
+
         form.reset();
       } catch (error: unknown) {
         toast.error(getErrorMessage(error));
@@ -243,7 +313,9 @@ export const createContactAction = actionClient
   .inputSchema(CreateContactSchema)
   .action(async ({ parsedInput }) => {
     try {  // ❌ Not needed
-      return { success: true };
+      return {
+        success: true
+      };
     } catch (error: unknown) {
       return handleActionError(error);
     }
@@ -256,10 +328,16 @@ export const createContactAction = actionClient
   });
 
 // ❌ Wrong: Prisma without select
-const user = await prisma.user.update({ where: { id }, data });
+const user = await prisma.user.update({
+  where: {
+    id
+  },
+  data
+});
 
 // ❌ Wrong: Client-side manual if/else
 const result = await executeAsync(value);
+
 if (result?.serverError) {
   toast.error(result.serverError);
   return;
