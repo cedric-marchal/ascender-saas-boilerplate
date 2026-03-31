@@ -1,29 +1,29 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  DEFAULT_PAGE_SIZE,
   MAX_ARRAY_LENGTH,
   MAX_PAGE,
   MAX_SEARCH_LENGTH,
+  PAGE_SIZE,
   PAGE_SIZES,
   SORT_ORDERS,
-} from "@/lib/parsers/nuqs";
+} from "@/lib/parsers/filters";
 
 describe("Pagination constants", () => {
   it("has MAX_PAGE === 1000", () => {
     expect(MAX_PAGE).toBe(1000);
   });
 
-  it("has DEFAULT_PAGE_SIZE === 10", () => {
-    expect(DEFAULT_PAGE_SIZE).toBe(10);
+  it("has PAGE_SIZE.SMALL === 10", () => {
+    expect(PAGE_SIZE.SMALL).toBe(10);
   });
 
   it("has PAGE_SIZES array", () => {
     expect(PAGE_SIZES).toEqual([10, 20, 50, 100]);
   });
 
-  it("DEFAULT_PAGE_SIZE is included in PAGE_SIZES", () => {
-    expect(PAGE_SIZES).toContain(DEFAULT_PAGE_SIZE);
+  it("PAGE_SIZE.SMALL is included in PAGE_SIZES", () => {
+    expect(PAGE_SIZES).toContain(PAGE_SIZE.SMALL);
   });
 });
 

@@ -5,7 +5,7 @@ import {
   verificationFilters,
 } from "@/features/users/constants/users-filters.constant";
 
-import { MAX_SEARCH_LENGTH } from "@/lib/parsers/nuqs";
+import { MAX_SEARCH_LENGTH } from "@/lib/parsers/filters";
 
 const FilterUsersSchema = z.object({
   search: z

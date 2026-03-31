@@ -5,7 +5,7 @@ import {
   type GetUsersFilters,
 } from "@/features/users/services/get-users.service";
 
-import { DEFAULT_PAGE_SIZE } from "@/lib/parsers/nuqs";
+import { PAGE_SIZE } from "@/lib/parsers/filters";
 import { prisma } from "@/lib/prisma";
 
 vi.mock("@/lib/prisma", () => ({
@@ -111,14 +111,14 @@ describe("getUsers", () => {
       await getUsers({ ...defaultFilters, page: 3 });
 
       const findManyArgs = vi.mocked(prisma.user.findMany).mock.calls[0]![0]!;
-      expect(findManyArgs.skip).toBe(2 * DEFAULT_PAGE_SIZE);
+      expect(findManyArgs.skip).toBe(2 * PAGE_SIZE.SMALL);
     });
 
-    it("limits results to DEFAULT_PAGE_SIZE", async () => {
+    it("limits results to PAGE_SIZE.SMALL", async () => {
       await getUsers(defaultFilters);
 
       const findManyArgs = vi.mocked(prisma.user.findMany).mock.calls[0]![0]!;
-      expect(findManyArgs.take).toBe(DEFAULT_PAGE_SIZE);
+      expect(findManyArgs.take).toBe(PAGE_SIZE.SMALL);
     });
   });
 

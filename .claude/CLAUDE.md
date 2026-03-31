@@ -51,7 +51,7 @@ hooks/                        # Shared hooks
 ```
 Prisma Schema (enums: UserRole, SubscriptionStatus — ALWAYS UPPERCASE)
   → lib/generated/prisma/client (server) or prisma/browser (client-safe)
-  → lib/parsers/nuqs.ts
+  → lib/parsers/filters.ts (pure constants) + lib/parsers/nuqs.ts (Nuqs parsers only)
   → features/*/constants/
   → features/*/schemas/
   → features/*/services/
@@ -97,9 +97,10 @@ NEVER skip this step, even for small changes.
 
 ## Security (CRITICAL)
 
-- Services: ALWAYS `userId: string` + `userRole: UserRole` (NEVER booleans)
-- Define `UNRESTRICTED_ROLES: UserRole[]`, check with `.includes(userRole)`
-- Filter by `userId` UNLESS role is in `UNRESTRICTED_ROLES`
+- Services: ALWAYS `userId: string` parameter for user-scoped data (NEVER booleans for permissions)
+- Customer services: ALWAYS filter by `userId` in Prisma `where` clause (IDOR prevention)
+- Admin services: separate service, no `userId` filter (access guaranteed by entry point)
+- NEVER mix admin and customer logic in the same service — separate services per role
 - Rate limiting at entry point only (page/action/API), NEVER in services
 
 ## Error Handling

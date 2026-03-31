@@ -1,32 +1,26 @@
 "use client";
 
-import { useState } from "react";
-
 import { ExternalLink, Loader2 } from "lucide-react";
+import { useAction } from "next-safe-action/hooks";
 import { toast } from "sonner";
 
-import { upfetch } from "@/lib/up-fetch";
+import { createPortalSessionAction } from "@/features/billing/actions/create-portal-session.action";
 
 import { Button } from "@/components/ui/button";
 
+import { getActionResult } from "@/utils/errors/get-action-result";
 import { getErrorMessage } from "@/utils/errors/get-error-message";
 
 function BillingPortalButton() {
-  const [isLoading, setIsLoading] = useState(false);
+  const { executeAsync, isExecuting } = useAction(createPortalSessionAction);
 
   async function handleOpenPortal() {
-    setIsLoading(true);
-
     try {
-      const result = await upfetch("/api/stripe/portal", {
-        method: "POST",
-      });
+      const data = getActionResult(await executeAsync());
 
-      window.location.href = result.data.url;
+      window.location.href = data.url;
     } catch (error: unknown) {
       toast.error(getErrorMessage(error));
-    } finally {
-      setIsLoading(false);
     }
   }
 
@@ -35,13 +29,13 @@ function BillingPortalButton() {
       type="button"
       variant="outline"
       onClick={handleOpenPortal}
-      disabled={isLoading}
+      disabled={isExecuting}
     >
-      {isLoading && (
+      {isExecuting && (
         <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
       )}
       <ExternalLink className="mr-2 h-4 w-4" aria-hidden="true" />
-      {isLoading ? "Chargement..." : "Gérer mon abonnement"}
+      {isExecuting ? "Chargement..." : "Gérer mon abonnement"}
     </Button>
   );
 }

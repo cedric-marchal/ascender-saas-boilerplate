@@ -4,24 +4,13 @@ import {
   type SingleParserBuilder,
 } from "nuqs/server";
 
-const MAX_PAGE = 1000;
-const MAX_SEARCH_LENGTH = 100;
-const MAX_ARRAY_LENGTH = 50;
-
-const PAGE_SIZE = {
-  SMALL: 10,
-  MEDIUM: 20,
-  LARGE: 50,
-  XLARGE: 100,
-} as const;
-
-const PAGE_SIZES = Object.values(PAGE_SIZE);
-const DEFAULT_PAGE_SIZE = PAGE_SIZE.SMALL;
-
-const SORT_ORDERS = ["asc", "desc"] as const;
-
-type PageSize = (typeof PAGE_SIZES)[number];
-type SortOrder = (typeof SORT_ORDERS)[number];
+import {
+  MAX_PAGE,
+  MAX_SEARCH_LENGTH,
+  PAGE_SIZE,
+  PAGE_SIZES,
+  SORT_ORDERS,
+} from "@/lib/parsers/filters";
 
 const parseAsPage = createParser({
   parse(query) {
@@ -60,7 +49,7 @@ const parseAsPageSize = createParser({
 
     return (PAGE_SIZES as readonly number[]).includes(parsed)
       ? parsed
-      : PAGE_SIZE.SMALL; // Fallback sur SMALL (10) si invalide
+      : PAGE_SIZE.SMALL;
   },
   serialize(value) {
     return String(value);
@@ -84,17 +73,8 @@ function createSortByParser<const T extends readonly string[]>(
 export {
   createEnumParser,
   createSortByParser,
-  DEFAULT_PAGE_SIZE,
-  MAX_ARRAY_LENGTH,
-  MAX_PAGE,
-  MAX_SEARCH_LENGTH,
-  PAGE_SIZE,
-  PAGE_SIZES,
   parseAsOrder,
   parseAsPage,
   parseAsPageSize,
   parseAsSafeSearch,
-  SORT_ORDERS,
 };
-
-export type { PageSize, SortOrder };

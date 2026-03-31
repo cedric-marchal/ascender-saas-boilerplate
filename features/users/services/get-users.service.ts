@@ -8,7 +8,7 @@ import type {
 
 import type { User, UserRole } from "@/lib/generated/prisma/client";
 import type { UserWhereInput } from "@/lib/generated/prisma/models";
-import { DEFAULT_PAGE_SIZE, type SortOrder } from "@/lib/parsers/nuqs";
+import { PAGE_SIZE, type SortOrder } from "@/lib/parsers/filters";
 import { prisma } from "@/lib/prisma";
 
 type GetUsersFilters = {
@@ -64,13 +64,13 @@ async function getUsers(filters: GetUsersFilters): Promise<GetUsersResult> {
         createdAt: true,
       },
       orderBy: { [filters.sortBy]: filters.order },
-      skip: (filters.page - 1) * DEFAULT_PAGE_SIZE,
-      take: DEFAULT_PAGE_SIZE,
+      skip: (filters.page - 1) * PAGE_SIZE.SMALL,
+      take: PAGE_SIZE.SMALL,
     }),
     prisma.user.count({ where: whereClause }),
   ]);
 
-  const totalPages = Math.max(1, Math.ceil(totalCount / DEFAULT_PAGE_SIZE));
+  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE.SMALL));
 
   return {
     users,

@@ -4,42 +4,64 @@ paths:
   - "features/*/schemas/*-filter*"
   - "features/*/components/*-filters*"
   - "features/*/components/*-columns*"
-  - "lib/parsers/nuqs*"
+  - "lib/parsers/*"
   - "components/pagination*"
   - "components/page-size*"
 ---
 
 # Filter, Search, Sort & Pagination Rules
 
-## 6-Layer Architecture
+## Import Rule (CRITICAL)
+
+Two separate files for two separate concerns:
+
+| File                     | Contains                                                                                          | Who imports it                                                                       |
+| ------------------------ | ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| `lib/parsers/filters.ts` | Pure constants & types (`PAGE_SIZE.SMALL`, `SortOrder`, `MAX_SEARCH_LENGTH`, etc.)                | Services, schemas, tests — anything that needs pagination/filter values without Nuqs |
+| `lib/parsers/nuqs.ts`    | Nuqs parsers only (`parseAsPage`, `createEnumParser`, etc.) — imports constants from `filters.ts` | Constants files (searchParams config), components, pages                             |
+
+**NEVER import from `nuqs.ts` in services or schemas.** Services MUST import from `filters.ts` to stay decoupled from Nuqs.
+
+### When to use Nuqs vs plain filters
+
+| Scenario                                         | Nuqs? | Why                                                           |
+| ------------------------------------------------ | ----- | ------------------------------------------------------------- |
+| Page with URL filters/sort/pagination            | Yes   | State lives in the URL (bookmarkable, shareable, back button) |
+| Page with multiple independent lists             | No    | Query param conflicts between lists                           |
+| Cron, action, or service calling another service | No    | No URL involved                                               |
+| Page with a single list, no user-facing filters  | No    | Nothing to put in the URL                                     |
+
+**The service doesn't care.** It receives a plain TypeScript object. The page decides whether that object comes from Nuqs or is built manually.
+
+## Architecture
 
 ```
-Prisma Schema (enums) → lib/generated/prisma/client
-  → lib/parsers/nuqs.ts → features/*/constants/{entity}-filters.constant.ts
-  → features/*/schemas/ → features/*/services/ → features/*/components/ → app/*/page.tsx
+lib/parsers/filters.ts            ← pure constants & types (zero dependencies)
+lib/parsers/nuqs.ts               ← Nuqs parsers (imports from filters.ts)
+features/*/constants/              ← domain config (types, labels, searchParams)
+features/*/schemas/                ← Zod validation (imports limits from filters.ts)
+features/*/services/               ← server data fetch (imports from filters.ts)
+features/*/components/             ← client UI (imports parsers from nuqs.ts)
+app/*/page.tsx                     ← thin shim (createLoader from nuqs.ts OR manual object)
 ```
 
-| Layer | File                                                | Responsibility                                   |
-| ----- | --------------------------------------------------- | ------------------------------------------------ |
-| 1     | `lib/parsers/nuqs.ts`                               | Global constants + universal parsers             |
-| 2     | `features/*/constants/{entity}-filters.constant.ts` | Domain config (searchParams, guards, labels)     |
-| 3     | `features/*/schemas/{entity}-filters.schema.ts`     | Zod validation (imports from constants)          |
-| 4     | `features/*/services/get-{entity}.service.ts`       | Server data fetch (`"server-only"`)              |
-| 5     | `app/*/page.tsx`                                    | Server Component (`createLoader(searchParams)`)  |
-| 6     | `features/*/components/`                            | Client components (filters, columns, pagination) |
+## lib/parsers/filters.ts — Pure Constants
 
-## Layer 1: Global Constants + Parsers
-
-`lib/parsers/nuqs.ts` — ALL query constants and parsers centralized here.
+Zero dependencies. Importable anywhere.
 
 Key exports:
 
 - `PAGE_SIZE` object: `{ SMALL: 10, MEDIUM: 20, LARGE: 50, XLARGE: 100 }`
-- `PAGE_SIZES` array, `DEFAULT_PAGE_SIZE` → `PAGE_SIZE.SMALL`
-- `SORT_ORDERS`, `DEFAULT_SORT_ORDER`, `DEFAULT_SORT_BY`
-- `MAX_PAGE` (1000), `MAX_SEARCH_LENGTH` (100)
-- Parsers: `parseAsPage`, `parseAsSafeSearch`, `parseAsPageSize`, `parseAsOrder`
-- Factories: `createEnumParser()`, `createSortByParser()`
+- `PAGE_SIZES` array, `PAGE_SIZE.SMALL` → `PAGE_SIZE.SMALL`
+- `SORT_ORDERS`, types `SortOrder`, `PageSize`
+- `MAX_PAGE` (1000), `MAX_SEARCH_LENGTH` (100), `MAX_ARRAY_LENGTH` (50)
+
+## lib/parsers/nuqs.ts — Nuqs Parsers Only
+
+Imports constants from `filters.ts`. Exports only Nuqs-specific parsers:
+
+- `parseAsPage`, `parseAsSafeSearch`, `parseAsPageSize`, `parseAsOrder`
+- `createEnumParser()`, `createSortByParser()`
 
 Rules:
 
@@ -47,7 +69,7 @@ Rules:
 - `parseAsPage` MUST clamp between 1 and `MAX_PAGE`
 - `parseAsPageSize` MUST fallback to `PAGE_SIZE.SMALL` on invalid input
 
-## Layer 2: Domain Configuration
+## Domain Configuration
 
 `features/{feature}/constants/{entity}-filters.constant.ts`
 
@@ -91,24 +113,27 @@ Rules:
 - Type guards defined here for server validation
 - Labels: `Record<Enum, string>` (French UI strings)
 
-## Layer 3: Validation Schema
+## Validation Schema
 
 `features/*/schemas/{entity}-filters.schema.ts`
 
 - IMPORTS enum arrays from feature constants (never defines them)
-- IMPORTS limits from `@/lib/parsers/nuqs`
+- IMPORTS limits from `@/lib/parsers/filters` (NOT nuqs)
 - Validates form fields only (NOT `sortBy`/`order`/`page` — parsers handle those)
 
-## Layer 4: Service
+## Service
 
 - `import "server-only"` at top
+- Imports `PAGE_SIZE.SMALL`, `type SortOrder` from `@/lib/parsers/filters`
 - `$transaction` for parallel `findMany` + `count`
 - Always `select` + `take`
 - Dynamic orderBy: `{ [filters.sortBy]: filters.order }`
 - Use type guards from constants (e.g., `isUserRole()`)
-- NO re-validation — nuqs parsers already validate all values
+- NO re-validation — parsers or caller already validate all values
 
-## Layer 5: Server Page
+## Server Page
+
+### With Nuqs (URL-driven filters)
 
 ```tsx
 import { createLoader, type SearchParams } from "nuqs/server";
@@ -138,13 +163,42 @@ export default async function AdminUsersRoute({
 }
 ```
 
-- `createLoader(searchParams)` is the ONLY place parsers connect to page
-- Page does NOT re-validate
-- DataTable receives raw data (no client-side sort/filter/pagination)
+### Without Nuqs (manual filters)
 
-## Layer 6: Client Components
+```tsx
+import { getActivity } from "@/features/activity/services/get-activity.service";
+import { getProjects } from "@/features/projects/services/get-projects.service";
 
-### 6a. Filter Component
+export default async function DashboardRoute() {
+  const session = await requireCustomer();
+
+  const [projects, activity] = await Promise.all([
+    getProjects({
+      userId: session.user.id,
+      page: 1,
+      sortBy: "createdAt",
+      order: "desc",
+    }),
+    getActivity({
+      userId: session.user.id,
+      page: 1,
+      sortBy: "createdAt",
+      order: "desc",
+    }),
+  ]);
+
+  return (
+    <Main>
+      <ProjectsList projects={projects} />
+      <ActivityList activity={activity} />
+    </Main>
+  );
+}
+```
+
+## Client Components
+
+### Filter Component
 
 Uses TanStack Form + Zod + `useQueryStates`. On submit, pushes filters to URL with `page: 1` reset. See existing implementations in `features/*/components/*-filters.tsx`.
 
@@ -154,18 +208,18 @@ Key rules:
 - Reset `page: 1` on every filter change
 - Use `null` to clear params (not empty string)
 
-### 6b. SortableHeader in Columns
+### SortableHeader in Columns
 
 3-state toggle: `unsorted → asc → desc → reset`
 
 - Reset sets `sortBy: null, order: null`
 - `field` MUST match value in `{entity}SortableFields`
 
-### 6c. DataTable (Dumb Renderer)
+### DataTable (Dumb Renderer)
 
 ONLY `getCoreRowModel()` — NO `getSortedRowModel`, `getFilteredRowModel`, `getPaginationRowModel`.
 
-### 6d. Pagination
+### Pagination
 
 Uses `useQueryState("page", parseAsPage)`. Hides when `totalPages <= 1`. See `components/pagination.tsx`.
 
@@ -181,6 +235,7 @@ Uses `useQueryState("page", parseAsPage)`. Hides when `totalPages <= 1`. See `co
 ## Anti-Patterns
 
 ```
+Services importing from lib/parsers/nuqs.ts → MUST import from lib/parsers/filters.ts
 Parsers inline in page file → MUST be in lib/parsers/nuqs.ts
 Enums defined in schema → MUST be in constants
 parseAsSafeSearch rejecting → MUST truncate with .slice()
