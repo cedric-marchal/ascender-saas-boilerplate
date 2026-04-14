@@ -13,6 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 
 const DeleteAccountModal = dynamic(() =>
   import("@/features/account/components/modals/delete-account-modal").then(
@@ -34,6 +35,8 @@ function SettingsPage({ user, showStripeWarning = false }: SettingsPageProps) {
   return (
     <Main className="flex flex-col gap-6 p-6">
       <SettingsHeader />
+
+      <Separator />
 
       <div className="grid gap-6 lg:grid-cols-2">
         <div className="space-y-6">

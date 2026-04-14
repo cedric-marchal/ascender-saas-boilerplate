@@ -13,23 +13,22 @@ function TooManyRequestsPage() {
       aria-labelledby="too-many-requests-title"
     >
       <div className="mx-auto max-w-md text-center">
-        <Clock
-          className="text-muted-foreground mx-auto mb-6 h-16 w-16"
-          aria-hidden="true"
-        />
+        <div className="mx-auto mb-6 flex size-16 items-center justify-center rounded-full bg-orange-100">
+          <Clock className="size-8 text-orange-600" aria-hidden="true" />
+        </div>
 
         <h1
           id="too-many-requests-title"
-          className="text-foreground mb-2 text-4xl font-bold"
+          className="text-foreground mb-2 text-4xl font-bold tabular-nums"
         >
           429
         </h1>
 
-        <h2 className="text-foreground mb-4 text-xl font-semibold">
+        <h2 className="text-foreground mb-3 text-xl font-semibold">
           Trop de requêtes
         </h2>
 
-        <p className="text-muted-foreground mb-8">
+        <p className="text-muted-foreground mb-8 text-sm">
           Vous avez effectué trop de requêtes en peu de temps. Veuillez
           patienter quelques instants avant de réessayer.
         </p>

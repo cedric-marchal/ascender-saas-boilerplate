@@ -24,10 +24,12 @@ function GlobalErrorPage({ error, reset }: GlobalErrorPageProps) {
           aria-labelledby="global-error-title"
         >
           <div className="mx-auto max-w-md text-center">
-            <AlertTriangle
-              className="mx-auto mb-6 h-16 w-16 text-red-600"
-              aria-hidden="true"
-            />
+            <div className="mx-auto mb-6 flex size-16 items-center justify-center rounded-full bg-red-100">
+              <AlertTriangle
+                className="size-8 text-red-600"
+                aria-hidden="true"
+              />
+            </div>
 
             <h1
               id="global-error-title"
@@ -36,18 +38,18 @@ function GlobalErrorPage({ error, reset }: GlobalErrorPageProps) {
               Erreur critique
             </h1>
 
-            <h2 className="text-foreground mb-4 text-xl font-semibold">
+            <h2 className="text-foreground mb-3 text-xl font-semibold">
               Une erreur critique est survenue
             </h2>
 
-            <p className="text-muted-foreground mb-8">
+            <p className="text-muted-foreground mb-8 text-sm">
               Désolé, une erreur critique s'est produite. Veuillez réessayer ou
               rafraîchir la page.
             </p>
 
             {error.digest && (
-              <p className="text-muted-foreground mb-6 text-sm">
-                Code d'erreur : {error.digest}
+              <p className="text-muted-foreground mb-6 font-mono text-xs">
+                Code : {error.digest}
               </p>
             )}
 

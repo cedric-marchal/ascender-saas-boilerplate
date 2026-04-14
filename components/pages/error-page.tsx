@@ -27,10 +27,9 @@ function ErrorPage({ error, reset }: ErrorPageProps) {
       aria-labelledby="error-title"
     >
       <div className="mx-auto max-w-md text-center">
-        <AlertTriangle
-          className="text-destructive mx-auto mb-6 h-16 w-16"
-          aria-hidden="true"
-        />
+        <div className="mx-auto mb-6 flex size-16 items-center justify-center rounded-full bg-red-100">
+          <AlertTriangle className="size-8 text-red-600" aria-hidden="true" />
+        </div>
 
         <h1
           id="error-title"
@@ -39,17 +38,17 @@ function ErrorPage({ error, reset }: ErrorPageProps) {
           Erreur
         </h1>
 
-        <h2 className="text-foreground mb-4 text-xl font-semibold">
+        <h2 className="text-foreground mb-3 text-xl font-semibold">
           Une erreur est survenue
         </h2>
 
-        <p className="text-muted-foreground mb-8">
+        <p className="text-muted-foreground mb-8 text-sm">
           Désolé, une erreur inattendue s'est produite. Veuillez réessayer.
         </p>
 
         {error.digest && (
-          <p className="text-muted-foreground mb-6 text-sm">
-            Code d'erreur : {error.digest}
+          <p className="text-muted-foreground mb-6 font-mono text-xs">
+            Code : {error.digest}
           </p>
         )}
 

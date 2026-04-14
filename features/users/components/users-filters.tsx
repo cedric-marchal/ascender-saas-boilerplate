@@ -72,7 +72,7 @@ function UsersFilters() {
     urlFilters.verified !== "all";
 
   return (
-    <section className="mb-6 space-y-4">
+    <section className="space-y-4">
       <form
         onSubmit={(event: SubmitEvent<HTMLFormElement>) => {
           event.preventDefault();

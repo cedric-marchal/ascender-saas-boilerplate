@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, CreditCard } from "lucide-react";
 
 import { BillingPortalButton } from "@/features/billing/components/billing-portal-button";
 import { InvoiceList } from "@/features/billing/components/invoice-list";
@@ -16,6 +16,7 @@ import type {
 import { Main } from "@/components/main";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 
 type BillingPageProps = {
   billing: GetBillingResult;
@@ -36,12 +37,27 @@ function BillingPage({ billing }: BillingPageProps) {
 
   return (
     <Main className="flex flex-col gap-6 p-6">
-      <header className="space-y-2">
-        <h1 className="text-3xl font-semibold tracking-tight">Facturation</h1>
-        <p className="text-muted-foreground">
-          Gérez vos abonnements et vos informations de paiement
-        </p>
+      <header className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="flex size-10 items-center justify-center rounded-lg bg-emerald-500/10">
+            <CreditCard
+              className="size-5 text-emerald-500"
+              aria-hidden="true"
+            />
+          </div>
+          <div>
+            <h1 className="text-2xl font-semibold tracking-tight">
+              Facturation
+            </h1>
+            <p className="text-muted-foreground text-sm">
+              Gérez vos abonnements et vos informations de paiement
+            </p>
+          </div>
+        </div>
+        {subscriptions.length > 0 && <BillingPortalButton />}
       </header>
+
+      <Separator />
 
       {subscriptions.length === 0 && (
         <div className="space-y-6">
@@ -50,7 +66,7 @@ function BillingPage({ billing }: BillingPageProps) {
 
           {invoices.length > 0 && (
             <div className="space-y-4">
-              <h2 className="text-xl font-semibold">Historique des factures</h2>
+              <h2 className="text-lg font-semibold">Historique des factures</h2>
               <InvoiceList invoices={invoices} />
             </div>
           )}
@@ -67,21 +83,18 @@ function BillingPage({ billing }: BillingPageProps) {
         <section className="space-y-6">
           <div className="grid gap-6 lg:grid-cols-2">
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h2 className="text-xl font-semibold">Statut</h2>
-                <BillingPortalButton />
-              </div>
+              <h2 className="text-lg font-semibold">Statut</h2>
               <SubscriptionStatusCard subscriptions={subscriptions} />
             </div>
 
             {activeSubscription && (
               <div className="space-y-4">
-                <h2 className="text-xl font-semibold">Abonnement actif</h2>
+                <h2 className="text-lg font-semibold">Abonnement actif</h2>
                 <SubscriptionCard subscription={activeSubscription} />
 
                 {activeSubscription.cancelAtPeriodEnd && (
                   <Alert variant="destructive">
-                    <AlertCircle className="h-4 w-4" aria-hidden="true" />
+                    <AlertCircle className="size-4" aria-hidden="true" />
                     <AlertTitle>Abonnement en cours d'annulation</AlertTitle>
                     <AlertDescription>
                       Votre abonnement sera annulé le{" "}
@@ -102,13 +115,13 @@ function BillingPage({ billing }: BillingPageProps) {
           </div>
 
           <div className="space-y-4">
-            <h2 className="text-xl font-semibold">Historique des factures</h2>
+            <h2 className="text-lg font-semibold">Historique des factures</h2>
             <InvoiceList invoices={invoices} />
           </div>
 
           {inactiveSubscriptions.length > 0 && (
             <div className="space-y-4">
-              <h2 className="text-xl font-semibold">Anciens abonnements</h2>
+              <h2 className="text-lg font-semibold">Anciens abonnements</h2>
 
               <div className="grid gap-4">
                 {inactiveSubscriptions.map(

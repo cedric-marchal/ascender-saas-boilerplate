@@ -13,23 +13,22 @@ function ForbiddenPage() {
       aria-labelledby="forbidden-title"
     >
       <div className="mx-auto max-w-md text-center">
-        <ShieldX
-          className="text-muted-foreground mx-auto mb-6 h-16 w-16"
-          aria-hidden="true"
-        />
+        <div className="mx-auto mb-6 flex size-16 items-center justify-center rounded-full bg-red-100">
+          <ShieldX className="size-8 text-red-600" aria-hidden="true" />
+        </div>
 
         <h1
           id="forbidden-title"
-          className="text-foreground mb-2 text-4xl font-bold"
+          className="text-foreground mb-2 text-4xl font-bold tabular-nums"
         >
           403
         </h1>
 
-        <h2 className="text-foreground mb-4 text-xl font-semibold">
+        <h2 className="text-foreground mb-3 text-xl font-semibold">
           Accès interdit
         </h2>
 
-        <p className="text-muted-foreground mb-8">
+        <p className="text-muted-foreground mb-8 text-sm">
           Vous n'avez pas les permissions nécessaires pour accéder à cette
           ressource.
         </p>

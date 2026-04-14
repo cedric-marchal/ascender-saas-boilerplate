@@ -2,6 +2,13 @@ import { ResetPasswordForm } from "@/features/auth/components/forms/reset-passwo
 import { getResetPasswordSchema } from "@/features/auth/constants/auth-seo.constant";
 
 import { Main } from "@/components/main";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 type ResetPasswordPageProps = {
   token: string;
@@ -20,18 +27,17 @@ function ResetPasswordPage({ token }: ResetPasswordPageProps) {
       />
 
       <Main className="flex items-center justify-center px-4 py-12">
-        <div className="w-full max-w-sm space-y-6">
-          <header className="space-y-2 text-center">
-            <h1 className="text-2xl font-semibold tracking-tight">
-              Nouveau mot de passe
-            </h1>
-            <p className="text-muted-foreground text-sm">
+        <Card className="w-full max-w-sm">
+          <CardHeader className="text-center">
+            <CardTitle className="text-2xl">Nouveau mot de passe</CardTitle>
+            <CardDescription>
               Choisissez un nouveau mot de passe pour votre compte
-            </p>
-          </header>
-
-          <ResetPasswordForm token={token} />
-        </div>
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ResetPasswordForm token={token} />
+          </CardContent>
+        </Card>
       </Main>
     </>
   );

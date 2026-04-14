@@ -1,4 +1,5 @@
 import { Main } from "@/components/main";
+import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 
 function SettingsLoading() {
@@ -10,17 +11,19 @@ function SettingsLoading() {
     >
       <header className="space-y-2">
         <div className="flex items-center gap-3">
-          <Skeleton className="h-12 w-12 rounded-lg" />
+          <Skeleton className="size-10 rounded-lg" />
           <div className="space-y-2">
-            <Skeleton className="h-7 w-48" />
-            <Skeleton className="h-4 w-96" />
+            <Skeleton className="h-7 w-36" />
+            <Skeleton className="h-4 w-72" />
           </div>
         </div>
       </header>
 
+      <Separator />
+
       <div className="grid gap-6 lg:grid-cols-2">
         <div className="space-y-6">
-          <div className="rounded-lg border bg-white p-6">
+          <div className="rounded-xl border p-6">
             <div className="mb-6 space-y-2">
               <Skeleton className="h-6 w-48" />
               <Skeleton className="h-4 w-64" />
@@ -39,7 +42,7 @@ function SettingsLoading() {
             </div>
           </div>
 
-          <div className="rounded-lg border bg-white p-6">
+          <div className="rounded-xl border p-6">
             <div className="mb-6 space-y-2">
               <Skeleton className="h-6 w-32" />
               <Skeleton className="h-4 w-80" />
@@ -63,14 +66,14 @@ function SettingsLoading() {
         </div>
 
         <div>
-          <div className="rounded-lg border bg-white p-6">
+          <div className="rounded-xl border p-6">
             <div className="mb-6 space-y-2">
               <Skeleton className="h-6 w-40" />
-              <Skeleton className="h-4 w-96" />
+              <Skeleton className="h-4 w-72" />
             </div>
             <div className="space-y-4">
               <div className="flex items-center gap-6">
-                <Skeleton className="h-20 w-20 rounded-full" />
+                <Skeleton className="size-20 rounded-full" />
                 <div className="space-y-2">
                   <Skeleton className="h-4 w-32" />
                   <Skeleton className="h-3 w-48" />
@@ -87,7 +90,7 @@ function SettingsLoading() {
         </div>
       </div>
 
-      <div className="rounded-lg border border-red-200 bg-red-50 p-6">
+      <div className="rounded-xl border border-red-200 bg-red-50 p-6">
         <div className="mb-4 space-y-2">
           <Skeleton className="h-6 w-40" />
           <Skeleton className="h-4 w-96" />

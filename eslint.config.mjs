@@ -56,6 +56,14 @@ const eslintConfig = defineConfig([
       "react-hooks/incompatible-library": "off",
     },
   },
+  // Seed files: run outside Next.js, so @/ imports don't resolve with tsx.
+  {
+    files: ["prisma/seed.ts", "prisma/seed/**"],
+    rules: {
+      "no-restricted-imports": "off",
+      "no-console": "off",
+    },
+  },
   // Tests: allow `any` for mocks and stubs.
   {
     files: ["__tests__/**"],

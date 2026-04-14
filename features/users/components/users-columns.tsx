@@ -20,6 +20,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
+import { getAvatarUrl } from "@/utils/string/get-avatar-url";
 import { getInitials } from "@/utils/string/get-initials";
 
 type UserTableData = Pick<
@@ -101,7 +102,7 @@ const usersColumns: ColumnDef<UserTableData>[] = [
           <Avatar className="h-8 w-8">
             {user.image ? (
               <AvatarImage
-                src={`${process.env.NEXT_PUBLIC_R2_PUBLIC_URL}/${user.image}`}
+                src={getAvatarUrl(user.image)}
                 alt={`${user.name} avatar`}
               />
             ) : (

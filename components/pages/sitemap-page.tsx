@@ -87,11 +87,11 @@ function SitemapPage() {
 
       <Main>
         <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6 md:py-16 lg:px-8 lg:py-20">
-          <header className="mb-12">
+          <header className="mb-12 space-y-3">
             <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
               Plan du site
             </h1>
-            <p className="text-muted-foreground mt-4 text-sm">
+            <p className="text-muted-foreground text-sm">
               Accédez rapidement à toutes les pages disponibles sur {APP_NAME}.
             </p>
           </header>

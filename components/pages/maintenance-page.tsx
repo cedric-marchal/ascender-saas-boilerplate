@@ -1,31 +1,24 @@
 import { Construction } from "lucide-react";
 
 import { Main } from "@/components/main";
-import {
-  Card,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 
 function MaintenancePage() {
   return (
     <Main className="flex items-center justify-center p-4">
-      <Card className="w-full max-w-md text-center">
-        <CardHeader className="space-y-4">
-          <div className="bg-muted mx-auto flex h-16 w-16 items-center justify-center rounded-full">
-            <Construction
-              className="text-muted-foreground h-8 w-8"
-              aria-hidden="true"
-            />
-          </div>
-          <CardTitle className="text-2xl">Site en maintenance</CardTitle>
-          <CardDescription className="text-base">
-            Nous effectuons actuellement une maintenance pour améliorer votre
-            expérience. Merci de revenir dans quelques instants.
-          </CardDescription>
-        </CardHeader>
-      </Card>
+      <div className="mx-auto max-w-md text-center">
+        <div className="mx-auto mb-6 flex size-16 items-center justify-center rounded-full bg-orange-100">
+          <Construction className="size-8 text-orange-600" aria-hidden="true" />
+        </div>
+
+        <h1 className="text-foreground mb-3 text-2xl font-semibold">
+          Site en maintenance
+        </h1>
+
+        <p className="text-muted-foreground text-sm">
+          Nous effectuons actuellement une maintenance pour améliorer votre
+          expérience. Merci de revenir dans quelques instants.
+        </p>
+      </div>
     </Main>
   );
 }

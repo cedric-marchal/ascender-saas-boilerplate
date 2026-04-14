@@ -13,23 +13,22 @@ function UnauthorizedPage() {
       aria-labelledby="unauthorized-title"
     >
       <div className="mx-auto max-w-md text-center">
-        <LogIn
-          className="text-muted-foreground mx-auto mb-6 h-16 w-16"
-          aria-hidden="true"
-        />
+        <div className="mx-auto mb-6 flex size-16 items-center justify-center rounded-full bg-blue-500/10">
+          <LogIn className="size-8 text-blue-500" aria-hidden="true" />
+        </div>
 
         <h1
           id="unauthorized-title"
-          className="text-foreground mb-2 text-4xl font-bold"
+          className="text-foreground mb-2 text-4xl font-bold tabular-nums"
         >
           401
         </h1>
 
-        <h2 className="text-foreground mb-4 text-xl font-semibold">
+        <h2 className="text-foreground mb-3 text-xl font-semibold">
           Authentification requise
         </h2>
 
-        <p className="text-muted-foreground mb-8">
+        <p className="text-muted-foreground mb-8 text-sm">
           Vous devez être connecté pour accéder à cette page.
         </p>
 

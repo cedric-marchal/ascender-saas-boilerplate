@@ -1,4 +1,5 @@
 import { Main } from "@/components/main";
+import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 
 function BillingLoading() {
@@ -8,20 +9,22 @@ function BillingLoading() {
       aria-busy="true"
       aria-label="Chargement de la facturation"
     >
-      <header className="space-y-2">
-        <Skeleton className="h-9 w-48" />
-        <Skeleton className="h-5 w-96" />
+      <header className="flex items-center gap-3">
+        <Skeleton className="size-10 rounded-lg" />
+        <div className="space-y-2">
+          <Skeleton className="h-7 w-36" />
+          <Skeleton className="h-4 w-72" />
+        </div>
       </header>
+
+      <Separator />
 
       <section className="space-y-6">
         <div className="grid gap-6 lg:grid-cols-2">
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <Skeleton className="h-7 w-24" />
-              <Skeleton className="h-10 w-48" />
-            </div>
+            <Skeleton className="h-6 w-24" />
 
-            <div className="bg-card rounded-lg border">
+            <div className="rounded-xl border">
               <div className="space-y-1.5 p-6">
                 <Skeleton className="h-5 w-56" />
                 <Skeleton className="h-4 w-72" />
@@ -31,7 +34,7 @@ function BillingLoading() {
                   <div className="space-y-2">
                     <Skeleton className="h-4 w-24" />
                     <div className="flex items-center gap-2">
-                      <Skeleton className="h-5 w-5 rounded-full" />
+                      <Skeleton className="size-5 rounded-full" />
                       <Skeleton className="h-6 w-32" />
                     </div>
                   </div>
@@ -55,30 +58,30 @@ function BillingLoading() {
           </div>
 
           <div className="space-y-4">
-            <Skeleton className="h-7 w-40" />
+            <Skeleton className="h-6 w-40" />
 
-            <div className="bg-card rounded-lg border">
+            <div className="rounded-xl border">
               <div className="p-6">
                 <div className="flex items-start justify-between">
                   <div className="space-y-2">
                     <Skeleton className="h-4 w-32" />
                     <Skeleton className="h-3 w-48" />
                   </div>
-                  <Skeleton className="h-6 w-16 rounded-full" />
+                  <Skeleton className="h-5 w-16 rounded-full" />
                 </div>
               </div>
               <div className="space-y-4 p-6 pt-0">
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
-                      <Skeleton className="h-4 w-4" />
+                      <Skeleton className="size-4" />
                       <Skeleton className="h-4 w-32" />
                     </div>
                     <Skeleton className="h-4 w-36" />
                   </div>
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
-                      <Skeleton className="h-4 w-4" />
+                      <Skeleton className="size-4" />
                       <Skeleton className="h-4 w-28" />
                     </div>
                     <Skeleton className="h-4 w-36" />
@@ -90,21 +93,21 @@ function BillingLoading() {
         </div>
 
         <div className="space-y-4">
-          <Skeleton className="h-7 w-56" />
+          <Skeleton className="h-6 w-56" />
 
           <div className="grid gap-4">
             {Array.from({ length: 3 }).map((_, index: number) => (
-              <div key={index} className="bg-card rounded-lg border">
+              <div key={index} className="rounded-xl border">
                 <div className="p-6">
                   <div className="flex items-start justify-between">
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
-                        <Skeleton className="h-4 w-4" />
+                        <Skeleton className="size-4" />
                         <Skeleton className="h-4 w-48" />
                       </div>
                       <Skeleton className="h-3 w-32" />
                     </div>
-                    <Skeleton className="h-6 w-16 rounded-full" />
+                    <Skeleton className="h-5 w-16 rounded-full" />
                   </div>
                 </div>
                 <div className="p-6 pt-0">
@@ -112,7 +115,7 @@ function BillingLoading() {
                     <div className="space-y-2">
                       <Skeleton className="h-8 w-24" />
                       <div className="flex items-center gap-2">
-                        <Skeleton className="h-3 w-3" />
+                        <Skeleton className="size-3" />
                         <Skeleton className="h-3 w-40" />
                       </div>
                     </div>

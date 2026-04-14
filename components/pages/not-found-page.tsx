@@ -13,23 +13,25 @@ function NotFoundPage() {
       aria-labelledby="not-found-title"
     >
       <div className="mx-auto max-w-md text-center">
-        <FileQuestion
-          className="text-muted-foreground mx-auto mb-6 h-16 w-16"
-          aria-hidden="true"
-        />
+        <div className="bg-muted mx-auto mb-6 flex size-16 items-center justify-center rounded-full">
+          <FileQuestion
+            className="text-muted-foreground size-8"
+            aria-hidden="true"
+          />
+        </div>
 
         <h1
           id="not-found-title"
-          className="text-foreground mb-2 text-4xl font-bold"
+          className="text-foreground mb-2 text-4xl font-bold tabular-nums"
         >
           404
         </h1>
 
-        <h2 className="text-foreground mb-4 text-xl font-semibold">
+        <h2 className="text-foreground mb-3 text-xl font-semibold">
           Page introuvable
         </h2>
 
-        <p className="text-muted-foreground mb-8">
+        <p className="text-muted-foreground mb-8 text-sm">
           Désolé, la page que vous recherchez n'existe pas ou a été déplacée.
         </p>
 

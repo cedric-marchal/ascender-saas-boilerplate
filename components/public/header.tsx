@@ -1,78 +1,60 @@
 import Link from "next/link";
 
-import { SignOutButton } from "@/features/auth/components/sign-out-button";
 import { Menu } from "lucide-react";
+
+import { SignOutButton } from "@/features/auth/components/sign-out-button";
 
 import { env } from "@/lib/env";
 import { getSession } from "@/lib/session";
 
+import { NavLink } from "@/components/public/nav-link";
 import { Button } from "@/components/ui/button";
-import {
-  NavigationMenu,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-} from "@/components/ui/navigation-menu";
-import { Separator } from "@/components/ui/separator";
 import {
   Sheet,
   SheetClose,
   SheetContent,
+  SheetDescription,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
 
+const MOBILE_LINK_CLASS = "py-1.5 text-[13px]";
+
 async function Header() {
   const session = await getSession();
 
   return (
-    <header className="bg-background/80 sticky top-0 z-50 w-full border-b backdrop-blur">
-      <div className="container mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
-        <Link href="/" className="flex items-center gap-2 font-semibold">
-          <span className="rounded-md border px-2 py-1 text-xs font-medium tracking-wide uppercase">
+    <header className="bg-background/80 sticky top-0 z-50 w-full border-b backdrop-blur supports-backdrop-filter:bg-background/60">
+      <div className="container mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
+        <Link href="/" className="flex items-center gap-2">
+          <div className="bg-primary text-primary-foreground flex size-7 items-center justify-center rounded-md text-xs font-bold">
+            {env.NEXT_PUBLIC_APP_NAME.charAt(0)}
+          </div>
+          <span className="text-sm font-semibold tracking-tight">
             {env.NEXT_PUBLIC_APP_NAME}
           </span>
         </Link>
 
-        <nav className="hidden md:flex">
-          <NavigationMenu>
-            <NavigationMenuList className="gap-2">
-              <NavigationMenuItem>
-                <NavigationMenuLink
-                  asChild
-                  className="hover:text-foreground px-3 py-2 text-sm font-medium transition-colors"
-                >
-                  <Link href="/tarifs">Tarifs</Link>
-                </NavigationMenuLink>
-              </NavigationMenuItem>
-
-              <NavigationMenuItem>
-                <NavigationMenuLink
-                  asChild
-                  className="hover:text-foreground px-3 py-2 text-sm font-medium transition-colors"
-                >
-                  <Link href="/contact">Contact</Link>
-                </NavigationMenuLink>
-              </NavigationMenuItem>
-            </NavigationMenuList>
-          </NavigationMenu>
+        <nav className="hidden items-center gap-1 md:flex">
+          <NavLink href="/tarifs">Tarifs</NavLink>
+          <NavLink href="/contact">Contact</NavLink>
         </nav>
 
         <div className="hidden items-center gap-2 md:flex">
           {session ? (
             <>
-              <Button asChild variant="ghost">
+              <Button asChild variant="ghost" size="sm">
                 <Link href="/dashboard">Dashboard</Link>
               </Button>
               <SignOutButton />
             </>
           ) : (
             <>
-              <Button asChild variant="ghost">
+              <Button asChild variant="ghost" size="sm">
                 <Link href="/connexion">Connexion</Link>
               </Button>
-              <Button asChild>
+              <Button asChild size="sm">
                 <Link href="/inscription">Créer un compte</Link>
               </Button>
             </>
@@ -84,112 +66,106 @@ async function Header() {
             <SheetTrigger asChild>
               <Button
                 type="button"
-                variant="outline"
+                variant="ghost"
                 size="icon"
                 aria-label="Ouvrir le menu"
               >
-                <Menu className="h-4 w-4" aria-hidden="true" />
+                <Menu className="size-5" aria-hidden="true" />
               </Button>
             </SheetTrigger>
             <SheetContent
               side="right"
-              className="bg-background/95 flex h-full flex-col border-l px-6 py-6 sm:max-w-xs"
+              className="flex h-full flex-col px-6 py-6 sm:max-w-xs"
             >
               <SheetHeader className="px-0 text-left">
-                <SheetTitle className="text-base font-semibold">
-                  Menu de navigation
+                <SheetTitle className="flex items-center gap-2">
+                  <div className="bg-primary text-primary-foreground flex size-6 items-center justify-center rounded-md text-xs font-bold">
+                    {env.NEXT_PUBLIC_APP_NAME.charAt(0)}
+                  </div>
+                  <span className="text-sm font-semibold">
+                    {env.NEXT_PUBLIC_APP_NAME}
+                  </span>
                 </SheetTitle>
+                <SheetDescription className="sr-only">
+                  Menu de navigation du site
+                </SheetDescription>
               </SheetHeader>
 
-              <nav className="mt-4 flex-1 space-y-6 overflow-y-auto px-0">
-                <div className="space-y-3">
-                  <p className="text-muted-foreground text-[11px] font-semibold tracking-[0.15em] uppercase">
+              <nav className="mt-6 flex-1 space-y-6 overflow-y-auto px-0">
+                <div className="space-y-1">
+                  <p className="text-muted-foreground mb-2 px-3 text-xs font-semibold uppercase tracking-wider">
                     Navigation
                   </p>
-                  <ul className="text-muted-foreground space-y-1.5 text-sm">
+                  <ul className="space-y-0.5">
                     <li>
                       <SheetClose asChild>
-                        <Link
-                          href="/"
-                          className="hover:bg-accent hover:text-accent-foreground flex items-center justify-between rounded-md px-3 py-2"
-                        >
-                          <span>Accueil</span>
-                        </Link>
+                        <NavLink href="/" className={MOBILE_LINK_CLASS}>
+                          Accueil
+                        </NavLink>
                       </SheetClose>
                     </li>
                     <li>
                       <SheetClose asChild>
-                        <Link
-                          href="/tarifs"
-                          className="hover:bg-accent hover:text-accent-foreground flex items-center justify-between rounded-md px-3 py-2"
-                        >
-                          <span>Tarifs</span>
-                        </Link>
+                        <NavLink href="/tarifs" className={MOBILE_LINK_CLASS}>
+                          Tarifs
+                        </NavLink>
                       </SheetClose>
                     </li>
                     <li>
                       <SheetClose asChild>
-                        <Link
-                          href="/contact"
-                          className="hover:bg-accent hover:text-accent-foreground flex items-center justify-between rounded-md px-3 py-2"
-                        >
-                          <span>Contact</span>
-                        </Link>
+                        <NavLink href="/contact" className={MOBILE_LINK_CLASS}>
+                          Contact
+                        </NavLink>
                       </SheetClose>
                     </li>
                   </ul>
                 </div>
 
-                <div className="space-y-3">
-                  <p className="text-muted-foreground text-[11px] font-semibold tracking-[0.15em] uppercase">
+                <div className="space-y-1">
+                  <p className="text-muted-foreground mb-2 px-3 text-xs font-semibold uppercase tracking-wider">
                     Compte
                   </p>
                   {session ? (
-                    <>
-                      <Button asChild variant="ghost">
+                    <div className="space-y-2 px-3">
+                      <Button
+                        asChild
+                        variant="ghost"
+                        className="w-full justify-start"
+                      >
                         <Link href="/dashboard">Dashboard</Link>
                       </Button>
                       <SignOutButton />
-                    </>
+                    </div>
                   ) : (
-                    <ul className="text-muted-foreground space-y-1.5 text-sm">
+                    <ul className="space-y-0.5">
                       <li>
                         <SheetClose asChild>
-                          <Link
+                          <NavLink
                             href="/connexion"
-                            className="hover:bg-accent hover:text-accent-foreground flex items-center justify-between rounded-md px-3 py-2"
+                            className={MOBILE_LINK_CLASS}
                           >
-                            <span>Connexion</span>
-                          </Link>
+                            Connexion
+                          </NavLink>
                         </SheetClose>
                       </li>
                       <li>
                         <SheetClose asChild>
-                          <Link
+                          <NavLink
                             href="/inscription"
-                            className="hover:bg-accent hover:text-accent-foreground flex items-center justify-between rounded-md px-3 py-2"
+                            className={MOBILE_LINK_CLASS}
                           >
-                            <span>Inscription</span>
-                          </Link>
+                            Inscription
+                          </NavLink>
                         </SheetClose>
                       </li>
                     </ul>
                   )}
                 </div>
               </nav>
-
-              <div className="text-muted-foreground mt-4 border-t pt-4 text-xs">
-                <p>
-                  Accédez rapidement aux principales pages du site ou créez un
-                  compte pour commencer à utiliser {env.NEXT_PUBLIC_APP_NAME}.
-                </p>
-              </div>
             </SheetContent>
           </Sheet>
         </div>
       </div>
-
-      <Separator />
     </header>
   );
 }

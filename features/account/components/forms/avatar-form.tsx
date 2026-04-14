@@ -17,7 +17,6 @@ import { toast } from "sonner";
 
 import { UpdateAvatarSchema } from "@/features/account/schemas/avatar.schema";
 
-import { env } from "@/lib/env";
 import { upfetch } from "@/lib/up-fetch";
 import { cn } from "@/lib/utils";
 
@@ -26,6 +25,7 @@ import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 
 import { getErrorMessage } from "@/utils/errors/get-error-message";
+import { getAvatarUrl } from "@/utils/string/get-avatar-url";
 import { getInitials } from "@/utils/string/get-initials";
 
 type AvatarFormProps = {
@@ -106,10 +106,7 @@ function AvatarForm({ name, image }: AvatarFormProps) {
       <div className="flex items-center gap-6">
         <Avatar className="h-20 w-20">
           <AvatarImage
-            src={
-              previewUrl ||
-              (image ? `${env.NEXT_PUBLIC_R2_PUBLIC_URL}/${image}` : undefined)
-            }
+            src={previewUrl || (image ? getAvatarUrl(image) : undefined)}
             alt={name}
           />
           <AvatarFallback className="text-lg">{initials}</AvatarFallback>

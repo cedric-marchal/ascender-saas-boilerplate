@@ -12,7 +12,11 @@ import { Button } from "@/components/ui/button";
 import { getActionResult } from "@/utils/errors/get-action-result";
 import { getErrorMessage } from "@/utils/errors/get-error-message";
 
-function SignOutButton() {
+type SignOutButtonProps = {
+  variant?: "button" | "inline";
+};
+
+function SignOutButton({ variant = "button" }: SignOutButtonProps) {
   const router = useRouter();
   const { executeAsync, isExecuting } = useAction(signOutAction);
 
@@ -23,6 +27,24 @@ function SignOutButton() {
     } catch (error: unknown) {
       toast.error(getErrorMessage(error));
     }
+  }
+
+  if (variant === "inline") {
+    return (
+      <span
+        role="button"
+        tabIndex={0}
+        onClick={handleSignOut}
+        onKeyDown={(event: React.KeyboardEvent<HTMLSpanElement>) => {
+          if (event.key === "Enter" || event.key === " ") {
+            handleSignOut();
+          }
+        }}
+        className={isExecuting ? "pointer-events-none opacity-50" : ""}
+      >
+        Déconnexion
+      </span>
+    );
   }
 
   return (

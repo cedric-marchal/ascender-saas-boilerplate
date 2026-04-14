@@ -26,7 +26,7 @@ function generateCsp(nonce: string): string {
     "default-src 'self'",
     `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${isDev ? " 'unsafe-eval'" : ""}`,
     "style-src 'self' 'unsafe-inline'",
-    "img-src 'self' data: blob: https://*.r2.cloudflarestorage.com https://*.r2.dev",
+    `img-src 'self' data: blob: https://*.r2.cloudflarestorage.com https://*.r2.dev https://lh3.googleusercontent.com${isDev ? " https://picsum.photos https://fastly.picsum.photos" : ""}`,
     "font-src 'self'",
     "connect-src 'self' https://*.stripe.com https://*.sentry.io https://*.ingest.sentry.io",
     "frame-src https://*.stripe.com",

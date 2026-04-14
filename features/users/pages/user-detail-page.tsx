@@ -1,6 +1,13 @@
 import Link from "next/link";
 
-import { ArrowLeft } from "lucide-react";
+import {
+  ArrowLeft,
+  CreditCard,
+  Globe,
+  KeyRound,
+  MonitorSmartphone,
+  UserCircle,
+} from "lucide-react";
 
 import { subscriptionStatusLabels } from "@/features/billing/constants/subscription-status.constant";
 import { roleLabels } from "@/features/users/constants/users-filters.constant";
@@ -17,8 +24,16 @@ import { Main } from "@/components/main";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 
+import { getAvatarUrl } from "@/utils/string/get-avatar-url";
 import { getInitials } from "@/utils/string/get-initials";
 import { truncateName } from "@/utils/string/truncate";
 
@@ -29,69 +44,76 @@ type UserDetailPageProps = {
 function UserDetailPage({ user }: UserDetailPageProps) {
   return (
     <Main className="flex flex-col gap-6 p-6">
-      <div className="flex items-center gap-4">
-        <Button type="button" variant="outline" size="sm" asChild>
+      <div>
+        <Button type="button" variant="ghost" size="sm" asChild>
           <Link href="/admin/utilisateurs">
-            <ArrowLeft className="mr-2 h-4 w-4" aria-hidden="true" />
-            Retour
+            <ArrowLeft className="mr-2 size-4" aria-hidden="true" />
+            Retour aux utilisateurs
           </Link>
         </Button>
       </div>
 
       <header className="flex items-center gap-4">
-        <Avatar className="h-16 w-16">
+        <Avatar className="size-14 rounded-lg">
           {user.image ? (
             <AvatarImage
-              src={`${process.env.NEXT_PUBLIC_R2_PUBLIC_URL}/${user.image}`}
+              src={getAvatarUrl(user.image)}
               alt={`${user.name} avatar`}
             />
           ) : (
-            <AvatarFallback className="text-lg">
+            <AvatarFallback className="rounded-lg text-lg">
               {getInitials(user.name)}
             </AvatarFallback>
           )}
         </Avatar>
         <div className="space-y-1">
-          <h1 className="text-3xl font-bold tracking-tight">{user.name}</h1>
-          <p className="text-muted-foreground">{user.email}</p>
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-semibold tracking-tight">
+              {user.name}
+            </h1>
+            <Badge
+              variant={user.role === UserRole.ADMIN ? "default" : "secondary"}
+            >
+              {roleLabels[user.role]}
+            </Badge>
+          </div>
+          <p className="text-muted-foreground text-sm">{user.email}</p>
         </div>
       </header>
 
+      <Separator />
+
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center gap-2">
+            <UserCircle
+              className="text-muted-foreground size-5"
+              aria-hidden="true"
+            />
             <CardTitle>Informations générales</CardTitle>
           </CardHeader>
           <CardContent>
             <dl className="space-y-3">
               <div className="flex justify-between gap-2">
                 <dt className="text-muted-foreground text-sm">Identifiant</dt>
-                <dd className="font-mono text-sm">{user.id}</dd>
+                <dd className="font-mono text-xs">{user.id}</dd>
               </div>
+              <Separator />
               <div className="flex justify-between gap-2">
                 <dt className="text-muted-foreground text-sm">Slug</dt>
-                <dd className="font-mono text-sm">{user.slug}</dd>
+                <dd className="font-mono text-xs">{user.slug}</dd>
               </div>
+              <Separator />
               <div className="flex justify-between gap-2">
                 <dt className="text-muted-foreground text-sm">Nom</dt>
                 <dd className="text-sm">{truncateName(user.name)}</dd>
               </div>
+              <Separator />
               <div className="flex justify-between gap-2">
                 <dt className="text-muted-foreground text-sm">Email</dt>
                 <dd className="text-sm">{user.email}</dd>
               </div>
-              <div className="flex justify-between gap-2">
-                <dt className="text-muted-foreground text-sm">Rôle</dt>
-                <dd>
-                  <Badge
-                    variant={
-                      user.role === UserRole.ADMIN ? "default" : "secondary"
-                    }
-                  >
-                    {roleLabels[user.role]}
-                  </Badge>
-                </dd>
-              </div>
+              <Separator />
               <div className="flex justify-between gap-2">
                 <dt className="text-muted-foreground text-sm">Email vérifié</dt>
                 <dd>
@@ -100,6 +122,7 @@ function UserDetailPage({ user }: UserDetailPageProps) {
                   </Badge>
                 </dd>
               </div>
+              <Separator />
               <div className="flex justify-between gap-2">
                 <dt className="text-muted-foreground text-sm">Inscrit le</dt>
                 <dd className="text-sm">
@@ -109,6 +132,7 @@ function UserDetailPage({ user }: UserDetailPageProps) {
                   }).format(new Date(user.createdAt))}
                 </dd>
               </div>
+              <Separator />
               <div className="flex justify-between gap-2">
                 <dt className="text-muted-foreground text-sm">Mis à jour le</dt>
                 <dd className="text-sm">
@@ -123,36 +147,41 @@ function UserDetailPage({ user }: UserDetailPageProps) {
         </Card>
 
         <Card>
-          <CardHeader>
-            <CardTitle>
-              Abonnements
+          <CardHeader className="flex flex-row items-center gap-2">
+            <CreditCard
+              className="text-muted-foreground size-5"
+              aria-hidden="true"
+            />
+            <div>
+              <CardTitle>Abonnements</CardTitle>
               {user.stripeCustomer && (
-                <span className="text-muted-foreground ml-2 text-sm font-normal">
-                  ({user.stripeCustomer.subscriptions.length})
-                </span>
+                <CardDescription>
+                  {user.stripeCustomer.subscriptions.length} abonnement
+                  {user.stripeCustomer.subscriptions.length > 1 ? "s" : ""}
+                </CardDescription>
               )}
-            </CardTitle>
+            </div>
           </CardHeader>
           <CardContent>
             {!user.stripeCustomer ? (
-              <p className="text-muted-foreground text-sm">
+              <div className="text-muted-foreground flex h-24 items-center justify-center rounded-lg border border-dashed text-sm">
                 Aucun client Stripe associé
-              </p>
+              </div>
             ) : (
               <div className="space-y-4">
                 <div className="flex justify-between gap-2">
                   <span className="text-muted-foreground text-sm">
                     Stripe ID
                   </span>
-                  <span className="font-mono text-sm">
+                  <span className="font-mono text-xs">
                     {user.stripeCustomer.stripeCustomerId}
                   </span>
                 </div>
 
                 {user.stripeCustomer.subscriptions.length === 0 ? (
-                  <p className="text-muted-foreground text-sm">
+                  <div className="text-muted-foreground flex h-16 items-center justify-center rounded-lg border border-dashed text-sm">
                     Aucun abonnement
-                  </p>
+                  </div>
                 ) : (
                   <ul className="space-y-3">
                     {user.stripeCustomer.subscriptions.map(
@@ -162,7 +191,7 @@ function UserDetailPage({ user }: UserDetailPageProps) {
                           className="space-y-2 rounded-lg border p-3"
                         >
                           <div className="flex items-center justify-between">
-                            <span className="font-mono text-sm text-xs">
+                            <span className="font-mono text-xs">
                               {subscription.stripeSubscriptionId}
                             </span>
                             <Badge variant="outline">
@@ -186,7 +215,7 @@ function UserDetailPage({ user }: UserDetailPageProps) {
                               )}
                             </p>
                             {subscription.cancelAtPeriodEnd && (
-                              <p className="text-destructive">
+                              <p className="text-destructive font-medium">
                                 Annulation en fin de période
                               </p>
                             )}
@@ -203,17 +232,25 @@ function UserDetailPage({ user }: UserDetailPageProps) {
       </div>
 
       <Card>
-        <CardHeader>
-          <CardTitle>
-            Sessions
-            <span className="text-muted-foreground ml-2 text-sm font-normal">
-              ({user.sessions.length})
-            </span>
-          </CardTitle>
+        <CardHeader className="flex flex-row items-center gap-2">
+          <MonitorSmartphone
+            className="text-muted-foreground size-5"
+            aria-hidden="true"
+          />
+          <div>
+            <CardTitle>Sessions</CardTitle>
+            <CardDescription>
+              {user.sessions.length} session
+              {user.sessions.length > 1 ? "s" : ""} active
+              {user.sessions.length > 1 ? "s" : ""}
+            </CardDescription>
+          </div>
         </CardHeader>
         <CardContent>
           {user.sessions.length === 0 ? (
-            <p className="text-muted-foreground text-sm">Aucune session</p>
+            <div className="text-muted-foreground flex h-16 items-center justify-center rounded-lg border border-dashed text-sm">
+              Aucune session
+            </div>
           ) : (
             <ul className="divide-y">
               {user.sessions.map((session: GetUserSession) => (
@@ -224,9 +261,10 @@ function UserDetailPage({ user }: UserDetailPageProps) {
                         {session.id}
                       </p>
                       {session.ipAddress && (
-                        <p className="text-muted-foreground text-xs">
-                          IP: {session.ipAddress}
-                        </p>
+                        <div className="text-muted-foreground flex items-center gap-1 text-xs">
+                          <Globe className="size-3" aria-hidden="true" />
+                          {session.ipAddress}
+                        </div>
                       )}
                       {session.userAgent && (
                         <p className="text-muted-foreground max-w-md truncate text-xs">
@@ -259,17 +297,25 @@ function UserDetailPage({ user }: UserDetailPageProps) {
       </Card>
 
       <Card>
-        <CardHeader>
-          <CardTitle>
-            Comptes liés
-            <span className="text-muted-foreground ml-2 text-sm font-normal">
-              ({user.accounts.length})
-            </span>
-          </CardTitle>
+        <CardHeader className="flex flex-row items-center gap-2">
+          <KeyRound
+            className="text-muted-foreground size-5"
+            aria-hidden="true"
+          />
+          <div>
+            <CardTitle>Comptes liés</CardTitle>
+            <CardDescription>
+              {user.accounts.length} compte
+              {user.accounts.length > 1 ? "s" : ""} lié
+              {user.accounts.length > 1 ? "s" : ""}
+            </CardDescription>
+          </div>
         </CardHeader>
         <CardContent>
           {user.accounts.length === 0 ? (
-            <p className="text-muted-foreground text-sm">Aucun compte lié</p>
+            <div className="text-muted-foreground flex h-16 items-center justify-center rounded-lg border border-dashed text-sm">
+              Aucun compte lié
+            </div>
           ) : (
             <ul className="divide-y">
               {user.accounts.map((account: GetUserAccount) => (

@@ -7,19 +7,19 @@ import { Separator } from "@/components/ui/separator";
 
 function Footer() {
   return (
-    <footer className="bg-background/80 border-t backdrop-blur-sm">
+    <footer className="border-t">
       <div className="container mx-auto max-w-6xl px-4 py-10 md:py-14">
         <div className="flex flex-col gap-10 md:flex-row md:items-start md:justify-between">
           <div className="max-w-sm space-y-4">
             <Link href="/" className="inline-flex items-center gap-2">
-              <span className="rounded-md border px-2 py-1 text-xs font-medium tracking-wide uppercase">
+              <div className="bg-primary text-primary-foreground flex size-7 items-center justify-center rounded-md text-xs font-bold">
+                {env.NEXT_PUBLIC_APP_NAME.charAt(0)}
+              </div>
+              <span className="text-sm font-semibold tracking-tight">
                 {env.NEXT_PUBLIC_APP_NAME}
               </span>
             </Link>
-            <h2 className="text-lg leading-snug font-semibold md:text-xl">
-              Plateforme SaaS d&apos;IA pour gagner du temps au quotidien.
-            </h2>
-            <p className="text-muted-foreground text-sm">
+            <p className="text-muted-foreground text-sm leading-relaxed">
               Centralisez vos workflows, automatisez les tâches répétitives et
               livrez plus vite grâce à {env.NEXT_PUBLIC_APP_NAME}.
             </p>
@@ -27,14 +27,12 @@ function Footer() {
 
           <div className="grid flex-1 gap-8 sm:grid-cols-2 md:grid-cols-3">
             <nav className="space-y-3">
-              <h3 className="text-foreground text-sm font-semibold tracking-wide">
-                Navigation
-              </h3>
-              <ul className="text-muted-foreground space-y-2 text-sm">
+              <h3 className="text-sm font-semibold">Navigation</h3>
+              <ul className="text-muted-foreground space-y-2.5 text-sm">
                 <li>
                   <Link
                     href="/tarifs"
-                    className="hover:text-foreground underline-offset-4 hover:underline"
+                    className="hover:text-foreground transition-colors"
                   >
                     Tarifs
                   </Link>
@@ -42,7 +40,7 @@ function Footer() {
                 <li>
                   <Link
                     href="/contact"
-                    className="hover:text-foreground underline-offset-4 hover:underline"
+                    className="hover:text-foreground transition-colors"
                   >
                     Contact
                   </Link>
@@ -51,14 +49,12 @@ function Footer() {
             </nav>
 
             <nav className="space-y-3">
-              <h3 className="text-foreground text-sm font-semibold tracking-wide">
-                Compte
-              </h3>
-              <ul className="text-muted-foreground space-y-2 text-sm">
+              <h3 className="text-sm font-semibold">Compte</h3>
+              <ul className="text-muted-foreground space-y-2.5 text-sm">
                 <li>
                   <Link
                     href="/inscription"
-                    className="hover:text-foreground underline-offset-4 hover:underline"
+                    className="hover:text-foreground transition-colors"
                   >
                     Inscription
                   </Link>
@@ -66,7 +62,7 @@ function Footer() {
                 <li>
                   <Link
                     href="/connexion"
-                    className="hover:text-foreground underline-offset-4 hover:underline"
+                    className="hover:text-foreground transition-colors"
                   >
                     Connexion
                   </Link>
@@ -75,14 +71,12 @@ function Footer() {
             </nav>
 
             <nav className="space-y-3">
-              <h3 className="text-foreground text-sm font-semibold tracking-wide">
-                Légal
-              </h3>
-              <ul className="text-muted-foreground space-y-2 text-sm">
+              <h3 className="text-sm font-semibold">Légal</h3>
+              <ul className="text-muted-foreground space-y-2.5 text-sm">
                 <li>
                   <Link
                     href="/mentions-legales"
-                    className="hover:text-foreground underline-offset-4 hover:underline"
+                    className="hover:text-foreground transition-colors"
                   >
                     Mentions légales
                   </Link>
@@ -90,23 +84,23 @@ function Footer() {
                 <li>
                   <Link
                     href="/politique-de-confidentialite"
-                    className="hover:text-foreground underline-offset-4 hover:underline"
+                    className="hover:text-foreground transition-colors"
                   >
-                    Politique de confidentialité
+                    Confidentialité
                   </Link>
                 </li>
                 <li>
                   <Link
                     href="/politique-des-cookies"
-                    className="hover:text-foreground underline-offset-4 hover:underline"
+                    className="hover:text-foreground transition-colors"
                   >
-                    Politique des cookies
+                    Cookies
                   </Link>
                 </li>
                 <li>
                   <Link
                     href="/conditions-d-utilisation"
-                    className="hover:text-foreground underline-offset-4 hover:underline"
+                    className="hover:text-foreground transition-colors"
                   >
                     Conditions d'utilisation
                   </Link>
@@ -114,7 +108,7 @@ function Footer() {
                 <li>
                   <Link
                     href="/conditions-de-vente"
-                    className="hover:text-foreground underline-offset-4 hover:underline"
+                    className="hover:text-foreground transition-colors"
                   >
                     Conditions de vente
                   </Link>
@@ -126,28 +120,24 @@ function Footer() {
 
         <Separator className="my-8" />
 
-        <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-          <div />
-
-          <div className="text-muted-foreground flex flex-1 flex-col items-start gap-3 text-xs md:items-end">
-            <p>
-              &copy; <CopyrightYear /> {env.NEXT_PUBLIC_APP_NAME}. Tous droits
-              réservés.
-            </p>
-            <div className="flex flex-wrap gap-4">
-              <Link
-                href="/contact"
-                className="hover:text-foreground underline-offset-4 hover:underline"
-              >
-                Contact
-              </Link>
-              <Link
-                href="/plan-du-site"
-                className="hover:text-foreground underline-offset-4 hover:underline"
-              >
-                Plan du site
-              </Link>
-            </div>
+        <div className="text-muted-foreground flex flex-col items-center justify-between gap-4 text-xs sm:flex-row">
+          <p>
+            &copy; <CopyrightYear /> {env.NEXT_PUBLIC_APP_NAME}. Tous droits
+            réservés.
+          </p>
+          <div className="flex gap-4">
+            <Link
+              href="/contact"
+              className="hover:text-foreground transition-colors"
+            >
+              Contact
+            </Link>
+            <Link
+              href="/plan-du-site"
+              className="hover:text-foreground transition-colors"
+            >
+              Plan du site
+            </Link>
           </div>
         </div>
       </div>
