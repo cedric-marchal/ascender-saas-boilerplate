@@ -168,6 +168,9 @@ async function handleStripeWebhook(
           });
         });
 
+        const subscriptionsCacheKey = `subscriptions:${stripeCustomer.userId}`;
+        await redis.del(subscriptionsCacheKey);
+
         if (process.env.NODE_ENV === "development") {
           console.log(
             `[Subscription synced] ${subscription.id} (${subscription.status}) for user ${stripeCustomer.userId}`,
@@ -200,6 +203,9 @@ async function handleStripeWebhook(
         await prisma.subscription.deleteMany({
           where: { stripeSubscriptionId: subscription.id },
         });
+
+        const deletedSubscriptionsCacheKey = `subscriptions:${stripeCustomer.userId}`;
+        await redis.del(deletedSubscriptionsCacheKey);
 
         if (process.env.NODE_ENV === "development") {
           console.log(
