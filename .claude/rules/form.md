@@ -240,6 +240,23 @@ Core requirements:
 - Preview with file name + remove button
 - `<FieldDescription>` with accepted types and size limit
 
+## Social Sign-In (Google OAuth)
+
+ALWAYS pass `callbackURL: "/connexion"` to `signIn.social()`. After OAuth, the user lands on `/connexion` where `requireGuest()` handles role-based redirect via `ROLE_DASHBOARD_URL`.
+
+```tsx
+async function handleGoogleSignIn() {
+  const { error } = await signIn.social({
+    provider: "google",
+    callbackURL: "/connexion",
+  });
+
+  if (error) {
+    toast.error(error.message || "Une erreur est survenue");
+  }
+}
+```
+
 ## Form in Modal
 
 Form and Modal MUST be separate files. See `feature.md` for modal rules.
@@ -273,4 +290,6 @@ Untyped callbacks in map/filter
 Missing aria-hidden on decorative icons
 Default export
 useState for loading with Server Actions (use form.Subscribe + isExecuting)
+Hardcoded redirect after sign-in (use data.redirectUrl from action)
+Missing callbackURL on signIn.social() (must be "/connexion" for role-based redirect)
 ```

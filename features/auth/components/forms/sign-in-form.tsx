@@ -40,8 +40,8 @@ function SignInForm() {
     },
     onSubmit: async ({ value }) => {
       try {
-        getActionResult(await executeAsync(value));
-        router.push("/dashboard");
+        const data = getActionResult(await executeAsync(value));
+        router.push(data.redirectUrl);
         router.refresh();
       } catch (error: unknown) {
         toast.error(getErrorMessage(error));
@@ -50,7 +50,10 @@ function SignInForm() {
   });
 
   async function handleGoogleSignIn() {
-    const { error } = await signIn.social({ provider: "google" });
+    const { error } = await signIn.social({
+      provider: "google",
+      callbackURL: "/connexion",
+    });
 
     if (error) {
       toast.error(error.message || "Une erreur est survenue");

@@ -1,10 +1,8 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
 
 import { DashboardHomePage } from "@/features/dashboard/pages/dashboard-home-page";
 
-import { UserRole } from "@/lib/generated/prisma/client";
-import { requireSession } from "@/lib/session";
+import { requireCustomer } from "@/lib/session";
 
 export const metadata: Metadata = {
   title: "Dashboard",
@@ -15,11 +13,7 @@ export const metadata: Metadata = {
 };
 
 export default async function DashboardRoute() {
-  const session = await requireSession();
-
-  if (session.user.role === UserRole.ADMIN) {
-    return redirect("/admin");
-  }
+  const session = await requireCustomer();
 
   return <DashboardHomePage userName={session.user.name} />;
 }

@@ -1,7 +1,6 @@
 import "server-only";
 
 import { i18n } from "@better-auth/i18n";
-import * as Sentry from "@sentry/nextjs";
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { nextCookies } from "better-auth/next-js";
@@ -138,9 +137,7 @@ const auth = betterAuth({
           name: dbUser.name,
         });
       } catch (error: unknown) {
-        Sentry.captureException(error, {
-          tags: { userId: user.id, context: "stripe-email-sync" },
-        });
+        console.error("Failed to sync email to Stripe:", error);
       }
     },
   },

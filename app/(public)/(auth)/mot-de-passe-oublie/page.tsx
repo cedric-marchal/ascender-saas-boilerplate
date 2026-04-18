@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
 
 import { ForgotPasswordPage } from "@/features/auth/pages/forgot-password-page";
 
 import { env } from "@/lib/env";
-import { getSession } from "@/lib/session";
+import { requireGuest } from "@/lib/session";
 
 const APP_NAME = env.NEXT_PUBLIC_APP_NAME;
 const DESCRIPTION = `Réinitialisez votre mot de passe ${APP_NAME}. Recevez un lien de réinitialisation par email.`;
@@ -31,11 +30,7 @@ export const metadata: Metadata = {
 };
 
 export default async function ForgotPasswordRoute() {
-  const session = await getSession();
-
-  if (session) {
-    return redirect("/dashboard");
-  }
+  await requireGuest();
 
   return <ForgotPasswordPage />;
 }

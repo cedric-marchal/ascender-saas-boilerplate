@@ -1,6 +1,5 @@
 import "server-only";
 
-import * as Sentry from "@sentry/nextjs";
 import type Stripe from "stripe";
 
 import { STRIPE_TO_DB_SUBSCRIPTION_STATUS } from "@/features/billing/constants/subscription-status.constant";
@@ -70,13 +69,7 @@ async function handleStripeWebhook(
 
     await redis.set(eventKey, 1, { ex: EVENT_TTL_SECONDS });
   } catch (redisError: unknown) {
-    Sentry.captureException(redisError, {
-      extra: {
-        eventType: event.type,
-        eventId: event.id,
-        context: "idempotency-check",
-      },
-    });
+    console.error("Redis idempotency check failed:", redisError);
     // Redis indisponible → on continue sans idempotence (mieux que bloquer)
   }
 
@@ -96,9 +89,8 @@ async function handleStripeWebhook(
         });
 
         if (!stripeCustomer) {
-          Sentry.captureMessage(
+          console.warn(
             `StripeCustomer not found for ${customerId}. Event: ${event.type}`,
-            "warning",
           );
           break;
         }
@@ -107,9 +99,8 @@ async function handleStripeWebhook(
         const priceId = subscriptionItem?.price?.id;
 
         if (!priceId || !subscriptionItem) {
-          Sentry.captureMessage(
+          console.warn(
             `Missing priceId for subscription ${subscription.id}. Event: ${event.type}`,
-            "warning",
           );
           break;
         }
@@ -122,9 +113,8 @@ async function handleStripeWebhook(
         )[subscription.status];
 
         if (!subscriptionStatus) {
-          Sentry.captureMessage(
+          console.warn(
             `Unknown subscription status "${subscription.status}" for ${subscription.id}. Event: ${event.type}`,
-            "warning",
           );
           break;
         }
@@ -193,9 +183,8 @@ async function handleStripeWebhook(
         });
 
         if (!stripeCustomer) {
-          Sentry.captureMessage(
+          console.warn(
             `StripeCustomer not found for ${customerId}. Event: ${event.type}`,
-            "warning",
           );
           break;
         }
@@ -225,10 +214,7 @@ async function handleStripeWebhook(
             : invoice.customer?.id;
 
         if (!customerId) {
-          Sentry.captureMessage(
-            `No customer ID in invoice. Event: ${event.type}`,
-            "warning",
-          );
+          console.warn(`No customer ID in invoice. Event: ${event.type}`);
           break;
         }
 
@@ -238,9 +224,8 @@ async function handleStripeWebhook(
         });
 
         if (!stripeCustomer) {
-          Sentry.captureMessage(
+          console.warn(
             `StripeCustomer not found for ${customerId}. Event: ${event.type}`,
-            "warning",
           );
           break;
         }
@@ -262,9 +247,7 @@ async function handleStripeWebhook(
         }
     }
   } catch (error: unknown) {
-    Sentry.captureException(error, {
-      extra: { eventType: event.type, eventId: event.id },
-    });
+    console.error("Webhook processing error:", error);
 
     if (isTransientDbError(error)) {
       return {

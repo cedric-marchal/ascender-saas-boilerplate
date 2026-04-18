@@ -5,6 +5,7 @@ import { cache } from "react";
 import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 
+import { ROLE_DASHBOARD_URL } from "@/features/auth/constants/role-dashboard.constant";
 import { ACTIVE_SUBSCRIPTION_STATUSES } from "@/features/billing/constants/subscription-status.constant";
 
 import { auth } from "@/lib/auth";
@@ -51,6 +52,19 @@ const getSession = cache(async (): Promise<Session | null> => {
 });
 
 /**
+ * Vérifie que l'utilisateur n'est pas connecté (visiteur)
+ * Redirige vers le dashboard approprié selon le rôle si connecté
+ * À utiliser dans les pages publiques réservées aux visiteurs (connexion, inscription, etc.)
+ */
+const requireGuest = async (): Promise<void> => {
+  const session = await getSession();
+
+  if (session) {
+    redirect(ROLE_DASHBOARD_URL[session.user.role]);
+  }
+};
+
+/**
  * Récupère la session ou redirige vers connexion
  * À utiliser dans CHAQUE page protégée
  */
@@ -93,20 +107,24 @@ const requireCustomerVerifiedEmail = async (): Promise<Session> => {
   return session;
 };
 
-const getProSubscription = cache(async (userId: string) => {
-  return prisma.subscription.findFirst({
-    where: {
-      stripeCustomer: { userId },
-      stripePriceId: env.STRIPE_PRICE_ID_PRO,
-      status: { in: ACTIVE_SUBSCRIPTION_STATUSES },
-    },
-    select: { id: true },
-  });
-});
+const getActiveSubscription = cache(
+  async (userId: string, priceIds: string[]) => {
+    return prisma.subscription.findFirst({
+      where: {
+        stripeCustomer: { userId },
+        stripePriceId: { in: priceIds },
+        status: { in: ACTIVE_SUBSCRIPTION_STATUSES },
+      },
+      select: { id: true },
+    });
+  },
+);
 
-const requireCustomerProSubscription = async (): Promise<Session> => {
+const requireCustomerWithSubscription = async (
+  priceIds: string[],
+): Promise<Session> => {
   const session = await requireCustomer();
-  const subscription = await getProSubscription(session.user.id);
+  const subscription = await getActiveSubscription(session.user.id, priceIds);
 
   if (!subscription) {
     return redirect("/tarifs");
@@ -114,6 +132,9 @@ const requireCustomerProSubscription = async (): Promise<Session> => {
 
   return session;
 };
+
+const requireCustomerProSubscription = () =>
+  requireCustomerWithSubscription([env.STRIPE_PRICE_ID_PRO]);
 
 /**
  * Récupère la session admin ou affiche 404
@@ -151,6 +172,7 @@ export {
   requireCustomer,
   requireCustomerProSubscription,
   requireCustomerVerifiedEmail,
+  requireGuest,
   requireSession,
 };
 

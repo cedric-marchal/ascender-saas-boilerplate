@@ -39,11 +39,6 @@ const env = createEnv({
     STRIPE_SECRET_KEY: z.string().min(1),
     STRIPE_WEBHOOK_SECRET: z.string().min(1),
     STRIPE_PRICE_ID_PRO: z.string().min(1),
-
-    SENTRY_ORG: z.string().min(1).optional(),
-    SENTRY_PROJECT: z.string().min(1).optional(),
-
-    CRON_SECRET: z.string().min(1).optional(),
   },
   client: {
     NEXT_PUBLIC_APP_NAME: z.string().min(1),
@@ -64,10 +59,6 @@ const env = createEnv({
       .pipe(
         z.number({ message: "La taille maximale de fichier est de 4.5MB" }),
       ),
-    NEXT_PUBLIC_SENTRY_DSN: z
-      .string()
-      .min(1)
-      .pipe(z.url({ message: "URL invalide" })),
   },
   runtimeEnv: {
     // Server
@@ -98,11 +89,6 @@ const env = createEnv({
     STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
     STRIPE_PRICE_ID_PRO: process.env.STRIPE_PRICE_ID_PRO,
 
-    SENTRY_ORG: process.env.SENTRY_ORG,
-    SENTRY_PROJECT: process.env.SENTRY_PROJECT,
-
-    CRON_SECRET: process.env.CRON_SECRET,
-
     // Client
     NEXT_PUBLIC_APP_NAME: process.env.NEXT_PUBLIC_APP_NAME,
     NEXT_PUBLIC_GA_MEASUREMENT_ID: process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID,
@@ -110,7 +96,6 @@ const env = createEnv({
     NEXT_PUBLIC_R2_PUBLIC_URL: process.env.NEXT_PUBLIC_R2_PUBLIC_URL,
     NEXT_PUBLIC_VERCEL_MAX_UPLOAD_SIZE:
       process.env.NEXT_PUBLIC_VERCEL_MAX_UPLOAD_SIZE,
-    NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
   },
   emptyStringAsUndefined: true,
   skipValidation: false,

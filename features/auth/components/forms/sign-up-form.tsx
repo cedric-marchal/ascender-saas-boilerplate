@@ -51,7 +51,10 @@ function SignUpForm() {
   });
 
   async function handleGoogleSignUp() {
-    const { error } = await signIn.social({ provider: "google" });
+    const { error } = await signIn.social({
+      provider: "google",
+      callbackURL: "/connexion",
+    });
 
     if (error) {
       toast.error(error.message || "Une erreur est survenue");

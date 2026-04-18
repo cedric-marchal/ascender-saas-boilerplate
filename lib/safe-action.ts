@@ -1,4 +1,3 @@
-import * as Sentry from "@sentry/nextjs";
 import {
   createSafeActionClient,
   DEFAULT_SERVER_ERROR_MESSAGE,
@@ -29,7 +28,7 @@ export const actionClient = createSafeActionClient({
       return error.message;
     }
 
-    Sentry.captureException(error);
+    console.error("Unexpected action error:", error);
 
     if (process.env.NODE_ENV === "development") {
       return error.message;

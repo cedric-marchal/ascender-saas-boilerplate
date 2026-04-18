@@ -18,7 +18,7 @@ Rules for `page.tsx`, `loading.tsx`, feature page components, and global page co
 
 - `metadata` export
 - `export default function {Path}Route()`
-- Auth guards (`requireSession`, `requireAdmin`)
+- Auth guards (`requireGuest`, `requireSession`, `requireCustomer`, `requireAdmin`)
 - Data fetching (only to pass as props)
 - Redirects
 
@@ -233,6 +233,34 @@ export default async function DashboardBillingRoute() {
 }
 ```
 
+### Guest Page Shim (auth pages)
+
+Pages that authenticated users must NOT access (sign-in, sign-up, password reset). `requireGuest()` redirects authenticated users to their role-specific dashboard.
+
+```tsx
+import type { Metadata } from "next";
+
+import { SignInPage } from "@/features/auth/pages/sign-in-page";
+
+import { env } from "@/lib/env";
+import { requireGuest } from "@/lib/session";
+
+const APP_NAME = env.NEXT_PUBLIC_APP_NAME;
+const DESCRIPTION = `Connectez-vous à votre compte ${APP_NAME}.`;
+
+export const metadata: Metadata = {
+  title: "Connexion",
+  description: DESCRIPTION,
+  // ... openGraph, twitter, robots
+};
+
+export default async function SignInRoute() {
+  await requireGuest();
+
+  return <SignInPage />;
+}
+```
+
 ### Protected Page Shim
 
 ```tsx
@@ -303,13 +331,17 @@ dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
 
 ## Auth Guards (P0)
 
-| Guard                            | Usage                        |
-| -------------------------------- | ---------------------------- |
-| `requireSession()`               | Any authenticated user       |
-| `requireCustomer()`              | Customer role                |
-| `requireCustomerVerifiedEmail()` | Customer with verified email |
-| `requireAdmin()`                 | Admin role                   |
-| `requireAdminVerifiedEmail()`    | Admin with verified email    |
+| Guard                              | Usage                                          |
+| ---------------------------------- | ---------------------------------------------- |
+| `requireGuest()`                   | Visitor only — redirects authenticated by role |
+| `requireSession()`                 | Any authenticated user                         |
+| `requireCustomer()`                | Customer role (404 for non-customer)           |
+| `requireCustomerVerifiedEmail()`   | Customer with verified email                   |
+| `requireCustomerProSubscription()` | Customer with active Pro subscription          |
+| `requireAdmin()`                   | Admin role (404 for non-admin)                 |
+| `requireAdminVerifiedEmail()`      | Admin with verified email                      |
+
+Role-based redirect URLs are defined in `ROLE_DASHBOARD_URL` (`features/auth/constants/role-dashboard.constant.ts`). Used by `requireGuest` and sign-in action to redirect to the correct dashboard per role.
 
 ## Loading Pages (P0)
 
@@ -407,4 +439,20 @@ export const metadata = { title: "Loading..." };  // ❌ never
 
 // ❌ Default export in feature page component
 export default function PricingPage() { ... }  // ❌ always named export
+
+// ❌ Manual role check + redirect in route file
+const session = await requireSession();
+if (session.user.role === UserRole.ADMIN) {
+  return redirect("/admin");
+}
+// ✅ Use the correct guard: requireCustomer(), requireAdmin(), requireGuest()
+
+// ❌ Manual session check for guest pages
+const session = await getSession();
+if (session) { return redirect("/dashboard"); }
+// ✅ Use requireGuest() — handles role-based redirect via ROLE_DASHBOARD_URL
+
+// ❌ Hardcoded dashboard URLs for role-based redirect
+redirect("/dashboard");  // ❌ ignores admin role
+// ✅ Use ROLE_DASHBOARD_URL[role] or requireGuest()
 ```

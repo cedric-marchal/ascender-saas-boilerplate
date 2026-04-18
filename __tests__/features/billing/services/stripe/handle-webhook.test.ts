@@ -9,8 +9,6 @@ const mockTxUserFindUnique = vi.fn();
 const mockRedisGet = vi.fn();
 const mockRedisSet = vi.fn();
 const mockRedisDel = vi.fn();
-const mockSentryCapture = vi.fn();
-const mockSentryCaptureException = vi.fn();
 
 vi.mock("@/lib/stripe", () => ({
   stripe: {
@@ -50,11 +48,6 @@ vi.mock("@/lib/redis", () => ({
   },
 }));
 
-vi.mock("@sentry/nextjs", () => ({
-  captureMessage: mockSentryCapture,
-  captureException: mockSentryCaptureException,
-}));
-
 vi.mock("@/lib/env", () => ({
   env: {
     STRIPE_WEBHOOK_SECRET: "whsec_test_secret",
@@ -68,6 +61,8 @@ const { handleStripeWebhook } =
 describe("handleStripeWebhook", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    vi.spyOn(console, "error").mockImplementation(() => {});
     mockRedisGet.mockResolvedValue(null);
     mockRedisSet.mockResolvedValue("OK");
     mockTxUserFindUnique.mockResolvedValue({ id: "user_123" });
@@ -245,7 +240,7 @@ describe("handleStripeWebhook", () => {
       expect(mockPrismaUpsert).toHaveBeenCalled();
     });
 
-    it("logs Sentry warning if StripeCustomer not found", async () => {
+    it("logs warning if StripeCustomer not found", async () => {
       const mockEvent = {
         id: "evt_test_789",
         type: "customer.subscription.created",
@@ -264,9 +259,8 @@ describe("handleStripeWebhook", () => {
 
       await handleStripeWebhook("body", "sig");
 
-      expect(mockSentryCapture).toHaveBeenCalledWith(
+      expect(console.warn).toHaveBeenCalledWith(
         expect.stringContaining("StripeCustomer not found"),
-        "warning",
       );
       expect(mockPrismaUpsert).not.toHaveBeenCalled();
     });
@@ -293,9 +287,8 @@ describe("handleStripeWebhook", () => {
 
       await handleStripeWebhook("body", "sig");
 
-      expect(mockSentryCapture).toHaveBeenCalledWith(
+      expect(console.warn).toHaveBeenCalledWith(
         expect.stringContaining("Missing priceId"),
-        "warning",
       );
       expect(mockPrismaUpsert).not.toHaveBeenCalled();
     });
@@ -330,9 +323,8 @@ describe("handleStripeWebhook", () => {
 
       await handleStripeWebhook("body", "sig");
 
-      expect(mockSentryCapture).toHaveBeenCalledWith(
+      expect(console.warn).toHaveBeenCalledWith(
         expect.stringContaining("Unknown subscription status"),
-        "warning",
       );
       expect(mockPrismaUpsert).not.toHaveBeenCalled();
     });
@@ -400,7 +392,7 @@ describe("handleStripeWebhook", () => {
       });
     });
 
-    it("logs Sentry warning if customer not found", async () => {
+    it("logs warning if customer not found", async () => {
       const mockEvent = {
         id: "evt_test_del2",
         type: "customer.subscription.deleted",
@@ -416,9 +408,8 @@ describe("handleStripeWebhook", () => {
 
       await handleStripeWebhook("body", "sig");
 
-      expect(mockSentryCapture).toHaveBeenCalledWith(
+      expect(console.warn).toHaveBeenCalledWith(
         expect.stringContaining("StripeCustomer not found"),
-        "warning",
       );
       expect(mockPrismaDeleteMany).not.toHaveBeenCalled();
     });
@@ -483,9 +474,8 @@ describe("handleStripeWebhook", () => {
 
       await handleStripeWebhook("body", "sig");
 
-      expect(mockSentryCapture).toHaveBeenCalledWith(
+      expect(console.warn).toHaveBeenCalledWith(
         expect.stringContaining("No customer ID in invoice"),
-        "warning",
       );
       expect(mockRedisDel).not.toHaveBeenCalled();
     });
@@ -505,9 +495,8 @@ describe("handleStripeWebhook", () => {
 
       await handleStripeWebhook("body", "sig");
 
-      expect(mockSentryCapture).toHaveBeenCalledWith(
+      expect(console.warn).toHaveBeenCalledWith(
         expect.stringContaining("StripeCustomer not found"),
-        "warning",
       );
       expect(mockRedisDel).not.toHaveBeenCalled();
     });
@@ -550,7 +539,7 @@ describe("handleStripeWebhook", () => {
   });
 
   describe("error handling", () => {
-    it("captures exception in Sentry and returns 200", async () => {
+    it("logs error and returns 200", async () => {
       const mockEvent = {
         id: "evt_error",
         type: "customer.subscription.created",
@@ -577,14 +566,9 @@ describe("handleStripeWebhook", () => {
 
       const result = await handleStripeWebhook("body", "sig");
 
-      expect(mockSentryCaptureException).toHaveBeenCalledWith(
+      expect(console.error).toHaveBeenCalledWith(
+        "Webhook processing error:",
         expect.any(Error),
-        expect.objectContaining({
-          extra: expect.objectContaining({
-            eventType: "customer.subscription.created",
-            eventId: "evt_error",
-          }),
-        }),
       );
       expect(result.status).toBe(200);
       expect(result.body.success).toBe(true);

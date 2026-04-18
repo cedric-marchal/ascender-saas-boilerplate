@@ -111,6 +111,22 @@ export const deleteUserAction = adminActionClient
 
 `parsedInput` is typed and validated.
 
+## Role-Based Redirect (P0)
+
+Sign-in action returns `redirectUrl` from `ROLE_DASHBOARD_URL` so the client redirects to the correct dashboard per role. NEVER hardcode `/dashboard` in sign-in actions.
+
+```tsx
+import { ROLE_DASHBOARD_URL } from "@/features/auth/constants/role-dashboard.constant";
+
+import { UserRole } from "@/lib/generated/prisma/client";
+
+// Inside sign-in action:
+const role = session.user.role as UserRole;
+const redirectUrl = ROLE_DASHBOARD_URL[role];
+
+return { success: true, redirectUrl };
+```
+
 ## Error Handling (P0)
 
 - NO try/catch needed (next-safe-action handles it)

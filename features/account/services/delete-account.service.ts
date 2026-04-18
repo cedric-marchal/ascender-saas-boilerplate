@@ -1,7 +1,5 @@
 import "server-only";
 
-import * as Sentry from "@sentry/nextjs";
-
 import { AccountDeletedEmail } from "@/features/account/emails/account-deleted-email";
 
 import { env } from "@/lib/env";
@@ -49,9 +47,7 @@ async function cleanupStripeCustomer(
   try {
     await stripe.customers.del(stripeCustomerId);
   } catch (error: unknown) {
-    Sentry.captureException(error, {
-      tags: { userId, context: "delete-stripe-customer" },
-    });
+    console.error("Failed to delete Stripe customer:", error);
   }
 
   try {
@@ -60,9 +56,7 @@ async function cleanupStripeCustomer(
       redis.del(`invoices:${userId}`),
     ]);
   } catch (error: unknown) {
-    Sentry.captureException(error, {
-      tags: { userId, context: "delete-redis-cache" },
-    });
+    console.error("Failed to delete Redis cache:", error);
   }
 }
 
@@ -74,9 +68,7 @@ async function cleanupAvatar(image: string | null): Promise<void> {
   try {
     await deleteFile(image);
   } catch (error: unknown) {
-    Sentry.captureException(error, {
-      tags: { context: "delete-user-avatar" },
-    });
+    console.error("Failed to delete user avatar:", error);
   }
 }
 
@@ -121,9 +113,7 @@ async function deleteAccount(input: DeleteAccountInput): Promise<void> {
       react: AccountDeletedEmail({ name: input.userName }),
     });
   } catch (error: unknown) {
-    Sentry.captureException(error, {
-      tags: { context: "send-account-deletion-email" },
-    });
+    console.error("Failed to send account deletion email:", error);
   }
 }
 

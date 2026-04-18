@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { ResetPasswordPage } from "@/features/auth/pages/reset-password-page";
 
 import { env } from "@/lib/env";
-import { getSession } from "@/lib/session";
+import { requireGuest } from "@/lib/session";
 
 const APP_NAME = env.NEXT_PUBLIC_APP_NAME;
 const DESCRIPTION = `Créez un nouveau mot de passe pour votre compte ${APP_NAME}.`;
@@ -28,11 +28,7 @@ type ResetPasswordRouteProps = {
 export default async function ResetPasswordRoute({
   searchParams,
 }: ResetPasswordRouteProps) {
-  const session = await getSession();
-
-  if (session) {
-    return redirect("/dashboard");
-  }
+  await requireGuest();
 
   const { token } = await searchParams;
 

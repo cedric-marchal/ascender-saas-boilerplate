@@ -2,7 +2,6 @@
 
 import { useEffect } from "react";
 
-import * as Sentry from "@sentry/nextjs";
 import { AlertTriangle } from "lucide-react";
 
 type GlobalErrorPageProps = {
@@ -12,7 +11,7 @@ type GlobalErrorPageProps = {
 
 function GlobalErrorPage({ error, reset }: GlobalErrorPageProps) {
   useEffect(() => {
-    Sentry.captureException(error);
+    console.error(error);
   }, [error]);
 
   return (

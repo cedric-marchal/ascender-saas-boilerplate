@@ -117,4 +117,3 @@ jobs:
           NEXT_PUBLIC_APP_NAME: Ascender
           NEXT_PUBLIC_BASE_URL: https://ci.example.com
           NEXT_PUBLIC_R2_PUBLIC_URL: https://ci.r2.example.com
-          NEXT_PUBLIC_SENTRY_DSN: https://ci@ci.ingest.sentry.io/0

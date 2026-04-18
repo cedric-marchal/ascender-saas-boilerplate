@@ -23,7 +23,7 @@ async function seedVerifications(prisma: PrismaClient): Promise<void> {
     });
   }
 
-  // Expired verification (cleanup target for cron)
+  // Expired verification
   await prisma.verification.create({
     data: {
       id: seedId("verification", 99),

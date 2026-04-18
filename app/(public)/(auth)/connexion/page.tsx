@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
 
 import { SignInPage } from "@/features/auth/pages/sign-in-page";
 
 import { env } from "@/lib/env";
-import { getSession } from "@/lib/session";
+import { requireGuest } from "@/lib/session";
 
 const APP_NAME = env.NEXT_PUBLIC_APP_NAME;
 const DESCRIPTION = `Connectez-vous à votre compte ${APP_NAME}. Accédez à votre tableau de bord et gérez vos projets.`;
@@ -32,11 +31,7 @@ export const metadata: Metadata = {
 };
 
 export default async function SignInRoute() {
-  const session = await getSession();
-
-  if (session) {
-    return redirect("/dashboard");
-  }
+  await requireGuest();
 
   return <SignInPage />;
 }

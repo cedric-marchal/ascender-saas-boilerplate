@@ -18,7 +18,6 @@
 | Emails     | React Email + Resend         |
 | HTTP       | up-fetch                     |
 | Rate Limit | Upstash Redis + Ratelimit    |
-| Monitoring | Sentry                       |
 | Hosting    | Vercel                       |
 | Tests      | Vitest                       |
 
