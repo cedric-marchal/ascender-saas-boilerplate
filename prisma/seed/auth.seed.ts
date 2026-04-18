@@ -47,19 +47,38 @@ const USER_AGENTS = [
 // Name pools for generation
 // ---------------------------------------------------------------------------
 
-const FIRST_NAMES = [
+// Short first names (2-4 chars)
+const SHORT_FIRST_NAMES = [
+  "Léa",
+  "Léo",
+  "Lou",
+  "Ana",
+  "Éva",
+  "Tom",
+  "Max",
+  "Zoé",
+  "Mia",
+  "Ali",
+  "Aya",
+  "Noé",
+  "Lya",
+  "Tim",
+  "Sam",
+  "Emy",
+  "Ivy",
+  "Axe",
+  "Lio",
+  "Kay",
+];
+
+// Normal first names (5-8 chars)
+const NORMAL_FIRST_NAMES = [
   "Adrien",
   "Agathe",
-  "Alexandre",
   "Alice",
-  "Amandine",
   "Antoine",
   "Arthur",
-  "Aurélie",
-  "Baptiste",
   "Camille",
-  "Caroline",
-  "Charlotte",
   "Clara",
   "Clément",
   "Damien",
@@ -67,150 +86,165 @@ const FIRST_NAMES = [
   "Élise",
   "Émilie",
   "Emma",
-  "Étienne",
   "Fabien",
-  "Florian",
   "Gabriel",
-  "Guillaume",
   "Hélène",
   "Hugo",
   "Inès",
-  "Isabelle",
-  "Jacques",
   "Jade",
   "Julien",
-  "Juliette",
-  "Karine",
   "Laure",
-  "Laurent",
-  "Léa",
-  "Léo",
   "Louis",
-  "Louise",
-  "Luca",
   "Lucie",
   "Manon",
   "Marc",
-  "Margaux",
   "Marie",
-  "Mathieu",
-  "Mathilde",
-  "Maxime",
-  "Mélanie",
   "Nathan",
-  "Nicolas",
   "Nina",
   "Noah",
   "Nora",
-  "Olivier",
-  "Pauline",
-  "Philippe",
   "Pierre",
-  "Raphaël",
   "Romain",
   "Sarah",
   "Simon",
-  "Solène",
   "Sophie",
   "Théo",
   "Thomas",
-  "Valentin",
-  "Valentine",
   "Victor",
-  "Virginie",
-  "Xavier",
   "Yanis",
-  "Zoé",
 ];
 
-const LAST_NAMES = [
+// Long first names (9+ chars, compound)
+const LONG_FIRST_NAMES = [
+  "Alexandre",
+  "Amandine",
+  "Aurélie",
+  "Baptiste",
+  "Caroline",
+  "Charlotte",
+  "Christophe",
+  "Dominique",
+  "Emmanuelle",
+  "Frédérique",
+  "Guillaume",
+  "Jacqueline",
+  "Jean-Pierre",
+  "Jean-Claude",
+  "Jean-Michel",
+  "Jean-Marie",
+  "Jean-Louis",
+  "Jean-François",
+  "Marie-Claire",
+  "Marie-Hélène",
+  "Marie-Christine",
+  "Marie-Thérèse",
+  "Marguerite",
+  "Maximilien",
+  "Sébastien",
+  "Stéphanie",
+  "Véronique",
+  "Madeleine",
+  "Barthélemy",
+];
+
+// Short last names (2-4 chars)
+const SHORT_LAST_NAMES = [
+  "Roy",
+  "Rey",
+  "Gil",
+  "Mas",
+  "Bon",
+  "Duc",
+  "Foy",
+  "Rio",
+  "Ory",
+  "Roux",
+  "Brun",
   "Adam",
+  "Faur",
+  "Gras",
+  "Lamy",
+  "Pons",
+  "Vial",
+  "Blin",
+  "Roch",
+  "Mace",
+];
+
+// Normal last names (5-8 chars)
+const NORMAL_LAST_NAMES = [
   "Arnaud",
   "Barbier",
-  "Barre",
   "Benoit",
   "Bertrand",
   "Blanc",
   "Bonnet",
   "Boucher",
   "Boyer",
-  "Brun",
   "Caron",
-  "Carpentier",
-  "Charpentier",
-  "Chevalier",
   "Colin",
-  "Collet",
   "Costa",
   "David",
   "Denis",
-  "Deschamps",
   "Dufour",
-  "Dumont",
   "Dupont",
-  "Dupuis",
   "Durand",
   "Fabre",
-  "Fernandez",
   "Fleury",
-  "Fontaine",
   "Fournier",
   "Garnier",
-  "Gauthier",
-  "Gérard",
   "Girard",
   "Giraud",
   "Guérin",
-  "Guillaume",
   "Henry",
   "Hubert",
   "Joly",
   "Lambert",
   "Laurent",
-  "Leblanc",
   "Leclerc",
-  "Lefebvre",
-  "Legrand",
-  "Lemaire",
-  "Lemoine",
-  "Leroux",
   "Leroy",
-  "Lopez",
-  "Marchand",
-  "Marie",
   "Martin",
-  "Mathieu",
   "Mercier",
   "Meyer",
   "Michel",
   "Morel",
   "Moreau",
-  "Moulin",
   "Muller",
-  "Noel",
-  "Olivier",
-  "Paris",
   "Perrin",
   "Petit",
-  "Philippe",
   "Picard",
   "Renard",
-  "Renaud",
-  "Rey",
   "Richard",
   "Robert",
   "Robin",
-  "Roche",
-  "Rodriguez",
-  "Roger",
-  "Rolland",
-  "Rousseau",
-  "Roussel",
-  "Roy",
   "Simon",
   "Thomas",
   "Vidal",
   "Vincent",
+];
+
+// Long last names (9+ chars, compound, aristocratic)
+const LONG_LAST_NAMES = [
+  "Carpentier",
+  "Charpentier",
+  "Chevalier",
+  "Deschamps",
+  "Fernandez",
+  "Lefebvre-Giraud",
+  "Lemaire-Dupont",
+  "Rodriguez-Lopez",
+  "Beaumont-Leclerc",
+  "Montmorency",
+  "Rochefoucauld",
+  "Saint-Germain",
+  "Villeneuve-Bargemon",
+  "Château-Thierry",
+  "Clermont-Ferrand",
+  "De La Fontaine",
+  "Du Bellay-Moreau",
+  "Beauvilliers",
+  "Grandmaison",
+  "Pierrefonds",
 ];
 
 const EMAIL_DOMAINS = [
@@ -241,14 +275,39 @@ const PICSUM_IDS = [
 // Generator — deterministic from index
 // ---------------------------------------------------------------------------
 
+function pickName(index: number): string {
+  const variant = index % 3;
+  const offset = index - 17;
+
+  if (variant === 0) {
+    // ~1/3 SHORT: short first + short last → "Léa Roy" (5-9 chars)
+    const first = SHORT_FIRST_NAMES[offset % SHORT_FIRST_NAMES.length]!;
+    const last = SHORT_LAST_NAMES[offset % SHORT_LAST_NAMES.length]!;
+
+    return `${first} ${last}`;
+  }
+
+  if (variant === 1) {
+    // ~1/3 LONG: long first + long last → "Jean-François Villeneuve-Bargemon" (25-45 chars)
+    const first = LONG_FIRST_NAMES[offset % LONG_FIRST_NAMES.length]!;
+    const last = LONG_LAST_NAMES[offset % LONG_LAST_NAMES.length]!;
+
+    return `${first} ${last}`;
+  }
+
+  // ~1/3 NORMAL: normal first + normal last → "Julien Martin" (10-16 chars)
+  const first = NORMAL_FIRST_NAMES[offset % NORMAL_FIRST_NAMES.length]!;
+  const last = NORMAL_LAST_NAMES[offset % NORMAL_LAST_NAMES.length]!;
+
+  return `${first} ${last}`;
+}
+
 function generateUser(index: number): UserSeed {
-  const firstName = FIRST_NAMES[(index - 17) % FIRST_NAMES.length]!;
-  const lastName = LAST_NAMES[(index - 17) % LAST_NAMES.length]!;
-  const name = `${firstName} ${lastName}`;
+  const name = pickName(index);
 
   const emailSlug = slugify(name).replace(/-/g, ".");
   const domain = EMAIL_DOMAINS[(index - 17) % EMAIL_DOMAINS.length]!;
-  const email = `${emailSlug}@${domain}`;
+  const email = `${emailSlug}${index}@${domain}`;
 
   const isGoogle = index % 5 === 0;
   const hasImage = index % 3 !== 0;

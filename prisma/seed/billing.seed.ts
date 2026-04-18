@@ -9,8 +9,8 @@ import { daysAgo, daysFromNow, SEED_FILTER, seedId, slugify } from "./helpers";
 // Helpers
 // ---------------------------------------------------------------------------
 
-function stripeCustomerIdForUser(name: string): string {
-  return `cus_seed_${slugify(name).replace(/-/g, "_")}`;
+function stripeCustomerIdForUser(name: string, index: number): string {
+  return `cus_seed_${slugify(name).replace(/-/g, "_")}_${index}`;
 }
 
 // ---------------------------------------------------------------------------
@@ -245,7 +245,7 @@ async function seedBilling(prisma: PrismaClient): Promise<void> {
       data: {
         id: `seed-stripe-customer-${user.index}`,
         userId: seedId("user", user.index),
-        stripeCustomerId: stripeCustomerIdForUser(user.name),
+        stripeCustomerId: stripeCustomerIdForUser(user.name, user.index),
         createdAt: user.createdAt,
         updatedAt: user.createdAt,
       },
@@ -272,7 +272,10 @@ async function seedBilling(prisma: PrismaClient): Promise<void> {
       data: {
         id: `seed-subscription-${subscription.userIndex}`,
         stripeSubscriptionId: subscription.stripeSubscriptionId,
-        stripeCustomerId: stripeCustomerIdForUser(matchingUser.name),
+        stripeCustomerId: stripeCustomerIdForUser(
+          matchingUser.name,
+          matchingUser.index,
+        ),
         stripePriceId: subscription.stripePriceId,
         status: subscription.status,
         currentPeriodStart: subscription.currentPeriodStart,

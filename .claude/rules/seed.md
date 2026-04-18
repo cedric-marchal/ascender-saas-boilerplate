@@ -152,9 +152,11 @@ Every boolean, enum, and nullable field MUST have at least one seed record per p
 - `cancelAtPeriodEnd`: true AND false
 - Nullable fields (`ipAddress`, `userAgent`): present AND null
 
-### Boundary lengths
+### Boundary lengths & distribution
 
-Include at least one record at each **extreme** (minimum and maximum realistic length) to catch both overflow and empty/short display issues:
+Extremes are more valuable than averages for demos and UI testing. When generating bulk seed data, distribute string lengths as **~1/3 short, ~1/3 normal, ~1/3 long** — NOT mostly normal with a few edge cases. Use separate name pools per length category (short, normal, long) and rotate between them deterministically.
+
+Include at least one record at each **extreme** (minimum and maximum realistic length):
 
 | Field       | Min seed                 | Max seed                                                                      |
 | ----------- | ------------------------ | ----------------------------------------------------------------------------- |
