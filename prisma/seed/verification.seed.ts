@@ -34,6 +34,18 @@ async function seedVerifications(prisma: PrismaClient): Promise<void> {
       updatedAt: daysAgo(10),
     },
   });
+
+  // About-to-expire verification (expires in 1 hour)
+  await prisma.verification.create({
+    data: {
+      id: seedId("verification", 98),
+      identifier: "almost-expired@example.com",
+      value: "seed-almost-expired-verification-token",
+      expiresAt: hoursFromNow(1),
+      createdAt: daysAgo(1),
+      updatedAt: daysAgo(1),
+    },
+  });
 }
 
 // ---------------------------------------------------------------------------

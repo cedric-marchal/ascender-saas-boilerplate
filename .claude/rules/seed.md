@@ -99,6 +99,82 @@ Available exports — use these, don't reinvent:
 | `slugify(text)`                                     | Slug helper (matches app's `utils/string/slugify`) |
 | `daysAgo(n)` / `daysFromNow(n)` / `hoursFromNow(n)` | Date helpers                                       |
 
+## Production-Accurate Formats (P0)
+
+Seed data MUST match the exact formats that modules generate in production. Refer to this table when creating or updating seeds.
+
+### Better Auth (Users, Accounts, Sessions, Verifications)
+
+Better Auth generates all IDs via `crypto.randomUUID()` (UUID v4). Seed IDs use the `seed-` prefix instead — this is intentional for cleanup. But all other fields MUST match production format.
+
+| Field                                    | Production format                              | Seed convention                               |
+| ---------------------------------------- | ---------------------------------------------- | --------------------------------------------- |
+| `user.id`                                | UUID v4                                        | `seedId("user", index)`                       |
+| `account.id`                             | UUID v4                                        | `seedId("account", index)`                    |
+| `account.accountId` (credential)         | = `userId`                                     | `seedId("user", index)`                       |
+| `account.accountId` (Google)             | Google `sub` claim (numeric string, ~21 chars) | Realistic numeric string                      |
+| `account.providerId`                     | `"credential"` or `"google"`                   | Same                                          |
+| `account.scope` (Google)                 | `"openid email profile"`                       | Same                                          |
+| `account.accessTokenExpiresAt` (Google)  | ~1h from auth                                  | `hoursFromNow(1)`                             |
+| `account.refreshTokenExpiresAt` (Google) | `null` (never expires)                         | `null`                                        |
+| `account.password` (credential)          | scrypt hash via Better Auth                    | `getHashedPassword()`                         |
+| `account.password` (Google)              | `null`                                         | `null`                                        |
+| `session.id`                             | UUID v4                                        | `seedId("session", index)`                    |
+| `session.token`                          | Opaque random string                           | `seed-session-token-{index}`                  |
+| `session.ipAddress`                      | IPv4 or IPv6 or `null`                         | Vary: IPv4, IPv6, and null                    |
+| `session.userAgent`                      | Varies per browser/device or `null`            | Vary across records — NEVER identical for all |
+| `verification.id`                        | UUID v4                                        | `seedId("verification", index)`               |
+| `verification.value`                     | Opaque token string                            | `seed-*-token-{index}`                        |
+
+### Stripe (StripeCustomer, Subscription)
+
+| Field                               | Production format                 | Seed convention                |
+| ----------------------------------- | --------------------------------- | ------------------------------ |
+| `stripeCustomer.id`                 | cuid (Prisma default)             | `seed-stripe-customer-{index}` |
+| `stripeCustomer.stripeCustomerId`   | `cus_` + 14-24 alphanumeric       | `cus_seed_` + slugified name   |
+| `subscription.id`                   | cuid (Prisma default)             | `seed-subscription-{index}`    |
+| `subscription.stripeSubscriptionId` | `sub_` + 14-24 alphanumeric       | `sub_seed_` + descriptive      |
+| `subscription.stripePriceId`        | `price_` + 14-24 alphanumeric     | `price_seed_pro_monthly`       |
+| `subscription.status`               | All 8 `SubscriptionStatus` values | MUST cover all statuses        |
+
+## Edge Case Coverage (P0 — CRITICAL)
+
+Seed data MUST cover **every possible state and edge case** as if it were a production database. The goal is to stress-test the UI and catch overflow, truncation, and layout issues during development — not just happy paths.
+
+### State coverage
+
+Every boolean, enum, and nullable field MUST have at least one seed record per possible value:
+
+- `emailVerified`: true AND false
+- `role`: one user per `UserRole` value (ADMIN, CUSTOMER)
+- `image`: with avatar AND null (test fallback initials)
+- `SubscriptionStatus`: at least one subscription per status (ACTIVE, TRIALING, CANCELED, PAST_DUE, etc.)
+- `cancelAtPeriodEnd`: true AND false
+- Nullable fields (`ipAddress`, `userAgent`): present AND null
+
+### Boundary lengths
+
+Include at least one record at each **extreme** (minimum and maximum realistic length) to catch both overflow and empty/short display issues:
+
+| Field       | Min seed                 | Max seed                                                                      |
+| ----------- | ------------------------ | ----------------------------------------------------------------------------- |
+| `name`      | `"A B"` (3 chars)        | `"Jean-Baptiste de La Rochefoucauld-Montmorency"` (45+ chars)                 |
+| `email`     | `"a@b.fr"` (6 chars)     | `"jean-baptiste.rochefoucauld-montmorency@entreprise-exemple.fr"` (60+ chars) |
+| `slug`      | Short slug from min name | Long slug auto-generated from long name                                       |
+| `userAgent` | `null`                   | Full realistic UA string (150+ chars)                                         |
+| `ipAddress` | `null`                   | Full IPv6 `"2001:0db8:85a3:0000:0000:8a2e:0370:7334"`                         |
+
+### Temporal edge cases
+
+- Expired sessions (`expiresAt` in the past)
+- Expired verifications (`expiresAt` in the past)
+- Subscriptions at period boundaries (`currentPeriodEnd` = today)
+- Recently created records AND old records (vary `createdAt`)
+
+### Why
+
+If a long name breaks the sidebar or a null image crashes the avatar, you want to catch it in dev — not in production. Seed data is your first line of defense against UI edge cases.
+
 ## Single Source of Truth (P0 — CRITICAL)
 
 All relational seed data MUST be driven from a single shared data array. NEVER duplicate IDs, emails, indexes, or flags across files.
@@ -144,4 +220,6 @@ Absolute @/ imports (won't resolve with tsx)
 Hardcoded index lists like STRIPE_USER_INDEXES = [3, 4, 5] (use flags on USERS)
 Hardcoded emails in verifications (derive from USERS.filter(u => !u.emailVerified))
 Duplicating user data across seeders instead of importing from auth.seed.ts
+Only short/happy-path seed data (must include max-length strings, all enum values, all nullable states)
+Missing boundary-length records (long names, long emails — these catch UI overflow bugs)
 ```

@@ -35,7 +35,7 @@ import { Separator } from "@/components/ui/separator";
 
 import { getAvatarUrl } from "@/utils/string/get-avatar-url";
 import { getInitials } from "@/utils/string/get-initials";
-import { truncateName } from "@/utils/string/truncate";
+import { truncate, truncateName } from "@/utils/string/truncate";
 
 type UserDetailPageProps = {
   user: GetUserResult;
@@ -111,7 +111,7 @@ function UserDetailPage({ user }: UserDetailPageProps) {
               <Separator />
               <div className="flex justify-between gap-2">
                 <dt className="text-muted-foreground text-sm">Email</dt>
-                <dd className="text-sm">{user.email}</dd>
+                <dd className="text-sm">{truncate(user.email, 40)}</dd>
               </div>
               <Separator />
               <div className="flex justify-between gap-2">
@@ -267,8 +267,8 @@ function UserDetailPage({ user }: UserDetailPageProps) {
                         </div>
                       )}
                       {session.userAgent && (
-                        <p className="text-muted-foreground max-w-md truncate text-xs">
-                          {session.userAgent}
+                        <p className="text-muted-foreground text-xs">
+                          {truncate(session.userAgent, 120)}
                         </p>
                       )}
                     </div>

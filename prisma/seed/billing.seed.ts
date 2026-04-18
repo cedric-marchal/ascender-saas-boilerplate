@@ -30,7 +30,37 @@ type SubscriptionSeed = {
   createdAt: Date;
 };
 
-const SUBSCRIPTIONS: SubscriptionSeed[] = [
+// Status distribution for generated subscriptions (weighted, realistic)
+const STATUS_DISTRIBUTION: {
+  status: SubscriptionStatus;
+  cancelAtPeriodEnd: boolean;
+  periodEnd: "future" | "past" | "today";
+}[] = [
+  // ~50% ACTIVE normal
+  { status: "ACTIVE", cancelAtPeriodEnd: false, periodEnd: "future" },
+  { status: "ACTIVE", cancelAtPeriodEnd: false, periodEnd: "future" },
+  { status: "ACTIVE", cancelAtPeriodEnd: false, periodEnd: "future" },
+  { status: "ACTIVE", cancelAtPeriodEnd: false, periodEnd: "future" },
+  { status: "ACTIVE", cancelAtPeriodEnd: false, periodEnd: "future" },
+  // ~10% ACTIVE canceling
+  { status: "ACTIVE", cancelAtPeriodEnd: true, periodEnd: "future" },
+  // ~10% TRIALING
+  { status: "TRIALING", cancelAtPeriodEnd: false, periodEnd: "future" },
+  // ~10% CANCELED
+  { status: "CANCELED", cancelAtPeriodEnd: false, periodEnd: "past" },
+  // ~8% PAST_DUE
+  { status: "PAST_DUE", cancelAtPeriodEnd: false, periodEnd: "past" },
+  // ~4% INCOMPLETE
+  { status: "INCOMPLETE", cancelAtPeriodEnd: false, periodEnd: "future" },
+  // ~4% UNPAID
+  { status: "UNPAID", cancelAtPeriodEnd: false, periodEnd: "past" },
+  // ~4% PAUSED
+  { status: "PAUSED", cancelAtPeriodEnd: false, periodEnd: "today" },
+];
+
+// Hand-crafted subscriptions for edge case users (indexes 3-16)
+const MANUAL_SUBSCRIPTIONS: SubscriptionSeed[] = [
+  // ACTIVE — normal
   {
     userIndex: 3,
     stripeSubscriptionId: "sub_seed_thomas_active",
@@ -41,9 +71,10 @@ const SUBSCRIPTIONS: SubscriptionSeed[] = [
     cancelAtPeriodEnd: false,
     createdAt: daysAgo(90),
   },
+  // ACTIVE — canceling at period end
   {
     userIndex: 4,
-    stripeSubscriptionId: "sub_seed_marine_active",
+    stripeSubscriptionId: "sub_seed_marine_active_canceling",
     stripePriceId: STRIPE_PRICE_ID_PRO,
     status: "ACTIVE",
     currentPeriodStart: daysAgo(10),
@@ -51,6 +82,7 @@ const SUBSCRIPTIONS: SubscriptionSeed[] = [
     cancelAtPeriodEnd: true,
     createdAt: daysAgo(75),
   },
+  // TRIALING
   {
     userIndex: 5,
     stripeSubscriptionId: "sub_seed_lucas_trialing",
@@ -61,6 +93,7 @@ const SUBSCRIPTIONS: SubscriptionSeed[] = [
     cancelAtPeriodEnd: false,
     createdAt: daysAgo(7),
   },
+  // CANCELED — period ended
   {
     userIndex: 6,
     stripeSubscriptionId: "sub_seed_camille_canceled",
@@ -71,6 +104,7 @@ const SUBSCRIPTIONS: SubscriptionSeed[] = [
     cancelAtPeriodEnd: false,
     createdAt: daysAgo(120),
   },
+  // PAST_DUE — payment failed
   {
     userIndex: 7,
     stripeSubscriptionId: "sub_seed_antoine_pastdue",
@@ -81,6 +115,119 @@ const SUBSCRIPTIONS: SubscriptionSeed[] = [
     cancelAtPeriodEnd: false,
     createdAt: daysAgo(60),
   },
+  // ACTIVE — boundary min user
+  {
+    userIndex: 11,
+    stripeSubscriptionId: "sub_seed_ab_active",
+    stripePriceId: STRIPE_PRICE_ID_PRO,
+    status: "ACTIVE",
+    currentPeriodStart: daysAgo(3),
+    currentPeriodEnd: daysFromNow(27),
+    cancelAtPeriodEnd: false,
+    createdAt: daysAgo(5),
+  },
+  // ACTIVE — boundary max user
+  {
+    userIndex: 12,
+    stripeSubscriptionId: "sub_seed_jb_rochefoucauld_active",
+    stripePriceId: STRIPE_PRICE_ID_PRO,
+    status: "ACTIVE",
+    currentPeriodStart: daysAgo(20),
+    currentPeriodEnd: daysFromNow(10),
+    cancelAtPeriodEnd: false,
+    createdAt: daysAgo(365),
+  },
+  // No subscription for user 13 (abandoned checkout)
+  // INCOMPLETE — payment not yet confirmed
+  {
+    userIndex: 14,
+    stripeSubscriptionId: "sub_seed_hugo_incomplete",
+    stripePriceId: STRIPE_PRICE_ID_PRO,
+    status: "INCOMPLETE",
+    currentPeriodStart: daysAgo(1),
+    currentPeriodEnd: daysFromNow(29),
+    cancelAtPeriodEnd: false,
+    createdAt: daysAgo(1),
+  },
+  // UNPAID — multiple payment failures
+  {
+    userIndex: 15,
+    stripeSubscriptionId: "sub_seed_lea_unpaid",
+    stripePriceId: STRIPE_PRICE_ID_PRO,
+    status: "UNPAID",
+    currentPeriodStart: daysAgo(45),
+    currentPeriodEnd: daysAgo(15),
+    cancelAtPeriodEnd: false,
+    createdAt: daysAgo(200),
+  },
+  // PAUSED
+  {
+    userIndex: 16,
+    stripeSubscriptionId: "sub_seed_nathan_paused",
+    stripePriceId: STRIPE_PRICE_ID_PRO,
+    status: "PAUSED",
+    currentPeriodStart: daysAgo(30),
+    currentPeriodEnd: daysAgo(0),
+    cancelAtPeriodEnd: false,
+    createdAt: daysAgo(100),
+  },
+];
+
+// Users with manual subscriptions (skip in generation)
+const MANUAL_SUB_INDEXES = new Set(
+  MANUAL_SUBSCRIPTIONS.map(
+    (subscription: SubscriptionSeed) => subscription.userIndex,
+  ),
+);
+
+// Users with Stripe customer but explicitly no subscription (abandoned checkout)
+const NO_SUB_INDEXES = new Set([13]);
+
+function generateSubscriptions(): SubscriptionSeed[] {
+  const generatedUsersWithStripe = USERS.filter(
+    (user: UserSeed) =>
+      user.hasStripeCustomer &&
+      !MANUAL_SUB_INDEXES.has(user.index) &&
+      !NO_SUB_INDEXES.has(user.index),
+  );
+
+  return generatedUsersWithStripe.map(
+    (user: UserSeed, index: number): SubscriptionSeed => {
+      const distribution =
+        STATUS_DISTRIBUTION[index % STATUS_DISTRIBUTION.length]!;
+
+      const periodDays = 15 + (index % 15);
+      let currentPeriodStart: Date;
+      let currentPeriodEnd: Date;
+
+      if (distribution.periodEnd === "future") {
+        currentPeriodStart = daysAgo(periodDays);
+        currentPeriodEnd = daysFromNow(30 - periodDays);
+      } else if (distribution.periodEnd === "past") {
+        currentPeriodStart = daysAgo(periodDays + 30);
+        currentPeriodEnd = daysAgo(periodDays);
+      } else {
+        currentPeriodStart = daysAgo(30);
+        currentPeriodEnd = daysAgo(0);
+      }
+
+      return {
+        userIndex: user.index,
+        stripeSubscriptionId: `sub_seed_gen_${user.index}`,
+        stripePriceId: STRIPE_PRICE_ID_PRO,
+        status: distribution.status,
+        currentPeriodStart,
+        currentPeriodEnd,
+        cancelAtPeriodEnd: distribution.cancelAtPeriodEnd,
+        createdAt: user.createdAt,
+      };
+    },
+  );
+}
+
+const SUBSCRIPTIONS: SubscriptionSeed[] = [
+  ...MANUAL_SUBSCRIPTIONS,
+  ...generateSubscriptions(),
 ];
 
 // ---------------------------------------------------------------------------

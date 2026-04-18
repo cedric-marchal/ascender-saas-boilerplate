@@ -27,6 +27,7 @@ import { Separator } from "@/components/ui/separator";
 
 import { getAvatarUrl } from "@/utils/string/get-avatar-url";
 import { getInitials } from "@/utils/string/get-initials";
+import { truncate, truncateName } from "@/utils/string/truncate";
 
 type AdminDashboardPageProps = {
   metrics: AdminDashboardMetrics;
@@ -184,9 +185,11 @@ function AdminDashboardPage({ metrics }: AdminDashboardPageProps) {
                           )}
                         </Avatar>
                         <div>
-                          <p className="text-sm font-medium">{user.name}</p>
+                          <p className="text-sm font-medium">
+                            {truncateName(user.name)}
+                          </p>
                           <p className="text-muted-foreground text-xs">
-                            {user.email}
+                            {truncate(user.email, 30)}
                           </p>
                         </div>
                       </div>

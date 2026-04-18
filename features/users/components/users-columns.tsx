@@ -22,6 +22,7 @@ import { Button } from "@/components/ui/button";
 
 import { getAvatarUrl } from "@/utils/string/get-avatar-url";
 import { getInitials } from "@/utils/string/get-initials";
+import { truncate, truncateName } from "@/utils/string/truncate";
 
 type UserTableData = Pick<
   User,
@@ -109,7 +110,7 @@ const usersColumns: ColumnDef<UserTableData>[] = [
               <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
             )}
           </Avatar>
-          <span className="font-medium">{user.name}</span>
+          <span className="font-medium">{truncateName(user.name)}</span>
         </Link>
       );
     },
@@ -117,6 +118,7 @@ const usersColumns: ColumnDef<UserTableData>[] = [
   {
     accessorKey: "email",
     header: () => <SortableHeader field="email" label="Email" />,
+    cell: ({ row }) => truncate(row.original.email, 40),
   },
   {
     accessorKey: "role",
