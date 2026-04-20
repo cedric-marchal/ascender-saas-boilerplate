@@ -96,7 +96,7 @@ export type { CreateContactSchemaType };
 
 Location: `features/{feature}/emails/{entity}-email.tsx`
 
-Stack: `@react-email/components` (Html, Head, Body, Container, Heading, Text)
+Stack: `react-email` (Html, Head, Body, Container, Heading, Text)
 
 ## Constant Rules
 
