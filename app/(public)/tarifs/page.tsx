@@ -1,10 +1,12 @@
+import { Suspense } from "react";
+
 import type { Metadata } from "next";
 
+import { PricingCta } from "@/features/pricing/components/pricing-cta";
+import { PricingGridSkeleton } from "@/features/pricing/components/pricing-grid-skeleton";
 import { PricingPage } from "@/features/pricing/pages/pricing-page";
-import { getPricingUserStatus } from "@/features/pricing/services/get-pricing-user-status.service";
 
 import { env } from "@/lib/env";
-import { getSession } from "@/lib/session";
 
 const APP_NAME = env.NEXT_PUBLIC_APP_NAME;
 const DESCRIPTION = `Découvrez les tarifs de ${APP_NAME} : offres flexibles pour les indépendants, équipes et entreprises, sans engagement.`;
@@ -37,17 +39,12 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function PricingRoute() {
-  const session = await getSession();
-
-  const { isAuthenticated, isEmailVerified, isCustomer } =
-    await getPricingUserStatus(session?.user.id ?? null);
-
+export default function PricingRoute() {
   return (
-    <PricingPage
-      isAuthenticated={isAuthenticated}
-      isEmailVerified={isEmailVerified}
-      isCustomer={isCustomer}
-    />
+    <PricingPage>
+      <Suspense fallback={<PricingGridSkeleton />}>
+        <PricingCta />
+      </Suspense>
+    </PricingPage>
   );
 }

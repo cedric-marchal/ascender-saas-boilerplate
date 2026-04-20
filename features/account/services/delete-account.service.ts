@@ -2,6 +2,10 @@ import "server-only";
 
 import { AccountDeletedEmail } from "@/features/account/emails/account-deleted-email";
 
+import {
+  billingInvoicesCacheKey,
+  billingSubscriptionsCacheKey,
+} from "@/lib/cache-keys";
 import { env } from "@/lib/env";
 import { UserRole } from "@/lib/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
@@ -52,8 +56,8 @@ async function cleanupStripeCustomer(
 
   try {
     await Promise.all([
-      redis.del(`subscription:${userId}:pro`),
-      redis.del(`invoices:${userId}`),
+      redis.del(billingSubscriptionsCacheKey(userId)),
+      redis.del(billingInvoicesCacheKey(userId)),
     ]);
   } catch (error: unknown) {
     console.error("Failed to delete Redis cache:", error);

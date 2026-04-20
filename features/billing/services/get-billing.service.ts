@@ -5,6 +5,10 @@ import type Stripe from "stripe";
 import type { InvoiceStatus } from "@/features/billing/constants/invoice-status.constant";
 import { STRIPE_TO_DB_SUBSCRIPTION_STATUS } from "@/features/billing/constants/subscription-status.constant";
 
+import {
+  billingInvoicesCacheKey,
+  billingSubscriptionsCacheKey,
+} from "@/lib/cache-keys";
 import { SubscriptionStatus } from "@/lib/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { redis } from "@/lib/redis";
@@ -75,7 +79,7 @@ async function fetchInvoices(
   stripeCustomerId: string,
   userId: string,
 ): Promise<BillingInvoice[]> {
-  const cacheKey = `invoices:${userId}`;
+  const cacheKey = billingInvoicesCacheKey(userId);
   const cached = await redis.get<BillingInvoice[]>(cacheKey);
 
   if (cached) {
@@ -97,7 +101,7 @@ async function fetchSubscriptions(
   stripeCustomerId: string,
   userId: string,
 ): Promise<BillingSubscription[]> {
-  const cacheKey = `subscriptions:${userId}`;
+  const cacheKey = billingSubscriptionsCacheKey(userId);
   const cached = await redis.get<BillingSubscription[]>(cacheKey);
 
   if (cached) {

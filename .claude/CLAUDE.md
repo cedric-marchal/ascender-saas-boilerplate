@@ -131,6 +131,19 @@ Detailed rules are in `.claude/rules/` — loaded conditionally per file path:
 - **Filters, Sort & Pagination**: `filter.md`
 - **Security (IDOR)**: `security.md`
 - **Code Style (spacing, strings, control flow)**: `code-style.md`
+- **Cache (`"use cache"`, Redis keys, PPR)**: `cache.md`
+
+## Engineering Judgment (CRITICAL)
+
+Act with common sense. Before writing any code, think through the consequences:
+
+1. **Do I need this?** — Don't add complexity without a proven need. No cache "just in case", no abstraction for one usage, no feature nobody asked for.
+2. **What breaks if I'm wrong?** — Evaluate blast radius. A wrong cache = stale data served to users. A missing `userId` filter = security breach. Scale your caution to the risk.
+3. **Is there a simpler way?** — Prefer the boring solution. If 3 lines of code solve the problem, don't build a framework. If the existing pattern works, follow it.
+4. **Am I sure, or am I guessing?** — If unsure about an API, a behavior, or a version: read the doc of the exact installed version FIRST. Never code from memory on fast-moving packages (Next.js, Prisma, Better Auth).
+5. **Will the next developer understand this?** — Code is read more than written. Explicit beats clever. `getCachedAdminDashboard()` beats a hidden cache layer. A named function beats an inline ternary chain.
+
+When in doubt: ask, don't assume.
 
 ## Self-Check
 
@@ -139,5 +152,6 @@ Before finalizing, verify:
 - Read at least 3 existing files before making changes?
 - Code is consistent with existing project patterns?
 - All conventions above followed?
+- Applied engineering judgment — no unnecessary complexity, consequences considered?
 
 If any answer is no, stop and fix it first.

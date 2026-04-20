@@ -103,7 +103,7 @@ describe("deleteAccount", () => {
     });
 
     expect(mockStripeCustomersDel).toHaveBeenCalledWith("cus_123");
-    expect(mockRedisDel).toHaveBeenCalledWith("subscription:user-123:pro");
+    expect(mockRedisDel).toHaveBeenCalledWith("subscriptions:user-123");
     expect(mockRedisDel).toHaveBeenCalledWith("invoices:user-123");
   });
 
@@ -141,7 +141,7 @@ describe("deleteAccount", () => {
       confirmation: "user@example.com",
     });
 
-    expect(mockRedisDel).toHaveBeenCalledWith("subscription:user-123:pro");
+    expect(mockRedisDel).toHaveBeenCalledWith("subscriptions:user-123");
     expect(mockRedisDel).toHaveBeenCalledWith("invoices:user-123");
   });
 

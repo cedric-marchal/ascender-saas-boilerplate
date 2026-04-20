@@ -4,6 +4,11 @@ import type Stripe from "stripe";
 
 import { STRIPE_TO_DB_SUBSCRIPTION_STATUS } from "@/features/billing/constants/subscription-status.constant";
 
+import {
+  billingInvoicesCacheKey,
+  billingSubscriptionsCacheKey,
+  stripeEventIdempotencyCacheKey,
+} from "@/lib/cache-keys";
 import { env } from "@/lib/env";
 import type { SubscriptionStatus } from "@/lib/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
@@ -58,7 +63,7 @@ async function handleStripeWebhook(
     console.log(`Received Stripe event: ${event.type}`);
   }
 
-  const eventKey = `stripe:event:${event.id}`;
+  const eventKey = stripeEventIdempotencyCacheKey(event.id);
 
   try {
     const alreadyProcessed = await redis.get(eventKey);
@@ -158,8 +163,7 @@ async function handleStripeWebhook(
           });
         });
 
-        const subscriptionsCacheKey = `subscriptions:${stripeCustomer.userId}`;
-        await redis.del(subscriptionsCacheKey);
+        await redis.del(billingSubscriptionsCacheKey(stripeCustomer.userId));
 
         if (process.env.NODE_ENV === "development") {
           console.log(
@@ -193,8 +197,7 @@ async function handleStripeWebhook(
           where: { stripeSubscriptionId: subscription.id },
         });
 
-        const deletedSubscriptionsCacheKey = `subscriptions:${stripeCustomer.userId}`;
-        await redis.del(deletedSubscriptionsCacheKey);
+        await redis.del(billingSubscriptionsCacheKey(stripeCustomer.userId));
 
         if (process.env.NODE_ENV === "development") {
           console.log(
@@ -230,8 +233,7 @@ async function handleStripeWebhook(
           break;
         }
 
-        const invoicesCacheKey = `invoices:${stripeCustomer.userId}`;
-        await redis.del(invoicesCacheKey);
+        await redis.del(billingInvoicesCacheKey(stripeCustomer.userId));
         if (process.env.NODE_ENV === "development") {
           console.log(
             `[Cache invalidated] Invoices cache for user ${stripeCustomer.userId} - Event: ${event.type}`,

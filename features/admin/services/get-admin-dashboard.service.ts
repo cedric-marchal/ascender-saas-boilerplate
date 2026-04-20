@@ -1,5 +1,7 @@
 import "server-only";
 
+import { cacheLife, cacheTag } from "next/cache";
+
 import { SubscriptionStatus } from "@/lib/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 
@@ -83,6 +85,15 @@ async function getAdminDashboard(): Promise<AdminDashboardMetrics> {
   };
 }
 
-export { getAdminDashboard };
+async function getCachedAdminDashboard(): Promise<AdminDashboardMetrics> {
+  "use cache";
+
+  cacheLife({ stale: 60, revalidate: 300, expire: 3600 });
+  cacheTag("admin-dashboard");
+
+  return getAdminDashboard();
+}
+
+export { getAdminDashboard, getCachedAdminDashboard };
 
 export type { AdminDashboardMetrics, RecentUser };

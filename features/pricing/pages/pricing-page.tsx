@@ -1,6 +1,7 @@
+import type { ReactNode } from "react";
+
 import type { Product, WebPage, WithContext } from "schema-dts";
 
-import { PricingGrid } from "@/features/pricing/components/pricing-grid";
 import {
   getPricingProductSchemas,
   getPricingWebPageSchema,
@@ -13,16 +14,10 @@ import { Main } from "@/components/main";
 const APP_NAME = env.NEXT_PUBLIC_APP_NAME;
 
 type PricingPageProps = {
-  isAuthenticated: boolean;
-  isEmailVerified: boolean;
-  isCustomer: boolean;
+  children: ReactNode;
 };
 
-function PricingPage({
-  isAuthenticated,
-  isEmailVerified,
-  isCustomer,
-}: PricingPageProps) {
+function PricingPage({ children }: PricingPageProps) {
   const webPageSchema: WithContext<WebPage> = getPricingWebPageSchema();
   const productSchemas: WithContext<Product>[] = getPricingProductSchemas();
 
@@ -58,11 +53,7 @@ function PricingPage({
             </p>
           </header>
 
-          <PricingGrid
-            isAuthenticated={isAuthenticated}
-            isEmailVerified={isEmailVerified}
-            isCustomer={isCustomer}
-          />
+          {children}
 
           <p className="text-muted-foreground text-center text-xs">
             Les tarifs affichés sont présentés à titre indicatif et peuvent
