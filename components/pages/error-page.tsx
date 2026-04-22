@@ -16,7 +16,7 @@ type ErrorPageProps = {
 
 function ErrorPage({ error, reset }: ErrorPageProps) {
   useEffect(() => {
-    console.error(error);
+    console.error(error.digest ?? error.message);
   }, [error]);
 
   return (

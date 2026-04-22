@@ -31,7 +31,6 @@ async function sendEmail(
       name: result.error.name,
       message: result.error.message,
       subject: emailOptions.subject,
-      to: emailOptions.to,
       timestamp: new Date().toISOString(),
     });
   }
@@ -48,7 +47,6 @@ async function sendEmailSafe(
     console.error("[Resend Critical Error]", {
       error: error instanceof Error ? error.message : "Unknown error",
       subject: options.subject,
-      to: options.to,
       timestamp: new Date().toISOString(),
     });
 

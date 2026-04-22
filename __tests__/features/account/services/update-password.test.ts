@@ -54,7 +54,7 @@ describe("updatePassword", () => {
       body: {
         newPassword: "newPassword456",
         currentPassword: "oldPassword123",
-        revokeOtherSessions: false,
+        revokeOtherSessions: true,
       },
       headers: expect.any(Headers),
     });

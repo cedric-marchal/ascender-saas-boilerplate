@@ -11,7 +11,7 @@ type GlobalErrorPageProps = {
 
 function GlobalErrorPage({ error, reset }: GlobalErrorPageProps) {
   useEffect(() => {
-    console.error(error);
+    console.error(error.digest ?? error.message);
   }, [error]);
 
   return (

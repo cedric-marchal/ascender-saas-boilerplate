@@ -126,10 +126,7 @@ export async function proxy(request: NextRequest) {
 
   // Non authentifié — page protégée → redirection connexion
   if (isProtected && !sessionCookie) {
-    const signInUrl = new URL("/connexion", request.url);
-    signInUrl.searchParams.set("callbackUrl", pathname);
-
-    return NextResponse.redirect(signInUrl);
+    return NextResponse.redirect(new URL("/connexion", request.url));
   }
 
   // Passage normal avec headers de sécurité et nonce

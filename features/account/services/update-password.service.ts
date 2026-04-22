@@ -20,7 +20,7 @@ async function updatePassword(input: UpdatePasswordInput): Promise<void> {
     body: {
       newPassword: input.newPassword,
       currentPassword: input.currentPassword,
-      revokeOtherSessions: false,
+      revokeOtherSessions: true,
     },
     headers: await headers(),
   });

@@ -59,11 +59,13 @@ describe("getRequestIdentifier", () => {
     expect(getRequestIdentifier(request)).toBe("dev-localhost");
   });
 
-  it("returns 'unknown' in production when no headers", () => {
+  it("throws in production when no headers", () => {
     vi.stubEnv("NODE_ENV", "production");
 
     const request = createMockRequest({});
-    expect(getRequestIdentifier(request)).toBe("unknown");
+    expect(() => getRequestIdentifier(request)).toThrow(
+      "Unable to determine client IP",
+    );
   });
 
   it("prefers cf-connecting-ip over x-real-ip and x-forwarded-for", () => {

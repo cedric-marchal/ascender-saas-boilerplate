@@ -27,11 +27,9 @@ function extractIpFromHeaders(
     return "dev-localhost";
   }
 
-  console.warn(
-    "[Rate Limit] Unable to determine client IP. Using fallback identifier 'unknown'. This may cause all users to share the same rate limit.",
+  throw new Error(
+    "[Rate Limit] Unable to determine client IP. Blocking request to prevent shared rate limit bucket.",
   );
-
-  return "unknown";
 }
 
 function getRequestIdentifier(request: Request): string {
