@@ -120,8 +120,14 @@ const useCookieConsent = create<CookieConsentStore>()(
           },
         })),
 
-      openPreferences: () => set({ isPreferencesOpen: true }),
-      closePreferences: () => set({ isPreferencesOpen: false }),
+      openPreferences: () =>
+        set({
+          isPreferencesOpen: true,
+        }),
+      closePreferences: () =>
+        set({
+          isPreferencesOpen: false,
+        }),
     }),
     {
       name: "ascender-cookie-consent",

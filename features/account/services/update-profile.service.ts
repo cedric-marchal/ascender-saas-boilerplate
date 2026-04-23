@@ -29,7 +29,9 @@ async function updateProfile(
   input: UpdateProfileInput,
 ): Promise<UpdateProfileResult> {
   const currentUser = await prisma.user.findUnique({
-    where: { id: input.userId },
+    where: {
+      id: input.userId,
+    },
     select: {
       id: true,
       name: true,
@@ -47,8 +49,12 @@ async function updateProfile(
 
   if (emailChanged) {
     const existingUser = await prisma.user.findUnique({
-      where: { email: input.email },
-      select: { id: true },
+      where: {
+        email: input.email,
+      },
+      select: {
+        id: true,
+      },
     });
 
     if (existingUser) {

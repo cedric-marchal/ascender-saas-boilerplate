@@ -47,7 +47,15 @@ async function POST(request: Request) {
       avatar: data.avatar,
     });
 
-    return NextResponse.json({ success: true, data: result }, { status: 201 });
+    return NextResponse.json(
+      {
+        success: true,
+        data: result,
+      },
+      {
+        status: 201,
+      },
+    );
   } catch (error: unknown) {
     return handleApiError(error);
   }
@@ -112,13 +120,23 @@ async function GET(request: Request, { params }: RouteParams) {
 Success with data:
 
 ```tsx
-return NextResponse.json({ success: true, data: result }, { status: 201 });
+return NextResponse.json(
+  {
+    success: true,
+    data: result,
+  },
+  {
+    status: 201,
+  },
+);
 ```
 
 Success no data (DELETE):
 
 ```tsx
-return new NextResponse(null, { status: 204 });
+return new NextResponse(null, {
+  status: 204,
+});
 ```
 
 ## Complete Example
@@ -180,8 +198,13 @@ async function GET(request: Request, { params }: RouteParams) {
     }
 
     return NextResponse.json(
-      { success: true, data: document },
-      { status: 200 },
+      {
+        success: true,
+        data: document,
+      },
+      {
+        status: 200,
+      },
     );
   } catch (error: unknown) {
     return handleApiError(error);
@@ -190,21 +213,38 @@ async function GET(request: Request, { params }: RouteParams) {
 
 async function POST(request: Request) {
   try {
-    const authSession = await auth.api.getSession({ headers: await headers() });
-    if (!authSession?.user)
+    const authSession = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!authSession?.user) {
       throw new UnauthorizedError("Vous devez être connecté");
+    }
 
     const formData = await request.formData();
-    const data = CreateDocumentSchema.parse({ name: formData.get("name") });
+    const data = CreateDocumentSchema.parse({
+      name: formData.get("name"),
+    });
 
     const document = await prisma.document.create({
-      data: { ...data, userId: authSession.user.id },
-      select: { id: true, name: true },
+      data: {
+        ...data,
+        userId: authSession.user.id,
+      },
+      select: {
+        id: true,
+        name: true,
+      },
     });
 
     return NextResponse.json(
-      { success: true, data: document },
-      { status: 201 },
+      {
+        success: true,
+        data: document,
+      },
+      {
+        status: 201,
+      },
     );
   } catch (error: unknown) {
     return handleApiError(error);
@@ -219,7 +259,9 @@ async function DELETE(request: Request, { params }: RouteParams) {
       throw new BadRequestError("ID requis");
     }
 
-    const authSession = await auth.api.getSession({ headers: await headers() });
+    const authSession = await auth.api.getSession({
+      headers: await headers(),
+    });
 
     if (!authSession?.user) {
       throw new UnauthorizedError("Vous devez être connecté");
@@ -249,7 +291,9 @@ async function DELETE(request: Request, { params }: RouteParams) {
       },
     });
 
-    return new NextResponse(null, { status: 204 });
+    return new NextResponse(null, {
+      status: 204,
+    });
   } catch (error: unknown) {
     return handleApiError(error);
   }
@@ -292,8 +336,14 @@ async function GET(request: Request, { params }: RouteParams) {
   const { id } = params; // ❌ Missing await
 
 // ❌ Wrong: Wrong status code
-return NextResponse.json({ success: true, data }, { status: 200 }); // POST should be 201
-return NextResponse.json({ success: true }, { status: 200 }); // DELETE should be 204 with no body
+return NextResponse.json(
+  { success: true, data },
+  { status: 200 }, // POST should be 201
+);
+return NextResponse.json(
+  { success: true },
+  { status: 200 }, // DELETE should be 204 with no body
+);
 
 // ❌ Wrong: Default export
 export default async function handler() { ... }

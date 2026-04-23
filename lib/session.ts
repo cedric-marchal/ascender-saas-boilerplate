@@ -6,10 +6,14 @@ import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 
 import { ROLE_DASHBOARD_URL } from "@/features/auth/constants/role-dashboard.constant";
+import {
+  ALLOWED_PRICE_IDS,
+  getPriceIds,
+  type PlanKey,
+} from "@/features/billing/constants/plan.constant";
 import { ACTIVE_SUBSCRIPTION_STATUSES } from "@/features/billing/constants/subscription-status.constant";
 
 import { auth } from "@/lib/auth";
-import { env } from "@/lib/env";
 import { UserRole } from "@/lib/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 
@@ -111,18 +115,25 @@ const getActiveSubscription = cache(
   async (userId: string, priceIds: string[]) => {
     return prisma.subscription.findFirst({
       where: {
-        stripeCustomer: { userId },
-        stripePriceId: { in: priceIds },
-        status: { in: ACTIVE_SUBSCRIPTION_STATUSES },
+        stripeCustomer: {
+          userId,
+        },
+        stripePriceId: {
+          in: priceIds,
+        },
+        status: {
+          in: ACTIVE_SUBSCRIPTION_STATUSES,
+        },
       },
-      select: { id: true },
+      select: {
+        id: true,
+      },
     });
   },
 );
 
-const requireCustomerWithSubscription = async (
-  priceIds: string[],
-): Promise<Session> => {
+const requireCustomerPlan = async (...plans: PlanKey[]): Promise<Session> => {
+  const priceIds = plans.length > 0 ? getPriceIds(...plans) : ALLOWED_PRICE_IDS;
   const session = await requireCustomer();
   const subscription = await getActiveSubscription(session.user.id, priceIds);
 
@@ -132,9 +143,6 @@ const requireCustomerWithSubscription = async (
 
   return session;
 };
-
-const requireCustomerProSubscription = () =>
-  requireCustomerWithSubscription([env.STRIPE_PRICE_ID_PRO]);
 
 /**
  * Récupère la session admin ou affiche 404
@@ -170,7 +178,7 @@ export {
   requireAdmin,
   requireAdminVerifiedEmail,
   requireCustomer,
-  requireCustomerProSubscription,
+  requireCustomerPlan,
   requireCustomerVerifiedEmail,
   requireGuest,
   requireSession,

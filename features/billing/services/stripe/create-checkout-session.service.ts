@@ -1,5 +1,7 @@
 import "server-only";
 
+import { ALLOWED_PRICE_IDS } from "@/features/billing/constants/plan.constant";
+
 import { env } from "@/lib/env";
 import { UserRole } from "@/lib/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
@@ -67,8 +69,12 @@ async function syncStripeCustomerIfNeeded(
 
 async function getOrCreateStripeCustomer(user: StripeUser): Promise<string> {
   const existingStripeCustomer = await prisma.stripeCustomer.findUnique({
-    where: { userId: user.id },
-    select: { stripeCustomerId: true },
+    where: {
+      userId: user.id,
+    },
+    select: {
+      stripeCustomerId: true,
+    },
   });
 
   if (existingStripeCustomer) {
@@ -102,7 +108,9 @@ async function createCheckoutSession(
   input: CreateCheckoutSessionInput,
 ): Promise<CreateCheckoutSessionResult> {
   const user = await prisma.user.findUnique({
-    where: { id: input.userId },
+    where: {
+      id: input.userId,
+    },
     select: {
       id: true,
       email: true,
@@ -128,7 +136,7 @@ async function createCheckoutSession(
     );
   }
 
-  if (input.priceId !== env.STRIPE_PRICE_ID_PRO) {
+  if (!ALLOWED_PRICE_IDS.includes(input.priceId)) {
     throw new BadRequestError("Prix invalide ou non autorisé");
   }
 
@@ -173,7 +181,9 @@ async function createCheckoutSession(
     throw new BadRequestError("Impossible de créer la session de paiement");
   }
 
-  return { url: stripeSession.url };
+  return {
+    url: stripeSession.url,
+  };
 }
 
 export { createCheckoutSession };

@@ -1,5 +1,6 @@
 import { Calendar, CheckCircle2, XCircle } from "lucide-react";
 
+import { getPlanLabel } from "@/features/billing/constants/plan.constant";
 import { subscriptionStatusLabels } from "@/features/billing/constants/subscription-status.constant";
 import type { BillingSubscription } from "@/features/billing/services/get-billing.service";
 
@@ -71,12 +72,14 @@ function SubscriptionCard({
   const config = STATUS_CONFIG[subscription.status] ?? STATUS_CONFIG.CANCELED;
   const StatusIcon = config.icon;
 
+  const planLabel = getPlanLabel(subscription.priceId);
+
   return (
     <Card>
       <CardHeader>
         <div className="flex items-start justify-between">
           <div className="space-y-1">
-            <CardTitle className="text-base">Abonnement Pro</CardTitle>
+            <CardTitle className="text-base">{`Abonnement ${planLabel}`}</CardTitle>
             <CardDescription>ID: {subscription.id}</CardDescription>
           </div>
           <Badge variant={config.variant} className="gap-1">

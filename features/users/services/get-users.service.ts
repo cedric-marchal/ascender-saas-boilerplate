@@ -63,11 +63,15 @@ async function getUsers(filters: GetUsersFilters): Promise<GetUsersResult> {
         slug: true,
         createdAt: true,
       },
-      orderBy: { [filters.sortBy]: filters.order },
+      orderBy: {
+        [filters.sortBy]: filters.order,
+      },
       skip: (filters.page - 1) * PAGE_SIZE.SMALL,
       take: PAGE_SIZE.SMALL,
     }),
-    prisma.user.count({ where: whereClause }),
+    prisma.user.count({
+      where: whereClause,
+    }),
   ]);
 
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE.SMALL));

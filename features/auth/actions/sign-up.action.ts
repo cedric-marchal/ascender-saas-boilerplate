@@ -31,5 +31,7 @@ export const signUpAction = actionClient
       throw error;
     }
 
-    return { success: true };
+    return {
+      success: true,
+    };
   });

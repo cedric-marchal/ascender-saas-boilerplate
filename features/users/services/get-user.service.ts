@@ -56,7 +56,9 @@ type GetUserResult = Pick<
 const getUserBySlug = cache(
   async (slug: string): Promise<GetUserResult | null> => {
     return prisma.user.findUnique({
-      where: { slug },
+      where: {
+        slug,
+      },
       select: {
         id: true,
         name: true,
@@ -75,7 +77,9 @@ const getUserBySlug = cache(
             expiresAt: true,
             createdAt: true,
           },
-          orderBy: { createdAt: "desc" },
+          orderBy: {
+            createdAt: "desc",
+          },
           take: 20,
         },
         accounts: {
@@ -85,7 +89,9 @@ const getUserBySlug = cache(
             providerId: true,
             createdAt: true,
           },
-          orderBy: { createdAt: "desc" },
+          orderBy: {
+            createdAt: "desc",
+          },
           take: 10,
         },
         stripeCustomer: {
@@ -102,7 +108,9 @@ const getUserBySlug = cache(
                 cancelAtPeriodEnd: true,
                 createdAt: true,
               },
-              orderBy: { createdAt: "desc" },
+              orderBy: {
+                createdAt: "desc",
+              },
               take: 10,
             },
           },

@@ -16,7 +16,10 @@ export const resetPasswordAction = actionClient
   .action(async ({ parsedInput }) => {
     try {
       await auth.api.resetPassword({
-        body: { newPassword: parsedInput.password, token: parsedInput.token },
+        body: {
+          newPassword: parsedInput.password,
+          token: parsedInput.token,
+        },
         headers: await headers(),
       });
     } catch (error: unknown) {
@@ -27,5 +30,7 @@ export const resetPasswordAction = actionClient
       throw error;
     }
 
-    return { success: true };
+    return {
+      success: true,
+    };
   });

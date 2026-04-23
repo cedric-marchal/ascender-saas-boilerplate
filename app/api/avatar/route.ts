@@ -31,7 +31,15 @@ async function POST(request: Request) {
       avatar: data.avatar,
     });
 
-    return NextResponse.json({ success: true, data: result }, { status: 201 });
+    return NextResponse.json(
+      {
+        success: true,
+        data: result,
+      },
+      {
+        status: 201,
+      },
+    );
   } catch (error: unknown) {
     return handleApiError(error);
   }

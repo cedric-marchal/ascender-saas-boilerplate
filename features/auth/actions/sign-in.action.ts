@@ -18,14 +18,20 @@ export const signInAction = actionClient
   .action(async ({ parsedInput }) => {
     try {
       const session = await auth.api.signInEmail({
-        body: { email: parsedInput.email, password: parsedInput.password },
+        body: {
+          email: parsedInput.email,
+          password: parsedInput.password,
+        },
         headers: await headers(),
       });
 
       const role = session.user.role as UserRole;
       const redirectUrl = ROLE_DASHBOARD_URL[role];
 
-      return { success: true, redirectUrl };
+      return {
+        success: true,
+        redirectUrl,
+      };
     } catch (error: unknown) {
       if (error instanceof APIError) {
         throw new UnauthorizedError(error.message);

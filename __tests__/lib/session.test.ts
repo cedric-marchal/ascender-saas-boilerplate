@@ -44,6 +44,11 @@ vi.mock("@/features/billing/constants/subscription-status.constant", () => ({
   ACTIVE_SUBSCRIPTION_STATUSES: ["ACTIVE", "TRIALING", "PAST_DUE"],
 }));
 
+vi.mock("@/features/billing/constants/plan.constant", () => ({
+  ALLOWED_PRICE_IDS: ["price_pro_test"],
+  getPriceIds: (...plans: string[]) => plans.map(() => "price_pro_test"),
+}));
+
 const {
   getSession,
   requireSession,
@@ -51,7 +56,7 @@ const {
   requireCustomerVerifiedEmail,
   requireAdmin,
   requireAdminVerifiedEmail,
-  requireCustomerProSubscription,
+  requireCustomerPlan,
 } = await import("@/lib/session");
 
 const makeSession = (
@@ -224,7 +229,7 @@ describe("requireAdminVerifiedEmail", () => {
   });
 });
 
-describe("requireCustomerProSubscription", () => {
+describe("requireCustomerPlan", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -233,7 +238,7 @@ describe("requireCustomerProSubscription", () => {
     mockGetSessionAuth.mockResolvedValue(makeSession({ role: "CUSTOMER" }));
     mockSubscriptionFindFirst.mockResolvedValue(null);
 
-    await requireCustomerProSubscription();
+    await requireCustomerPlan("pro");
 
     expect(mockRedirect).toHaveBeenCalledWith("/tarifs");
   });
@@ -242,7 +247,17 @@ describe("requireCustomerProSubscription", () => {
     mockGetSessionAuth.mockResolvedValue(makeSession({ role: "CUSTOMER" }));
     mockSubscriptionFindFirst.mockResolvedValue({ id: "sub-123" });
 
-    const result = await requireCustomerProSubscription();
+    const result = await requireCustomerPlan("pro");
+
+    expect(result?.user.role).toBe("CUSTOMER");
+    expect(mockRedirect).not.toHaveBeenCalled();
+  });
+
+  it("uses all paid plans when called without arguments", async () => {
+    mockGetSessionAuth.mockResolvedValue(makeSession({ role: "CUSTOMER" }));
+    mockSubscriptionFindFirst.mockResolvedValue({ id: "sub-123" });
+
+    const result = await requireCustomerPlan();
 
     expect(result?.user.role).toBe("CUSTOMER");
     expect(mockRedirect).not.toHaveBeenCalled();

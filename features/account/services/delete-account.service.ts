@@ -30,7 +30,9 @@ async function checkLastAdmin(role: UserRole): Promise<void> {
   }
 
   const adminCount = await prisma.user.count({
-    where: { role: UserRole.ADMIN },
+    where: {
+      role: UserRole.ADMIN,
+    },
   });
 
   if (adminCount <= 1) {
@@ -78,14 +80,18 @@ async function cleanupAvatar(image: string | null): Promise<void> {
 
 async function deleteAccount(input: DeleteAccountInput): Promise<void> {
   const user = await prisma.user.findUnique({
-    where: { id: input.userId },
+    where: {
+      id: input.userId,
+    },
     select: {
       id: true,
       email: true,
       image: true,
       role: true,
       stripeCustomer: {
-        select: { stripeCustomerId: true },
+        select: {
+          stripeCustomerId: true,
+        },
       },
     },
   });
@@ -103,7 +109,11 @@ async function deleteAccount(input: DeleteAccountInput): Promise<void> {
   await checkLastAdmin(user.role);
 
   // Primary action: delete from DB (atomic, cascades to stripeCustomer, subscription, sessions)
-  await prisma.user.delete({ where: { id: user.id } });
+  await prisma.user.delete({
+    where: {
+      id: user.id,
+    },
+  });
 
   // Compensation: clean up external resources (best-effort, non-blocking)
   await cleanupStripeCustomer(user.stripeCustomer?.stripeCustomerId, user.id);
@@ -114,7 +124,9 @@ async function deleteAccount(input: DeleteAccountInput): Promise<void> {
       from: `${env.NEXT_PUBLIC_APP_NAME} <${env.RESEND_EMAIL_NOREPLY}>`,
       to: user.email,
       subject: `Votre compte ${env.NEXT_PUBLIC_APP_NAME} a été supprimé`,
-      react: AccountDeletedEmail({ name: input.userName }),
+      react: AccountDeletedEmail({
+        name: input.userName,
+      }),
     });
   } catch (error: unknown) {
     console.error("Failed to send account deletion email:", error);

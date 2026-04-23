@@ -108,8 +108,15 @@ const auth = betterAuth({
     },
     async afterEmailVerification(user) {
       const dbUser = await prisma.user.findUnique({
-        where: { id: user.id },
-        select: { id: true, email: true, name: true, role: true },
+        where: {
+          id: user.id,
+        },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          role: true,
+        },
       });
 
       if (!dbUser) {
@@ -122,8 +129,12 @@ const auth = betterAuth({
       }
 
       const existingStripeCustomer = await prisma.stripeCustomer.findUnique({
-        where: { userId: dbUser.id },
-        select: { stripeCustomerId: true },
+        where: {
+          userId: dbUser.id,
+        },
+        select: {
+          stripeCustomerId: true,
+        },
       });
 
       if (!existingStripeCustomer) {
@@ -196,7 +207,12 @@ const auth = betterAuth({
           const uniqueSuffix =
             Date.now().toString(36) + randomValue.toString(36);
 
-          return { data: { ...user, slug: `${baseSlug}-${uniqueSuffix}` } };
+          return {
+            data: {
+              ...user,
+              slug: `${baseSlug}-${uniqueSuffix}`,
+            },
+          };
         },
       },
     },

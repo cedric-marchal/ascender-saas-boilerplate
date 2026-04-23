@@ -20,5 +20,7 @@ export const createContactAction = actionClient
   .action(async ({ parsedInput }) => {
     await createContact(parsedInput);
 
-    return { success: true };
+    return {
+      success: true,
+    };
   });

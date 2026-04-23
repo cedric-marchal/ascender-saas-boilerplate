@@ -55,7 +55,10 @@ async function handleStripeWebhook(
 
     return {
       status: 400,
-      body: { success: false, message: `Webhook Error: ${errorMessage}` },
+      body: {
+        success: false,
+        message: `Webhook Error: ${errorMessage}`,
+      },
     };
   }
 
@@ -69,7 +72,13 @@ async function handleStripeWebhook(
     const alreadyProcessed = await redis.get(eventKey);
 
     if (alreadyProcessed) {
-      return { status: 200, body: { success: true, received: true } };
+      return {
+        status: 200,
+        body: {
+          success: true,
+          received: true,
+        },
+      };
     }
 
     await redis.set(eventKey, 1, { ex: EVENT_TTL_SECONDS });
@@ -89,8 +98,13 @@ async function handleStripeWebhook(
             : subscription.customer.id;
 
         const stripeCustomer = await prisma.stripeCustomer.findUnique({
-          where: { stripeCustomerId: customerId },
-          select: { userId: true, stripeCustomerId: true },
+          where: {
+            stripeCustomerId: customerId,
+          },
+          select: {
+            userId: true,
+            stripeCustomerId: true,
+          },
         });
 
         if (!stripeCustomer) {
@@ -126,8 +140,12 @@ async function handleStripeWebhook(
 
         await prisma.$transaction(async (tx) => {
           const user = await tx.user.findUnique({
-            where: { id: stripeCustomer.userId },
-            select: { id: true },
+            where: {
+              id: stripeCustomer.userId,
+            },
+            select: {
+              id: true,
+            },
           });
 
           if (!user) {
@@ -182,8 +200,12 @@ async function handleStripeWebhook(
             : subscription.customer.id;
 
         const stripeCustomer = await prisma.stripeCustomer.findUnique({
-          where: { stripeCustomerId: customerId },
-          select: { userId: true },
+          where: {
+            stripeCustomerId: customerId,
+          },
+          select: {
+            userId: true,
+          },
         });
 
         if (!stripeCustomer) {
@@ -194,7 +216,9 @@ async function handleStripeWebhook(
         }
 
         await prisma.subscription.deleteMany({
-          where: { stripeSubscriptionId: subscription.id },
+          where: {
+            stripeSubscriptionId: subscription.id,
+          },
         });
 
         await redis.del(billingSubscriptionsCacheKey(stripeCustomer.userId));
@@ -222,8 +246,12 @@ async function handleStripeWebhook(
         }
 
         const stripeCustomer = await prisma.stripeCustomer.findUnique({
-          where: { stripeCustomerId: customerId },
-          select: { userId: true },
+          where: {
+            stripeCustomerId: customerId,
+          },
+          select: {
+            userId: true,
+          },
         });
 
         if (!stripeCustomer) {
@@ -261,10 +289,22 @@ async function handleStripeWebhook(
       };
     }
 
-    return { status: 200, body: { success: true, received: true } };
+    return {
+      status: 200,
+      body: {
+        success: true,
+        received: true,
+      },
+    };
   }
 
-  return { status: 200, body: { success: true, received: true } };
+  return {
+    status: 200,
+    body: {
+      success: true,
+      received: true,
+    },
+  };
 }
 
 export { handleStripeWebhook };

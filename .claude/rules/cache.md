@@ -49,7 +49,11 @@ async function getAdminDashboard(): Promise<AdminDashboardMetrics> {
 async function getCachedAdminDashboard(): Promise<AdminDashboardMetrics> {
   "use cache";
 
-  cacheLife({ stale: 60, revalidate: 300, expire: 3600 });
+  cacheLife({
+    stale: 60,
+    revalidate: 300,
+    expire: 3600,
+  });
   cacheTag("admin-dashboard");
 
   return getAdminDashboard();
@@ -103,7 +107,11 @@ Use custom objects for explicit control, not presets:
 
 ```tsx
 // ✅ Correct: explicit values
-cacheLife({ stale: 60, revalidate: 300, expire: 3600 });
+cacheLife({
+  stale: 60,
+  revalidate: 300,
+  expire: 3600,
+});
 
 // ❌ Wrong: opaque preset
 cacheLife("hours");
@@ -255,7 +263,11 @@ async function getData() {
 async function getData() {
   "use cache";
 
-  cacheLife({ stale: 60, revalidate: 300, expire: 3600 });
+  cacheLife({
+    stale: 60,
+    revalidate: 300,
+    expire: 3600,
+  });
   // missing cacheTag()
 }
 

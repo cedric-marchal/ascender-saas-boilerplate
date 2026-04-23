@@ -165,6 +165,33 @@ async function getUsers(filters: GetUsersFilters): Promise<GetUsersResult> {
 }
 ```
 
+## Subscription & Checkout Security
+
+### Checkout Price Validation
+
+The checkout service validates `priceId` against `ALLOWED_PRICE_IDS` (derived from `PLAN_CONFIG`). This is a **server-side allowlist** — only price IDs explicitly declared in `PLAN_CONFIG` can be used to create a checkout session.
+
+- NEVER accept arbitrary price IDs from client input without allowlist check
+- NEVER hardcode price ID checks — always use `ALLOWED_PRICE_IDS.includes()`
+- NEVER bypass the allowlist for "testing" — add the plan to `PLAN_CONFIG` instead
+
+### Subscription Access Guards
+
+Use `requireCustomerPlan()` from `lib/session.ts` to gate pages by subscription:
+
+```tsx
+// Any paid plan
+await requireCustomerPlan();
+
+// Specific plan(s) — typesafe PlanKey
+await requireCustomerPlan("pro");
+await requireCustomerPlan("business", "enterprise");
+```
+
+- NEVER check subscription status manually in pages — use the guard
+- NEVER pass raw price ID strings — use `PlanKey` for type safety
+- Plan upgrades/downgrades go through Stripe Customer Portal, not new checkouts
+
 ## Rate Limiting (Entry Points Only)
 
 | Entry Point | Pattern                                                                   | Identifier        |

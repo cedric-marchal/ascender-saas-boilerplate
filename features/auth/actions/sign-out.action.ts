@@ -22,5 +22,7 @@ export const signOutAction = actionClient.action(async () => {
     throw error;
   }
 
-  return { success: true };
+  return {
+    success: true,
+  };
 });

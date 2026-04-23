@@ -22,14 +22,26 @@ type InvoiceStatusConfig = {
 };
 
 const STATUS_CONFIG: Record<InvoiceStatus, InvoiceStatusConfig> = {
-  draft: { label: invoiceStatusLabels.draft, variant: "secondary" },
-  open: { label: invoiceStatusLabels.open, variant: "secondary" },
-  paid: { label: invoiceStatusLabels.paid, variant: "default" },
+  draft: {
+    label: invoiceStatusLabels.draft,
+    variant: "secondary",
+  },
+  open: {
+    label: invoiceStatusLabels.open,
+    variant: "secondary",
+  },
+  paid: {
+    label: invoiceStatusLabels.paid,
+    variant: "default",
+  },
   uncollectible: {
     label: invoiceStatusLabels.uncollectible,
     variant: "destructive",
   },
-  void: { label: invoiceStatusLabels.void, variant: "destructive" },
+  void: {
+    label: invoiceStatusLabels.void,
+    variant: "destructive",
+  },
 };
 
 function formatAmount(amount: number | null): string {

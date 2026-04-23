@@ -29,7 +29,9 @@ async function updatePassword(input: UpdatePasswordInput): Promise<void> {
     from: `${env.NEXT_PUBLIC_APP_NAME} Sécurité <${env.RESEND_EMAIL_SECURITY}>`,
     to: input.userEmail,
     subject: `Votre mot de passe ${env.NEXT_PUBLIC_APP_NAME} a été modifié`,
-    react: PasswordChangedEmail({ name: input.userName }),
+    react: PasswordChangedEmail({
+      name: input.userName,
+    }),
   });
 }
 

@@ -22,5 +22,7 @@ export const deleteAccountAction = authActionClient
       confirmation: parsedInput.confirmation,
     });
 
-    return { success: true };
+    return {
+      success: true,
+    };
   });

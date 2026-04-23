@@ -124,7 +124,10 @@ import { UserRole } from "@/lib/generated/prisma/client";
 const role = session.user.role as UserRole;
 const redirectUrl = ROLE_DASHBOARD_URL[role];
 
-return { success: true, redirectUrl };
+return {
+  success: true,
+  redirectUrl,
+};
 ```
 
 ## Error Handling (P0)

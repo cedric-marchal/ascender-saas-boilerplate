@@ -21,7 +21,9 @@ type UpdateAvatarResult = {
 
 async function deleteOldAvatar(userId: string): Promise<void> {
   const user = await prisma.user.findUnique({
-    where: { id: userId },
+    where: {
+      id: userId,
+    },
     select: {
       id: true,
       image: true,

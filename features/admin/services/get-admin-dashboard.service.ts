@@ -26,6 +26,7 @@ type RecentUser = {
 
 async function getAdminDashboard(): Promise<AdminDashboardMetrics> {
   const now = new Date();
+
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
   const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
 
@@ -40,11 +41,18 @@ async function getAdminDashboard(): Promise<AdminDashboardMetrics> {
   ] = await prisma.$transaction([
     prisma.user.count(),
     prisma.user.count({
-      where: { createdAt: { gte: startOfMonth } },
+      where: {
+        createdAt: {
+          gte: startOfMonth,
+        },
+      },
     }),
     prisma.user.count({
       where: {
-        createdAt: { gte: startOfLastMonth, lt: startOfMonth },
+        createdAt: {
+          gte: startOfLastMonth,
+          lt: startOfMonth,
+        },
       },
     }),
     prisma.subscription.count({
@@ -55,10 +63,16 @@ async function getAdminDashboard(): Promise<AdminDashboardMetrics> {
       },
     }),
     prisma.session.count({
-      where: { expiresAt: { gt: now } },
+      where: {
+        expiresAt: {
+          gt: now,
+        },
+      },
     }),
     prisma.user.count({
-      where: { emailVerified: true },
+      where: {
+        emailVerified: true,
+      },
     }),
     prisma.user.findMany({
       select: {
@@ -69,7 +83,9 @@ async function getAdminDashboard(): Promise<AdminDashboardMetrics> {
         slug: true,
         createdAt: true,
       },
-      orderBy: { createdAt: "desc" },
+      orderBy: {
+        createdAt: "desc",
+      },
       take: 5,
     }),
   ]);
@@ -88,7 +104,12 @@ async function getAdminDashboard(): Promise<AdminDashboardMetrics> {
 async function getCachedAdminDashboard(): Promise<AdminDashboardMetrics> {
   "use cache";
 
-  cacheLife({ stale: 60, revalidate: 300, expire: 3600 });
+  cacheLife({
+    stale: 60,
+    revalidate: 300,
+    expire: 3600,
+  });
+
   cacheTag("admin-dashboard");
 
   return getAdminDashboard();

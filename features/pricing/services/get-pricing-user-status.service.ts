@@ -22,7 +22,9 @@ const getPricingUserStatus = cache(
     }
 
     const user = await prisma.user.findUnique({
-      where: { id: userId },
+      where: {
+        id: userId,
+      },
       select: {
         emailVerified: true,
         role: true,

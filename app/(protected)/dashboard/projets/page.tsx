@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 import { ProjectsPage } from "@/features/projects/pages/projects-page";
 
-import { requireCustomerProSubscription } from "@/lib/session";
+import { requireCustomerPlan } from "@/lib/session";
 
 export const metadata: Metadata = {
   title: "Projets",
@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 };
 
 export default async function DashboardProjectsRoute() {
-  await requireCustomerProSubscription();
+  await requireCustomerPlan("pro");
 
   return <ProjectsPage />;
 }

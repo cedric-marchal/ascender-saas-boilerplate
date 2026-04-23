@@ -1,12 +1,11 @@
 import { CheckCircle2, XCircle } from "lucide-react";
 
+import { getPlanLabel } from "@/features/billing/constants/plan.constant";
 import {
   ACTIVE_SUBSCRIPTION_STATUSES,
   subscriptionStatusLabels,
 } from "@/features/billing/constants/subscription-status.constant";
 import type { BillingSubscription } from "@/features/billing/services/get-billing.service";
-
-import { env } from "@/lib/env";
 
 import { Badge } from "@/components/ui/badge";
 import {
@@ -29,9 +28,9 @@ function SubscriptionStatusCard({
       ACTIVE_SUBSCRIPTION_STATUSES.includes(subscription.status),
   );
 
-  const isProSubscription = activeSubscription
-    ? activeSubscription.priceId === env.STRIPE_PRICE_ID_PRO
-    : false;
+  const planLabel = activeSubscription
+    ? getPlanLabel(activeSubscription.priceId)
+    : null;
 
   const isSubscribed = !!activeSubscription;
 
@@ -74,7 +73,7 @@ function SubscriptionStatusCard({
 
           {isSubscribed && (
             <Badge variant="default" className="text-base">
-              {isProSubscription ? "Plan Pro" : "Plan Inconnu"}
+              {`Plan ${planLabel}`}
             </Badge>
           )}
         </div>

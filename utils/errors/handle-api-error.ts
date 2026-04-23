@@ -15,7 +15,9 @@ function handleApiError(error: unknown): NextResponse {
         message:
           error.issues[0]?.message ?? "Une erreur de validation s'est produite",
       },
-      { status: 400 },
+      {
+        status: 400,
+      },
     );
   }
 
@@ -26,7 +28,9 @@ function handleApiError(error: unknown): NextResponse {
         type: error.name,
         message: error.message,
       },
-      { status: error.statusCode },
+      {
+        status: error.statusCode,
+      },
     );
   }
 
@@ -43,7 +47,9 @@ function handleApiError(error: unknown): NextResponse {
       type: "ServerError",
       message,
     },
-    { status: 500 },
+    {
+      status: 500,
+    },
   );
 }
 

@@ -23,5 +23,7 @@ export const updatePasswordAction = authActionClient
       userEmail: ctx.userEmail,
     });
 
-    return { success: true };
+    return {
+      success: true,
+    };
   });

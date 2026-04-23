@@ -25,7 +25,9 @@ async function createPortalSession(
 ): Promise<CreatePortalSessionResult> {
   const [user, stripeCustomer] = await Promise.all([
     prisma.user.findUnique({
-      where: { id: input.userId },
+      where: {
+        id: input.userId,
+      },
       select: {
         id: true,
         emailVerified: true,
@@ -33,8 +35,12 @@ async function createPortalSession(
       },
     }),
     prisma.stripeCustomer.findUnique({
-      where: { userId: input.userId },
-      select: { stripeCustomerId: true },
+      where: {
+        userId: input.userId,
+      },
+      select: {
+        stripeCustomerId: true,
+      },
     }),
   ]);
 
@@ -74,7 +80,9 @@ async function createPortalSession(
     );
   }
 
-  return { url: portalSession.url };
+  return {
+    url: portalSession.url,
+  };
 }
 
 export { createPortalSession };

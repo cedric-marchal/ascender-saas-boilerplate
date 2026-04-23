@@ -16,7 +16,10 @@ export const forgotPasswordAction = actionClient
   .action(async ({ parsedInput }) => {
     try {
       await auth.api.requestPasswordReset({
-        body: { email: parsedInput.email, redirectTo: "/nouveau-mot-de-passe" },
+        body: {
+          email: parsedInput.email,
+          redirectTo: "/nouveau-mot-de-passe",
+        },
         headers: await headers(),
       });
     } catch (error: unknown) {
@@ -27,5 +30,7 @@ export const forgotPasswordAction = actionClient
       throw error;
     }
 
-    return { success: true };
+    return {
+      success: true,
+    };
   });

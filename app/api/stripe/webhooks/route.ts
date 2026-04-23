@@ -8,14 +8,21 @@ async function POST(request: Request) {
 
   if (!signature) {
     return NextResponse.json(
-      { success: false, message: "Signature manquante" },
-      { status: 400 },
+      {
+        success: false,
+        message: "Signature manquante",
+      },
+      {
+        status: 400,
+      },
     );
   }
 
   const result = await handleStripeWebhook(body, signature);
 
-  return NextResponse.json(result.body, { status: result.status });
+  return NextResponse.json(result.body, {
+    status: result.status,
+  });
 }
 
 export { POST };

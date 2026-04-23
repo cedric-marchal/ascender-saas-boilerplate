@@ -123,8 +123,12 @@ async function fetchSubscriptions(
 
 async function getBilling(userId: string): Promise<GetBillingResult | null> {
   const stripeCustomer = await prisma.stripeCustomer.findUnique({
-    where: { userId },
-    select: { stripeCustomerId: true },
+    where: {
+      userId,
+    },
+    select: {
+      stripeCustomerId: true,
+    },
   });
 
   if (!stripeCustomer) {
@@ -136,7 +140,10 @@ async function getBilling(userId: string): Promise<GetBillingResult | null> {
     fetchSubscriptions(stripeCustomer.stripeCustomerId, userId),
   ]);
 
-  return { invoices, subscriptions };
+  return {
+    invoices,
+    subscriptions,
+  };
 }
 
 export { getBilling };

@@ -105,6 +105,42 @@ Stack: `react-email` (Html, Head, Body, Container, Heading, Text)
 - Labels: `Record<Enum, string>` for UI display (French strings)
 - NEVER `Record<string, ...>` — always use the typed enum
 
+## Plan Configuration (Billing)
+
+All paid plan definitions live in a single source of truth: `features/billing/constants/plan.constant.ts`.
+
+```tsx
+const PLAN_CONFIG = {
+  pro: {
+    priceId: env.STRIPE_PRICE_ID_PRO,
+    label: "Pro",
+  },
+} as const satisfies Record<
+  string,
+  {
+    priceId: string;
+    label: string;
+  }
+>;
+```
+
+Everything derives from `PLAN_CONFIG`:
+
+| Export                  | Purpose                              | Used by                                                    |
+| ----------------------- | ------------------------------------ | ---------------------------------------------------------- |
+| `PlanKey`               | Union type `"pro" \| ...` (typesafe) | `requireCustomerPlan()` in `lib/session.ts`                |
+| `ALLOWED_PRICE_IDS`     | All paid price IDs                   | Checkout validation (`create-checkout-session.service.ts`) |
+| `getPlanLabel(priceId)` | Price ID → display label             | Billing UI components                                      |
+| `getPriceIds(...plans)` | Plan keys → price IDs array          | `requireCustomerPlan()` internals                          |
+
+To add a new paid plan:
+
+1. Add env var in `lib/env.ts` (e.g. `STRIPE_PRICE_ID_BUSINESS`)
+2. Add entry in `PLAN_CONFIG`
+3. Add plan object in `features/pricing/constants/pricing-plans.ts`
+
+NEVER hardcode price IDs or plan labels outside `PLAN_CONFIG`.
+
 ## Anti-Patterns
 
 ```
