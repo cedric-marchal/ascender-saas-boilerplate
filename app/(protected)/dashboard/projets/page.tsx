@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 
+import { requireCustomerPlan } from "@/features/billing/guards/require-customer-plan";
 import { ProjectsPage } from "@/features/projects/pages/projects-page";
-
-import { requireCustomerPlan } from "@/lib/session";
 
 export const metadata: Metadata = {
   title: "Projets",

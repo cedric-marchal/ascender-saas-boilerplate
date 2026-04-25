@@ -223,7 +223,7 @@ export { getUserBySlug };
 | Function                  | File                         | Why                                                 |
 | ------------------------- | ---------------------------- | --------------------------------------------------- |
 | `getSession()`            | `lib/session.ts`             | Called in page + layout + guards within same render |
-| `getActiveSubscription()` | `lib/session.ts`             | Called alongside session in same render             |
+| `getActiveSubscription()` | `features/billing/guards/`   | Called alongside session in same render             |
 | `getPricingUserStatus()`  | `features/pricing/services/` | Called in metadata + page                           |
 | `getUserBySlug()`         | `features/users/services/`   | Called in metadata + page                           |
 

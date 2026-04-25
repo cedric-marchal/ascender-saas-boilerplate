@@ -1,7 +1,7 @@
 "use server";
 
+import { UpdatePasswordSchema } from "@/features/account/schemas/password.schema";
 import { updatePassword } from "@/features/account/services/update-password.service";
-import { UpdatePasswordSchema } from "@/features/auth/schemas/password.schema";
 
 import { authenticatedRatelimit } from "@/lib/ratelimit";
 import { authActionClient } from "@/lib/safe-action";

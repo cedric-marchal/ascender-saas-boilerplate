@@ -4,11 +4,11 @@ import { headers } from "next/headers";
 
 import { APIError } from "better-auth/api";
 
-import { ROLE_DASHBOARD_URL } from "@/features/auth/constants/role-dashboard.constant";
 import { SignInSchema } from "@/features/auth/schemas/auth.schema";
 
 import { auth } from "@/lib/auth";
 import type { UserRole } from "@/lib/generated/prisma/client";
+import { ROLE_DASHBOARD_URL } from "@/lib/navigation";
 import { actionClient } from "@/lib/safe-action";
 
 import { UnauthorizedError } from "@/utils/errors/errors";

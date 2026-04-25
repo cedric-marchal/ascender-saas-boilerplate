@@ -1,18 +1,13 @@
 import "server-only";
 
 import { AccountDeletedEmail } from "@/features/account/emails/account-deleted-email";
+import { cleanupBillingForUser } from "@/features/billing/services/cleanup-billing.service";
 
-import {
-  billingInvoicesCacheKey,
-  billingSubscriptionsCacheKey,
-} from "@/lib/cache-keys";
 import { env } from "@/lib/env";
 import { UserRole } from "@/lib/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { deleteFile } from "@/lib/r2";
-import { redis } from "@/lib/redis";
 import { sendEmail } from "@/lib/resend";
-import { stripe } from "@/lib/stripe";
 
 import { BadRequestError, ForbiddenError } from "@/utils/errors/errors";
 
@@ -39,30 +34,6 @@ async function checkLastAdmin(role: UserRole): Promise<void> {
     throw new ForbiddenError(
       "Vous êtes le seul administrateur. Vous ne pouvez pas supprimer votre compte.",
     );
-  }
-}
-
-async function cleanupStripeCustomer(
-  stripeCustomerId: string | undefined,
-  userId: string,
-): Promise<void> {
-  if (!stripeCustomerId) {
-    return;
-  }
-
-  try {
-    await stripe.customers.del(stripeCustomerId);
-  } catch (error: unknown) {
-    console.error("Failed to delete Stripe customer:", error);
-  }
-
-  try {
-    await Promise.all([
-      redis.del(billingSubscriptionsCacheKey(userId)),
-      redis.del(billingInvoicesCacheKey(userId)),
-    ]);
-  } catch (error: unknown) {
-    console.error("Failed to delete Redis cache:", error);
   }
 }
 
@@ -116,7 +87,7 @@ async function deleteAccount(input: DeleteAccountInput): Promise<void> {
   });
 
   // Compensation: clean up external resources (best-effort, non-blocking)
-  await cleanupStripeCustomer(user.stripeCustomer?.stripeCustomerId, user.id);
+  await cleanupBillingForUser(user.stripeCustomer?.stripeCustomerId, user.id);
   await cleanupAvatar(user.image);
 
   try {

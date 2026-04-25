@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Menu } from "lucide-react";
 
 import { SignOutButton } from "@/features/auth/components/sign-out-button";
-import { ROLE_DASHBOARD_URL } from "@/features/auth/constants/role-dashboard.constant";
+import { ROLE_DASHBOARD_URL } from "@/lib/navigation";
 
 import { env } from "@/lib/env";
 import { type UserRole } from "@/lib/generated/prisma/client";
@@ -25,6 +25,7 @@ const MOBILE_LINK_CLASS = "py-1.5 text-[13px]";
 
 async function Header() {
   const session = await getSession();
+
   const dashboardUrl = session
     ? ROLE_DASHBOARD_URL[session.user.role as UserRole]
     : null;

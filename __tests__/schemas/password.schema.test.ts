@@ -1,9 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import {
-  passwordSchema,
-  UpdatePasswordSchema,
-} from "@/features/auth/schemas/password.schema";
+import { UpdatePasswordSchema } from "@/features/account/schemas/password.schema";
+import { passwordSchema } from "@/features/auth/schemas/password.schema";
 
 describe("passwordSchema", () => {
   it("accepts valid password with lowercase, uppercase, and digit", () => {

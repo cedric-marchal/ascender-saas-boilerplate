@@ -13,7 +13,7 @@ import { updatePasswordAction } from "@/features/account/actions/update-password
 import {
   UpdatePasswordSchema,
   type UpdatePasswordSchemaType,
-} from "@/features/auth/schemas/password.schema";
+} from "@/features/account/schemas/password.schema";
 
 import { Button } from "@/components/ui/button";
 import {

@@ -47,6 +47,31 @@ const eslintConfig = defineConfig([
       "react/no-unescaped-entities": "off",
     },
   },
+  // lib/ is infrastructure — it must NEVER import from features/.
+  // This prevents dependency inversion (features depend on lib, never the inverse).
+  // Exception: lib/auth.ts imports email templates (Better Auth callback constraint).
+  {
+    files: ["lib/**"],
+    ignores: ["lib/auth.ts"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["./.*", "../.*"],
+              message: "Utilisez des imports absolus (@/)",
+            },
+            {
+              group: ["@/features/*"],
+              message:
+                "lib/ ne doit jamais importer depuis features/ (inversion de dépendance)",
+            },
+          ],
+        },
+      ],
+    },
+  },
   // TanStack Table: useReactTable() returns functions that cannot be safely
   // memoized by React Compiler. This is a known incompatibility — the warning
   // is a false positive since React Compiler is not enabled in this project.

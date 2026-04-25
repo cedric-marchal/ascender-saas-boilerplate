@@ -128,7 +128,7 @@ Everything derives from `PLAN_CONFIG`:
 
 | Export                  | Purpose                              | Used by                                                    |
 | ----------------------- | ------------------------------------ | ---------------------------------------------------------- |
-| `PlanKey`               | Union type `"pro" \| ...` (typesafe) | `requireCustomerPlan()` in `lib/session.ts`                |
+| `PlanKey`               | Union type `"pro" \| ...` (typesafe) | `requireCustomerPlan()` in `features/billing/guards/`      |
 | `ALLOWED_PRICE_IDS`     | All paid price IDs                   | Checkout validation (`create-checkout-session.service.ts`) |
 | `getPlanLabel(priceId)` | Price ID → display label             | Billing UI components                                      |
 | `getPriceIds(...plans)` | Plan keys → price IDs array          | `requireCustomerPlan()` internals                          |
@@ -141,6 +141,22 @@ To add a new paid plan:
 
 NEVER hardcode price IDs or plan labels outside `PLAN_CONFIG`.
 
+## Inter-Feature Import Rules (P0)
+
+A feature can import from another feature **only** through its public surface:
+
+| Allowed import targets        | Example                                                          |
+| ----------------------------- | ---------------------------------------------------------------- |
+| `features/{other}/actions/`   | `pricing → billing/actions/create-checkout.action`               |
+| `features/{other}/constants/` | `users → billing/constants/subscription-status.constant`         |
+| `features/{other}/emails/`    | `account → auth/emails/password-changed-email`                   |
+| `features/{other}/schemas/`   | `account → auth/schemas/password.schema` (shared validator only) |
+| `features/{other}/guards/`    | `app/ → billing/guards/require-customer-plan`                    |
+
+**NEVER** import another feature's `services/` directly — services contain security-scoped logic (`userId` filters) that must not leak across feature boundaries.
+
+`lib/` must NEVER import from `features/` (enforced by ESLint `no-restricted-imports` on `lib/**`).
+
 ## Anti-Patterns
 
 ```
@@ -152,4 +168,6 @@ Missing .trim() or wrong order (.trim() before .max())
 Default exports
 Inline schema in action (always import from schemas/)
 react-hook-form (always TanStack Form)
+Importing features/ from lib/ (dependency inversion)
+Importing another feature's services/ directly (security boundary violation)
 ```

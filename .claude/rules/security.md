@@ -177,7 +177,7 @@ The checkout service validates `priceId` against `ALLOWED_PRICE_IDS` (derived fr
 
 ### Subscription Access Guards
 
-Use `requireCustomerPlan()` from `lib/session.ts` to gate pages by subscription:
+Use `requireCustomerPlan()` from `features/billing/guards/require-customer-plan.ts` to gate pages by subscription:
 
 ```tsx
 // Any paid plan

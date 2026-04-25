@@ -5,17 +5,9 @@ import { cache } from "react";
 import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 
-import { ROLE_DASHBOARD_URL } from "@/features/auth/constants/role-dashboard.constant";
-import {
-  ALLOWED_PRICE_IDS,
-  getPriceIds,
-  type PlanKey,
-} from "@/features/billing/constants/plan.constant";
-import { ACTIVE_SUBSCRIPTION_STATUSES } from "@/features/billing/constants/subscription-status.constant";
-
 import { auth } from "@/lib/auth";
 import { UserRole } from "@/lib/generated/prisma/client";
-import { prisma } from "@/lib/prisma";
+import { ROLE_DASHBOARD_URL } from "@/lib/navigation";
 
 type RawSession = typeof auth.$Infer.Session;
 
@@ -111,39 +103,6 @@ const requireCustomerVerifiedEmail = async (): Promise<Session> => {
   return session;
 };
 
-const getActiveSubscription = cache(
-  async (userId: string, priceIds: string[]) => {
-    return prisma.subscription.findFirst({
-      where: {
-        stripeCustomer: {
-          userId,
-        },
-        stripePriceId: {
-          in: priceIds,
-        },
-        status: {
-          in: ACTIVE_SUBSCRIPTION_STATUSES,
-        },
-      },
-      select: {
-        id: true,
-      },
-    });
-  },
-);
-
-const requireCustomerPlan = async (...plans: PlanKey[]): Promise<Session> => {
-  const priceIds = plans.length > 0 ? getPriceIds(...plans) : ALLOWED_PRICE_IDS;
-  const session = await requireCustomer();
-  const subscription = await getActiveSubscription(session.user.id, priceIds);
-
-  if (!subscription) {
-    return redirect("/tarifs");
-  }
-
-  return session;
-};
-
 /**
  * Récupère la session admin ou affiche 404
  * À utiliser dans les pages admin ne nécessitant pas d'email vérifié
@@ -178,7 +137,6 @@ export {
   requireAdmin,
   requireAdminVerifiedEmail,
   requireCustomer,
-  requireCustomerPlan,
   requireCustomerVerifiedEmail,
   requireGuest,
   requireSession,

@@ -331,18 +331,18 @@ dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
 
 ## Auth Guards (P0)
 
-| Guard                            | Usage                                                    |
-| -------------------------------- | -------------------------------------------------------- |
-| `requireGuest()`                 | Visitor only — redirects authenticated by role           |
-| `requireSession()`               | Any authenticated user                                   |
-| `requireCustomer()`              | Customer role (404 for non-customer)                     |
-| `requireCustomerVerifiedEmail()` | Customer with verified email                             |
-| `requireCustomerPlan()`          | Customer with any active paid subscription               |
-| `requireCustomerPlan("pro")`     | Customer with specific plan(s) — typesafe `PlanKey` args |
-| `requireAdmin()`                 | Admin role (404 for non-admin)                           |
-| `requireAdminVerifiedEmail()`    | Admin with verified email                                |
+| Guard                            | Usage                                                                                      |
+| -------------------------------- | ------------------------------------------------------------------------------------------ |
+| `requireGuest()`                 | Visitor only — redirects authenticated by role                                             |
+| `requireSession()`               | Any authenticated user                                                                     |
+| `requireCustomer()`              | Customer role (404 for non-customer)                                                       |
+| `requireCustomerVerifiedEmail()` | Customer with verified email                                                               |
+| `requireCustomerPlan()`          | Customer with any active paid subscription (from `features/billing/guards/`)               |
+| `requireCustomerPlan("pro")`     | Customer with specific plan(s) — typesafe `PlanKey` args (from `features/billing/guards/`) |
+| `requireAdmin()`                 | Admin role (404 for non-admin)                                                             |
+| `requireAdminVerifiedEmail()`    | Admin with verified email                                                                  |
 
-Role-based redirect URLs are defined in `ROLE_DASHBOARD_URL` (`features/auth/constants/role-dashboard.constant.ts`). Used by `requireGuest` and sign-in action to redirect to the correct dashboard per role.
+Role-based redirect URLs are defined in `ROLE_DASHBOARD_URL` (`lib/navigation.ts`). Used by `requireGuest` and sign-in action to redirect to the correct dashboard per role.
 
 ## Loading Pages (P0)
 

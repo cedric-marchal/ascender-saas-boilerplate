@@ -116,9 +116,8 @@ export const deleteUserAction = adminActionClient
 Sign-in action returns `redirectUrl` from `ROLE_DASHBOARD_URL` so the client redirects to the correct dashboard per role. NEVER hardcode `/dashboard` in sign-in actions.
 
 ```tsx
-import { ROLE_DASHBOARD_URL } from "@/features/auth/constants/role-dashboard.constant";
-
 import { UserRole } from "@/lib/generated/prisma/client";
+import { ROLE_DASHBOARD_URL } from "@/lib/navigation";
 
 // Inside sign-in action:
 const role = session.user.role as UserRole;

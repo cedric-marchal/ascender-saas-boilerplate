@@ -3,8 +3,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const mockRedirect = vi.fn();
 const mockNotFound = vi.fn();
 const mockGetSessionAuth = vi.fn();
-const mockSubscriptionFindFirst = vi.fn();
-
 vi.mock("react", async (importOriginal) => {
   const actual = (await importOriginal()) as Record<string, unknown>;
 
@@ -32,23 +30,6 @@ vi.mock("@/lib/auth", () => ({
   },
 }));
 
-vi.mock("@/lib/prisma", () => ({
-  prisma: {
-    subscription: {
-      findFirst: mockSubscriptionFindFirst,
-    },
-  },
-}));
-
-vi.mock("@/features/billing/constants/subscription-status.constant", () => ({
-  ACTIVE_SUBSCRIPTION_STATUSES: ["ACTIVE", "TRIALING", "PAST_DUE"],
-}));
-
-vi.mock("@/features/billing/constants/plan.constant", () => ({
-  ALLOWED_PRICE_IDS: ["price_pro_test"],
-  getPriceIds: (...plans: string[]) => plans.map(() => "price_pro_test"),
-}));
-
 const {
   getSession,
   requireSession,
@@ -56,7 +37,6 @@ const {
   requireCustomerVerifiedEmail,
   requireAdmin,
   requireAdminVerifiedEmail,
-  requireCustomerPlan,
 } = await import("@/lib/session");
 
 const makeSession = (
@@ -225,41 +205,6 @@ describe("requireAdminVerifiedEmail", () => {
     const result = await requireAdminVerifiedEmail();
 
     expect(result?.user.emailVerified).toBe(true);
-    expect(mockRedirect).not.toHaveBeenCalled();
-  });
-});
-
-describe("requireCustomerPlan", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  it("redirects to /tarifs if no active subscription", async () => {
-    mockGetSessionAuth.mockResolvedValue(makeSession({ role: "CUSTOMER" }));
-    mockSubscriptionFindFirst.mockResolvedValue(null);
-
-    await requireCustomerPlan("pro");
-
-    expect(mockRedirect).toHaveBeenCalledWith("/tarifs");
-  });
-
-  it("returns session if active subscription exists", async () => {
-    mockGetSessionAuth.mockResolvedValue(makeSession({ role: "CUSTOMER" }));
-    mockSubscriptionFindFirst.mockResolvedValue({ id: "sub-123" });
-
-    const result = await requireCustomerPlan("pro");
-
-    expect(result?.user.role).toBe("CUSTOMER");
-    expect(mockRedirect).not.toHaveBeenCalled();
-  });
-
-  it("uses all paid plans when called without arguments", async () => {
-    mockGetSessionAuth.mockResolvedValue(makeSession({ role: "CUSTOMER" }));
-    mockSubscriptionFindFirst.mockResolvedValue({ id: "sub-123" });
-
-    const result = await requireCustomerPlan();
-
-    expect(result?.user.role).toBe("CUSTOMER");
     expect(mockRedirect).not.toHaveBeenCalled();
   });
 });
