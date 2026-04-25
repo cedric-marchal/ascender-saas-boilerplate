@@ -8,11 +8,13 @@ const nextConfig: NextConfig = {
   cacheComponents: true,
   typedRoutes: true,
   reactCompiler: true,
-  logging: {
-    fetches: {
-      fullUrl: true,
-    },
-  },
+  logging: isDev
+    ? {
+        fetches: {
+          fullUrl: true,
+        },
+      }
+    : undefined,
   serverExternalPackages: [
     "@prisma/client",
     "@neondatabase/serverless",

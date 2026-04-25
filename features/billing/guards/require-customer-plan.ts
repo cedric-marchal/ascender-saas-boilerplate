@@ -31,6 +31,9 @@ const getActiveSubscription = cache(
       select: {
         id: true,
       },
+      orderBy: {
+        currentPeriodEnd: "desc",
+      },
     });
   },
 );

@@ -24,18 +24,18 @@ describe("getRequestIdentifier", () => {
     vi.unstubAllEnvs();
   });
 
-  it("returns last IP from x-forwarded-for", () => {
+  it("returns first IP from x-forwarded-for (original client)", () => {
     const request = createMockRequest({
       "x-forwarded-for": "1.2.3.4, 10.0.0.1",
     });
-    expect(getRequestIdentifier(request)).toBe("10.0.0.1");
+    expect(getRequestIdentifier(request)).toBe("1.2.3.4");
   });
 
-  it("trims last IP from x-forwarded-for", () => {
+  it("trims first IP from x-forwarded-for", () => {
     const request = createMockRequest({
-      "x-forwarded-for": "1.2.3.4,  10.0.0.1  ",
+      "x-forwarded-for": "  1.2.3.4  ,  10.0.0.1  ",
     });
-    expect(getRequestIdentifier(request)).toBe("10.0.0.1");
+    expect(getRequestIdentifier(request)).toBe("1.2.3.4");
   });
 
   it("returns cf-connecting-ip when present", () => {
@@ -91,7 +91,7 @@ describe("getActionIdentifier", () => {
     vi.unstubAllEnvs();
   });
 
-  it("returns last IP from x-forwarded-for header", async () => {
+  it("returns first IP from x-forwarded-for header (original client)", async () => {
     const mockHeaders = {
       get: (name: string) => {
         if (name === "x-forwarded-for") {
@@ -103,7 +103,7 @@ describe("getActionIdentifier", () => {
     vi.mocked(headers).mockResolvedValue(mockHeaders as any);
 
     const result = await getActionIdentifier();
-    expect(result).toBe("10.0.0.1");
+    expect(result).toBe("1.2.3.4");
   });
 
   it("returns cf-connecting-ip when present", async () => {

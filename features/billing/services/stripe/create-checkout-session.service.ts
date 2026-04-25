@@ -86,20 +86,43 @@ async function getOrCreateStripeCustomer(user: StripeUser): Promise<string> {
     return existingStripeCustomer.stripeCustomerId;
   }
 
-  const stripeCustomer = await stripe.customers.create({
-    email: user.email,
-    name: user.name,
-    metadata: {
-      userId: user.id,
+  const stripeCustomer = await stripe.customers.create(
+    {
+      email: user.email,
+      name: user.name,
+      metadata: {
+        userId: user.id,
+      },
     },
-  });
+    {
+      idempotencyKey: `stripe-customer-${user.id}`,
+    },
+  );
 
-  await prisma.stripeCustomer.create({
-    data: {
-      userId: user.id,
-      stripeCustomerId: stripeCustomer.id,
-    },
-  });
+  try {
+    await prisma.stripeCustomer.create({
+      data: {
+        userId: user.id,
+        stripeCustomerId: stripeCustomer.id,
+      },
+    });
+  } catch (error: unknown) {
+    const existingRecord = await prisma.stripeCustomer.findUnique({
+      where: {
+        userId: user.id,
+      },
+      select: {
+        stripeCustomerId: true,
+      },
+    });
+
+    if (existingRecord) {
+      return existingRecord.stripeCustomerId;
+    }
+
+    await stripe.customers.del(stripeCustomer.id).catch(() => {});
+    throw error;
+  }
 
   return stripeCustomer.id;
 }
@@ -158,24 +181,21 @@ async function createCheckoutSession(
     );
   }
 
-  const stripeSession = await stripe.checkout.sessions.create(
-    {
-      customer: stripeCustomerId,
-      line_items: [
-        {
-          price: input.priceId,
-          quantity: 1,
-        },
-      ],
-      mode: "subscription",
-      success_url: `${env.NEXT_PUBLIC_BASE_URL}/dashboard/facturation?success=true`,
-      cancel_url: `${env.NEXT_PUBLIC_BASE_URL}/tarifs?canceled=true`,
-      metadata: {
-        userId: user.id,
+  const stripeSession = await stripe.checkout.sessions.create({
+    customer: stripeCustomerId,
+    line_items: [
+      {
+        price: input.priceId,
+        quantity: 1,
       },
+    ],
+    mode: "subscription",
+    success_url: `${env.NEXT_PUBLIC_BASE_URL}/dashboard/facturation?success=true`,
+    cancel_url: `${env.NEXT_PUBLIC_BASE_URL}/tarifs?canceled=true`,
+    metadata: {
+      userId: user.id,
     },
-    { idempotencyKey: `checkout-${input.userId}-${input.priceId}` },
-  );
+  });
 
   if (!stripeSession.url) {
     throw new BadRequestError("Impossible de créer la session de paiement");

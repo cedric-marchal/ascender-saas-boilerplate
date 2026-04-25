@@ -137,6 +137,10 @@ export async function proxy(request: NextRequest) {
     request: { headers: requestHeaders },
   });
 
+  if (isProtectedRoute(pathname)) {
+    response.headers.set("Cache-Control", "private, no-store");
+  }
+
   return applySecurityHeaders(response, nonce);
 }
 

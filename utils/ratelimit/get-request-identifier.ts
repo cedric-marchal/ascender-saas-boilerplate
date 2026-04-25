@@ -17,10 +17,10 @@ function extractIpFromHeaders(
     return realIp.trim();
   }
 
-  const lastIp = forwardedFor?.split(",").at(-1)?.trim();
+  const firstIp = forwardedFor?.split(",")[0]?.trim();
 
-  if (lastIp) {
-    return lastIp;
+  if (firstIp) {
+    return firstIp;
   }
 
   if (process.env.NODE_ENV === "development") {

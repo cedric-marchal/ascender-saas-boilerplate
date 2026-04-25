@@ -280,6 +280,8 @@ async function handleStripeWebhook(
     console.error("Webhook processing error:", error);
 
     if (isTransientDbError(error)) {
+      await redis.del(eventKey).catch(() => {});
+
       return {
         status: 503,
         body: {
