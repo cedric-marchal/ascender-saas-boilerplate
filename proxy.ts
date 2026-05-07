@@ -24,11 +24,11 @@ function generateCsp(nonce: string): string {
 
   return [
     "default-src 'self'",
-    `script-src 'self' 'nonce-${nonce}' https://www.googletagmanager.com${isDev ? " 'unsafe-inline' 'unsafe-eval'" : " 'strict-dynamic'"}`,
+    `script-src 'self' 'nonce-${nonce}'${isDev ? " 'unsafe-inline' 'unsafe-eval'" : " 'strict-dynamic'"}`,
     "style-src 'self' 'unsafe-inline'",
     `img-src 'self' data: blob: https://*.r2.cloudflarestorage.com https://*.r2.dev https://lh3.googleusercontent.com${isDev ? " https://picsum.photos https://fastly.picsum.photos" : ""}`,
     "font-src 'self'",
-    "connect-src 'self' https://*.stripe.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com",
+    "connect-src 'self' https://*.stripe.com",
     "frame-src https://*.stripe.com",
     "object-src 'none'",
     "base-uri 'self'",

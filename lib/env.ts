@@ -42,7 +42,6 @@ const env = createEnv({
   },
   client: {
     NEXT_PUBLIC_APP_NAME: z.string().min(1),
-    NEXT_PUBLIC_GA_MEASUREMENT_ID: z.string().optional(),
     NEXT_PUBLIC_BASE_URL: z
       .string()
       .min(1)
@@ -91,7 +90,6 @@ const env = createEnv({
 
     // Client
     NEXT_PUBLIC_APP_NAME: process.env.NEXT_PUBLIC_APP_NAME,
-    NEXT_PUBLIC_GA_MEASUREMENT_ID: process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID,
     NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL,
     NEXT_PUBLIC_R2_PUBLIC_URL: process.env.NEXT_PUBLIC_R2_PUBLIC_URL,
     NEXT_PUBLIC_VERCEL_MAX_UPLOAD_SIZE:
