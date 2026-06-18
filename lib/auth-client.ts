@@ -8,4 +8,4 @@ const authClient = createAuthClient({
   plugins: [organizationClient()],
 });
 
-export const { signIn } = authClient;
+export const { signIn, organization: organizationAuthClient } = authClient;
