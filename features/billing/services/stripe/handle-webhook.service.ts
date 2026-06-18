@@ -80,11 +80,9 @@ async function handleStripeWebhook(
         },
       };
     }
-
-    await redis.set(eventKey, 1, { ex: EVENT_TTL_SECONDS });
   } catch (redisError: unknown) {
     console.error("Redis idempotency check failed:", redisError);
-    // Redis indisponible → on continue sans idempotence (mieux que bloquer)
+    // Redis unavailable → continue without idempotence (better than blocking)
   }
 
   try {
@@ -270,8 +268,7 @@ async function handleStripeWebhook(
     console.error("Webhook processing error:", error);
 
     if (isTransientDbError(error)) {
-      await redis.del(eventKey).catch(() => {});
-
+      // Do NOT set the idempotency key — allow Stripe to retry
       return {
         status: 503,
         body: {
@@ -281,13 +278,26 @@ async function handleStripeWebhook(
       };
     }
 
+    // Unexpected error: return 5xx so Stripe retries.
+    // The idempotency key was never set (we moved the set to after success),
+    // so Stripe will retry and the event will be reprocessed.
     return {
-      status: 200,
+      status: 500,
       body: {
-        success: true,
-        received: true,
+        success: false,
+        message: "Erreur interne du serveur",
       },
     };
+  }
+
+  // Mark the event as processed ONLY after the handler succeeded.
+  // This ensures a failed handler does not poison idempotency.
+  try {
+    await redis.set(eventKey, 1, { ex: EVENT_TTL_SECONDS });
+  } catch (redisError: unknown) {
+    console.error("Redis idempotency set failed:", redisError);
+    // Non-fatal: idempotency key not set, event may be reprocessed.
+    // Acceptable tradeoff — better than dropping a successfully-processed event.
   }
 
   return {
