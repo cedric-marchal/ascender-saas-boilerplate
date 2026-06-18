@@ -260,7 +260,7 @@ const auth = betterAuth({
 
           const existing = await prisma.stripeCustomer.findUnique({
             where: {
-              userId: user.id,
+              organizationId: organization.id,
             },
             select: {
               stripeCustomerId: true,
@@ -277,7 +277,6 @@ const auth = betterAuth({
                 name: organization.name,
                 metadata: {
                   organizationId: organization.id,
-                  userId: user.id,
                 },
               },
               {
@@ -287,7 +286,7 @@ const auth = betterAuth({
 
             await prisma.stripeCustomer.create({
               data: {
-                userId: user.id,
+                organizationId: organization.id,
                 stripeCustomerId: stripeCustomer.id,
               },
             });

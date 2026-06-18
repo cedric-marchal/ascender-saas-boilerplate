@@ -4,11 +4,12 @@ import { CreateCheckoutSessionSchema } from "@/features/billing/schemas/checkout
 import { createCheckoutSession } from "@/features/billing/services/stripe/create-checkout-session.service";
 
 import { authenticatedRatelimit } from "@/lib/ratelimit";
-import { authActionClient } from "@/lib/safe-action";
+import { orgActionClient } from "@/lib/safe-action";
 
+import { ForbiddenError } from "@/utils/errors/errors";
 import { checkRatelimit } from "@/utils/ratelimit/check-ratelimit";
 
-export const createCheckoutAction = authActionClient
+export const createCheckoutAction = orgActionClient
   .use(async ({ next, ctx }) => {
     await checkRatelimit(authenticatedRatelimit, ctx.userId);
 
@@ -16,7 +17,14 @@ export const createCheckoutAction = authActionClient
   })
   .inputSchema(CreateCheckoutSessionSchema)
   .action(async ({ parsedInput, ctx }) => {
+    if (ctx.memberRole !== "owner" && ctx.memberRole !== "admin") {
+      throw new ForbiddenError(
+        "Seuls les propriétaires et administrateurs peuvent gérer la facturation",
+      );
+    }
+
     const result = await createCheckoutSession({
+      organizationId: ctx.organizationId,
       userId: ctx.userId,
       priceId: parsedInput.priceId,
     });

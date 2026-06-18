@@ -1,7 +1,7 @@
 import "server-only";
 
 import { AccountDeletedEmail } from "@/features/account/emails/account-deleted-email";
-import { cleanupBillingForUser } from "@/features/billing/services/cleanup-billing.service";
+import { cleanupBillingForOrganization } from "@/features/billing/services/cleanup-billing.service";
 
 import { env } from "@/lib/env";
 import { UserRole } from "@/lib/generated/prisma/client";
@@ -59,11 +59,6 @@ async function deleteAccount(input: DeleteAccountInput): Promise<void> {
       email: true,
       image: true,
       role: true,
-      stripeCustomer: {
-        select: {
-          stripeCustomerId: true,
-        },
-      },
     },
   });
 
@@ -79,15 +74,52 @@ async function deleteAccount(input: DeleteAccountInput): Promise<void> {
 
   await checkLastAdmin(user.role);
 
-  // Primary action: delete from DB (atomic, cascades to stripeCustomer, subscription, sessions)
+  // Gather owned orgs that are sole-owner (will be orphaned after user deletion)
+  const soleOwnedOrgs = await prisma.organization.findMany({
+    where: {
+      members: {
+        some: {
+          userId: input.userId,
+          role: "owner",
+        },
+      },
+    },
+    select: {
+      id: true,
+      stripeCustomer: {
+        select: {
+          stripeCustomerId: true,
+        },
+      },
+      members: {
+        select: {
+          id: true,
+        },
+        take: 10,
+      },
+    },
+    take: 50,
+  });
+
+  // Primary action: delete from DB (cascades to sessions, accounts, member records)
   await prisma.user.delete({
     where: {
       id: user.id,
     },
   });
 
-  // Compensation: clean up external resources (best-effort, non-blocking)
-  await cleanupBillingForUser(user.stripeCustomer?.stripeCustomerId, user.id);
+  // Compensation: clean up Stripe and Redis for orgs the user owned
+  // Organizations cascade-delete their StripeCustomer on delete via FK,
+  // so we only need to clean up Stripe + Redis (DB already cleaned by cascade).
+  for (const org of soleOwnedOrgs) {
+    if (org.stripeCustomer) {
+      await cleanupBillingForOrganization(
+        org.stripeCustomer.stripeCustomerId,
+        org.id,
+      );
+    }
+  }
+
   await cleanupAvatar(user.image);
 
   try {

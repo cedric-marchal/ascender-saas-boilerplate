@@ -9,13 +9,11 @@ import {
   UserCircle,
 } from "lucide-react";
 
-import { subscriptionStatusLabels } from "@/features/billing/constants/subscription-status.constant";
 import { roleLabels } from "@/features/users/constants/users-filters.constant";
 import type {
   GetUserAccount,
   GetUserResult,
   GetUserSession,
-  GetUserSubscription,
 } from "@/features/users/services/get-user.service";
 
 import { UserRole } from "@/lib/generated/prisma/browser";
@@ -153,80 +151,16 @@ function UserDetailPage({ user }: UserDetailPageProps) {
               aria-hidden="true"
             />
             <div>
-              <CardTitle>Abonnements</CardTitle>
-              {user.stripeCustomer && (
-                <CardDescription>
-                  {user.stripeCustomer.subscriptions.length} abonnement
-                  {user.stripeCustomer.subscriptions.length > 1 ? "s" : ""}
-                </CardDescription>
-              )}
+              <CardTitle>Facturation</CardTitle>
+              <CardDescription>
+                Gérée au niveau de l&apos;organisation
+              </CardDescription>
             </div>
           </CardHeader>
           <CardContent>
-            {!user.stripeCustomer ? (
-              <div className="text-muted-foreground flex h-24 items-center justify-center rounded-lg border border-dashed text-sm">
-                Aucun client Stripe associé
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <div className="flex justify-between gap-2">
-                  <span className="text-muted-foreground text-sm">
-                    Stripe ID
-                  </span>
-                  <span className="font-mono text-xs">
-                    {user.stripeCustomer.stripeCustomerId}
-                  </span>
-                </div>
-
-                {user.stripeCustomer.subscriptions.length === 0 ? (
-                  <div className="text-muted-foreground flex h-16 items-center justify-center rounded-lg border border-dashed text-sm">
-                    Aucun abonnement
-                  </div>
-                ) : (
-                  <ul className="space-y-3">
-                    {user.stripeCustomer.subscriptions.map(
-                      (subscription: GetUserSubscription) => (
-                        <li
-                          key={subscription.id}
-                          className="space-y-2 rounded-lg border p-3"
-                        >
-                          <div className="flex items-center justify-between">
-                            <span className="font-mono text-xs">
-                              {subscription.stripeSubscriptionId}
-                            </span>
-                            <Badge variant="outline">
-                              {subscriptionStatusLabels[subscription.status]}
-                            </Badge>
-                          </div>
-                          <div className="text-muted-foreground space-y-1 text-xs">
-                            <p>Prix: {subscription.stripePriceId}</p>
-                            <p>
-                              Période:{" "}
-                              {new Intl.DateTimeFormat("fr-FR", {
-                                dateStyle: "short",
-                              }).format(
-                                new Date(subscription.currentPeriodStart),
-                              )}{" "}
-                              →{" "}
-                              {new Intl.DateTimeFormat("fr-FR", {
-                                dateStyle: "short",
-                              }).format(
-                                new Date(subscription.currentPeriodEnd),
-                              )}
-                            </p>
-                            {subscription.cancelAtPeriodEnd && (
-                              <p className="text-destructive font-medium">
-                                Annulation en fin de période
-                              </p>
-                            )}
-                          </div>
-                        </li>
-                      ),
-                    )}
-                  </ul>
-                )}
-              </div>
-            )}
+            <div className="text-muted-foreground flex h-24 items-center justify-center rounded-lg border border-dashed text-sm">
+              La facturation est désormais gérée par organisation
+            </div>
           </CardContent>
         </Card>
       </div>

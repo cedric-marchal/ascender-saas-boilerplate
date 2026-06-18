@@ -3,6 +3,7 @@
  *
  * Each domain has its own file in `prisma/seed/`:
  *   - auth.seed.ts          → Users, Accounts, Sessions
+ *   - organization.seed.ts  → Organizations, Members
  *   - billing.seed.ts       → StripeCustomers, Subscriptions
  *   - verification.seed.ts  → Verifications
  *
@@ -17,6 +18,10 @@ import { cleanAuth, seedAuth } from "./seed/auth.seed";
 import { cleanBilling, seedBilling } from "./seed/billing.seed";
 import { prisma } from "./seed/client";
 import { SEED_PASSWORD } from "./seed/helpers";
+import {
+  cleanOrganizations,
+  seedOrganizations,
+} from "./seed/organization.seed";
 import {
   cleanVerifications,
   seedVerifications,
@@ -37,6 +42,11 @@ const SEEDERS: Seeder[] = [
     name: "Auth (users, accounts, sessions)",
     clean: () => cleanAuth(prisma),
     run: () => seedAuth(prisma),
+  },
+  {
+    name: "Organizations (organizations, members)",
+    clean: () => cleanOrganizations(prisma),
+    run: () => seedOrganizations(prisma),
   },
   {
     name: "Billing (stripe customers, subscriptions)",

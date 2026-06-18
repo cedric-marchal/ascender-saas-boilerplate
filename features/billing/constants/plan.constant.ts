@@ -2,7 +2,7 @@ import { env } from "@/lib/env";
 
 /**
  * Centralized plan configuration — single source of truth for all plan-related
- * lookups (checkout validation, UI labels, access guards).
+ * lookups (checkout validation, UI labels, access guards, seat caps, feature gating).
  *
  * To add a new paid plan:
  * 1. Add the env var in lib/env.ts (e.g. STRIPE_PRICE_ID_BUSINESS)
@@ -13,19 +13,25 @@ const PLAN_CONFIG = {
   pro: {
     priceId: env.STRIPE_PRICE_ID_PRO,
     label: "Pro",
+    seatsIncluded: 5,
+    features: ["advanced_analytics", "api_access", "priority_support"] as const,
   },
 } as const satisfies Record<
   string,
   {
     priceId: string;
     label: string;
+    seatsIncluded: number;
+    features: readonly string[];
   }
 >;
 
 type PlanKey = keyof typeof PLAN_CONFIG;
 
+type PlanFeature = (typeof PLAN_CONFIG)[PlanKey]["features"][number];
+
 const ALLOWED_PRICE_IDS: string[] = Object.values(PLAN_CONFIG).map(
-  (plan: { priceId: string; label: string }) => plan.priceId,
+  (plan) => plan.priceId,
 );
 
 function getPlanLabel(priceId: string | null): string {
@@ -34,7 +40,7 @@ function getPlanLabel(priceId: string | null): string {
   }
 
   const plan = Object.values(PLAN_CONFIG).find(
-    (config: { priceId: string; label: string }) => config.priceId === priceId,
+    (config) => config.priceId === priceId,
   );
 
   return plan?.label ?? "Inconnu";
@@ -44,5 +50,25 @@ function getPriceIds(...plans: PlanKey[]): string[] {
   return plans.map((key: PlanKey) => PLAN_CONFIG[key].priceId);
 }
 
-export { ALLOWED_PRICE_IDS, getPlanLabel, getPriceIds, PLAN_CONFIG };
-export type { PlanKey };
+function getSeatsIncluded(planKey: PlanKey): number {
+  return PLAN_CONFIG[planKey].seatsIncluded;
+}
+
+function getPlanByPriceId(
+  priceId: string,
+): (typeof PLAN_CONFIG)[PlanKey] | undefined {
+  return Object.values(PLAN_CONFIG).find(
+    (config) => config.priceId === priceId,
+  );
+}
+
+export {
+  ALLOWED_PRICE_IDS,
+  getPlanByPriceId,
+  getPlanLabel,
+  getPriceIds,
+  getSeatsIncluded,
+  PLAN_CONFIG,
+};
+
+export type { PlanFeature, PlanKey };

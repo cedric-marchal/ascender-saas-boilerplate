@@ -3,18 +3,26 @@
 import { createPortalSession } from "@/features/billing/services/stripe/create-portal-session.service";
 
 import { authenticatedRatelimit } from "@/lib/ratelimit";
-import { authActionClient } from "@/lib/safe-action";
+import { orgActionClient } from "@/lib/safe-action";
 
+import { ForbiddenError } from "@/utils/errors/errors";
 import { checkRatelimit } from "@/utils/ratelimit/check-ratelimit";
 
-export const createPortalSessionAction = authActionClient
+export const createPortalSessionAction = orgActionClient
   .use(async ({ next, ctx }) => {
     await checkRatelimit(authenticatedRatelimit, ctx.userId);
 
     return next();
   })
   .action(async ({ ctx }) => {
+    if (ctx.memberRole !== "owner" && ctx.memberRole !== "admin") {
+      throw new ForbiddenError(
+        "Seuls les propriétaires et administrateurs peuvent accéder au portail de facturation",
+      );
+    }
+
     const result = await createPortalSession({
+      organizationId: ctx.organizationId,
       userId: ctx.userId,
     });
 

@@ -3,6 +3,7 @@
 import { headers } from "next/headers";
 
 import { InviteMemberSchema } from "@/features/organizations/schemas/invitation.schema";
+import { checkSeatCapacity } from "@/features/organizations/services/check-seat-capacity.service";
 
 import { auth } from "@/lib/auth";
 import { orgActionClient } from "@/lib/safe-action";
@@ -17,6 +18,8 @@ export const inviteMemberAction = orgActionClient
         "Seuls les propriétaires et administrateurs peuvent inviter des membres",
       );
     }
+
+    await checkSeatCapacity(ctx.organizationId);
 
     await auth.api.createInvitation({
       body: {

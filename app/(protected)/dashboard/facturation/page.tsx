@@ -1,13 +1,16 @@
 import type { Metadata } from "next";
 
 import { BillingEmptyPage } from "@/features/billing/pages/billing-empty-page";
-import { BillingPage } from "@/features/billing/pages/billing-page";
+import { OrganizationBillingPage } from "@/features/billing/pages/organization-billing-page";
 import { getBilling } from "@/features/billing/services/get-billing.service";
 
+import { prisma } from "@/lib/prisma";
 import { filterRatelimit } from "@/lib/ratelimit";
 import { requireCustomerVerifiedEmail } from "@/lib/session";
 
 import { TooManyRequestsPage } from "@/components/pages/too-many-requests-page";
+
+import { ForbiddenError } from "@/utils/errors/errors";
 
 export const metadata: Metadata = {
   title: "Facturation",
@@ -26,11 +29,55 @@ export default async function DashboardBillingRoute() {
     return <TooManyRequestsPage />;
   }
 
-  const billing = await getBilling(session.user.id);
+  const organizationId = session.activeOrganizationId;
 
-  if (!billing) {
+  if (!organizationId) {
     return <BillingEmptyPage />;
   }
 
-  return <BillingPage billing={billing} />;
+  const membership = await prisma.member.findFirst({
+    where: {
+      userId: session.user.id,
+      organizationId,
+      role: {
+        in: ["owner", "admin"],
+      },
+    },
+    select: {
+      id: true,
+    },
+  });
+
+  if (!membership) {
+    throw new ForbiddenError(
+      "Seuls les propriétaires et administrateurs peuvent accéder à la facturation",
+    );
+  }
+
+  const [billing, organization] = await Promise.all([
+    getBilling(organizationId),
+    prisma.organization.findUnique({
+      where: {
+        id: organizationId,
+      },
+      select: {
+        name: true,
+        seatsUsed: true,
+        plan: true,
+      },
+    }),
+  ]);
+
+  if (!billing || !organization) {
+    return <BillingEmptyPage />;
+  }
+
+  return (
+    <OrganizationBillingPage
+      billing={billing}
+      organizationName={organization.name}
+      seatsUsed={organization.seatsUsed}
+      plan={organization.plan}
+    />
+  );
 }

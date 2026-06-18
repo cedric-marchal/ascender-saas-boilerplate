@@ -48,11 +48,23 @@ export const removeMemberAction = orgActionClient
       }
     }
 
-    await prisma.member.delete({
-      where: {
-        id: parsedInput.memberId,
-      },
-    });
+    await prisma.$transaction([
+      prisma.member.delete({
+        where: {
+          id: parsedInput.memberId,
+        },
+      }),
+      prisma.organization.update({
+        where: {
+          id: ctx.organizationId,
+        },
+        data: {
+          seatsUsed: {
+            decrement: 1,
+          },
+        },
+      }),
+    ]);
 
     revalidatePath("/dashboard/organisation");
 

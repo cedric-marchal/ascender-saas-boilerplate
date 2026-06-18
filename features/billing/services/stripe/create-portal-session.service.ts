@@ -1,7 +1,6 @@
 import "server-only";
 
 import { env } from "@/lib/env";
-import { UserRole } from "@/lib/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { stripe } from "@/lib/stripe";
 
@@ -9,10 +8,10 @@ import {
   BadRequestError,
   ForbiddenError,
   NotFoundError,
-  UnauthorizedError,
 } from "@/utils/errors/errors";
 
 type CreatePortalSessionInput = {
+  organizationId: string;
   userId: string;
 };
 
@@ -23,42 +22,33 @@ type CreatePortalSessionResult = {
 async function createPortalSession(
   input: CreatePortalSessionInput,
 ): Promise<CreatePortalSessionResult> {
-  const [user, stripeCustomer] = await Promise.all([
-    prisma.user.findUnique({
-      where: {
-        id: input.userId,
+  const member = await prisma.member.findFirst({
+    where: {
+      organizationId: input.organizationId,
+      userId: input.userId,
+      role: {
+        in: ["owner", "admin"],
       },
-      select: {
-        id: true,
-        emailVerified: true,
-        role: true,
-      },
-    }),
-    prisma.stripeCustomer.findUnique({
-      where: {
-        userId: input.userId,
-      },
-      select: {
-        stripeCustomerId: true,
-      },
-    }),
-  ]);
+    },
+    select: {
+      id: true,
+    },
+  });
 
-  if (!user) {
-    throw new UnauthorizedError("Utilisateur introuvable");
-  }
-
-  if (!user.emailVerified) {
+  if (!member) {
     throw new ForbiddenError(
-      "Vous devez vérifier votre adresse e-mail avant d'accéder au portail de facturation",
+      "Seuls les propriétaires et administrateurs peuvent accéder au portail de facturation",
     );
   }
 
-  if (user.role !== UserRole.CUSTOMER) {
-    throw new ForbiddenError(
-      "Seuls les utilisateurs avec le rôle CUSTOMER peuvent accéder au portail de facturation",
-    );
-  }
+  const stripeCustomer = await prisma.stripeCustomer.findUnique({
+    where: {
+      organizationId: input.organizationId,
+    },
+    select: {
+      stripeCustomerId: true,
+    },
+  });
 
   if (!stripeCustomer) {
     throw new NotFoundError(
@@ -71,7 +61,7 @@ async function createPortalSession(
       customer: stripeCustomer.stripeCustomerId,
       return_url: `${env.NEXT_PUBLIC_BASE_URL}/dashboard/facturation`,
     },
-    { idempotencyKey: `portal-${input.userId}` },
+    { idempotencyKey: `portal-org-${input.organizationId}` },
   );
 
   if (!portalSession.url) {

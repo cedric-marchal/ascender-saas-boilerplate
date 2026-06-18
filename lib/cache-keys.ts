@@ -1,11 +1,11 @@
 import "server-only";
 
-function billingInvoicesCacheKey(userId: string): string {
-  return `invoices:${userId}`;
+function billingInvoicesCacheKey(organizationId: string): string {
+  return `invoices:org:${organizationId}`;
 }
 
-function billingSubscriptionsCacheKey(userId: string): string {
-  return `subscriptions:${userId}`;
+function billingSubscriptionsCacheKey(organizationId: string): string {
+  return `subscriptions:org:${organizationId}`;
 }
 
 function stripeEventIdempotencyCacheKey(eventId: string): string {
