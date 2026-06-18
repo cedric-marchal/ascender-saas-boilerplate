@@ -93,7 +93,6 @@ async function getAuditLog(
       name: true,
       email: true,
     },
-    take: PAGE_SIZE.SMALL,
   });
 
   const userMap = new Map(users.map((user) => [user.id, user]));

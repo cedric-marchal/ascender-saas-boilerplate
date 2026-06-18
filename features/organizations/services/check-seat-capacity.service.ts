@@ -15,16 +15,15 @@ const FREE_PLAN_SEAT_CAP = 1;
 
 /**
  * Throws ForbiddenError if adding one more member would exceed the plan's seat cap.
+ * Uses the real member row count — never a cached counter — so it stays accurate
+ * even after cascade-deletes (account deletion, etc.).
  * Must be called before creating a membership or accepting an invitation.
  */
 async function checkSeatCapacity(organizationId: string): Promise<void> {
-  const [organization, activeSubscription] = await Promise.all([
-    prisma.organization.findUnique({
+  const [memberCount, activeSubscription] = await Promise.all([
+    prisma.member.count({
       where: {
-        id: organizationId,
-      },
-      select: {
-        seatsUsed: true,
+        organizationId,
       },
     }),
     prisma.subscription.findFirst({
@@ -48,6 +47,18 @@ async function checkSeatCapacity(organizationId: string): Promise<void> {
     }),
   ]);
 
+  // Verify org exists by checking membership (member.count returns 0 for missing org too,
+  // so we do a quick existence check via member table — if 0 members AND no subscription
+  // the org may not exist; guard via organization lookup)
+  const organization = await prisma.organization.findUnique({
+    where: {
+      id: organizationId,
+    },
+    select: {
+      id: true,
+    },
+  });
+
   if (!organization) {
     throw new ForbiddenError("Organisation introuvable");
   }
@@ -58,7 +69,7 @@ async function checkSeatCapacity(organizationId: string): Promise<void> {
 
   const seatCap = planConfig?.seatsIncluded ?? FREE_PLAN_SEAT_CAP;
 
-  if (organization.seatsUsed >= seatCap) {
+  if (memberCount >= seatCap) {
     throw new ForbiddenError(
       `Votre plan ne permet pas d'ajouter plus de ${seatCap} membre${seatCap > 1 ? "s" : ""}. Passez à un plan supérieur pour inviter davantage de membres.`,
     );

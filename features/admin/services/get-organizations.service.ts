@@ -52,15 +52,24 @@ async function getOrganizations(
         slug: true,
         plan: true,
         createdAt: true,
+        // Bounded owner lookup: at most 1 row, only owner role
         members: {
+          where: {
+            role: "owner",
+          },
+          take: 1,
           select: {
-            id: true,
-            role: true,
             user: {
               select: {
                 email: true,
               },
             },
+          },
+        },
+        // Aggregate count — no unbounded fetch of all member rows
+        _count: {
+          select: {
+            members: true,
           },
         },
       },
@@ -77,9 +86,7 @@ async function getOrganizations(
 
   const organizations: OrganizationRow[] = rawOrganizations.map(
     (organization) => {
-      const ownerMember = organization.members.find(
-        (member) => member.role === "owner",
-      );
+      const ownerMember = organization.members[0];
 
       return {
         id: organization.id,
@@ -87,7 +94,7 @@ async function getOrganizations(
         slug: organization.slug,
         plan: organization.plan,
         createdAt: organization.createdAt,
-        memberCount: organization.members.length,
+        memberCount: organization._count.members,
         ownerEmail: ownerMember?.user.email ?? null,
       };
     },

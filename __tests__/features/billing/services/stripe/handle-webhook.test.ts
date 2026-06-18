@@ -100,7 +100,7 @@ describe("handleStripeWebhook", () => {
       expect(mockRedisSet).not.toHaveBeenCalled();
     });
 
-    it("marks event as processed in Redis", async () => {
+    it("marks event as processed in Redis AFTER the handler succeeds", async () => {
       const mockEvent = {
         id: "evt_test_123",
         type: "customer.subscription.created",
@@ -129,13 +129,62 @@ describe("handleStripeWebhook", () => {
         stripeCustomerId: "cus_123",
       });
 
+      const callOrder: string[] = [];
+      mockPrismaUpsert.mockImplementation(async () => {
+        callOrder.push("upsert");
+      });
+      mockRedisDel.mockImplementation(async () => {
+        callOrder.push("del");
+      });
+      mockRedisSet.mockImplementation(async () => {
+        callOrder.push("set");
+        return "OK";
+      });
+
       await handleStripeWebhook("body", "sig");
+
+      // Redis set (idempotency mark) must come AFTER upsert and cache invalidation
+      expect(callOrder).toEqual(["upsert", "del", "set"]);
 
       expect(mockRedisSet).toHaveBeenCalledWith(
         "stripe:event:evt_test_123",
         1,
         { ex: 86400 },
       );
+    });
+
+    it("does NOT set idempotency key when handler fails", async () => {
+      const mockEvent = {
+        id: "evt_fail",
+        type: "customer.subscription.created",
+        data: {
+          object: {
+            id: "sub_fail",
+            customer: "cus_fail",
+            status: "active",
+            items: {
+              data: [
+                {
+                  price: { id: "price_fail" },
+                  current_period_start: 1234567890,
+                  current_period_end: 1234577890,
+                },
+              ],
+            },
+            cancel_at_period_end: false,
+          },
+        },
+      };
+      mockConstructEvent.mockReturnValue(mockEvent);
+      mockRedisGet.mockResolvedValue(null);
+      mockPrismaFindUnique.mockRejectedValue(new Error("DB failure"));
+
+      const result = await handleStripeWebhook("body", "sig");
+
+      // Handler failed → idempotency key must NOT be set (Stripe can retry)
+      expect(mockRedisSet).not.toHaveBeenCalled();
+      // Must return 5xx so Stripe retries
+      expect(result.status).toBeGreaterThanOrEqual(500);
     });
   });
 
@@ -527,7 +576,7 @@ describe("handleStripeWebhook", () => {
   });
 
   describe("error handling", () => {
-    it("logs error and returns 200", async () => {
+    it("logs error and returns 500 for unexpected errors (so Stripe retries)", async () => {
       const mockEvent = {
         id: "evt_error",
         type: "customer.subscription.created",
@@ -558,11 +607,12 @@ describe("handleStripeWebhook", () => {
         "Webhook processing error:",
         expect.any(Error),
       );
-      expect(result.status).toBe(200);
-      expect(result.body.success).toBe(true);
+      // Must return 5xx so Stripe retries the event
+      expect(result.status).toBe(500);
+      expect(result.body.success).toBe(false);
     });
 
-    it("returns 200 even on internal processing errors", async () => {
+    it("returns 500 on internal processing errors so Stripe can retry", async () => {
       const mockEvent = {
         id: "evt_internal_error",
         type: "invoice.payment_succeeded",
@@ -577,8 +627,40 @@ describe("handleStripeWebhook", () => {
 
       const result = await handleStripeWebhook("body", "sig");
 
-      expect(result.status).toBe(200);
-      expect(result.body.received).toBe(true);
+      expect(result.status).toBe(500);
+      expect(result.body.success).toBe(false);
+    });
+
+    it("does NOT mark event as processed in Redis when handler throws", async () => {
+      const mockEvent = {
+        id: "evt_no_idempotency_on_fail",
+        type: "customer.subscription.created",
+        data: {
+          object: {
+            id: "sub_nif",
+            customer: "cus_nif",
+            status: "active",
+            items: {
+              data: [
+                {
+                  price: { id: "price_nif" },
+                  current_period_start: 1234567890,
+                  current_period_end: 1234577890,
+                },
+              ],
+            },
+            cancel_at_period_end: false,
+          },
+        },
+      };
+      mockConstructEvent.mockReturnValue(mockEvent);
+      mockRedisGet.mockResolvedValue(null);
+      mockPrismaFindUnique.mockRejectedValue(new Error("DB failure"));
+
+      await handleStripeWebhook("body", "sig");
+
+      // Idempotency key must NOT be set — failed handler must not poison idempotency
+      expect(mockRedisSet).not.toHaveBeenCalled();
     });
   });
 });

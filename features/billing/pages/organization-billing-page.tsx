@@ -23,14 +23,14 @@ import { Separator } from "@/components/ui/separator";
 type OrganizationBillingPageProps = {
   billing: GetBillingResult;
   organizationName: string;
-  seatsUsed: number;
+  memberCount: number;
   plan: string;
 };
 
 function OrganizationBillingPage({
   billing,
   organizationName,
-  seatsUsed,
+  memberCount,
   plan,
 }: OrganizationBillingPageProps) {
   const { invoices, subscriptions } = billing;
@@ -78,7 +78,7 @@ function OrganizationBillingPage({
         <div className="flex-1">
           <p className="text-sm font-medium">Membres actifs</p>
           <p className="text-muted-foreground text-sm">
-            {seatsUsed} membre{seatsUsed > 1 ? "s" : ""} dans
+            {memberCount} membre{memberCount > 1 ? "s" : ""} dans
             l&apos;organisation
           </p>
         </div>
