@@ -16,6 +16,8 @@ import {
   memberRole,
   ownerRole,
 } from "@/features/organizations/constants/organization-roles.constant";
+import { createOrganization } from "@/features/organizations/services/create-organization.service";
+import { sendInvitationEmail } from "@/features/organizations/services/send-invitation-email.service";
 
 import { env } from "@/lib/env";
 import { UserRole } from "@/lib/generated/prisma/client";
@@ -113,50 +115,7 @@ const auth = betterAuth({
         react: WelcomeEmail({ name: user.name, verificationLink: url }),
       });
     },
-    async afterEmailVerification(user) {
-      const dbUser = await prisma.user.findUnique({
-        where: {
-          id: user.id,
-        },
-        select: {
-          id: true,
-          email: true,
-          name: true,
-          role: true,
-        },
-      });
-
-      if (!dbUser) {
-        console.error(`User not found: ${user.id}`);
-        return;
-      }
-
-      if (dbUser.role !== UserRole.CUSTOMER) {
-        return;
-      }
-
-      const existingStripeCustomer = await prisma.stripeCustomer.findUnique({
-        where: {
-          userId: dbUser.id,
-        },
-        select: {
-          stripeCustomerId: true,
-        },
-      });
-
-      if (!existingStripeCustomer) {
-        return;
-      }
-
-      try {
-        await stripe.customers.update(existingStripeCustomer.stripeCustomerId, {
-          email: dbUser.email,
-          name: dbUser.name,
-        });
-      } catch (error: unknown) {
-        console.error("Failed to sync email to Stripe:", error);
-      }
-    },
+    async afterEmailVerification() {},
   },
   socialProviders: {
     google: {
@@ -221,6 +180,25 @@ const auth = betterAuth({
             },
           };
         },
+        after: async (user) => {
+          const userRole = (user as { role?: string }).role;
+
+          if (userRole !== UserRole.CUSTOMER) {
+            return;
+          }
+
+          try {
+            await createOrganization({
+              userId: user.id,
+              name: user.name,
+            });
+          } catch (error: unknown) {
+            console.error(
+              `Failed to create personal organization for user ${user.id}:`,
+              error,
+            );
+          }
+        },
       },
     },
     session: {
@@ -263,6 +241,64 @@ const auth = betterAuth({
         member: memberRole,
       },
       creatorRole: "owner",
+      invitationExpiresIn: 48 * 60 * 60 * 1000,
+      sendInvitationEmail: async (data) => {
+        await sendInvitationEmail({
+          invitationId: data.id,
+          email: data.email,
+          inviterName: data.inviter.user.name,
+          inviterEmail: data.inviter.user.email,
+          organizationName: data.organization.name,
+          role: data.role,
+        });
+      },
+      organizationHooks: {
+        afterCreateOrganization: async ({ organization, user }) => {
+          if (!user) {
+            return;
+          }
+
+          const existing = await prisma.stripeCustomer.findUnique({
+            where: {
+              userId: user.id,
+            },
+            select: {
+              stripeCustomerId: true,
+            },
+          });
+
+          if (existing) {
+            return;
+          }
+
+          try {
+            const stripeCustomer = await stripe.customers.create(
+              {
+                name: organization.name,
+                metadata: {
+                  organizationId: organization.id,
+                  userId: user.id,
+                },
+              },
+              {
+                idempotencyKey: `org-stripe-customer-${organization.id}`,
+              },
+            );
+
+            await prisma.stripeCustomer.create({
+              data: {
+                userId: user.id,
+                stripeCustomerId: stripeCustomer.id,
+              },
+            });
+          } catch (error: unknown) {
+            console.error(
+              `Failed to create Stripe customer for organization ${organization.id}:`,
+              error,
+            );
+          }
+        },
+      },
     }),
     i18n({
       defaultLocale: "fr",
