@@ -11,6 +11,11 @@ import { PasswordChangedEmail } from "@/features/auth/emails/password-changed-em
 import { ResetPasswordEmail } from "@/features/auth/emails/reset-password-email";
 import { WelcomeEmail } from "@/features/auth/emails/welcome-email";
 import {
+  ALLOWED_PRICE_IDS,
+  getPlanByPriceId,
+} from "@/features/billing/constants/plan.constant";
+import { ACTIVE_SUBSCRIPTION_STATUSES } from "@/features/billing/constants/subscription-status.constant";
+import {
   ac,
   adminRole,
   memberRole,
@@ -242,6 +247,39 @@ const auth = betterAuth({
       },
       creatorRole: "owner",
       invitationExpiresIn: 48 * 60 * 60 * 1000,
+      membershipLimit: async (
+        _user: { id: string },
+        organization: { id: string },
+      ): Promise<number> => {
+        // Free plan: 1 seat
+        const FREE_PLAN_SEAT_CAP = 1;
+
+        const activeSubscription = await prisma.subscription.findFirst({
+          where: {
+            stripeCustomer: {
+              organizationId: organization.id,
+            },
+            stripePriceId: {
+              in: ALLOWED_PRICE_IDS,
+            },
+            status: {
+              in: ACTIVE_SUBSCRIPTION_STATUSES,
+            },
+          },
+          select: {
+            stripePriceId: true,
+          },
+          orderBy: {
+            currentPeriodEnd: "desc",
+          },
+        });
+
+        const planConfig = activeSubscription
+          ? getPlanByPriceId(activeSubscription.stripePriceId)
+          : undefined;
+
+        return planConfig?.seatsIncluded ?? FREE_PLAN_SEAT_CAP;
+      },
       sendInvitationEmail: async (data) => {
         await sendInvitationEmail({
           invitationId: data.id,

@@ -2,7 +2,9 @@
 
 import { revalidatePath } from "next/cache";
 
+import { AUDIT_ACTION } from "@/features/organizations/constants/audit-actions.constant";
 import { UpdateOrganizationSchema } from "@/features/organizations/schemas/organization.schema";
+import { logEvent } from "@/features/organizations/services/audit-log.service";
 
 import { prisma } from "@/lib/prisma";
 import { orgActionClient } from "@/lib/safe-action";
@@ -41,6 +43,18 @@ export const updateOrganizationAction = orgActionClient
       },
       select: {
         id: true,
+      },
+    });
+
+    await logEvent({
+      organizationId: ctx.organizationId,
+      userId: ctx.userId,
+      action: AUDIT_ACTION.ORG_UPDATED,
+      entityType: "organization",
+      entityId: ctx.organizationId,
+      metadata: {
+        ...(parsedInput.name !== undefined && { name: parsedInput.name }),
+        ...(parsedInput.logo !== undefined && { logo: parsedInput.logo }),
       },
     });
 

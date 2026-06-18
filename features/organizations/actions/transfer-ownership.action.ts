@@ -2,7 +2,9 @@
 
 import { revalidatePath } from "next/cache";
 
+import { AUDIT_ACTION } from "@/features/organizations/constants/audit-actions.constant";
 import { TransferOwnershipSchema } from "@/features/organizations/schemas/member.schema";
+import { logEvent } from "@/features/organizations/services/audit-log.service";
 
 import { prisma } from "@/lib/prisma";
 import { orgActionClient } from "@/lib/safe-action";
@@ -73,6 +75,18 @@ export const transferOwnershipAction = orgActionClient
         },
       }),
     ]);
+
+    await logEvent({
+      organizationId: ctx.organizationId,
+      userId: ctx.userId,
+      action: AUDIT_ACTION.OWNERSHIP_TRANSFERRED,
+      entityType: "organization",
+      entityId: ctx.organizationId,
+      metadata: {
+        previousOwnerId: ctx.userId,
+        newOwnerId: targetMember.userId,
+      },
+    });
 
     revalidatePath("/dashboard/organisation");
 

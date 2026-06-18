@@ -6,7 +6,11 @@ import { BadRequestError, ForbiddenError } from "@/utils/errors/errors";
 const mockPrismaUserFindUnique = vi.fn();
 const mockPrismaUserCount = vi.fn();
 const mockPrismaUserDelete = vi.fn();
+const mockPrismaMemberFindMany = vi.fn();
+const mockPrismaMemberCount = vi.fn();
 const mockPrismaOrganizationFindMany = vi.fn();
+const mockPrismaOrganizationDelete = vi.fn();
+const mockPrismaAuditLogCreate = vi.fn();
 const mockStripeCustomersDel = vi.fn();
 const mockRedisDel = vi.fn();
 const mockDeleteFile = vi.fn();
@@ -19,8 +23,16 @@ vi.mock("@/lib/prisma", () => ({
       count: mockPrismaUserCount,
       delete: mockPrismaUserDelete,
     },
+    member: {
+      findMany: mockPrismaMemberFindMany,
+      count: mockPrismaMemberCount,
+    },
     organization: {
       findMany: mockPrismaOrganizationFindMany,
+      delete: mockPrismaOrganizationDelete,
+    },
+    auditLog: {
+      create: mockPrismaAuditLogCreate,
     },
   },
 }));
@@ -62,7 +74,10 @@ describe("deleteAccount", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockSendEmail.mockResolvedValue(undefined);
+    mockPrismaMemberFindMany.mockResolvedValue([]); // No memberships by default
+    mockPrismaMemberCount.mockResolvedValue(0);
     mockPrismaOrganizationFindMany.mockResolvedValue([]);
+    mockPrismaAuditLogCreate.mockResolvedValue({});
   });
 
   it("deletes user from DB", async () => {
@@ -84,7 +99,7 @@ describe("deleteAccount", () => {
     });
   });
 
-  it("deletes Stripe customer for owned organization", async () => {
+  it("deletes Stripe customer for sole-owned organization", async () => {
     mockPrismaUserFindUnique.mockResolvedValue({
       id: "user-123",
       email: "user@example.com",
@@ -92,11 +107,19 @@ describe("deleteAccount", () => {
       role: "CUSTOMER",
     });
 
+    // User is an owner in one org
+    mockPrismaMemberFindMany.mockResolvedValue([
+      { organizationId: "org-123", role: "owner" },
+    ]);
+
+    // Only 1 owner in the org (sole owner)
+    mockPrismaMemberCount.mockResolvedValue(1);
+
+    // Org has a Stripe customer
     mockPrismaOrganizationFindMany.mockResolvedValue([
       {
         id: "org-123",
         stripeCustomer: { stripeCustomerId: "cus_123" },
-        members: [{ id: "member-1" }],
       },
     ]);
 
@@ -107,9 +130,12 @@ describe("deleteAccount", () => {
     });
 
     expect(mockStripeCustomersDel).toHaveBeenCalledWith("cus_123");
+    expect(mockPrismaOrganizationDelete).toHaveBeenCalledWith({
+      where: { id: "org-123" },
+    });
   });
 
-  it("invalidates Redis cache for owned organization", async () => {
+  it("invalidates Redis cache for sole-owned organization", async () => {
     mockPrismaUserFindUnique.mockResolvedValue({
       id: "user-123",
       email: "user@example.com",
@@ -117,11 +143,16 @@ describe("deleteAccount", () => {
       role: "CUSTOMER",
     });
 
+    mockPrismaMemberFindMany.mockResolvedValue([
+      { organizationId: "org-123", role: "owner" },
+    ]);
+
+    mockPrismaMemberCount.mockResolvedValue(1);
+
     mockPrismaOrganizationFindMany.mockResolvedValue([
       {
         id: "org-123",
         stripeCustomer: { stripeCustomerId: "cus_123" },
-        members: [{ id: "member-1" }],
       },
     ]);
 
@@ -135,7 +166,7 @@ describe("deleteAccount", () => {
     expect(mockRedisDel).toHaveBeenCalledWith("invoices:org:org-123");
   });
 
-  it("does not delete Stripe if no owned orgs with stripe customer", async () => {
+  it("does not delete Stripe if no sole-owned orgs with stripe customer", async () => {
     mockPrismaUserFindUnique.mockResolvedValue({
       id: "admin-123",
       email: "admin@example.com",
@@ -143,7 +174,7 @@ describe("deleteAccount", () => {
       role: "ADMIN",
     });
     mockPrismaUserCount.mockResolvedValue(2);
-    mockPrismaOrganizationFindMany.mockResolvedValue([]);
+    mockPrismaMemberFindMany.mockResolvedValue([]);
 
     await deleteAccount({
       userId: "admin-123",
@@ -311,5 +342,30 @@ describe("deleteAccount", () => {
         confirmation: "admin@example.com",
       }),
     ).rejects.toThrow("seul administrateur");
+  });
+
+  it("does not cascade-delete org when user is not the sole owner", async () => {
+    mockPrismaUserFindUnique.mockResolvedValue({
+      id: "user-123",
+      email: "user@example.com",
+      image: null,
+      role: "CUSTOMER",
+    });
+
+    // User is an owner but there are 2 owners
+    mockPrismaMemberFindMany.mockResolvedValue([
+      { organizationId: "org-123", role: "owner" },
+    ]);
+    mockPrismaMemberCount.mockResolvedValue(2); // Two owners
+
+    await deleteAccount({
+      userId: "user-123",
+      userName: "John",
+      confirmation: "user@example.com",
+    });
+
+    // Should NOT cascade-delete the org
+    expect(mockPrismaOrganizationDelete).not.toHaveBeenCalled();
+    expect(mockStripeCustomersDel).not.toHaveBeenCalled();
   });
 });

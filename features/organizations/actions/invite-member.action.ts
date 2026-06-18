@@ -2,7 +2,9 @@
 
 import { headers } from "next/headers";
 
+import { AUDIT_ACTION } from "@/features/organizations/constants/audit-actions.constant";
 import { InviteMemberSchema } from "@/features/organizations/schemas/invitation.schema";
+import { logEvent } from "@/features/organizations/services/audit-log.service";
 import { checkSeatCapacity } from "@/features/organizations/services/check-seat-capacity.service";
 
 import { auth } from "@/lib/auth";
@@ -28,6 +30,17 @@ export const inviteMemberAction = orgActionClient
         organizationId: ctx.organizationId,
       },
       headers: await headers(),
+    });
+
+    await logEvent({
+      organizationId: ctx.organizationId,
+      userId: ctx.userId,
+      action: AUDIT_ACTION.MEMBER_INVITED,
+      entityType: "invitation",
+      metadata: {
+        email: parsedInput.email,
+        role: parsedInput.role,
+      },
     });
 
     return {

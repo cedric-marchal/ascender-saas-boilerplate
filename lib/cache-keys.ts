@@ -12,8 +12,13 @@ function stripeEventIdempotencyCacheKey(eventId: string): string {
   return `stripe:event:${eventId}`;
 }
 
+function orgMembersCacheKey(organizationId: string): string {
+  return `members:org:${organizationId}`;
+}
+
 export {
   billingInvoicesCacheKey,
   billingSubscriptionsCacheKey,
+  orgMembersCacheKey,
   stripeEventIdempotencyCacheKey,
 };

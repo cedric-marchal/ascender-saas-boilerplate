@@ -2,7 +2,9 @@
 
 import { revalidatePath } from "next/cache";
 
+import { AUDIT_ACTION } from "@/features/organizations/constants/audit-actions.constant";
 import { RemoveMemberSchema } from "@/features/organizations/schemas/member.schema";
+import { logEvent } from "@/features/organizations/services/audit-log.service";
 import { isLastOwner } from "@/features/organizations/services/is-last-owner.service";
 
 import { prisma } from "@/lib/prisma";
@@ -65,6 +67,18 @@ export const removeMemberAction = orgActionClient
         },
       }),
     ]);
+
+    await logEvent({
+      organizationId: ctx.organizationId,
+      userId: ctx.userId,
+      action: AUDIT_ACTION.MEMBER_REMOVED,
+      entityType: "member",
+      entityId: parsedInput.memberId,
+      metadata: {
+        removedUserId: member.userId,
+        removedRole: member.role,
+      },
+    });
 
     revalidatePath("/dashboard/organisation");
 

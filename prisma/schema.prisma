@@ -175,3 +175,18 @@ model Invitation {
   @@index([inviterId])
   @@map("invitation")
 }
+
+model AuditLog {
+  id             String   @id @default(cuid())
+  organizationId String
+  userId         String
+  action         String
+  entityType     String
+  entityId       String?
+  metadata       Json?
+  createdAt      DateTime @default(now())
+
+  @@index([organizationId])
+  @@index([userId])
+  @@map("auditLog")
+}

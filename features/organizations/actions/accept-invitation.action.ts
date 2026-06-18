@@ -2,7 +2,9 @@
 
 import { headers } from "next/headers";
 
+import { AUDIT_ACTION } from "@/features/organizations/constants/audit-actions.constant";
 import { AcceptInvitationSchema } from "@/features/organizations/schemas/invitation.schema";
+import { logEvent } from "@/features/organizations/services/audit-log.service";
 import { checkSeatCapacity } from "@/features/organizations/services/check-seat-capacity.service";
 
 import { auth } from "@/lib/auth";
@@ -13,7 +15,7 @@ import { NotFoundError } from "@/utils/errors/errors";
 
 export const acceptInvitationAction = authActionClient
   .inputSchema(AcceptInvitationSchema)
-  .action(async ({ parsedInput }) => {
+  .action(async ({ parsedInput, ctx }) => {
     const invitation = await prisma.invitation.findUnique({
       where: {
         id: parsedInput.id,
@@ -46,6 +48,14 @@ export const acceptInvitationAction = authActionClient
           increment: 1,
         },
       },
+    });
+
+    await logEvent({
+      organizationId: invitation.organizationId,
+      userId: ctx.userId,
+      action: AUDIT_ACTION.MEMBER_ACCEPTED,
+      entityType: "invitation",
+      entityId: parsedInput.id,
     });
 
     return {

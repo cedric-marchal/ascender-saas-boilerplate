@@ -2,7 +2,9 @@
 
 import { revalidatePath } from "next/cache";
 
+import { AUDIT_ACTION } from "@/features/organizations/constants/audit-actions.constant";
 import { ChangeMemberRoleSchema } from "@/features/organizations/schemas/member.schema";
+import { logEvent } from "@/features/organizations/services/audit-log.service";
 import { isLastOwner } from "@/features/organizations/services/is-last-owner.service";
 
 import { prisma } from "@/lib/prisma";
@@ -57,6 +59,19 @@ export const changeMemberRoleAction = orgActionClient
       },
       select: {
         id: true,
+      },
+    });
+
+    await logEvent({
+      organizationId: ctx.organizationId,
+      userId: ctx.userId,
+      action: AUDIT_ACTION.ROLE_CHANGED,
+      entityType: "member",
+      entityId: parsedInput.memberId,
+      metadata: {
+        previousRole: member.role,
+        newRole: parsedInput.role,
+        targetUserId: member.userId,
       },
     });
 
