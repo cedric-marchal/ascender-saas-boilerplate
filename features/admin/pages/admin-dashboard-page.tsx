@@ -4,6 +4,7 @@ import {
   Activity,
   ArrowRight,
   BadgeCheck,
+  Building2,
   CreditCard,
   TrendingUp,
   Users,
@@ -139,6 +140,46 @@ function AdminDashboardPage({ metrics }: AdminDashboardPageProps) {
             </p>
           </CardContent>
         </Card>
+      </section>
+
+      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <Link
+          href="/admin/utilisateurs"
+          className="group hover:bg-muted/50 flex items-center gap-4 rounded-lg border p-4 transition-colors"
+        >
+          <div className="bg-primary/10 flex size-10 items-center justify-center rounded-lg">
+            <Users className="text-primary size-5" aria-hidden="true" />
+          </div>
+          <div className="flex-1">
+            <p className="font-medium">Utilisateurs</p>
+            <p className="text-muted-foreground text-sm">
+              Gérer les comptes utilisateurs
+            </p>
+          </div>
+          <ArrowRight
+            className="text-muted-foreground size-4 transition-transform group-hover:translate-x-1"
+            aria-hidden="true"
+          />
+        </Link>
+
+        <Link
+          href="/admin/organisations"
+          className="group hover:bg-muted/50 flex items-center gap-4 rounded-lg border p-4 transition-colors"
+        >
+          <div className="flex size-10 items-center justify-center rounded-lg bg-violet-500/10">
+            <Building2 className="size-5 text-violet-500" aria-hidden="true" />
+          </div>
+          <div className="flex-1">
+            <p className="font-medium">Organisations</p>
+            <p className="text-muted-foreground text-sm">
+              Gérer les organisations
+            </p>
+          </div>
+          <ArrowRight
+            className="text-muted-foreground size-4 transition-transform group-hover:translate-x-1"
+            aria-hidden="true"
+          />
+        </Link>
       </section>
 
       <section className="grid gap-4 lg:grid-cols-7">
