@@ -10,7 +10,6 @@ type OrganizationSeed = {
   userIndex: number;
   name: string;
   plan: string;
-  seatsUsed: number;
   createdAt: Date;
 };
 
@@ -47,7 +46,6 @@ function buildOrganizationSeeds(): OrganizationSeed[] {
       userIndex: user.index,
       name: `${user.name} (org)`,
       plan,
-      seatsUsed: 1,
       createdAt: user.createdAt,
     };
   });
@@ -83,7 +81,6 @@ async function seedOrganizations(prisma: PrismaClient): Promise<void> {
         name: org.name,
         slug: orgSlugForUser(user.name, org.userIndex),
         plan: org.plan,
-        seatsUsed: org.seatsUsed,
         createdAt: org.createdAt,
         updatedAt: org.createdAt,
         members: {
@@ -105,7 +102,6 @@ async function seedOrganizations(prisma: PrismaClient): Promise<void> {
       name: "Démo Organisation A",
       slug: "demo-organisation-a",
       plan: "pro",
-      seatsUsed: 3,
       createdAt: daysAgo(60),
       updatedAt: daysAgo(60),
       members: {
@@ -140,7 +136,6 @@ async function seedOrganizations(prisma: PrismaClient): Promise<void> {
       name: "Démo Organisation B",
       slug: "demo-organisation-b",
       plan: "free",
-      seatsUsed: 2,
       createdAt: daysAgo(45),
       updatedAt: daysAgo(45),
       members: {

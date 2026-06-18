@@ -54,7 +54,7 @@ export default async function DashboardBillingRoute() {
     );
   }
 
-  const [billing, organization] = await Promise.all([
+  const [billing, organization, memberCount] = await Promise.all([
     getBilling(organizationId),
     prisma.organization.findUnique({
       where: {
@@ -62,8 +62,12 @@ export default async function DashboardBillingRoute() {
       },
       select: {
         name: true,
-        seatsUsed: true,
         plan: true,
+      },
+    }),
+    prisma.member.count({
+      where: {
+        organizationId,
       },
     }),
   ]);
@@ -76,7 +80,7 @@ export default async function DashboardBillingRoute() {
     <OrganizationBillingPage
       billing={billing}
       organizationName={organization.name}
-      seatsUsed={organization.seatsUsed}
+      memberCount={memberCount}
       plan={organization.plan}
     />
   );

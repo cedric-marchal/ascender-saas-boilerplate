@@ -30,6 +30,9 @@ export const acceptInvitationAction = authActionClient
       throw new NotFoundError("Invitation introuvable ou déjà traitée");
     }
 
+    // Pre-check: fast guard before the Better Auth call.
+    // The authoritative race-safe gate is Better Auth's membershipLimit,
+    // which counts real member rows. No counter is maintained here.
     await checkSeatCapacity(invitation.organizationId);
 
     await auth.api.acceptInvitation({
@@ -37,17 +40,6 @@ export const acceptInvitationAction = authActionClient
         invitationId: parsedInput.id,
       },
       headers: await headers(),
-    });
-
-    await prisma.organization.update({
-      where: {
-        id: invitation.organizationId,
-      },
-      data: {
-        seatsUsed: {
-          increment: 1,
-        },
-      },
     });
 
     await logEvent({

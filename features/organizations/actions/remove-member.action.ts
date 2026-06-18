@@ -50,23 +50,11 @@ export const removeMemberAction = orgActionClient
       }
     }
 
-    await prisma.$transaction([
-      prisma.member.delete({
-        where: {
-          id: parsedInput.memberId,
-        },
-      }),
-      prisma.organization.update({
-        where: {
-          id: ctx.organizationId,
-        },
-        data: {
-          seatsUsed: {
-            decrement: 1,
-          },
-        },
-      }),
-    ]);
+    await prisma.member.delete({
+      where: {
+        id: parsedInput.memberId,
+      },
+    });
 
     await logEvent({
       organizationId: ctx.organizationId,
