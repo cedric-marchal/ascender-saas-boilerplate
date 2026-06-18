@@ -8,11 +8,15 @@ vi.mock("server-only", () => ({}));
 // Mock dependencies BEFORE importing services
 // ---------------------------------------------------------------------------
 
+const mockMemberCount = vi.fn();
 const mockOrganizationFindUnique = vi.fn();
 const mockSubscriptionFindFirst = vi.fn();
 
 vi.mock("@/lib/prisma", () => ({
   prisma: {
+    member: {
+      count: mockMemberCount,
+    },
     organization: {
       findUnique: mockOrganizationFindUnique,
     },
@@ -41,6 +45,23 @@ const FREE_PLAN_CAP = 1;
 const PRO_PLAN_CAP = 5;
 const PRO_PRICE_ID = "price_pro_test_123";
 
+// Helper: set up standard mock returns for a scenario
+function setupMocks({
+  memberCount,
+  subscription,
+  orgExists = true,
+}: {
+  memberCount: number;
+  subscription: { stripePriceId: string } | null;
+  orgExists?: boolean;
+}) {
+  mockMemberCount.mockResolvedValue(memberCount);
+  mockSubscriptionFindFirst.mockResolvedValue(subscription);
+  mockOrganizationFindUnique.mockResolvedValue(
+    orgExists ? { id: ORG_ID } : null,
+  );
+}
+
 // ---------------------------------------------------------------------------
 // Tests: checkSeatCapacity — free plan
 // ---------------------------------------------------------------------------
@@ -50,30 +71,26 @@ describe("checkSeatCapacity — free plan enforcement", () => {
     vi.clearAllMocks();
   });
 
-  it("allows invite when org has 0 seats used (free plan — cap = 1)", async () => {
-    mockOrganizationFindUnique.mockResolvedValue({ seatsUsed: 0 });
-    mockSubscriptionFindFirst.mockResolvedValue(null); // No active subscription
+  it("allows invite when org has 0 real members (free plan — cap = 1)", async () => {
+    setupMocks({ memberCount: 0, subscription: null });
 
     await expect(checkSeatCapacity(ORG_ID)).resolves.toBeUndefined();
   });
 
-  it("throws ForbiddenError when free plan org already has 1 member (cap = 1)", async () => {
-    mockOrganizationFindUnique.mockResolvedValue({ seatsUsed: FREE_PLAN_CAP });
-    mockSubscriptionFindFirst.mockResolvedValue(null); // No active subscription
+  it("throws ForbiddenError when free plan org already has 1 real member (cap = 1)", async () => {
+    setupMocks({ memberCount: FREE_PLAN_CAP, subscription: null });
 
     await expect(checkSeatCapacity(ORG_ID)).rejects.toThrow(ForbiddenError);
   });
 
-  it("throws ForbiddenError when free plan org has more than 1 member", async () => {
-    mockOrganizationFindUnique.mockResolvedValue({ seatsUsed: 3 });
-    mockSubscriptionFindFirst.mockResolvedValue(null);
+  it("throws ForbiddenError when free plan org has more than 1 real member", async () => {
+    setupMocks({ memberCount: 3, subscription: null });
 
     await expect(checkSeatCapacity(ORG_ID)).rejects.toThrow(ForbiddenError);
   });
 
   it("throws ForbiddenError when org is not found", async () => {
-    mockOrganizationFindUnique.mockResolvedValue(null);
-    mockSubscriptionFindFirst.mockResolvedValue(null);
+    setupMocks({ memberCount: 0, subscription: null, orgExists: false });
 
     await expect(checkSeatCapacity(ORG_ID)).rejects.toThrow(ForbiddenError);
   });
@@ -88,37 +105,37 @@ describe("checkSeatCapacity — pro plan enforcement", () => {
     vi.clearAllMocks();
   });
 
-  it("allows invite when pro plan org has 4 seats used (cap = 5)", async () => {
-    mockOrganizationFindUnique.mockResolvedValue({ seatsUsed: 4 });
-    mockSubscriptionFindFirst.mockResolvedValue({
-      stripePriceId: PRO_PRICE_ID,
+  it("allows invite when pro plan org has 4 real members (cap = 5)", async () => {
+    setupMocks({
+      memberCount: 4,
+      subscription: { stripePriceId: PRO_PRICE_ID },
     });
 
     await expect(checkSeatCapacity(ORG_ID)).resolves.toBeUndefined();
   });
 
-  it("throws ForbiddenError when pro plan org is at 5 seats (cap = 5)", async () => {
-    mockOrganizationFindUnique.mockResolvedValue({ seatsUsed: PRO_PLAN_CAP });
-    mockSubscriptionFindFirst.mockResolvedValue({
-      stripePriceId: PRO_PRICE_ID,
+  it("throws ForbiddenError when pro plan org is at 5 real members (cap = 5)", async () => {
+    setupMocks({
+      memberCount: PRO_PLAN_CAP,
+      subscription: { stripePriceId: PRO_PRICE_ID },
     });
 
     await expect(checkSeatCapacity(ORG_ID)).rejects.toThrow(ForbiddenError);
   });
 
-  it("throws ForbiddenError when pro plan org is over cap (6 seats)", async () => {
-    mockOrganizationFindUnique.mockResolvedValue({ seatsUsed: 6 });
-    mockSubscriptionFindFirst.mockResolvedValue({
-      stripePriceId: PRO_PRICE_ID,
+  it("throws ForbiddenError when pro plan org has 6 real members (over cap)", async () => {
+    setupMocks({
+      memberCount: 6,
+      subscription: { stripePriceId: PRO_PRICE_ID },
     });
 
     await expect(checkSeatCapacity(ORG_ID)).rejects.toThrow(ForbiddenError);
   });
 
-  it("allows invite on pro plan below cap (1 seat)", async () => {
-    mockOrganizationFindUnique.mockResolvedValue({ seatsUsed: 1 });
-    mockSubscriptionFindFirst.mockResolvedValue({
-      stripePriceId: PRO_PRICE_ID,
+  it("allows invite on pro plan below cap (1 real member)", async () => {
+    setupMocks({
+      memberCount: 1,
+      subscription: { stripePriceId: PRO_PRICE_ID },
     });
 
     await expect(checkSeatCapacity(ORG_ID)).resolves.toBeUndefined();
@@ -134,22 +151,42 @@ describe("checkSeatCapacity — org scope", () => {
     vi.clearAllMocks();
   });
 
-  it("queries org by organizationId (not userId)", async () => {
-    mockOrganizationFindUnique.mockResolvedValue({ seatsUsed: 0 });
-    mockSubscriptionFindFirst.mockResolvedValue(null);
+  it("queries REAL member row count by organizationId (not a cached counter)", async () => {
+    setupMocks({ memberCount: 0, subscription: null });
 
     await checkSeatCapacity(ORG_ID);
 
-    // Must query org by id
+    // MUST use prisma.member.count, NOT organization.seatsUsed
+    expect(mockMemberCount).toHaveBeenCalledWith({
+      where: { organizationId: ORG_ID },
+    });
+
+    // Regression guard: if someone reverts to seatsUsed counter,
+    // organization.findUnique must NOT be used for the seat comparison.
+    // (It IS called for existence check, but must NOT select seatsUsed.)
     expect(mockOrganizationFindUnique).toHaveBeenCalledWith({
       where: { id: ORG_ID },
-      select: { seatsUsed: true },
+      select: { id: true },
     });
   });
 
+  it("REGRESSION: does NOT read seatsUsed from organization", async () => {
+    setupMocks({ memberCount: 0, subscription: null });
+
+    await checkSeatCapacity(ORG_ID);
+
+    // Ensure the organization.findUnique call never selects seatsUsed
+    const orgCalls = mockOrganizationFindUnique.mock.calls;
+
+    for (const call of orgCalls) {
+      const selectArg = call[0]?.select as Record<string, unknown> | undefined;
+
+      expect(selectArg).not.toHaveProperty("seatsUsed");
+    }
+  });
+
   it("queries subscription scoped to organizationId", async () => {
-    mockOrganizationFindUnique.mockResolvedValue({ seatsUsed: 0 });
-    mockSubscriptionFindFirst.mockResolvedValue(null);
+    setupMocks({ memberCount: 0, subscription: null });
 
     await checkSeatCapacity(ORG_ID);
 
@@ -170,60 +207,77 @@ describe("checkSeatCapacity — org scope", () => {
     const ORG_B = "org-b";
 
     // Org A at cap (1), free plan
-    mockOrganizationFindUnique.mockResolvedValueOnce({ seatsUsed: 1 });
+    mockMemberCount.mockResolvedValueOnce(1);
     mockSubscriptionFindFirst.mockResolvedValueOnce(null);
+    mockOrganizationFindUnique.mockResolvedValueOnce({ id: ORG_A });
 
     await expect(checkSeatCapacity(ORG_A)).rejects.toThrow(ForbiddenError);
 
     // Org B below cap (0), free plan
-    mockOrganizationFindUnique.mockResolvedValueOnce({ seatsUsed: 0 });
+    mockMemberCount.mockResolvedValueOnce(0);
     mockSubscriptionFindFirst.mockResolvedValueOnce(null);
+    mockOrganizationFindUnique.mockResolvedValueOnce({ id: ORG_B });
 
     await expect(checkSeatCapacity(ORG_B)).resolves.toBeUndefined();
 
-    // Verify each call used the correct org ID
-    expect(mockOrganizationFindUnique.mock.calls[0]![0].where.id).toBe(ORG_A);
-    expect(mockOrganizationFindUnique.mock.calls[1]![0].where.id).toBe(ORG_B);
+    // Verify each call used the correct org ID in member.count
+    expect(mockMemberCount.mock.calls[0]![0].where.organizationId).toBe(ORG_A);
+    expect(mockMemberCount.mock.calls[1]![0].where.organizationId).toBe(ORG_B);
   });
 });
 
 // ---------------------------------------------------------------------------
-// Tests: membershipLimit path (Better Auth direct accept-invitation)
+// Tests: checkSeatCapacity — real member row count (not stale counter)
 // ---------------------------------------------------------------------------
 
-describe("checkSeatCapacity — membershipLimit integration (direct Better Auth path)", () => {
+describe("checkSeatCapacity — uses real member row count", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it("cap is enforced via checkSeatCapacity which is reused for the membershipLimit function", async () => {
-    // The membershipLimit function in lib/auth.ts uses the same plan lookup
-    // as checkSeatCapacity. This test verifies that logic is sound:
-    // when seatsUsed >= cap, the ForbiddenError is thrown.
-
-    // Simulate a pro org exactly at its cap
-    mockOrganizationFindUnique.mockResolvedValue({ seatsUsed: PRO_PLAN_CAP });
-    mockSubscriptionFindFirst.mockResolvedValue({
-      stripePriceId: PRO_PRICE_ID,
+  it("cap is enforced against real member count — pro org exactly at cap throws", async () => {
+    // Simulate a pro org exactly at its cap (5 real members)
+    setupMocks({
+      memberCount: PRO_PLAN_CAP,
+      subscription: { stripePriceId: PRO_PRICE_ID },
     });
 
     const error = await checkSeatCapacity(ORG_ID).catch(
-      (error: unknown) => error,
+      (caughtError: unknown) => caughtError,
     );
 
     expect(error).toBeInstanceOf(ForbiddenError);
     expect((error as ForbiddenError).message).toContain(String(PRO_PLAN_CAP));
+
+    // Confirm the count was read from member rows, not organization.seatsUsed
+    expect(mockMemberCount).toHaveBeenCalledTimes(1);
   });
 
   it("cap message includes the plan limit for user-facing clarity", async () => {
-    mockOrganizationFindUnique.mockResolvedValue({ seatsUsed: FREE_PLAN_CAP });
-    mockSubscriptionFindFirst.mockResolvedValue(null); // Free plan
+    setupMocks({ memberCount: FREE_PLAN_CAP, subscription: null });
 
     const error = await checkSeatCapacity(ORG_ID).catch(
-      (error: unknown) => error,
+      (caughtError: unknown) => caughtError,
     );
 
     expect(error).toBeInstanceOf(ForbiddenError);
     expect((error as ForbiddenError).message).toContain(String(FREE_PLAN_CAP));
+
+    // Confirm we counted real members
+    expect(mockMemberCount).toHaveBeenCalledTimes(1);
+  });
+
+  it("REGRESSION: reverted seatsUsed counter would break this test (member.count never called)", async () => {
+    // This test documents the invariant: mockMemberCount MUST be called.
+    // If someone reverts to reading organization.seatsUsed and removes member.count,
+    // this test will fail — making the regression visible.
+    setupMocks({ memberCount: 0, subscription: null });
+
+    await checkSeatCapacity(ORG_ID);
+
+    expect(mockMemberCount).toHaveBeenCalledTimes(1);
+    expect(mockMemberCount).toHaveBeenCalledWith({
+      where: { organizationId: ORG_ID },
+    });
   });
 });
