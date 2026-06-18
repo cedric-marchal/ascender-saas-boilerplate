@@ -4,11 +4,18 @@ import { i18n } from "@better-auth/i18n";
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { nextCookies } from "better-auth/next-js";
+import { organization } from "better-auth/plugins";
 
 import { EmailChangeNotificationEmail } from "@/features/auth/emails/email-change-notification-email";
 import { PasswordChangedEmail } from "@/features/auth/emails/password-changed-email";
 import { ResetPasswordEmail } from "@/features/auth/emails/reset-password-email";
 import { WelcomeEmail } from "@/features/auth/emails/welcome-email";
+import {
+  ac,
+  adminRole,
+  memberRole,
+  ownerRole,
+} from "@/features/organizations/constants/organization-roles.constant";
 
 import { env } from "@/lib/env";
 import { UserRole } from "@/lib/generated/prisma/client";
@@ -216,6 +223,30 @@ const auth = betterAuth({
         },
       },
     },
+    session: {
+      create: {
+        before: async (session) => {
+          const firstMembership = await prisma.member.findFirst({
+            where: {
+              userId: session.userId,
+            },
+            select: {
+              organizationId: true,
+            },
+            orderBy: {
+              createdAt: "asc",
+            },
+          });
+
+          return {
+            data: {
+              ...session,
+              activeOrganizationId: firstMembership?.organizationId ?? null,
+            },
+          };
+        },
+      },
+    },
   },
   trustedOrigins: [env.NEXT_PUBLIC_BASE_URL],
   baseURL: env.NEXT_PUBLIC_BASE_URL,
@@ -224,6 +255,15 @@ const auth = betterAuth({
     useSecureCookies: process.env.NODE_ENV === "production",
   },
   plugins: [
+    organization({
+      ac,
+      roles: {
+        owner: ownerRole,
+        admin: adminRole,
+        member: memberRole,
+      },
+      creatorRole: "owner",
+    }),
     i18n({
       defaultLocale: "fr",
       translations: {
