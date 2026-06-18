@@ -37,17 +37,17 @@ vi.mock("@/utils/ratelimit/check-ratelimit", () => ({
 }));
 
 describe("getBilling", () => {
-  const mockUserId = "user-123";
+  const mockOrganizationId = "user-123";
   const mockStripeCustomerId = "cus_123";
 
   it("returns null when no stripe customer found", async () => {
     vi.mocked(prisma.stripeCustomer.findUnique).mockResolvedValue(null);
 
-    const result = await getBilling(mockUserId);
+    const result = await getBilling(mockOrganizationId);
 
     expect(result).toBeNull();
     expect(prisma.stripeCustomer.findUnique).toHaveBeenCalledWith({
-      where: { userId: mockUserId },
+      where: { organizationId: mockOrganizationId },
       select: { stripeCustomerId: true },
     });
   });
@@ -73,7 +73,7 @@ describe("getBilling", () => {
       data: [],
     } as any);
 
-    const result = await getBilling(mockUserId);
+    const result = await getBilling(mockOrganizationId);
 
     expect(result).not.toBeNull();
     expect(result!.invoices).toEqual(cachedInvoices);
@@ -102,7 +102,7 @@ describe("getBilling", () => {
       data: [],
     } as any);
 
-    const result = await getBilling(mockUserId);
+    const result = await getBilling(mockOrganizationId);
 
     expect(result).not.toBeNull();
     expect(result!.invoices).toHaveLength(1);
@@ -118,7 +118,7 @@ describe("getBilling", () => {
     });
 
     expect(redis.set).toHaveBeenCalledWith(
-      `invoices:${mockUserId}`,
+      `invoices:org:${mockOrganizationId}`,
       expect.any(Array),
       { ex: 300 },
     );
@@ -149,7 +149,7 @@ describe("getBilling", () => {
       data: [mockSubscription],
     } as any);
 
-    const result = await getBilling(mockUserId);
+    const result = await getBilling(mockOrganizationId);
 
     expect(result).not.toBeNull();
     expect(result!.subscriptions).toHaveLength(1);
@@ -181,7 +181,7 @@ describe("getBilling", () => {
       data: [mockSubscription],
     } as any);
 
-    const result = await getBilling(mockUserId);
+    const result = await getBilling(mockOrganizationId);
 
     expect(result).not.toBeNull();
     expect(result!.subscriptions[0]!.currentPeriodStart).toBe(0);
@@ -211,7 +211,7 @@ describe("getBilling", () => {
       data: [],
     } as any);
 
-    const result = await getBilling(mockUserId);
+    const result = await getBilling(mockOrganizationId);
 
     expect(result).not.toBeNull();
     expect(result!.invoices[0]).toEqual({

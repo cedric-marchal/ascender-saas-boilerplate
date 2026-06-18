@@ -77,9 +77,9 @@ function mapSubscription(
 
 async function fetchInvoices(
   stripeCustomerId: string,
-  userId: string,
+  organizationId: string,
 ): Promise<BillingInvoice[]> {
-  const cacheKey = billingInvoicesCacheKey(userId);
+  const cacheKey = billingInvoicesCacheKey(organizationId);
   const cached = await redis.get<BillingInvoice[]>(cacheKey);
 
   if (cached) {
@@ -99,9 +99,9 @@ async function fetchInvoices(
 
 async function fetchSubscriptions(
   stripeCustomerId: string,
-  userId: string,
+  organizationId: string,
 ): Promise<BillingSubscription[]> {
-  const cacheKey = billingSubscriptionsCacheKey(userId);
+  const cacheKey = billingSubscriptionsCacheKey(organizationId);
   const cached = await redis.get<BillingSubscription[]>(cacheKey);
 
   if (cached) {
@@ -121,10 +121,12 @@ async function fetchSubscriptions(
   return subscriptions;
 }
 
-async function getBilling(userId: string): Promise<GetBillingResult | null> {
+async function getBilling(
+  organizationId: string,
+): Promise<GetBillingResult | null> {
   const stripeCustomer = await prisma.stripeCustomer.findUnique({
     where: {
-      userId,
+      organizationId,
     },
     select: {
       stripeCustomerId: true,
@@ -136,8 +138,8 @@ async function getBilling(userId: string): Promise<GetBillingResult | null> {
   }
 
   const [invoices, subscriptions] = await Promise.all([
-    fetchInvoices(stripeCustomer.stripeCustomerId, userId),
-    fetchSubscriptions(stripeCustomer.stripeCustomerId, userId),
+    fetchInvoices(stripeCustomer.stripeCustomerId, organizationId),
+    fetchSubscriptions(stripeCustomer.stripeCustomerId, organizationId),
   ]);
 
   return {

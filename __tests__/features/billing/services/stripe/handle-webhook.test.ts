@@ -5,7 +5,6 @@ const mockConstructEvent = vi.fn();
 const mockPrismaUpsert = vi.fn();
 const mockPrismaDeleteMany = vi.fn();
 const mockPrismaFindUnique = vi.fn();
-const mockTxUserFindUnique = vi.fn();
 const mockRedisGet = vi.fn();
 const mockRedisSet = vi.fn();
 const mockRedisDel = vi.fn();
@@ -27,16 +26,6 @@ vi.mock("@/lib/prisma", () => ({
       upsert: mockPrismaUpsert,
       deleteMany: mockPrismaDeleteMany,
     },
-    $transaction: vi
-      .fn()
-      .mockImplementation(
-        async (callback: (tx: unknown) => Promise<unknown>) => {
-          return callback({
-            user: { findUnique: mockTxUserFindUnique },
-            subscription: { upsert: mockPrismaUpsert },
-          });
-        },
-      ),
   },
 }));
 
@@ -65,7 +54,6 @@ describe("handleStripeWebhook", () => {
     vi.spyOn(console, "error").mockImplementation(() => {});
     mockRedisGet.mockResolvedValue(null);
     mockRedisSet.mockResolvedValue("OK");
-    mockTxUserFindUnique.mockResolvedValue({ id: "user_123" });
   });
 
   describe("signature validation", () => {
@@ -137,7 +125,7 @@ describe("handleStripeWebhook", () => {
       mockConstructEvent.mockReturnValue(mockEvent);
       mockRedisGet.mockResolvedValue(null);
       mockPrismaFindUnique.mockResolvedValue({
-        userId: "user_123",
+        organizationId: "org_123",
         stripeCustomerId: "cus_123",
       });
 
@@ -176,7 +164,7 @@ describe("handleStripeWebhook", () => {
       };
       mockConstructEvent.mockReturnValue(mockEvent);
       mockPrismaFindUnique.mockResolvedValue({
-        userId: "user_123",
+        organizationId: "org_123",
         stripeCustomerId: "cus_123",
       });
 
@@ -227,7 +215,7 @@ describe("handleStripeWebhook", () => {
       };
       mockConstructEvent.mockReturnValue(mockEvent);
       mockPrismaFindUnique.mockResolvedValue({
-        userId: "user_456",
+        organizationId: "org_456",
         stripeCustomerId: "cus_456",
       });
 
@@ -235,7 +223,7 @@ describe("handleStripeWebhook", () => {
 
       expect(mockPrismaFindUnique).toHaveBeenCalledWith({
         where: { stripeCustomerId: "cus_456" },
-        select: { userId: true, stripeCustomerId: true },
+        select: { organizationId: true, stripeCustomerId: true },
       });
       expect(mockPrismaUpsert).toHaveBeenCalled();
     });
@@ -317,7 +305,7 @@ describe("handleStripeWebhook", () => {
       };
       mockConstructEvent.mockReturnValue(mockEvent);
       mockPrismaFindUnique.mockResolvedValue({
-        userId: "user_def",
+        organizationId: "org_def",
         stripeCustomerId: "cus_def",
       });
 
@@ -353,7 +341,7 @@ describe("handleStripeWebhook", () => {
       };
       mockConstructEvent.mockReturnValue(mockEvent);
       mockPrismaFindUnique.mockResolvedValue({
-        userId: "user_cancel",
+        organizationId: "org_cancel",
         stripeCustomerId: "cus_cancel",
       });
 
@@ -382,7 +370,7 @@ describe("handleStripeWebhook", () => {
       };
       mockConstructEvent.mockReturnValue(mockEvent);
       mockPrismaFindUnique.mockResolvedValue({
-        userId: "user_del",
+        organizationId: "org_del",
       });
 
       await handleStripeWebhook("body", "sig");
@@ -427,14 +415,14 @@ describe("handleStripeWebhook", () => {
       };
       mockConstructEvent.mockReturnValue(mockEvent);
       mockPrismaFindUnique.mockResolvedValue({
-        userId: "user_del3",
+        organizationId: "org_del3",
       });
 
       await handleStripeWebhook("body", "sig");
 
       expect(mockPrismaFindUnique).toHaveBeenCalledWith({
         where: { stripeCustomerId: "cus_del3" },
-        select: { userId: true },
+        select: { organizationId: true },
       });
     });
   });
@@ -452,12 +440,12 @@ describe("handleStripeWebhook", () => {
       };
       mockConstructEvent.mockReturnValue(mockEvent);
       mockPrismaFindUnique.mockResolvedValue({
-        userId: "user_inv",
+        organizationId: "org_inv",
       });
 
       await handleStripeWebhook("body", "sig");
 
-      expect(mockRedisDel).toHaveBeenCalledWith("invoices:user_inv");
+      expect(mockRedisDel).toHaveBeenCalledWith("invoices:org:org_inv");
     });
 
     it("does not process invoice.payment_succeeded with null customerId", async () => {
@@ -513,12 +501,12 @@ describe("handleStripeWebhook", () => {
       };
       mockConstructEvent.mockReturnValue(mockEvent);
       mockPrismaFindUnique.mockResolvedValue({
-        userId: "user_inv_obj",
+        organizationId: "org_inv_obj",
       });
 
       await handleStripeWebhook("body", "sig");
 
-      expect(mockRedisDel).toHaveBeenCalledWith("invoices:user_inv_obj");
+      expect(mockRedisDel).toHaveBeenCalledWith("invoices:org:org_inv_obj");
     });
   });
 

@@ -15,11 +15,11 @@ import { prisma } from "@/lib/prisma";
 import { requireCustomer, type Session } from "@/lib/session";
 
 const getActiveSubscription = cache(
-  async (userId: string, priceIds: string[]) => {
+  async (organizationId: string, priceIds: string[]) => {
     return prisma.subscription.findFirst({
       where: {
         stripeCustomer: {
-          userId,
+          organizationId,
         },
         stripePriceId: {
           in: priceIds,
@@ -41,7 +41,13 @@ const getActiveSubscription = cache(
 async function requireCustomerPlan(...plans: PlanKey[]): Promise<Session> {
   const priceIds = plans.length > 0 ? getPriceIds(...plans) : ALLOWED_PRICE_IDS;
   const session = await requireCustomer();
-  const subscription = await getActiveSubscription(session.user.id, priceIds);
+  const organizationId = session.activeOrganizationId;
+
+  if (!organizationId) {
+    return redirect("/tarifs");
+  }
+
+  const subscription = await getActiveSubscription(organizationId, priceIds);
 
   if (!subscription) {
     return redirect("/tarifs");

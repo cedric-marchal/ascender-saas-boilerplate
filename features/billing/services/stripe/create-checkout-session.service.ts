@@ -3,7 +3,6 @@ import "server-only";
 import { ALLOWED_PRICE_IDS } from "@/features/billing/constants/plan.constant";
 
 import { env } from "@/lib/env";
-import { UserRole } from "@/lib/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { stripe } from "@/lib/stripe";
 
@@ -11,16 +10,11 @@ import {
   BadRequestError,
   ConflictError,
   ForbiddenError,
-  UnauthorizedError,
+  NotFoundError,
 } from "@/utils/errors/errors";
 
-type StripeUser = {
-  id: string;
-  email: string;
-  name: string;
-};
-
 type CreateCheckoutSessionInput = {
+  organizationId: string;
   userId: string;
   priceId: string;
 };
@@ -31,7 +25,8 @@ type CreateCheckoutSessionResult = {
 
 async function syncStripeCustomerIfNeeded(
   stripeCustomerId: string,
-  user: StripeUser,
+  organizationName: string,
+  organizationId: string,
 ): Promise<void> {
   try {
     const stripeCustomer = await stripe.customers.retrieve(stripeCustomerId);
@@ -42,35 +37,34 @@ async function syncStripeCustomerIfNeeded(
       );
     }
 
-    if (
-      stripeCustomer.email !== user.email ||
-      stripeCustomer.name !== user.name
-    ) {
+    if (stripeCustomer.name !== organizationName) {
       await stripe.customers.update(stripeCustomerId, {
-        email: user.email,
-        name: user.name,
+        name: organizationName,
       });
 
       if (process.env.NODE_ENV === "development") {
-        console.log(
-          `Stripe customer synchronized during checkout for user ${user.id}`,
+        console.warn(
+          `Stripe customer synchronized during checkout for organization ${organizationId}`,
         );
       }
     }
   } catch (error: unknown) {
     if (process.env.NODE_ENV === "development") {
       console.error(
-        `Failed to sync Stripe customer during checkout for user ${user.id}:`,
+        `Failed to sync Stripe customer during checkout for organization ${organizationId}:`,
         error,
       );
     }
   }
 }
 
-async function getOrCreateStripeCustomer(user: StripeUser): Promise<string> {
+async function getOrCreateStripeCustomer(input: {
+  organizationId: string;
+  organizationName: string;
+}): Promise<string> {
   const existingStripeCustomer = await prisma.stripeCustomer.findUnique({
     where: {
-      userId: user.id,
+      organizationId: input.organizationId,
     },
     select: {
       stripeCustomerId: true,
@@ -80,7 +74,8 @@ async function getOrCreateStripeCustomer(user: StripeUser): Promise<string> {
   if (existingStripeCustomer) {
     await syncStripeCustomerIfNeeded(
       existingStripeCustomer.stripeCustomerId,
-      user,
+      input.organizationName,
+      input.organizationId,
     );
 
     return existingStripeCustomer.stripeCustomerId;
@@ -88,28 +83,27 @@ async function getOrCreateStripeCustomer(user: StripeUser): Promise<string> {
 
   const stripeCustomer = await stripe.customers.create(
     {
-      email: user.email,
-      name: user.name,
+      name: input.organizationName,
       metadata: {
-        userId: user.id,
+        organizationId: input.organizationId,
       },
     },
     {
-      idempotencyKey: `stripe-customer-${user.id}`,
+      idempotencyKey: `stripe-org-customer-${input.organizationId}`,
     },
   );
 
   try {
     await prisma.stripeCustomer.create({
       data: {
-        userId: user.id,
+        organizationId: input.organizationId,
         stripeCustomerId: stripeCustomer.id,
       },
     });
   } catch (error: unknown) {
     const existingRecord = await prisma.stripeCustomer.findUnique({
       where: {
-        userId: user.id,
+        organizationId: input.organizationId,
       },
       select: {
         stripeCustomerId: true,
@@ -130,32 +124,36 @@ async function getOrCreateStripeCustomer(user: StripeUser): Promise<string> {
 async function createCheckoutSession(
   input: CreateCheckoutSessionInput,
 ): Promise<CreateCheckoutSessionResult> {
-  const user = await prisma.user.findUnique({
+  const organization = await prisma.organization.findUnique({
     where: {
-      id: input.userId,
+      id: input.organizationId,
     },
     select: {
       id: true,
-      email: true,
       name: true,
-      emailVerified: true,
-      role: true,
     },
   });
 
-  if (!user) {
-    throw new UnauthorizedError("Utilisateur introuvable");
+  if (!organization) {
+    throw new NotFoundError("Organisation introuvable");
   }
 
-  if (!user.emailVerified) {
-    throw new ForbiddenError(
-      "Vous devez vérifier votre adresse e-mail avant de souscrire à un abonnement",
-    );
-  }
+  const member = await prisma.member.findFirst({
+    where: {
+      organizationId: input.organizationId,
+      userId: input.userId,
+      role: {
+        in: ["owner", "admin"],
+      },
+    },
+    select: {
+      id: true,
+    },
+  });
 
-  if (user.role !== UserRole.CUSTOMER) {
+  if (!member) {
     throw new ForbiddenError(
-      "Seuls les utilisateurs avec le rôle CUSTOMER peuvent souscrire à un abonnement",
+      "Seuls les propriétaires et administrateurs peuvent gérer la facturation",
     );
   }
 
@@ -164,9 +162,8 @@ async function createCheckoutSession(
   }
 
   const stripeCustomerId = await getOrCreateStripeCustomer({
-    id: user.id,
-    email: user.email,
-    name: user.name,
+    organizationId: organization.id,
+    organizationName: organization.name,
   });
 
   const existingSubscriptions = await stripe.subscriptions.list({
@@ -177,7 +174,7 @@ async function createCheckoutSession(
 
   if (existingSubscriptions.data.length > 0) {
     throw new ConflictError(
-      "Vous avez déjà un abonnement actif. Gérez-le depuis votre espace facturation.",
+      "Cette organisation a déjà un abonnement actif. Gérez-le depuis votre espace facturation.",
     );
   }
 
@@ -193,7 +190,7 @@ async function createCheckoutSession(
     success_url: `${env.NEXT_PUBLIC_BASE_URL}/dashboard/facturation?success=true`,
     cancel_url: `${env.NEXT_PUBLIC_BASE_URL}/tarifs?canceled=true`,
     metadata: {
-      userId: user.id,
+      organizationId: organization.id,
     },
   });
 

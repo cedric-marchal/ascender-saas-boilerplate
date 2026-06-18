@@ -6,6 +6,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import {
+  Building2,
   ChevronsUpDown,
   CreditCard,
   FolderKanban,
@@ -17,6 +18,8 @@ import {
 } from "lucide-react";
 
 import { SignOutButton } from "@/features/auth/components/sign-out-button";
+import { OrgSwitcher } from "@/features/organizations/components/org-switcher";
+import type { UserOrganizationItem } from "@/features/organizations/services/get-user-organizations.service";
 
 import { env } from "@/lib/env";
 
@@ -54,7 +57,8 @@ type MenuItem = {
     | "/dashboard"
     | "/dashboard/projets"
     | "/dashboard/facturation"
-    | "/dashboard/parametres";
+    | "/dashboard/parametres"
+    | "/dashboard/organisation";
   icon: ComponentType<React.SVGProps<SVGSVGElement>>;
 };
 
@@ -73,6 +77,11 @@ const navigationItems: MenuItem[] = [
 
 const managementItems: MenuItem[] = [
   {
+    title: "Organisation",
+    url: "/dashboard/organisation",
+    icon: Building2,
+  },
+  {
     title: "Facturation",
     url: "/dashboard/facturation",
     icon: CreditCard,
@@ -87,9 +96,16 @@ const managementItems: MenuItem[] = [
 type DashboardSidebarProps = {
   image?: string | null;
   name: string;
+  organizations: UserOrganizationItem[];
+  activeOrganizationId: string | null;
 };
 
-function DashboardSidebar({ image, name }: DashboardSidebarProps) {
+function DashboardSidebar({
+  image,
+  name,
+  organizations,
+  activeOrganizationId,
+}: DashboardSidebarProps) {
   const pathname = usePathname();
   const { setOpenMobile } = useSidebar();
 
@@ -128,7 +144,18 @@ function DashboardSidebar({ image, name }: DashboardSidebarProps) {
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
-      <SidebarSeparator />
+      {organizations.length >= 2 && (
+        <>
+          <div className="px-2 pb-1">
+            <OrgSwitcher
+              organizations={organizations}
+              activeOrganizationId={activeOrganizationId}
+            />
+          </div>
+          <SidebarSeparator />
+        </>
+      )}
+      {organizations.length < 2 && <SidebarSeparator />}
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>Navigation</SidebarGroupLabel>

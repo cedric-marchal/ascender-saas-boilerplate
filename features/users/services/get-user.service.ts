@@ -2,7 +2,7 @@ import "server-only";
 
 import { cache } from "react";
 
-import type { SubscriptionStatus, User } from "@/lib/generated/prisma/client";
+import type { User } from "@/lib/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 
 type GetUserSession = {
@@ -20,22 +20,6 @@ type GetUserAccount = {
   createdAt: Date;
 };
 
-type GetUserSubscription = {
-  id: string;
-  stripeSubscriptionId: string;
-  stripePriceId: string;
-  status: SubscriptionStatus;
-  currentPeriodStart: Date;
-  currentPeriodEnd: Date;
-  cancelAtPeriodEnd: boolean;
-  createdAt: Date;
-};
-
-type GetUserStripeCustomer = {
-  stripeCustomerId: string;
-  subscriptions: GetUserSubscription[];
-};
-
 type GetUserResult = Pick<
   User,
   | "id"
@@ -50,7 +34,6 @@ type GetUserResult = Pick<
 > & {
   sessions: GetUserSession[];
   accounts: GetUserAccount[];
-  stripeCustomer: GetUserStripeCustomer | null;
 };
 
 const getUserBySlug = cache(
@@ -94,37 +77,10 @@ const getUserBySlug = cache(
           },
           take: 10,
         },
-        stripeCustomer: {
-          select: {
-            stripeCustomerId: true,
-            subscriptions: {
-              select: {
-                id: true,
-                stripeSubscriptionId: true,
-                stripePriceId: true,
-                status: true,
-                currentPeriodStart: true,
-                currentPeriodEnd: true,
-                cancelAtPeriodEnd: true,
-                createdAt: true,
-              },
-              orderBy: {
-                createdAt: "desc",
-              },
-              take: 10,
-            },
-          },
-        },
       },
     });
   },
 );
 
 export { getUserBySlug };
-export type {
-  GetUserResult,
-  GetUserSession,
-  GetUserAccount,
-  GetUserSubscription,
-  GetUserStripeCustomer,
-};
+export type { GetUserResult, GetUserSession, GetUserAccount };

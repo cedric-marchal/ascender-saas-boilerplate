@@ -41,7 +41,9 @@ vi.mock("@/features/billing/constants/plan.constant", () => ({
 const { requireCustomerPlan } =
   await import("@/features/billing/guards/require-customer-plan");
 
-const makeSession = (overrides: { id?: string } = {}) => ({
+const makeSession = (
+  overrides: { id?: string; activeOrganizationId?: string | null } = {},
+) => ({
   user: {
     id: overrides.id ?? "user-123",
     email: "user@example.com",
@@ -50,6 +52,10 @@ const makeSession = (overrides: { id?: string } = {}) => ({
     emailVerified: true,
   },
   session: { id: "session-123", expiresAt: new Date() },
+  activeOrganizationId:
+    overrides.activeOrganizationId !== undefined
+      ? overrides.activeOrganizationId
+      : "org-123",
 });
 
 describe("requireCustomerPlan", () => {

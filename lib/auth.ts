@@ -4,11 +4,25 @@ import { i18n } from "@better-auth/i18n";
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { nextCookies } from "better-auth/next-js";
+import { organization } from "better-auth/plugins";
 
 import { EmailChangeNotificationEmail } from "@/features/auth/emails/email-change-notification-email";
 import { PasswordChangedEmail } from "@/features/auth/emails/password-changed-email";
 import { ResetPasswordEmail } from "@/features/auth/emails/reset-password-email";
 import { WelcomeEmail } from "@/features/auth/emails/welcome-email";
+import {
+  ALLOWED_PRICE_IDS,
+  getPlanByPriceId,
+} from "@/features/billing/constants/plan.constant";
+import { ACTIVE_SUBSCRIPTION_STATUSES } from "@/features/billing/constants/subscription-status.constant";
+import {
+  ac,
+  adminRole,
+  memberRole,
+  ownerRole,
+} from "@/features/organizations/constants/organization-roles.constant";
+import { createOrganization } from "@/features/organizations/services/create-organization.service";
+import { sendInvitationEmail } from "@/features/organizations/services/send-invitation-email.service";
 
 import { env } from "@/lib/env";
 import { UserRole } from "@/lib/generated/prisma/client";
@@ -106,50 +120,7 @@ const auth = betterAuth({
         react: WelcomeEmail({ name: user.name, verificationLink: url }),
       });
     },
-    async afterEmailVerification(user) {
-      const dbUser = await prisma.user.findUnique({
-        where: {
-          id: user.id,
-        },
-        select: {
-          id: true,
-          email: true,
-          name: true,
-          role: true,
-        },
-      });
-
-      if (!dbUser) {
-        console.error(`User not found: ${user.id}`);
-        return;
-      }
-
-      if (dbUser.role !== UserRole.CUSTOMER) {
-        return;
-      }
-
-      const existingStripeCustomer = await prisma.stripeCustomer.findUnique({
-        where: {
-          userId: dbUser.id,
-        },
-        select: {
-          stripeCustomerId: true,
-        },
-      });
-
-      if (!existingStripeCustomer) {
-        return;
-      }
-
-      try {
-        await stripe.customers.update(existingStripeCustomer.stripeCustomerId, {
-          email: dbUser.email,
-          name: dbUser.name,
-        });
-      } catch (error: unknown) {
-        console.error("Failed to sync email to Stripe:", error);
-      }
-    },
+    async afterEmailVerification() {},
   },
   socialProviders: {
     google: {
@@ -214,6 +185,49 @@ const auth = betterAuth({
             },
           };
         },
+        after: async (user) => {
+          const userRole = (user as { role?: string }).role;
+
+          if (userRole !== UserRole.CUSTOMER) {
+            return;
+          }
+
+          try {
+            await createOrganization({
+              userId: user.id,
+              name: user.name,
+            });
+          } catch (error: unknown) {
+            console.error(
+              `Failed to create personal organization for user ${user.id}:`,
+              error,
+            );
+          }
+        },
+      },
+    },
+    session: {
+      create: {
+        before: async (session) => {
+          const firstMembership = await prisma.member.findFirst({
+            where: {
+              userId: session.userId,
+            },
+            select: {
+              organizationId: true,
+            },
+            orderBy: {
+              createdAt: "asc",
+            },
+          });
+
+          return {
+            data: {
+              ...session,
+              activeOrganizationId: firstMembership?.organizationId ?? null,
+            },
+          };
+        },
       },
     },
   },
@@ -224,6 +238,105 @@ const auth = betterAuth({
     useSecureCookies: process.env.NODE_ENV === "production",
   },
   plugins: [
+    organization({
+      ac,
+      roles: {
+        owner: ownerRole,
+        admin: adminRole,
+        member: memberRole,
+      },
+      creatorRole: "owner",
+      invitationExpiresIn: 48 * 60 * 60 * 1000,
+      membershipLimit: async (
+        _user: { id: string },
+        organization: { id: string },
+      ): Promise<number> => {
+        // Free plan: 1 seat
+        const FREE_PLAN_SEAT_CAP = 1;
+
+        const activeSubscription = await prisma.subscription.findFirst({
+          where: {
+            stripeCustomer: {
+              organizationId: organization.id,
+            },
+            stripePriceId: {
+              in: ALLOWED_PRICE_IDS,
+            },
+            status: {
+              in: ACTIVE_SUBSCRIPTION_STATUSES,
+            },
+          },
+          select: {
+            stripePriceId: true,
+          },
+          orderBy: {
+            currentPeriodEnd: "desc",
+          },
+        });
+
+        const planConfig = activeSubscription
+          ? getPlanByPriceId(activeSubscription.stripePriceId)
+          : undefined;
+
+        return planConfig?.seatsIncluded ?? FREE_PLAN_SEAT_CAP;
+      },
+      sendInvitationEmail: async (data) => {
+        await sendInvitationEmail({
+          invitationId: data.id,
+          email: data.email,
+          inviterName: data.inviter.user.name,
+          inviterEmail: data.inviter.user.email,
+          organizationName: data.organization.name,
+          role: data.role,
+        });
+      },
+      organizationHooks: {
+        afterCreateOrganization: async ({ organization, user }) => {
+          if (!user) {
+            return;
+          }
+
+          const existing = await prisma.stripeCustomer.findUnique({
+            where: {
+              organizationId: organization.id,
+            },
+            select: {
+              stripeCustomerId: true,
+            },
+          });
+
+          if (existing) {
+            return;
+          }
+
+          try {
+            const stripeCustomer = await stripe.customers.create(
+              {
+                name: organization.name,
+                metadata: {
+                  organizationId: organization.id,
+                },
+              },
+              {
+                idempotencyKey: `org-stripe-customer-${organization.id}`,
+              },
+            );
+
+            await prisma.stripeCustomer.create({
+              data: {
+                organizationId: organization.id,
+                stripeCustomerId: stripeCustomer.id,
+              },
+            });
+          } catch (error: unknown) {
+            console.error(
+              `Failed to create Stripe customer for organization ${organization.id}:`,
+              error,
+            );
+          }
+        },
+      },
+    }),
     i18n({
       defaultLocale: "fr",
       translations: {

@@ -5,6 +5,7 @@ import {
 
 import { auth } from "@/lib/auth";
 import { UserRole } from "@/lib/generated/prisma/client";
+import { prisma } from "@/lib/prisma";
 
 import {
   AppError,
@@ -52,12 +53,17 @@ export const authActionClient = actionClient.use(async ({ next }) => {
     throw new UnauthorizedError("Vous devez être connecté");
   }
 
+  const activeOrganizationId =
+    (session as { activeOrganizationId?: string | null })
+      .activeOrganizationId ?? null;
+
   return next({
     ctx: {
       userId: session.user.id,
       userEmail: session.user.email,
       userName: session.user.name,
       userRole: parseUserRole(session.user.role),
+      activeOrganizationId,
     },
   });
 });
@@ -75,4 +81,39 @@ export const adminActionClient = authActionClient.use(async ({ next, ctx }) => {
   }
 
   return next({ ctx });
+});
+
+/**
+ * Org action client (organization-scoped actions)
+ * Use this for actions that require active organization membership
+ * Provides userId, organizationId, and member role in context
+ */
+export const orgActionClient = authActionClient.use(async ({ next, ctx }) => {
+  if (!ctx.activeOrganizationId) {
+    throw new ForbiddenError(
+      "Aucune organisation active. Veuillez sélectionner une organisation.",
+    );
+  }
+
+  const membership = await prisma.member.findFirst({
+    where: {
+      userId: ctx.userId,
+      organizationId: ctx.activeOrganizationId,
+    },
+    select: {
+      role: true,
+    },
+  });
+
+  if (!membership) {
+    throw new ForbiddenError("Vous n'êtes pas membre de cette organisation");
+  }
+
+  return next({
+    ctx: {
+      ...ctx,
+      organizationId: ctx.activeOrganizationId,
+      memberRole: membership.role,
+    },
+  });
 });

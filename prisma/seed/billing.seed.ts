@@ -3,14 +3,15 @@ import type {
   SubscriptionStatus,
 } from "../../lib/generated/prisma/client";
 import { USERS, type UserSeed } from "./auth.seed";
-import { daysAgo, daysFromNow, SEED_FILTER, seedId, slugify } from "./helpers";
+import { daysAgo, daysFromNow, SEED_FILTER, slugify } from "./helpers";
+import { orgIdForUser } from "./organization.seed";
 
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
-function stripeCustomerIdForUser(name: string, index: number): string {
-  return `cus_seed_${slugify(name).replace(/-/g, "_")}_${index}`;
+function stripeCustomerIdForOrg(name: string, userIndex: number): string {
+  return `cus_seed_${slugify(name).replace(/-/g, "_")}_${userIndex}`;
 }
 
 // ---------------------------------------------------------------------------
@@ -235,7 +236,7 @@ const SUBSCRIPTIONS: SubscriptionSeed[] = [
 // ---------------------------------------------------------------------------
 
 async function seedBilling(prisma: PrismaClient): Promise<void> {
-  // Stripe Customers
+  // Stripe Customers — keyed to organizationId
   const usersWithStripe = USERS.filter(
     (user: UserSeed) => user.hasStripeCustomer,
   );
@@ -244,8 +245,8 @@ async function seedBilling(prisma: PrismaClient): Promise<void> {
     await prisma.stripeCustomer.create({
       data: {
         id: `seed-stripe-customer-${user.index}`,
-        userId: seedId("user", user.index),
-        stripeCustomerId: stripeCustomerIdForUser(user.name, user.index),
+        organizationId: orgIdForUser(user.index),
+        stripeCustomerId: stripeCustomerIdForOrg(user.name, user.index),
         createdAt: user.createdAt,
         updatedAt: user.createdAt,
       },
@@ -272,7 +273,7 @@ async function seedBilling(prisma: PrismaClient): Promise<void> {
       data: {
         id: `seed-subscription-${subscription.userIndex}`,
         stripeSubscriptionId: subscription.stripeSubscriptionId,
-        stripeCustomerId: stripeCustomerIdForUser(
+        stripeCustomerId: stripeCustomerIdForOrg(
           matchingUser.name,
           matchingUser.index,
         ),

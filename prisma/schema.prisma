@@ -25,7 +25,8 @@ model User {
   updatedAt      DateTime        @updatedAt
   sessions       Session[]
   accounts       Account[]
-  stripeCustomer StripeCustomer?
+  members        Member[]
+  invitations    Invitation[]
 
   @@unique([email])
   @@map("user")
@@ -37,15 +38,16 @@ enum UserRole {
 }
 
 model Session {
-  id        String   @id
-  expiresAt DateTime
-  token     String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  ipAddress String?
-  userAgent String?
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                   String   @id
+  expiresAt            DateTime
+  token                String
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  ipAddress            String?
+  userAgent            String?
+  userId               String
+  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  activeOrganizationId String?
 
   @@unique([token])
   @@index([userId])
@@ -86,14 +88,14 @@ model Verification {
 
 model StripeCustomer {
   id               String         @id @default(cuid())
-  userId           String         @unique
-  user             User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organizationId   String         @unique
+  organization     Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   stripeCustomerId String         @unique
   subscriptions    Subscription[]
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @updatedAt
 
-  @@index([userId])
+  @@index([organizationId])
   @@index([stripeCustomerId])
   @@map("stripeCustomer")
 }
@@ -125,4 +127,66 @@ model Subscription {
   @@index([stripeCustomerId])
   @@index([stripeCustomerId, status])
   @@map("subscription")
+}
+
+model Organization {
+  id             String          @id
+  name           String
+  slug           String          @unique
+  logo           String?
+  plan           String          @default("free")
+  seatsUsed      Int             @default(1)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime?       @updatedAt
+  members        Member[]
+  invitations    Invitation[]
+  stripeCustomer StripeCustomer?
+
+  @@map("organization")
+}
+
+model Member {
+  id             String       @id
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role           String
+  createdAt      DateTime     @default(now())
+
+  @@index([organizationId])
+  @@index([userId])
+  @@map("member")
+}
+
+model Invitation {
+  id             String       @id
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  email          String
+  role           String?
+  status         String       @default("pending")
+  inviterId      String
+  inviter        User         @relation(fields: [inviterId], references: [id], onDelete: Cascade)
+  expiresAt      DateTime?
+  createdAt      DateTime     @default(now())
+
+  @@index([organizationId])
+  @@index([inviterId])
+  @@map("invitation")
+}
+
+model AuditLog {
+  id             String   @id @default(cuid())
+  organizationId String
+  userId         String
+  action         String
+  entityType     String
+  entityId       String?
+  metadata       Json?
+  createdAt      DateTime @default(now())
+
+  @@index([organizationId])
+  @@index([userId])
+  @@map("auditLog")
 }

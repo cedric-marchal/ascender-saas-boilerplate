@@ -8,6 +8,9 @@ import { notFound, redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { UserRole } from "@/lib/generated/prisma/client";
 import { ROLE_DASHBOARD_URL } from "@/lib/navigation";
+import { prisma } from "@/lib/prisma";
+
+import { ForbiddenError } from "@/utils/errors/errors";
 
 type RawSession = typeof auth.$Infer.Session;
 
@@ -15,6 +18,7 @@ type Session = Omit<RawSession, "user"> & {
   user: Omit<RawSession["user"], "role"> & {
     role: UserRole;
   };
+  activeOrganizationId: string | null;
 };
 
 function parseUserRole(role: string): UserRole {
@@ -44,6 +48,9 @@ const getSession = cache(async (): Promise<Session | null> => {
       ...session.user,
       role: parseUserRole(session.user.role),
     },
+    activeOrganizationId:
+      (session as { activeOrganizationId?: string | null })
+        .activeOrganizationId ?? null,
   };
 });
 
@@ -132,6 +139,31 @@ const requireAdminVerifiedEmail = async (): Promise<Session> => {
   return session;
 };
 
+/**
+ * Vérifie que l'utilisateur est membre de l'organisation donnée
+ * Lance une ForbiddenError si non membre
+ */
+async function requireOrganizationMembership(
+  userId: string,
+  organizationId: string,
+): Promise<string> {
+  const membership = await prisma.member.findFirst({
+    where: {
+      userId,
+      organizationId,
+    },
+    select: {
+      role: true,
+    },
+  });
+
+  if (!membership) {
+    throw new ForbiddenError("Vous n'êtes pas membre de cette organisation");
+  }
+
+  return membership.role;
+}
+
 export {
   getSession,
   requireAdmin,
@@ -139,6 +171,7 @@ export {
   requireCustomer,
   requireCustomerVerifiedEmail,
   requireGuest,
+  requireOrganizationMembership,
   requireSession,
 };
 

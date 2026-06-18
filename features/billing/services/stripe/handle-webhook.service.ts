@@ -63,7 +63,7 @@ async function handleStripeWebhook(
   }
 
   if (process.env.NODE_ENV === "development") {
-    console.log(`Received Stripe event: ${event.type}`);
+    console.warn(`Received Stripe event: ${event.type}`);
   }
 
   const eventKey = stripeEventIdempotencyCacheKey(event.id);
@@ -102,7 +102,7 @@ async function handleStripeWebhook(
             stripeCustomerId: customerId,
           },
           select: {
-            userId: true,
+            organizationId: true,
             stripeCustomerId: true,
           },
         });
@@ -138,54 +138,41 @@ async function handleStripeWebhook(
           break;
         }
 
-        await prisma.$transaction(async (tx) => {
-          const user = await tx.user.findUnique({
-            where: {
-              id: stripeCustomer.userId,
-            },
-            select: {
-              id: true,
-            },
-          });
-
-          if (!user) {
-            return;
-          }
-
-          await tx.subscription.upsert({
-            where: { stripeSubscriptionId: subscription.id },
-            create: {
-              stripeSubscriptionId: subscription.id,
-              stripeCustomerId: stripeCustomer.stripeCustomerId,
-              stripePriceId: priceId,
-              status: subscriptionStatus,
-              currentPeriodStart: new Date(
-                subscriptionItem.current_period_start * 1000,
-              ),
-              currentPeriodEnd: new Date(
-                subscriptionItem.current_period_end * 1000,
-              ),
-              cancelAtPeriodEnd: subscription.cancel_at_period_end,
-            },
-            update: {
-              stripePriceId: priceId,
-              status: subscriptionStatus,
-              currentPeriodStart: new Date(
-                subscriptionItem.current_period_start * 1000,
-              ),
-              currentPeriodEnd: new Date(
-                subscriptionItem.current_period_end * 1000,
-              ),
-              cancelAtPeriodEnd: subscription.cancel_at_period_end,
-            },
-          });
+        await prisma.subscription.upsert({
+          where: { stripeSubscriptionId: subscription.id },
+          create: {
+            stripeSubscriptionId: subscription.id,
+            stripeCustomerId: stripeCustomer.stripeCustomerId,
+            stripePriceId: priceId,
+            status: subscriptionStatus,
+            currentPeriodStart: new Date(
+              subscriptionItem.current_period_start * 1000,
+            ),
+            currentPeriodEnd: new Date(
+              subscriptionItem.current_period_end * 1000,
+            ),
+            cancelAtPeriodEnd: subscription.cancel_at_period_end,
+          },
+          update: {
+            stripePriceId: priceId,
+            status: subscriptionStatus,
+            currentPeriodStart: new Date(
+              subscriptionItem.current_period_start * 1000,
+            ),
+            currentPeriodEnd: new Date(
+              subscriptionItem.current_period_end * 1000,
+            ),
+            cancelAtPeriodEnd: subscription.cancel_at_period_end,
+          },
         });
 
-        await redis.del(billingSubscriptionsCacheKey(stripeCustomer.userId));
+        await redis.del(
+          billingSubscriptionsCacheKey(stripeCustomer.organizationId),
+        );
 
         if (process.env.NODE_ENV === "development") {
-          console.log(
-            `[Subscription synced] ${subscription.id} (${subscription.status}) for user ${stripeCustomer.userId}`,
+          console.warn(
+            `[Subscription synced] ${subscription.id} (${subscription.status}) for org ${stripeCustomer.organizationId}`,
           );
         }
 
@@ -204,7 +191,7 @@ async function handleStripeWebhook(
             stripeCustomerId: customerId,
           },
           select: {
-            userId: true,
+            organizationId: true,
           },
         });
 
@@ -221,11 +208,13 @@ async function handleStripeWebhook(
           },
         });
 
-        await redis.del(billingSubscriptionsCacheKey(stripeCustomer.userId));
+        await redis.del(
+          billingSubscriptionsCacheKey(stripeCustomer.organizationId),
+        );
 
         if (process.env.NODE_ENV === "development") {
-          console.log(
-            `[Subscription deleted] ${subscription.id} for user ${stripeCustomer.userId}`,
+          console.warn(
+            `[Subscription deleted] ${subscription.id} for org ${stripeCustomer.organizationId}`,
           );
         }
 
@@ -250,7 +239,7 @@ async function handleStripeWebhook(
             stripeCustomerId: customerId,
           },
           select: {
-            userId: true,
+            organizationId: true,
           },
         });
 
@@ -261,10 +250,11 @@ async function handleStripeWebhook(
           break;
         }
 
-        await redis.del(billingInvoicesCacheKey(stripeCustomer.userId));
+        await redis.del(billingInvoicesCacheKey(stripeCustomer.organizationId));
+
         if (process.env.NODE_ENV === "development") {
-          console.log(
-            `[Cache invalidated] Invoices cache for user ${stripeCustomer.userId} - Event: ${event.type}`,
+          console.warn(
+            `[Cache invalidated] Invoices cache for org ${stripeCustomer.organizationId} - Event: ${event.type}`,
           );
         }
 
@@ -273,7 +263,7 @@ async function handleStripeWebhook(
 
       default:
         if (process.env.NODE_ENV === "development") {
-          console.log(`Unhandled event type: ${event.type}`);
+          console.warn(`Unhandled event type: ${event.type}`);
         }
     }
   } catch (error: unknown) {
