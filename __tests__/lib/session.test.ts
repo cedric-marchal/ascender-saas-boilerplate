@@ -3,6 +3,16 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const mockRedirect = vi.fn();
 const mockNotFound = vi.fn();
 const mockGetSessionAuth = vi.fn();
+const mockMemberFindFirst = vi.fn();
+
+vi.mock("@/lib/prisma", () => ({
+  prisma: {
+    member: {
+      findFirst: mockMemberFindFirst,
+    },
+  },
+}));
+
 vi.mock("react", async (importOriginal) => {
   const actual = (await importOriginal()) as Record<string, unknown>;
 
