@@ -9,7 +9,7 @@ import { actionClient } from "@/lib/safe-action";
 import { checkRatelimit } from "@/utils/ratelimit/check-ratelimit";
 import { getActionIdentifier } from "@/utils/ratelimit/get-request-identifier";
 
-export const createContactAction = actionClient
+const createContactAction = actionClient
   .use(async ({ next }) => {
     const identifier = await getActionIdentifier();
     await checkRatelimit(contactRatelimit, identifier);
@@ -24,3 +24,5 @@ export const createContactAction = actionClient
       success: true,
     };
   });
+
+export { createContactAction };

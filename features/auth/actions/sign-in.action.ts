@@ -13,7 +13,7 @@ import { actionClient } from "@/lib/safe-action";
 
 import { UnauthorizedError } from "@/utils/errors/errors";
 
-export const signInAction = actionClient
+const signInAction = actionClient
   .inputSchema(SignInSchema)
   .action(async ({ parsedInput }) => {
     try {
@@ -40,3 +40,5 @@ export const signInAction = actionClient
       throw error;
     }
   });
+
+export { signInAction };

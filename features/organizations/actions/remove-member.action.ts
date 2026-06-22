@@ -12,7 +12,7 @@ import { orgActionClient } from "@/lib/safe-action";
 
 import { ForbiddenError, NotFoundError } from "@/utils/errors/errors";
 
-export const removeMemberAction = orgActionClient
+const removeMemberAction = orgActionClient
   .inputSchema(RemoveMemberSchema)
   .action(async ({ parsedInput, ctx }) => {
     if (ctx.memberRole !== "owner" && ctx.memberRole !== "admin") {
@@ -74,3 +74,5 @@ export const removeMemberAction = orgActionClient
       success: true,
     };
   });
+
+export { removeMemberAction };

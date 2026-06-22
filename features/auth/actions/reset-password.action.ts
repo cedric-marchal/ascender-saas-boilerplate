@@ -11,7 +11,7 @@ import { actionClient } from "@/lib/safe-action";
 
 import { BadRequestError } from "@/utils/errors/errors";
 
-export const resetPasswordAction = actionClient
+const resetPasswordAction = actionClient
   .inputSchema(ResetPasswordActionSchema)
   .action(async ({ parsedInput }) => {
     try {
@@ -34,3 +34,5 @@ export const resetPasswordAction = actionClient
       success: true,
     };
   });
+
+export { resetPasswordAction };

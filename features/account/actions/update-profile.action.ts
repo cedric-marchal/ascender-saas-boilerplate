@@ -8,7 +8,7 @@ import { authActionClient } from "@/lib/safe-action";
 
 import { checkRatelimit } from "@/utils/ratelimit/check-ratelimit";
 
-export const updateProfileAction = authActionClient
+const updateProfileAction = authActionClient
   .use(async ({ next, ctx }) => {
     await checkRatelimit(authenticatedRatelimit, ctx.userId);
 
@@ -22,3 +22,5 @@ export const updateProfileAction = authActionClient
       email: parsedInput.email,
     });
   });
+
+export { updateProfileAction };

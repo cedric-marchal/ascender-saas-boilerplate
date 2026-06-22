@@ -9,7 +9,7 @@ import { actionClient } from "@/lib/safe-action";
 
 import { BadRequestError } from "@/utils/errors/errors";
 
-export const signOutAction = actionClient.action(async () => {
+const signOutAction = actionClient.action(async () => {
   try {
     await auth.api.signOut({
       headers: await headers(),
@@ -26,3 +26,5 @@ export const signOutAction = actionClient.action(async () => {
     success: true,
   };
 });
+
+export { signOutAction };

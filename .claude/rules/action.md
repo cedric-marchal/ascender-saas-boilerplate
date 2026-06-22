@@ -36,7 +36,7 @@ import { createContact } from "@/features/contact/services/create-contact.servic
 
 import { actionClient } from "@/lib/safe-action";
 
-export const createContactAction = actionClient
+const createContactAction = actionClient
   .inputSchema(CreateContactSchema)
   .action(async ({ parsedInput }) => {
     await createContact(parsedInput);
@@ -45,6 +45,8 @@ export const createContactAction = actionClient
       success: true,
     };
   });
+
+export { createContactAction };
 ```
 
 ## Action Clients (P0)

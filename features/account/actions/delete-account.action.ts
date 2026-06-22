@@ -8,7 +8,7 @@ import { authActionClient } from "@/lib/safe-action";
 
 import { checkRatelimit } from "@/utils/ratelimit/check-ratelimit";
 
-export const deleteAccountAction = authActionClient
+const deleteAccountAction = authActionClient
   .use(async ({ next, ctx }) => {
     await checkRatelimit(authenticatedRatelimit, ctx.userId);
 
@@ -26,3 +26,5 @@ export const deleteAccountAction = authActionClient
       success: true,
     };
   });
+
+export { deleteAccountAction };

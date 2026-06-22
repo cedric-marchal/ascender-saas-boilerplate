@@ -13,7 +13,7 @@ import { authActionClient } from "@/lib/safe-action";
 
 import { NotFoundError } from "@/utils/errors/errors";
 
-export const acceptInvitationAction = authActionClient
+const acceptInvitationAction = authActionClient
   .inputSchema(AcceptInvitationSchema)
   .action(async ({ parsedInput, ctx }) => {
     const invitation = await prisma.invitation.findUnique({
@@ -54,3 +54,5 @@ export const acceptInvitationAction = authActionClient
       success: true,
     };
   });
+
+export { acceptInvitationAction };

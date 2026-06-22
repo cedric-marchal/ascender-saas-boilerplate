@@ -11,7 +11,7 @@ import { actionClient } from "@/lib/safe-action";
 
 import { ConflictError } from "@/utils/errors/errors";
 
-export const signUpAction = actionClient
+const signUpAction = actionClient
   .inputSchema(SignUpSchema)
   .action(async ({ parsedInput }) => {
     try {
@@ -35,3 +35,5 @@ export const signUpAction = actionClient
       success: true,
     };
   });
+
+export { signUpAction };

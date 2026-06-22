@@ -12,7 +12,7 @@ import { orgActionClient } from "@/lib/safe-action";
 
 import { ForbiddenError, NotFoundError } from "@/utils/errors/errors";
 
-export const changeMemberRoleAction = orgActionClient
+const changeMemberRoleAction = orgActionClient
   .inputSchema(ChangeMemberRoleSchema)
   .action(async ({ parsedInput, ctx }) => {
     if (ctx.memberRole !== "owner" && ctx.memberRole !== "admin") {
@@ -81,3 +81,5 @@ export const changeMemberRoleAction = orgActionClient
       success: true,
     };
   });
+
+export { changeMemberRoleAction };

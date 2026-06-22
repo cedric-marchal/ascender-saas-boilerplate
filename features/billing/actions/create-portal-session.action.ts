@@ -8,7 +8,7 @@ import { orgActionClient } from "@/lib/safe-action";
 import { ForbiddenError } from "@/utils/errors/errors";
 import { checkRatelimit } from "@/utils/ratelimit/check-ratelimit";
 
-export const createPortalSessionAction = orgActionClient
+const createPortalSessionAction = orgActionClient
   .use(async ({ next, ctx }) => {
     await checkRatelimit(authenticatedRatelimit, ctx.userId);
 
@@ -28,3 +28,5 @@ export const createPortalSessionAction = orgActionClient
 
     return result;
   });
+
+export { createPortalSessionAction };

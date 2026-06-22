@@ -12,7 +12,7 @@ import { orgActionClient } from "@/lib/safe-action";
 
 import { ForbiddenError } from "@/utils/errors/errors";
 
-export const inviteMemberAction = orgActionClient
+const inviteMemberAction = orgActionClient
   .inputSchema(InviteMemberSchema)
   .action(async ({ parsedInput, ctx }) => {
     if (ctx.memberRole !== "owner" && ctx.memberRole !== "admin") {
@@ -47,3 +47,5 @@ export const inviteMemberAction = orgActionClient
       success: true,
     };
   });
+
+export { inviteMemberAction };

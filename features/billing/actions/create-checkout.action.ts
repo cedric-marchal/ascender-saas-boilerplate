@@ -11,7 +11,7 @@ import { orgActionClient } from "@/lib/safe-action";
 import { ForbiddenError } from "@/utils/errors/errors";
 import { checkRatelimit } from "@/utils/ratelimit/check-ratelimit";
 
-export const createCheckoutAction = orgActionClient
+const createCheckoutAction = orgActionClient
   .use(async ({ next, ctx }) => {
     await checkRatelimit(authenticatedRatelimit, ctx.userId);
 
@@ -43,3 +43,5 @@ export const createCheckoutAction = orgActionClient
 
     return result;
   });
+
+export { createCheckoutAction };

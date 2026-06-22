@@ -11,7 +11,7 @@ import { orgActionClient } from "@/lib/safe-action";
 
 import { ForbiddenError, NotFoundError } from "@/utils/errors/errors";
 
-export const updateOrganizationAction = orgActionClient
+const updateOrganizationAction = orgActionClient
   .inputSchema(UpdateOrganizationSchema)
   .action(async ({ parsedInput, ctx }) => {
     if (ctx.memberRole !== "owner" && ctx.memberRole !== "admin") {
@@ -64,3 +64,5 @@ export const updateOrganizationAction = orgActionClient
       success: true,
     };
   });
+
+export { updateOrganizationAction };

@@ -11,7 +11,7 @@ import { orgActionClient } from "@/lib/safe-action";
 
 import { ForbiddenError, NotFoundError } from "@/utils/errors/errors";
 
-export const transferOwnershipAction = orgActionClient
+const transferOwnershipAction = orgActionClient
   .inputSchema(TransferOwnershipSchema)
   .action(async ({ parsedInput, ctx }) => {
     if (ctx.memberRole !== "owner") {
@@ -94,3 +94,5 @@ export const transferOwnershipAction = orgActionClient
       success: true,
     };
   });
+
+export { transferOwnershipAction };

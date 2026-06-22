@@ -8,7 +8,7 @@ import { authActionClient } from "@/lib/safe-action";
 
 import { checkRatelimit } from "@/utils/ratelimit/check-ratelimit";
 
-export const updatePasswordAction = authActionClient
+const updatePasswordAction = authActionClient
   .use(async ({ next, ctx }) => {
     await checkRatelimit(authenticatedRatelimit, ctx.userId);
 
@@ -27,3 +27,5 @@ export const updatePasswordAction = authActionClient
       success: true,
     };
   });
+
+export { updatePasswordAction };
