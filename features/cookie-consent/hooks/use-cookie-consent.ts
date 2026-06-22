@@ -130,7 +130,7 @@ const useCookieConsent = create<CookieConsentStore>()(
         }),
     }),
     {
-      name: "ascender-cookie-consent",
+      name: "next-cookie-consent",
       version: 1,
       storage: COOKIE_STORAGE,
       partialize: (state) => ({

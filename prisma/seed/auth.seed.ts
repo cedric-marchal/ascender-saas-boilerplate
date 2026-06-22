@@ -349,7 +349,7 @@ const MANUAL_USERS: UserSeed[] = [
   {
     index: 1,
     name: "Cédric Morel",
-    email: "cedric@ascender.dev",
+    email: "cedric@next.dev",
     emailVerified: true,
     role: "ADMIN",
     image: "https://picsum.photos/id/23/200/200",
@@ -361,7 +361,7 @@ const MANUAL_USERS: UserSeed[] = [
   {
     index: 2,
     name: "Amélie Fontaine",
-    email: "amelie.fontaine@ascender.dev",
+    email: "amelie.fontaine@next.dev",
     emailVerified: true,
     role: "ADMIN",
     image: null,

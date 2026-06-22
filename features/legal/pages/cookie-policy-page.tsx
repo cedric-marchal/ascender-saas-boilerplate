@@ -154,8 +154,8 @@ function CookiePolicyPage() {
               </p>
               <ul>
                 <li>
-                  <strong>ascender-cookie-consent :</strong> mémorise vos choix
-                  de consentement et vos préférences par catégorie de cookies
+                  <strong>next-cookie-consent :</strong> mémorise vos choix de
+                  consentement et vos préférences par catégorie de cookies
                 </li>
               </ul>
             </section>

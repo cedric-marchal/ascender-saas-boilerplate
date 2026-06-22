@@ -1,4 +1,4 @@
-# Ascender SaaS Boilerplate
+# Next SaaS Boilerplate
 
 ## Stack
 

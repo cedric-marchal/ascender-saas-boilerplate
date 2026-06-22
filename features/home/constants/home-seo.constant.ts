@@ -6,7 +6,7 @@ const APP_NAME = env.NEXT_PUBLIC_APP_NAME;
 const BASE_URL = env.NEXT_PUBLIC_BASE_URL;
 
 const HOME_DESCRIPTION =
-  "Découvrez les solutions innovantes d'Ascender SaaS Boilerplate pour transformer votre entreprise.";
+  "Découvrez les solutions innovantes de Next SaaS Boilerplate pour transformer votre entreprise.";
 
 function getHomeWebsiteSchema(): WithContext<WebSite> {
   return {
@@ -29,7 +29,7 @@ function getHomeOrganizationSchema(): WithContext<Organization> {
     url: BASE_URL,
     logo: {
       "@type": "ImageObject",
-      url: `${BASE_URL}/images/logos/ascender-saas-boilerplate-logo-dark.svg`,
+      url: `${BASE_URL}/images/logos/next-saas-boilerplate-logo-dark.svg`,
     },
   };
 }

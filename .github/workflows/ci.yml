@@ -114,6 +114,6 @@ jobs:
           STRIPE_SECRET_KEY: sk_test_ci_placeholder
           STRIPE_WEBHOOK_SECRET: whsec_ci_placeholder
           STRIPE_PRICE_ID_PRO: price_ci_placeholder
-          NEXT_PUBLIC_APP_NAME: Ascender
+          NEXT_PUBLIC_APP_NAME: Next
           NEXT_PUBLIC_BASE_URL: https://ci.example.com
           NEXT_PUBLIC_R2_PUBLIC_URL: https://ci.r2.example.com
