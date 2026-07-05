@@ -4,6 +4,7 @@ import { useTransition, type ChangeEvent, type SubmitEvent } from "react";
 
 import { useForm } from "@tanstack/react-form";
 import { Filter, Search, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useQueryStates } from "nuqs";
 
 import {
@@ -25,6 +26,8 @@ import {
 } from "@/components/ui/select";
 
 function ProjectsFilters() {
+  const t = useTranslations("projects.filters");
+  const tStatuses = useTranslations("projects.statuses");
   const [isLoading, startTransition] = useTransition();
 
   const [urlFilters, setUrlFilters] = useQueryStates(projectsSearchParams, {
@@ -82,7 +85,7 @@ function ProjectsFilters() {
                   />
                   <Input
                     type="search"
-                    placeholder="Rechercher par nom..."
+                    placeholder={t("searchPlaceholder")}
                     className="pl-10"
                     name={field.name}
                     value={field.state.value}
@@ -111,7 +114,7 @@ function ProjectsFilters() {
                   htmlFor="projects-filter-status"
                   className="sr-only"
                 >
-                  Statut
+                  {t("statusLabel")}
                 </FieldLabel>
                 <Select
                   value={field.state.value}
@@ -120,12 +123,12 @@ function ProjectsFilters() {
                   }
                 >
                   <SelectTrigger id="projects-filter-status">
-                    <SelectValue placeholder="Statut" />
+                    <SelectValue placeholder={t("statusPlaceholder")} />
                   </SelectTrigger>
                   <SelectContent>
                     {projectStatusFilters.map((status: ProjectStatusFilter) => (
                       <SelectItem key={status} value={status}>
-                        {projectStatusLabels[status]}
+                        {tStatuses(projectStatusLabels[status])}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -146,7 +149,7 @@ function ProjectsFilters() {
               className="gap-2"
             >
               <Filter className="h-4 w-4" aria-hidden="true" />
-              {isLoading ? "Chargement..." : "Appliquer"}
+              {isLoading ? t("loadingButton") : t("applyButton")}
             </Button>
           )}
         </form.Subscribe>
@@ -159,7 +162,7 @@ function ProjectsFilters() {
             className="gap-2"
           >
             <X className="h-4 w-4" aria-hidden="true" />
-            Effacer
+            {t("clearButton")}
           </Button>
         )}
       </form>

@@ -24,11 +24,15 @@ const projectsSortableFields = ["name", "status", "createdAt"] as const;
 
 type ProjectSortableField = (typeof projectsSortableFields)[number];
 
+/**
+ * Values are translation KEYS (resolved against the `projects.statuses`
+ * message namespace via `useTranslations`), not literal labels.
+ */
 const projectStatusLabels: Record<ProjectStatusFilter, string> = {
-  all: "Tous les statuts",
-  [ProjectStatus.DRAFT]: "Brouillon",
-  [ProjectStatus.ACTIVE]: "Actif",
-  [ProjectStatus.ARCHIVED]: "Archivé",
+  all: "all",
+  [ProjectStatus.DRAFT]: "DRAFT",
+  [ProjectStatus.ACTIVE]: "ACTIVE",
+  [ProjectStatus.ARCHIVED]: "ARCHIVED",
 };
 
 const projectsSearchParams = {

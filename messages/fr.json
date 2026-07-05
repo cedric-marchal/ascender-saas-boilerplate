@@ -375,6 +375,78 @@
       "void": "Annulée"
     }
   },
+  "projects": {
+    "title": "Projets",
+    "loadingLabel": "Chargement des projets",
+    "projectCount": "{count, plural, one {# projet} other {# projets}}",
+    "newProject": "Nouveau projet",
+    "empty": {
+      "filtered": "Aucun projet ne correspond à vos filtres.",
+      "unfiltered": "Aucun projet pour le moment. Créez votre premier projet."
+    },
+    "filters": {
+      "searchPlaceholder": "Rechercher par nom...",
+      "statusLabel": "Statut",
+      "statusPlaceholder": "Statut",
+      "applyButton": "Appliquer",
+      "loadingButton": "Chargement...",
+      "clearButton": "Effacer"
+    },
+    "columns": {
+      "nameHeader": "Nom",
+      "descriptionHeader": "Description",
+      "statusHeader": "Statut",
+      "createdAtHeader": "Créé le",
+      "noDescription": "—",
+      "actionsFor": "Actions pour {name}",
+      "edit": "Modifier",
+      "delete": "Supprimer"
+    },
+    "statuses": {
+      "all": "Tous les statuts",
+      "DRAFT": "Brouillon",
+      "ACTIVE": "Actif",
+      "ARCHIVED": "Archivé"
+    },
+    "createModal": {
+      "triggerLabel": "Nouveau projet",
+      "closeLabel": "Fermer",
+      "title": "Nouveau projet",
+      "description": "Créez un nouveau projet pour votre organisation."
+    },
+    "createForm": {
+      "nameLabel": "Nom",
+      "namePlaceholder": "Refonte du site marketing",
+      "descriptionLabel": "Description",
+      "descriptionPlaceholder": "Décrivez l'objectif du projet",
+      "statusLabel": "Statut",
+      "statusPlaceholder": "Sélectionnez un statut",
+      "submitLabel": "Créer",
+      "submittingLabel": "Création en cours...",
+      "successToast": "Projet créé avec succès !"
+    },
+    "editModal": {
+      "title": "Modifier le projet",
+      "description": "Modifiez les informations de {name}."
+    },
+    "editForm": {
+      "nameLabel": "Nom",
+      "descriptionLabel": "Description",
+      "statusLabel": "Statut",
+      "statusPlaceholder": "Sélectionnez un statut",
+      "submitLabel": "Enregistrer",
+      "submittingLabel": "Modification en cours...",
+      "successToast": "Projet modifié avec succès !"
+    },
+    "deleteModal": {
+      "title": "Supprimer ce projet ?",
+      "description": "{name} sera définitivement supprimé. Cette action est irréversible.",
+      "cancel": "Annuler",
+      "confirm": "Supprimer",
+      "confirming": "Suppression...",
+      "successToast": "Projet supprimé avec succès"
+    }
+  },
   "home": {
     "title": "Hello World",
     "seoDescription": "Découvrez les solutions innovantes de {appName} pour transformer votre entreprise."
@@ -586,6 +658,12 @@
     "billing": {
       "priceIdRequired": "L'identifiant du prix est requis",
       "priceIdInvalid": "L'identifiant du prix est invalide"
+    },
+    "projects": {
+      "nameTooLong": "Le nom doit contenir moins de 200 caractères",
+      "descriptionTooLong": "La description doit contenir moins de 2000 caractères",
+      "invalidStatus": "Statut invalide",
+      "projectIdRequired": "L'identifiant du projet est requis"
     },
     "contact": {
       "subject": {

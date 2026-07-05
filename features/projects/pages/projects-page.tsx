@@ -1,4 +1,5 @@
 import { FolderKanban } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { CreateProjectModal } from "@/features/projects/components/modals/create-project-modal";
 import { projectsColumns } from "@/features/projects/components/projects-columns";
@@ -26,6 +27,8 @@ function ProjectsPage({
   currentPage,
   hasActiveFilters,
 }: ProjectsPageProps) {
+  const t = useTranslations("projects");
+
   return (
     <Main className="flex flex-col gap-6 p-6">
       <header className="flex items-center justify-between">
@@ -34,9 +37,11 @@ function ProjectsPage({
             <FolderKanban className="size-5 text-blue-500" aria-hidden="true" />
           </div>
           <div>
-            <h1 className="text-2xl font-semibold tracking-tight">Projets</h1>
+            <h1 className="text-2xl font-semibold tracking-tight">
+              {t("title")}
+            </h1>
             <p className="text-muted-foreground text-sm">
-              {totalCount} projet{totalCount > 1 ? "s" : ""}
+              {t("projectCount", { count: totalCount })}
             </p>
           </div>
         </div>

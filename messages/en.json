@@ -379,6 +379,78 @@
       "void": "Void"
     }
   },
+  "projects": {
+    "title": "Projects",
+    "loadingLabel": "Loading projects",
+    "projectCount": "{count, plural, one {# project} other {# projects}}",
+    "newProject": "New project",
+    "empty": {
+      "filtered": "No project matches your filters.",
+      "unfiltered": "No project yet. Create your first project."
+    },
+    "filters": {
+      "searchPlaceholder": "Search by name...",
+      "statusLabel": "Status",
+      "statusPlaceholder": "Status",
+      "applyButton": "Apply",
+      "loadingButton": "Loading...",
+      "clearButton": "Clear"
+    },
+    "columns": {
+      "nameHeader": "Name",
+      "descriptionHeader": "Description",
+      "statusHeader": "Status",
+      "createdAtHeader": "Created on",
+      "noDescription": "—",
+      "actionsFor": "Actions for {name}",
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "statuses": {
+      "all": "All statuses",
+      "DRAFT": "Draft",
+      "ACTIVE": "Active",
+      "ARCHIVED": "Archived"
+    },
+    "createModal": {
+      "triggerLabel": "New project",
+      "closeLabel": "Close",
+      "title": "New project",
+      "description": "Create a new project for your organization."
+    },
+    "createForm": {
+      "nameLabel": "Name",
+      "namePlaceholder": "Marketing site redesign",
+      "descriptionLabel": "Description",
+      "descriptionPlaceholder": "Describe the project's goal",
+      "statusLabel": "Status",
+      "statusPlaceholder": "Select a status",
+      "submitLabel": "Create",
+      "submittingLabel": "Creating...",
+      "successToast": "Project created successfully!"
+    },
+    "editModal": {
+      "title": "Edit project",
+      "description": "Edit {name}'s information."
+    },
+    "editForm": {
+      "nameLabel": "Name",
+      "descriptionLabel": "Description",
+      "statusLabel": "Status",
+      "statusPlaceholder": "Select a status",
+      "submitLabel": "Save",
+      "submittingLabel": "Saving...",
+      "successToast": "Project updated successfully!"
+    },
+    "deleteModal": {
+      "title": "Delete this project?",
+      "description": "{name} will be permanently deleted. This action is irreversible.",
+      "cancel": "Cancel",
+      "confirm": "Delete",
+      "confirming": "Deleting...",
+      "successToast": "Project deleted successfully"
+    }
+  },
   "pricing": {
     "heading": "Clear pricing, built to grow with you",
     "subheading": "Whether you're a freelancer, a small team, or a larger organization, {appName} offers flexible, no-commitment plans so you can move at your own pace.",
@@ -586,6 +658,12 @@
     "billing": {
       "priceIdRequired": "Price ID is required",
       "priceIdInvalid": "Price ID is invalid"
+    },
+    "projects": {
+      "nameTooLong": "Name must be under 200 characters",
+      "descriptionTooLong": "Description must be under 2000 characters",
+      "invalidStatus": "Invalid status",
+      "projectIdRequired": "Project ID is required"
     },
     "contact": {
       "subject": {
