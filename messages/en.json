@@ -243,7 +243,10 @@
       "member": "Member"
     },
     "membersPage": {
-      "memberCount": "{count, plural, one {# member} other {# members}}"
+      "memberCount": "{count, plural, one {# member} other {# members}}",
+      "seatCapExceededTitle": "Seat limit exceeded",
+      "seatCapExceededDescription": "This organization has {memberCount, plural, one {# member} other {# members}}, which is over the {seatCap, plural, one {# seat} other {# seats}} included in the current plan. Existing members keep full access, but you can't add new members until you upgrade your plan or remove members.",
+      "seatCapExceededCta": "Manage billing"
     },
     "membersLoading": {
       "ariaLabel": "Loading member list"
@@ -1014,6 +1017,16 @@
       "greeting": "Hello,",
       "body": "We were unable to process the latest payment for {organizationName} on {appName}. Please update your payment method to avoid any interruption of service.",
       "cta": "Manage billing",
+      "fallbackIntro": "If the button doesn't work, copy this link into your browser:"
+    },
+    "seatLimitExceeded": {
+      "subject": "{organizationName} has exceeded its seat limit on {appName}",
+      "preview": "{organizationName} now has more members than its plan allows",
+      "heading": "Your organization has exceeded its seat limit",
+      "greeting": "Hello,",
+      "body": "{organizationName} now has {memberCount, plural, one {# member} other {# members}}, which is over the {seatCap, plural, one {# seat} other {# seats}} included in its current plan on {appName}.",
+      "noRemoval": "No member has been removed and none will be automatically. However, you won't be able to add new members until you upgrade your plan or remove members to get back within your seat limit.",
+      "cta": "Manage organization",
       "fallbackIntro": "If the button doesn't work, copy this link into your browser:"
     },
     "accountDeleted": {

@@ -239,7 +239,10 @@
       "member": "Membre"
     },
     "membersPage": {
-      "memberCount": "{count, plural, one {# membre} other {# membres}}"
+      "memberCount": "{count, plural, one {# membre} other {# membres}}",
+      "seatCapExceededTitle": "Limite de membres dépassée",
+      "seatCapExceededDescription": "Cette organisation compte {memberCount, plural, one {# membre} other {# membres}}, ce qui dépasse les {seatCap, plural, one {# place} other {# places}} incluses dans l'offre actuelle. Les membres existants conservent un accès complet, mais vous ne pouvez pas ajouter de nouveaux membres tant que vous n'aurez pas mis à niveau votre offre ou retiré des membres.",
+      "seatCapExceededCta": "Gérer la facturation"
     },
     "membersLoading": {
       "ariaLabel": "Chargement de la liste des membres"
@@ -1014,6 +1017,16 @@
       "greeting": "Bonjour,",
       "body": "Nous n'avons pas pu traiter le dernier paiement de {organizationName} sur {appName}. Merci de mettre à jour votre moyen de paiement pour éviter toute interruption de service.",
       "cta": "Gérer la facturation",
+      "fallbackIntro": "Si le bouton ne fonctionne pas, copiez ce lien dans votre navigateur :"
+    },
+    "seatLimitExceeded": {
+      "subject": "{organizationName} a dépassé sa limite de membres sur {appName}",
+      "preview": "{organizationName} compte désormais plus de membres que son offre ne le permet",
+      "heading": "Votre organisation a dépassé sa limite de membres",
+      "greeting": "Bonjour,",
+      "body": "{organizationName} compte désormais {memberCount, plural, one {# membre} other {# membres}}, ce qui dépasse les {seatCap, plural, one {# place} other {# places}} incluses dans son offre actuelle sur {appName}.",
+      "noRemoval": "Aucun membre n'a été retiré et aucun ne le sera automatiquement. Cependant, vous ne pourrez pas ajouter de nouveaux membres tant que vous n'aurez pas mis à niveau votre offre ou retiré des membres pour revenir dans la limite.",
+      "cta": "Gérer l'organisation",
       "fallbackIntro": "Si le bouton ne fonctionne pas, copiez ce lien dans votre navigateur :"
     },
     "accountDeleted": {

@@ -1,4 +1,5 @@
-import { Users } from "lucide-react";
+import { Link } from "@/i18n/navigation";
+import { AlertTriangle, Users } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { MembersFilters } from "@/features/organizations/components/members-filters";
@@ -8,6 +9,8 @@ import type { MemberItem } from "@/features/organizations/services/get-organizat
 
 import { Main } from "@/components/main";
 import { Pagination } from "@/components/pagination";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 
 type MembersPageProps = {
@@ -18,6 +21,9 @@ type MembersPageProps = {
   currentUserId: string;
   memberRole: string;
   organizationName: string;
+  organizationMemberCount: number;
+  seatCap: number;
+  isOverSeatCap: boolean;
 };
 
 function MembersPage({
@@ -28,6 +34,9 @@ function MembersPage({
   currentUserId,
   memberRole,
   organizationName,
+  organizationMemberCount,
+  seatCap,
+  isOverSeatCap,
 }: MembersPageProps) {
   const t = useTranslations("organizations.membersPage");
   const canManage = memberRole === "owner" || memberRole === "admin";
@@ -51,6 +60,26 @@ function MembersPage({
 
         {canManage && <InviteModal />}
       </header>
+
+      {isOverSeatCap && (
+        <Alert variant="destructive">
+          <AlertTriangle className="size-4" aria-hidden="true" />
+          <AlertTitle>{t("seatCapExceededTitle")}</AlertTitle>
+          <AlertDescription className="flex flex-col gap-3">
+            <span>
+              {t("seatCapExceededDescription", {
+                memberCount: organizationMemberCount,
+                seatCap,
+              })}
+            </span>
+            {canManage && (
+              <Button type="button" variant="outline" size="sm" asChild>
+                <Link href="/dashboard/billing">{t("seatCapExceededCta")}</Link>
+              </Button>
+            )}
+          </AlertDescription>
+        </Alert>
+      )}
 
       <Separator />
 

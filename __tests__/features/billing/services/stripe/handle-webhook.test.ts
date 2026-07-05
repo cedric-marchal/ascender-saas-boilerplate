@@ -10,7 +10,10 @@ const mockRedisSet = vi.fn();
 const mockRedisDel = vi.fn();
 const mockPrismaOrganizationFindUnique = vi.fn();
 const mockPrismaMemberFindFirst = vi.fn();
+const mockPrismaMemberCount = vi.fn();
+const mockPrismaSubscriptionFindFirst = vi.fn();
 const mockSendPaymentFailedEmail = vi.fn();
+const mockReconcileSeatsOnDowngrade = vi.fn();
 
 vi.mock("@/lib/stripe", () => ({
   stripe: {
@@ -28,12 +31,14 @@ vi.mock("@/lib/prisma", () => ({
     subscription: {
       upsert: mockPrismaUpsert,
       deleteMany: mockPrismaDeleteMany,
+      findFirst: mockPrismaSubscriptionFindFirst,
     },
     organization: {
       findUnique: mockPrismaOrganizationFindUnique,
     },
     member: {
       findFirst: mockPrismaMemberFindFirst,
+      count: mockPrismaMemberCount,
     },
   },
 }));
@@ -49,6 +54,7 @@ vi.mock("@/lib/redis", () => ({
 vi.mock("@/lib/env", () => ({
   env: {
     STRIPE_WEBHOOK_SECRET: "whsec_test_secret",
+    STRIPE_PRICE_ID_PRO: "price_pro_test",
   },
 }));
 
@@ -58,6 +64,10 @@ vi.mock(
     sendPaymentFailedEmail: mockSendPaymentFailedEmail,
   }),
 );
+
+vi.mock("@/features/billing/services/reconcile-seats.service", () => ({
+  reconcileSeatsOnDowngrade: mockReconcileSeatsOnDowngrade,
+}));
 
 // Import after mocks
 const { handleStripeWebhook } =
@@ -72,7 +82,10 @@ describe("handleStripeWebhook", () => {
     mockRedisSet.mockResolvedValue("OK");
     mockPrismaOrganizationFindUnique.mockResolvedValue(null);
     mockPrismaMemberFindFirst.mockResolvedValue(null);
+    mockPrismaMemberCount.mockResolvedValue(0);
+    mockPrismaSubscriptionFindFirst.mockResolvedValue(null);
     mockSendPaymentFailedEmail.mockResolvedValue(undefined);
+    mockReconcileSeatsOnDowngrade.mockResolvedValue(undefined);
   });
 
   describe("signature validation", () => {
@@ -723,6 +736,193 @@ describe("handleStripeWebhook", () => {
       expect(result.status).toBeGreaterThanOrEqual(500);
       // Neither the event-level nor the invoice-level dedupe key is set.
       expect(mockRedisSet).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("seat reconciliation on downgrade/cancellation", () => {
+    function buildSubscriptionEvent(
+      eventId: string,
+      type: "customer.subscription.created" | "customer.subscription.updated",
+      subscriptionId: string,
+      customerId: string,
+      priceId: string,
+    ) {
+      return {
+        id: eventId,
+        type,
+        data: {
+          object: {
+            id: subscriptionId,
+            customer: customerId,
+            status: "active",
+            items: {
+              data: [
+                {
+                  price: { id: priceId },
+                  current_period_start: 1234567890,
+                  current_period_end: 1234577890,
+                },
+              ],
+            },
+            cancel_at_period_end: false,
+          },
+        },
+      };
+    }
+
+    it("triggers reconciliation on subscription.updated when the seat cap shrinks", async () => {
+      mockConstructEvent.mockReturnValue(
+        buildSubscriptionEvent(
+          "evt_downgrade",
+          "customer.subscription.updated",
+          "sub_downgrade",
+          "cus_downgrade",
+          "price_unknown_free_tier",
+        ),
+      );
+      mockPrismaFindUnique.mockResolvedValue({
+        organizationId: "org_downgrade",
+        stripeCustomerId: "cus_downgrade",
+      });
+      // Before the write: an active Pro subscription (cap 5).
+      // After the write: no matching active/allowed subscription row (cap 1, free).
+      mockPrismaSubscriptionFindFirst
+        .mockResolvedValueOnce({ stripePriceId: "price_pro_test" })
+        .mockResolvedValueOnce(null);
+
+      const result = await handleStripeWebhook("body", "sig");
+
+      expect(mockReconcileSeatsOnDowngrade).toHaveBeenCalledWith(
+        "org_downgrade",
+      );
+      expect(result.status).toBe(200);
+    });
+
+    it("does not trigger reconciliation on a renewal that keeps the same price", async () => {
+      mockConstructEvent.mockReturnValue(
+        buildSubscriptionEvent(
+          "evt_renewal",
+          "customer.subscription.updated",
+          "sub_renewal",
+          "cus_renewal",
+          "price_pro_test",
+        ),
+      );
+      mockPrismaFindUnique.mockResolvedValue({
+        organizationId: "org_renewal",
+        stripeCustomerId: "cus_renewal",
+      });
+      mockPrismaSubscriptionFindFirst.mockResolvedValue({
+        stripePriceId: "price_pro_test",
+      });
+
+      await handleStripeWebhook("body", "sig");
+
+      expect(mockReconcileSeatsOnDowngrade).not.toHaveBeenCalled();
+    });
+
+    it("does not trigger reconciliation on subscription.created (no prior state to downgrade from)", async () => {
+      mockConstructEvent.mockReturnValue(
+        buildSubscriptionEvent(
+          "evt_created",
+          "customer.subscription.created",
+          "sub_created",
+          "cus_created",
+          "price_unknown_free_tier",
+        ),
+      );
+      mockPrismaFindUnique.mockResolvedValue({
+        organizationId: "org_created",
+        stripeCustomerId: "cus_created",
+      });
+      mockPrismaSubscriptionFindFirst.mockResolvedValue(null);
+
+      await handleStripeWebhook("body", "sig");
+
+      expect(mockReconcileSeatsOnDowngrade).not.toHaveBeenCalled();
+    });
+
+    it("triggers reconciliation on subscription.deleted when it drops the org to the free cap", async () => {
+      mockConstructEvent.mockReturnValue({
+        id: "evt_deleted_downgrade",
+        type: "customer.subscription.deleted",
+        data: {
+          object: {
+            id: "sub_deleted_downgrade",
+            customer: "cus_deleted_downgrade",
+          },
+        },
+      });
+      mockPrismaFindUnique.mockResolvedValue({
+        organizationId: "org_deleted_downgrade",
+      });
+      // Before delete: active Pro subscription (cap 5). After delete: none (cap 1).
+      mockPrismaSubscriptionFindFirst
+        .mockResolvedValueOnce({ stripePriceId: "price_pro_test" })
+        .mockResolvedValueOnce(null);
+
+      const result = await handleStripeWebhook("body", "sig");
+
+      expect(mockReconcileSeatsOnDowngrade).toHaveBeenCalledWith(
+        "org_deleted_downgrade",
+      );
+      expect(result.status).toBe(200);
+    });
+
+    it("does not trigger reconciliation on subscription.deleted when already on the free cap", async () => {
+      mockConstructEvent.mockReturnValue({
+        id: "evt_deleted_already_free",
+        type: "customer.subscription.deleted",
+        data: {
+          object: {
+            id: "sub_deleted_already_free",
+            customer: "cus_deleted_already_free",
+          },
+        },
+      });
+      mockPrismaFindUnique.mockResolvedValue({
+        organizationId: "org_deleted_already_free",
+      });
+      mockPrismaSubscriptionFindFirst.mockResolvedValue(null);
+
+      await handleStripeWebhook("body", "sig");
+
+      expect(mockReconcileSeatsOnDowngrade).not.toHaveBeenCalled();
+    });
+
+    it("does not fail the webhook when reconciliation itself throws (provisioning already succeeded)", async () => {
+      mockConstructEvent.mockReturnValue(
+        buildSubscriptionEvent(
+          "evt_reconcile_fails",
+          "customer.subscription.updated",
+          "sub_reconcile_fails",
+          "cus_reconcile_fails",
+          "price_unknown_free_tier",
+        ),
+      );
+      mockPrismaFindUnique.mockResolvedValue({
+        organizationId: "org_reconcile_fails",
+        stripeCustomerId: "cus_reconcile_fails",
+      });
+      mockPrismaSubscriptionFindFirst
+        .mockResolvedValueOnce({ stripePriceId: "price_pro_test" })
+        .mockResolvedValueOnce(null);
+      mockReconcileSeatsOnDowngrade.mockRejectedValue(
+        new Error("Resend unavailable"),
+      );
+
+      const result = await handleStripeWebhook("body", "sig");
+
+      // Provisioning (upsert + cache bust) succeeded, so the event is still
+      // marked processed and the webhook returns 200 — a failed courtesy
+      // notification must not cause Stripe to retry an already-synced event.
+      expect(mockPrismaUpsert).toHaveBeenCalled();
+      expect(result.status).toBe(200);
+      expect(mockRedisSet).toHaveBeenCalledWith(
+        "stripe:event:evt_reconcile_fails",
+        1,
+        { ex: 86400 },
+      );
     });
   });
 

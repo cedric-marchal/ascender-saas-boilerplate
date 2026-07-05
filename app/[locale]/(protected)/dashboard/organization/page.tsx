@@ -6,6 +6,7 @@ import { createLoader, type SearchParams } from "nuqs/server";
 
 import { membersSearchParams } from "@/features/organizations/constants/members-filters.constant";
 import { MembersPage } from "@/features/organizations/pages/members-page";
+import { getSeatCapStatus } from "@/features/organizations/services/check-seat-capacity.service";
 import { getOrganizationMembers } from "@/features/organizations/services/get-organization-members.service";
 import { getOrganization } from "@/features/organizations/services/get-organization.service";
 
@@ -70,18 +71,22 @@ export default async function OrganizationRoute({
 
   const filters = await loadSearchParams(searchParams);
 
-  const [organization, { members, totalCount, totalPages, currentPage }] =
-    await Promise.all([
-      getOrganization({
-        userId: session.user.id,
-        organizationId: session.activeOrganizationId,
-      }),
-      getOrganizationMembers({
-        organizationId: session.activeOrganizationId,
-        userId: session.user.id,
-        ...filters,
-      }),
-    ]);
+  const [
+    organization,
+    { members, totalCount, totalPages, currentPage },
+    seatCapStatus,
+  ] = await Promise.all([
+    getOrganization({
+      userId: session.user.id,
+      organizationId: session.activeOrganizationId,
+    }),
+    getOrganizationMembers({
+      organizationId: session.activeOrganizationId,
+      userId: session.user.id,
+      ...filters,
+    }),
+    getSeatCapStatus(session.activeOrganizationId),
+  ]);
 
   return (
     <MembersPage
@@ -92,6 +97,9 @@ export default async function OrganizationRoute({
       currentUserId={session.user.id}
       memberRole={organization.role}
       organizationName={organization.name}
+      organizationMemberCount={organization.memberCount}
+      seatCap={seatCapStatus.seatCap}
+      isOverSeatCap={seatCapStatus.isOverCap}
     />
   );
 }
