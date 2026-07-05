@@ -25,4 +25,45 @@ const filterRatelimit = new Ratelimit({
   analytics: true,
 });
 
-export { authenticatedRatelimit, contactRatelimit, filterRatelimit };
+// Mirrors lib/auth.ts customRules for "/sign-in/email" (window: 10, max: 5).
+// Keyed IP+email so a single attacker cannot lock out other users sharing an IP.
+const authSignInRatelimit = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(5, "10 s"),
+  prefix: "@upstash/ratelimit/auth-sign-in",
+  analytics: true,
+});
+
+// Mirrors lib/auth.ts customRules for "/sign-up/email" (window: 10, max: 3).
+const authSignUpRatelimit = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(3, "10 s"),
+  prefix: "@upstash/ratelimit/auth-sign-up",
+  analytics: true,
+});
+
+// Mirrors lib/auth.ts customRules for "/reset-password" and "/forget-password" (window: 60, max: 3).
+const authPasswordRatelimit = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(3, "60 s"),
+  prefix: "@upstash/ratelimit/auth-password",
+  analytics: true,
+});
+
+// Authenticated limiter for organization invitations (email-bomb vector).
+const invitationRatelimit = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(10, "10 m"),
+  prefix: "@upstash/ratelimit/invitation",
+  analytics: true,
+});
+
+export {
+  authenticatedRatelimit,
+  authPasswordRatelimit,
+  authSignInRatelimit,
+  authSignUpRatelimit,
+  contactRatelimit,
+  filterRatelimit,
+  invitationRatelimit,
+};

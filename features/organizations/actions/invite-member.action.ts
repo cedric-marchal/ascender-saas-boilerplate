@@ -8,11 +8,18 @@ import { logEvent } from "@/features/organizations/services/audit-log.service";
 import { checkSeatCapacity } from "@/features/organizations/services/check-seat-capacity.service";
 
 import { auth } from "@/lib/auth";
+import { invitationRatelimit } from "@/lib/ratelimit";
 import { orgActionClient } from "@/lib/safe-action";
 
 import { ForbiddenError } from "@/utils/errors/errors";
+import { checkRatelimit } from "@/utils/ratelimit/check-ratelimit";
 
 const inviteMemberAction = orgActionClient
+  .use(async ({ next, ctx }) => {
+    await checkRatelimit(invitationRatelimit, ctx.userId);
+
+    return next();
+  })
   .inputSchema(InviteMemberSchema)
   .action(async ({ parsedInput, ctx }) => {
     if (ctx.memberRole !== "owner" && ctx.memberRole !== "admin") {

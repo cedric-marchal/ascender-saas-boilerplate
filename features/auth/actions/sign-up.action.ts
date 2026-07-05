@@ -7,11 +7,21 @@ import { APIError } from "better-auth/api";
 import { SignUpSchema } from "@/features/auth/schemas/auth.schema";
 
 import { auth } from "@/lib/auth";
+import { authSignUpRatelimit } from "@/lib/ratelimit";
 import { actionClient } from "@/lib/safe-action";
 
 import { ConflictError } from "@/utils/errors/errors";
+import { checkRatelimit } from "@/utils/ratelimit/check-ratelimit";
+import { getActionIdentifier } from "@/utils/ratelimit/get-request-identifier";
 
 const signUpAction = actionClient
+  .use(async ({ next, clientInput }) => {
+    const { email } = clientInput as { email: string };
+    const ip = await getActionIdentifier();
+    await checkRatelimit(authSignUpRatelimit, `${ip}:${email}`);
+
+    return next();
+  })
   .inputSchema(SignUpSchema)
   .action(async ({ parsedInput }) => {
     try {

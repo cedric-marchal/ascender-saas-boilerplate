@@ -14,6 +14,13 @@ import { prisma } from "@/lib/prisma";
 import { redis } from "@/lib/redis";
 import { stripe } from "@/lib/stripe";
 
+import { ForbiddenError } from "@/utils/errors/errors";
+
+type GetBillingInput = {
+  organizationId: string;
+  userId: string;
+};
+
 type BillingInvoiceStatus = InvoiceStatus | null;
 
 type BillingInvoice = {
@@ -122,8 +129,24 @@ async function fetchSubscriptions(
 }
 
 async function getBilling(
-  organizationId: string,
+  input: GetBillingInput,
 ): Promise<GetBillingResult | null> {
+  const membership = await prisma.member.findFirst({
+    where: {
+      organizationId: input.organizationId,
+      userId: input.userId,
+    },
+    select: {
+      id: true,
+    },
+  });
+
+  if (!membership) {
+    throw new ForbiddenError("Vous n'êtes pas membre de cette organisation");
+  }
+
+  const { organizationId } = input;
+
   const stripeCustomer = await prisma.stripeCustomer.findUnique({
     where: {
       organizationId,
@@ -150,4 +173,9 @@ async function getBilling(
 
 export { getBilling };
 
-export type { BillingInvoice, BillingSubscription, GetBillingResult };
+export type {
+  BillingInvoice,
+  BillingSubscription,
+  GetBillingInput,
+  GetBillingResult,
+};

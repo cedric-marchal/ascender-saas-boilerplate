@@ -101,12 +101,16 @@ const STRIPE_CUSTOMER_B = "cus_b_456";
 describe("getBilling — resolves ONLY the caller's org Stripe customer", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockPrismaMemberFindFirst.mockResolvedValue({ id: "member-1" });
   });
 
   it("returns null for org A when org A has no Stripe customer", async () => {
     mockPrismaStripeCustomerFindUnique.mockResolvedValue(null);
 
-    const result = await getBilling(ORG_A_ID);
+    const result = await getBilling({
+      organizationId: ORG_A_ID,
+      userId: USER_IN_ORG_A,
+    });
 
     expect(result).toBeNull();
     // MUST query by organizationId — not by any other field
@@ -124,7 +128,10 @@ describe("getBilling — resolves ONLY the caller's org Stripe customer", () => 
     mockStripeInvoicesList.mockResolvedValue({ data: [] });
     mockStripeSubscriptionsList.mockResolvedValue({ data: [] });
 
-    await getBilling(ORG_A_ID);
+    await getBilling({
+      organizationId: ORG_A_ID,
+      userId: USER_IN_ORG_A,
+    });
 
     // Should query for org A only
     expect(mockPrismaStripeCustomerFindUnique).toHaveBeenCalledWith({
@@ -152,13 +159,32 @@ describe("getBilling — resolves ONLY the caller's org Stripe customer", () => 
     mockStripeInvoicesList.mockResolvedValue({ data: [] });
     mockStripeSubscriptionsList.mockResolvedValue({ data: [] });
 
-    await getBilling(ORG_A_ID);
+    await getBilling({
+      organizationId: ORG_A_ID,
+      userId: USER_IN_ORG_A,
+    });
 
     const callArgs = mockPrismaStripeCustomerFindUnique.mock.calls[0]![0];
 
     // Must use organizationId (not userId)
     expect(callArgs.where).toHaveProperty("organizationId");
     expect(callArgs.where).not.toHaveProperty("userId");
+  });
+
+  it("throws ForbiddenError and never queries Stripe customer when caller is not a member", async () => {
+    mockPrismaMemberFindFirst.mockResolvedValue(null);
+
+    await expect(
+      getBilling({
+        organizationId: ORG_B_ID,
+        userId: USER_IN_ORG_A,
+      }),
+    ).rejects.toThrow(ForbiddenError);
+
+    expect(mockPrismaStripeCustomerFindUnique).not.toHaveBeenCalled();
+    expect(mockRedisGet).not.toHaveBeenCalled();
+    expect(mockStripeInvoicesList).not.toHaveBeenCalled();
+    expect(mockStripeSubscriptionsList).not.toHaveBeenCalled();
   });
 });
 
