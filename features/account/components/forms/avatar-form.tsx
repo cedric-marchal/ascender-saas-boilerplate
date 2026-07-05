@@ -13,6 +13,7 @@ import { useRouter } from "next/navigation";
 
 import { useForm } from "@tanstack/react-form";
 import { Loader2, Upload, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import { UpdateAvatarSchema } from "@/features/account/schemas/avatar.schema";
@@ -25,6 +26,7 @@ import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 
 import { getErrorMessage } from "@/utils/errors/get-error-message";
+import { translateFieldErrors } from "@/utils/errors/translate-field-errors";
 import { getAvatarUrl } from "@/utils/string/get-avatar-url";
 import { getInitials } from "@/utils/string/get-initials";
 
@@ -35,6 +37,8 @@ type AvatarFormProps = {
 
 function AvatarForm({ name, image }: AvatarFormProps) {
   const router = useRouter();
+  const t = useTranslations("account.avatarForm");
+  const tValidation = useTranslations("validation");
 
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -84,7 +88,7 @@ function AvatarForm({ name, image }: AvatarFormProps) {
           body: formData,
         });
 
-        toast.success("Avatar mis à jour avec succès");
+        toast.success(t("successToast"));
 
         setPreviewUrl(null);
         form.reset();
@@ -113,10 +117,8 @@ function AvatarForm({ name, image }: AvatarFormProps) {
         </Avatar>
 
         <div className="flex-1">
-          <p className="text-sm font-medium">Photo de profil</p>
-          <p className="text-muted-foreground text-xs">
-            JPG, PNG ou WebP. Max 5MB.
-          </p>
+          <p className="text-sm font-medium">{t("label")}</p>
+          <p className="text-muted-foreground text-xs">{t("hint")}</p>
         </div>
       </div>
 
@@ -165,7 +167,7 @@ function AvatarForm({ name, image }: AvatarFormProps) {
           return (
             <Field data-invalid={isInvalid}>
               <FieldLabel htmlFor="settings-avatar-input">
-                Changer l&apos;avatar
+                {t("changeLabel")}
               </FieldLabel>
               <div
                 onDragOver={handleDragOver}
@@ -208,7 +210,7 @@ function AvatarForm({ name, image }: AvatarFormProps) {
                       className="h-8 w-8 p-0"
                     >
                       <X className="h-4 w-4" aria-hidden="true" />
-                      <span className="sr-only">Supprimer le fichier</span>
+                      <span className="sr-only">{t("removeFile")}</span>
                     </Button>
                   </div>
                 ) : (
@@ -218,9 +220,9 @@ function AvatarForm({ name, image }: AvatarFormProps) {
                       aria-hidden="true"
                     />
                     <p className="text-muted-foreground text-sm">
-                      Glissez-déposez une image ou{" "}
+                      {t("dragText")}{" "}
                       <label className="text-primary cursor-pointer font-medium hover:underline">
-                        parcourir
+                        {t("browseText")}
                         <input
                           id="settings-avatar-input"
                           type="file"
@@ -234,9 +236,16 @@ function AvatarForm({ name, image }: AvatarFormProps) {
                 )}
               </div>
               <p className="text-muted-foreground mt-2 text-xs">
-                JPG, PNG ou WebP. Maximum 5 MB.
+                {t("formatHint")}
               </p>
-              {isInvalid && <FieldError errors={field.state.meta.errors} />}
+              {isInvalid && (
+                <FieldError
+                  errors={translateFieldErrors(
+                    field.state.meta.errors,
+                    tValidation,
+                  )}
+                />
+              )}
             </Field>
           );
         }}
@@ -259,7 +268,7 @@ function AvatarForm({ name, image }: AvatarFormProps) {
                   aria-hidden="true"
                 />
               ) : null}
-              {isSubmitting ? "Téléchargement..." : "Mettre à jour l'avatar"}
+              {isSubmitting ? t("submittingLabel") : t("submitLabel")}
             </Button>
           );
         }}

@@ -1,5 +1,6 @@
 import { Link } from "@/i18n/navigation";
 import { ArrowRight, CreditCard, FolderKanban, Settings } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { Main } from "@/components/main";
 import {
@@ -15,9 +16,10 @@ type DashboardHomePageProps = {
   userName: string;
 };
 
+type QuickActionKey = "projects" | "billing" | "settings";
+
 type QuickAction = {
-  title: string;
-  description: string;
+  key: QuickActionKey;
   href: "/dashboard/projects" | "/dashboard/billing" | "/dashboard/settings";
   icon: typeof FolderKanban;
   color: string;
@@ -26,24 +28,21 @@ type QuickAction = {
 
 const quickActions = [
   {
-    title: "Projets",
-    description: "Gérez vos projets et suivez leur avancement",
+    key: "projects",
     href: "/dashboard/projects" as const,
     icon: FolderKanban,
     color: "bg-blue-500/10",
     iconColor: "text-blue-500",
   },
   {
-    title: "Facturation",
-    description: "Consultez vos factures et abonnements",
+    key: "billing",
     href: "/dashboard/billing" as const,
     icon: CreditCard,
     color: "bg-emerald-500/10",
     iconColor: "text-emerald-500",
   },
   {
-    title: "Paramètres",
-    description: "Modifiez votre profil et vos préférences",
+    key: "settings",
     href: "/dashboard/settings" as const,
     icon: Settings,
     color: "bg-orange-500/10",
@@ -52,17 +51,16 @@ const quickActions = [
 ] satisfies QuickAction[];
 
 function DashboardHomePage({ userName }: DashboardHomePageProps) {
-  const firstName = userName.split(" ")[0];
+  const t = useTranslations("dashboard.home");
+  const firstName = userName.split(" ")[0] ?? userName;
 
   return (
     <Main className="flex flex-col gap-6 p-6">
       <header>
         <h1 className="text-2xl font-semibold tracking-tight">
-          {`Bonjour, ${firstName}`}
+          {t("greeting", { firstName })}
         </h1>
-        <p className="text-muted-foreground text-sm">
-          Bienvenue sur votre tableau de bord
-        </p>
+        <p className="text-muted-foreground text-sm">{t("welcome")}</p>
       </header>
 
       <Separator />
@@ -81,9 +79,11 @@ function DashboardHomePage({ userName }: DashboardHomePageProps) {
                   />
                 </div>
                 <div className="flex-1">
-                  <CardTitle className="text-base">{action.title}</CardTitle>
+                  <CardTitle className="text-base">
+                    {t(`quickActions.${action.key}.title`)}
+                  </CardTitle>
                   <CardDescription className="text-xs">
-                    {action.description}
+                    {t(`quickActions.${action.key}.description`)}
                   </CardDescription>
                 </div>
                 <ArrowRight
@@ -98,14 +98,12 @@ function DashboardHomePage({ userName }: DashboardHomePageProps) {
 
       <Card>
         <CardHeader>
-          <CardTitle>Activité récente</CardTitle>
-          <CardDescription>
-            Vos dernières actions sur la plateforme
-          </CardDescription>
+          <CardTitle>{t("recentActivity.title")}</CardTitle>
+          <CardDescription>{t("recentActivity.description")}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="text-muted-foreground flex h-32 items-center justify-center rounded-lg border border-dashed text-sm">
-            Aucune activité récente
+            {t("recentActivity.empty")}
           </div>
         </CardContent>
       </Card>

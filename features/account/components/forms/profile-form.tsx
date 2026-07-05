@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 
 import { useForm } from "@tanstack/react-form";
 import { Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useAction } from "next-safe-action/hooks";
 import { toast } from "sonner";
 
@@ -27,6 +28,7 @@ import { Input } from "@/components/ui/input";
 
 import { getActionResult } from "@/utils/errors/get-action-result";
 import { getErrorMessage } from "@/utils/errors/get-error-message";
+import { translateFieldErrors } from "@/utils/errors/translate-field-errors";
 
 type ProfileFormProps = {
   name: string;
@@ -36,6 +38,8 @@ type ProfileFormProps = {
 
 function ProfileForm({ name, email, emailVerified }: ProfileFormProps) {
   const router = useRouter();
+  const t = useTranslations("account.profileForm");
+  const tValidation = useTranslations("validation");
   const { executeAsync, isExecuting } = useAction(updateProfileAction);
 
   const form = useForm({
@@ -51,9 +55,7 @@ function ProfileForm({ name, email, emailVerified }: ProfileFormProps) {
         const data = getActionResult(await executeAsync(value));
 
         toast.success(
-          data.emailChanged
-            ? "Profil mis à jour avec succès. Un email de vérification a été envoyé."
-            : "Profil mis à jour avec succès",
+          data.emailChanged ? t("successToastEmailChanged") : t("successToast"),
         );
 
         router.refresh();
@@ -83,7 +85,9 @@ function ProfileForm({ name, email, emailVerified }: ProfileFormProps) {
 
           return (
             <Field data-invalid={isInvalid}>
-              <FieldLabel htmlFor="settings-profile-name">Nom</FieldLabel>
+              <FieldLabel htmlFor="settings-profile-name">
+                {t("nameLabel")}
+              </FieldLabel>
               <Input
                 id="settings-profile-name"
                 name={field.name}
@@ -91,9 +95,16 @@ function ProfileForm({ name, email, emailVerified }: ProfileFormProps) {
                 onBlur={field.handleBlur}
                 onChange={handleChange}
                 aria-invalid={isInvalid}
-                placeholder="Votre nom"
+                placeholder={t("namePlaceholder")}
               />
-              {isInvalid && <FieldError errors={field.state.meta.errors} />}
+              {isInvalid && (
+                <FieldError
+                  errors={translateFieldErrors(
+                    field.state.meta.errors,
+                    tValidation,
+                  )}
+                />
+              )}
             </Field>
           );
         }}
@@ -111,7 +122,9 @@ function ProfileForm({ name, email, emailVerified }: ProfileFormProps) {
 
           return (
             <Field data-invalid={isInvalid}>
-              <FieldLabel htmlFor="settings-profile-email">Email</FieldLabel>
+              <FieldLabel htmlFor="settings-profile-email">
+                {t("emailLabel")}
+              </FieldLabel>
               <Input
                 id="settings-profile-email"
                 type="email"
@@ -120,17 +133,24 @@ function ProfileForm({ name, email, emailVerified }: ProfileFormProps) {
                 onBlur={field.handleBlur}
                 onChange={handleChange}
                 aria-invalid={isInvalid}
-                placeholder="votre@email.com"
+                placeholder={t("emailPlaceholder")}
               />
               <FieldDescription className="flex items-center gap-2">
                 <EmailVerificationBadge isVerified={emailVerified} />
                 {!emailVerified && (
                   <span className="text-xs text-orange-600">
-                    Vérifiez votre email pour sécuriser votre compte
+                    {t("verifyEmailHint")}
                   </span>
                 )}
               </FieldDescription>
-              {isInvalid && <FieldError errors={field.state.meta.errors} />}
+              {isInvalid && (
+                <FieldError
+                  errors={translateFieldErrors(
+                    field.state.meta.errors,
+                    tValidation,
+                  )}
+                />
+              )}
             </Field>
           );
         }}
@@ -151,8 +171,8 @@ function ProfileForm({ name, email, emailVerified }: ProfileFormProps) {
               />
             ) : null}
             {isExecuting || isSubmitting
-              ? "Enregistrement..."
-              : "Enregistrer les modifications"}
+              ? t("submittingLabel")
+              : t("submitLabel")}
           </Button>
         )}
       </form.Subscribe>

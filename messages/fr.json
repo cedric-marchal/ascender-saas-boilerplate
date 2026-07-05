@@ -98,6 +98,107 @@
       }
     }
   },
+  "dashboard": {
+    "home": {
+      "title": "Tableau de bord",
+      "greeting": "Bonjour, {firstName}",
+      "welcome": "Bienvenue sur votre tableau de bord",
+      "loadingLabel": "Chargement du tableau de bord",
+      "quickActions": {
+        "projects": {
+          "title": "Projets",
+          "description": "Gérez vos projets et suivez leur avancement"
+        },
+        "billing": {
+          "title": "Facturation",
+          "description": "Consultez vos factures et abonnements"
+        },
+        "settings": {
+          "title": "Paramètres",
+          "description": "Modifiez votre profil et vos préférences"
+        }
+      },
+      "recentActivity": {
+        "title": "Activité récente",
+        "description": "Vos dernières actions sur la plateforme",
+        "empty": "Aucune activité récente"
+      }
+    }
+  },
+  "account": {
+    "settings": {
+      "title": "Paramètres",
+      "subtitle": "Gérez vos informations personnelles et votre sécurité",
+      "loadingLabel": "Chargement des paramètres",
+      "personalInfo": {
+        "title": "Informations personnelles",
+        "description": "Mettez à jour votre nom et votre adresse email"
+      },
+      "security": {
+        "title": "Sécurité",
+        "description": "Changez votre mot de passe pour sécuriser votre compte"
+      },
+      "avatarCard": {
+        "title": "Photo de profil",
+        "description": "Personnalisez votre avatar visible par les autres utilisateurs"
+      },
+      "dangerZone": {
+        "title": "Zone de danger",
+        "description": "La suppression de votre compte est irréversible. Toutes vos données seront définitivement supprimées.",
+        "descriptionWithSubscription": "La suppression de votre compte est irréversible. Toutes vos données et votre abonnement seront définitivement supprimés."
+      }
+    },
+    "emailVerificationBadge": {
+      "verified": "Email vérifié",
+      "unverified": "Email non vérifié"
+    },
+    "profileForm": {
+      "nameLabel": "Nom",
+      "namePlaceholder": "Votre nom",
+      "emailLabel": "Email",
+      "emailPlaceholder": "votre@email.com",
+      "verifyEmailHint": "Vérifiez votre email pour sécuriser votre compte",
+      "submitLabel": "Enregistrer les modifications",
+      "submittingLabel": "Enregistrement...",
+      "successToast": "Profil mis à jour avec succès",
+      "successToastEmailChanged": "Profil mis à jour avec succès. Un email de vérification a été envoyé."
+    },
+    "passwordForm": {
+      "currentPasswordLabel": "Mot de passe actuel",
+      "newPasswordLabel": "Nouveau mot de passe",
+      "newPasswordHint": "Minimum 12 caractères, différent de l'ancien",
+      "confirmPasswordLabel": "Confirmer le nouveau mot de passe",
+      "submitLabel": "Modifier le mot de passe",
+      "submittingLabel": "Modification...",
+      "successToast": "Mot de passe modifié avec succès. Un email de confirmation a été envoyé."
+    },
+    "avatarForm": {
+      "label": "Photo de profil",
+      "hint": "JPG, PNG ou WebP. Max 5MB.",
+      "changeLabel": "Changer l'avatar",
+      "dragText": "Glissez-déposez une image ou",
+      "browseText": "parcourir",
+      "removeFile": "Supprimer le fichier",
+      "formatHint": "JPG, PNG ou WebP. Maximum 5 MB.",
+      "submitLabel": "Mettre à jour l'avatar",
+      "submittingLabel": "Téléchargement...",
+      "successToast": "Avatar mis à jour avec succès"
+    },
+    "deleteAccountForm": {
+      "confirmationLabel": "Confirmation",
+      "confirmationHint": "Tapez votre adresse email pour confirmer la suppression",
+      "submitLabel": "Supprimer mon compte",
+      "submittingLabel": "Suppression...",
+      "successToast": "Votre compte a été supprimé avec succès"
+    },
+    "deleteAccountModal": {
+      "triggerLabel": "Supprimer mon compte",
+      "closeLabel": "Fermer",
+      "title": "Supprimer votre compte",
+      "description": "Cette action est irréversible. Votre compte et vos données seront définitivement supprimés.",
+      "descriptionWithSubscription": "Cette action est irréversible. Votre compte, vos données et votre abonnement Stripe seront définitivement supprimés."
+    }
+  },
   "home": {
     "title": "Hello World",
     "seoDescription": "Découvrez les solutions innovantes de {appName} pour transformer votre entreprise."
@@ -283,6 +384,19 @@
     },
     "token": {
       "required": "Token requis"
+    },
+    "account": {
+      "confirmationRequired": "La confirmation est requise",
+      "confirmationInvalid": "La confirmation est invalide",
+      "emailTooLong": "L'email doit contenir moins de 255 caractères",
+      "currentPasswordRequired": "Le mot de passe actuel est requis",
+      "currentPasswordInvalid": "Le mot de passe actuel est invalide",
+      "newPasswordSameAsCurrent": "Le nouveau mot de passe doit être différent de l'ancien"
+    },
+    "avatar": {
+      "required": "L'image est requise",
+      "tooLarge": "L'image est trop volumineuse (max 4.5MB)",
+      "unsupportedFormat": "Format non supporté. Formats acceptés : JPEG, PNG, WebP"
     },
     "contact": {
       "subject": {

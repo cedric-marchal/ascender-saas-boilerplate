@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useRouter } from "@/i18n/navigation";
 import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog";
 import { Trash2, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { DeleteAccountForm } from "@/features/account/components/forms/delete-account-form";
 
@@ -28,6 +29,7 @@ function DeleteAccountModal({
   showStripeWarning = false,
 }: DeleteAccountModalProps) {
   const router = useRouter();
+  const t = useTranslations("account.deleteAccountModal");
   const [isOpen, setIsOpen] = useState(false);
 
   function handleSuccess() {
@@ -40,7 +42,7 @@ function DeleteAccountModal({
       <AlertDialogTrigger asChild>
         <Button type="button" variant="destructive">
           <Trash2 className="mr-2 h-4 w-4" aria-hidden="true" />
-          Supprimer mon compte
+          {t("triggerLabel")}
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent className="sm:max-w-lg">
@@ -50,18 +52,18 @@ function DeleteAccountModal({
             variant="ghost"
             size="icon"
             className="ring-offset-background focus:ring-ring absolute top-4 right-4 h-6 w-6 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-none disabled:pointer-events-none"
-            aria-label="Fermer"
+            aria-label={t("closeLabel")}
           >
             <X className="h-4 w-4" aria-hidden="true" />
           </Button>
         </AlertDialogPrimitive.Cancel>
 
         <AlertDialogHeader>
-          <AlertDialogTitle>Supprimer votre compte</AlertDialogTitle>
+          <AlertDialogTitle>{t("title")}</AlertDialogTitle>
           <AlertDialogDescription>
             {showStripeWarning
-              ? "Cette action est irréversible. Votre compte, vos données et votre abonnement Stripe seront définitivement supprimés."
-              : "Cette action est irréversible. Votre compte et vos données seront définitivement supprimés."}
+              ? t("descriptionWithSubscription")
+              : t("description")}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <DeleteAccountForm email={email} onSuccess={handleSuccess} />

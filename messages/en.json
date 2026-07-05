@@ -102,6 +102,107 @@
     "title": "Hello World",
     "seoDescription": "Discover the innovative solutions from {appName} to transform your business."
   },
+  "dashboard": {
+    "home": {
+      "title": "Dashboard",
+      "greeting": "Hello, {firstName}",
+      "welcome": "Welcome to your dashboard",
+      "loadingLabel": "Loading dashboard",
+      "quickActions": {
+        "projects": {
+          "title": "Projects",
+          "description": "Manage your projects and track their progress"
+        },
+        "billing": {
+          "title": "Billing",
+          "description": "View your invoices and subscriptions"
+        },
+        "settings": {
+          "title": "Settings",
+          "description": "Update your profile and preferences"
+        }
+      },
+      "recentActivity": {
+        "title": "Recent activity",
+        "description": "Your latest actions on the platform",
+        "empty": "No recent activity"
+      }
+    }
+  },
+  "account": {
+    "settings": {
+      "title": "Settings",
+      "subtitle": "Manage your personal information and security",
+      "loadingLabel": "Loading settings",
+      "personalInfo": {
+        "title": "Personal information",
+        "description": "Update your name and email address"
+      },
+      "security": {
+        "title": "Security",
+        "description": "Change your password to secure your account"
+      },
+      "avatarCard": {
+        "title": "Profile picture",
+        "description": "Customize your avatar visible to other users"
+      },
+      "dangerZone": {
+        "title": "Danger zone",
+        "description": "Deleting your account is irreversible. All your data will be permanently deleted.",
+        "descriptionWithSubscription": "Deleting your account is irreversible. All your data and your subscription will be permanently deleted."
+      }
+    },
+    "emailVerificationBadge": {
+      "verified": "Email verified",
+      "unverified": "Email not verified"
+    },
+    "profileForm": {
+      "nameLabel": "Name",
+      "namePlaceholder": "Your name",
+      "emailLabel": "Email",
+      "emailPlaceholder": "your@email.com",
+      "verifyEmailHint": "Verify your email to secure your account",
+      "submitLabel": "Save changes",
+      "submittingLabel": "Saving...",
+      "successToast": "Profile updated successfully",
+      "successToastEmailChanged": "Profile updated successfully. A verification email has been sent."
+    },
+    "passwordForm": {
+      "currentPasswordLabel": "Current password",
+      "newPasswordLabel": "New password",
+      "newPasswordHint": "Minimum 12 characters, different from the previous one",
+      "confirmPasswordLabel": "Confirm new password",
+      "submitLabel": "Change password",
+      "submittingLabel": "Updating...",
+      "successToast": "Password changed successfully. A confirmation email has been sent."
+    },
+    "avatarForm": {
+      "label": "Profile picture",
+      "hint": "JPG, PNG, or WebP. Max 5MB.",
+      "changeLabel": "Change avatar",
+      "dragText": "Drag and drop an image or",
+      "browseText": "browse",
+      "removeFile": "Remove file",
+      "formatHint": "JPG, PNG, or WebP. Maximum 5MB.",
+      "submitLabel": "Update avatar",
+      "submittingLabel": "Uploading...",
+      "successToast": "Avatar updated successfully"
+    },
+    "deleteAccountForm": {
+      "confirmationLabel": "Confirmation",
+      "confirmationHint": "Type your email address to confirm the deletion",
+      "submitLabel": "Delete my account",
+      "submittingLabel": "Deleting...",
+      "successToast": "Your account has been deleted successfully"
+    },
+    "deleteAccountModal": {
+      "triggerLabel": "Delete my account",
+      "closeLabel": "Close",
+      "title": "Delete your account",
+      "description": "This action is irreversible. Your account and your data will be permanently deleted.",
+      "descriptionWithSubscription": "This action is irreversible. Your account, your data, and your Stripe subscription will be permanently deleted."
+    }
+  },
   "pricing": {
     "heading": "Clear pricing, built to grow with you",
     "subheading": "Whether you're a freelancer, a small team, or a larger organization, {appName} offers flexible, no-commitment plans so you can move at your own pace.",
@@ -283,6 +384,19 @@
     },
     "token": {
       "required": "Token required"
+    },
+    "account": {
+      "confirmationRequired": "Confirmation is required",
+      "confirmationInvalid": "Confirmation is invalid",
+      "emailTooLong": "Email must be under 255 characters",
+      "currentPasswordRequired": "Current password is required",
+      "currentPasswordInvalid": "Current password is invalid",
+      "newPasswordSameAsCurrent": "New password must be different from the current one"
+    },
+    "avatar": {
+      "required": "Image is required",
+      "tooLarge": "Image is too large (max 4.5MB)",
+      "unsupportedFormat": "Unsupported format. Accepted formats: JPEG, PNG, WebP"
     },
     "contact": {
       "subject": {
