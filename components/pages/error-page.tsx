@@ -5,6 +5,8 @@ import { useEffect } from "react";
 import type { Route } from "next";
 import Link from "next/link";
 
+import { ERROR_BOUNDARY_MESSAGES } from "@/i18n/error-boundary-messages";
+import { getClientLocale } from "@/i18n/get-client-locale";
 import { AlertTriangle } from "lucide-react";
 
 import { Main } from "@/components/main";
@@ -19,6 +21,8 @@ function ErrorPage({ error, reset }: ErrorPageProps) {
   useEffect(() => {
     console.error(error.digest ?? error.message);
   }, [error]);
+
+  const messages = ERROR_BOUNDARY_MESSAGES[getClientLocale()];
 
   return (
     <Main
@@ -35,26 +39,26 @@ function ErrorPage({ error, reset }: ErrorPageProps) {
           id="error-title"
           className="text-foreground mb-2 text-4xl font-bold"
         >
-          Erreur
+          {messages.errorTitle}
         </h1>
 
         <h2 className="text-foreground mb-3 text-xl font-semibold">
-          Une erreur est survenue
+          {messages.errorHeading}
         </h2>
 
         <p className="text-muted-foreground mb-8 text-sm">
-          Désolé, une erreur inattendue s'est produite. Veuillez réessayer.
+          {messages.errorDescription}
         </p>
 
         {error.digest && (
           <p className="text-muted-foreground mb-6 font-mono text-xs">
-            Code : {error.digest}
+            {messages.errorCode} {error.digest}
           </p>
         )}
 
         <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
           <Button type="button" onClick={reset}>
-            Réessayer
+            {messages.retry}
           </Button>
 
           <Button type="button" variant="outline" asChild>
@@ -62,7 +66,7 @@ function ErrorPage({ error, reset }: ErrorPageProps) {
                 may render outside the [locale] segment's
                 NextIntlClientProvider, so the i18n Link is avoided here.
                 proxy.ts negotiates the correct locale on the next request. */}
-            <Link href={"/" as Route}>Retour à l'accueil</Link>
+            <Link href={"/" as Route}>{messages.backHome}</Link>
           </Button>
         </div>
       </div>
