@@ -89,6 +89,10 @@ const routing = defineRouting({
       en: "/admin/users/[slug]",
       fr: "/admin/utilisateurs/[slug]",
     },
+    "/accept-invitation/[invitationId]": {
+      en: "/accept-invitation/[invitationId]",
+      fr: "/accepter-invitation/[invitationId]",
+    },
   },
 });
 

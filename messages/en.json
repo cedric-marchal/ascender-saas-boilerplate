@@ -301,6 +301,13 @@
       "submittingLabel": "Sending...",
       "successToast": "Invitation sent successfully!"
     },
+    "acceptInvitation": {
+      "title": "Organization invitation",
+      "description": "Accept this invitation to join the organization.",
+      "acceptButton": "Accept invitation",
+      "acceptingButton": "Accepting...",
+      "successToast": "Invitation accepted successfully!"
+    },
     "roleForm": {
       "label": "New role",
       "placeholder": "Select a role",

@@ -1,5 +1,7 @@
 "use server";
 
+import { getLocale } from "next-intl/server";
+
 import { createPortalSession } from "@/features/billing/services/stripe/create-portal-session.service";
 
 import { authenticatedRatelimit } from "@/lib/ratelimit";
@@ -19,9 +21,12 @@ const createPortalSessionAction = orgActionClient
       throw new ForbiddenError("errors.billing.portalAccessForbidden");
     }
 
+    const locale = await getLocale();
+
     const result = await createPortalSession({
       organizationId: ctx.organizationId,
       userId: ctx.userId,
+      locale,
     });
 
     return result;

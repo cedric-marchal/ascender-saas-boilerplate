@@ -211,6 +211,7 @@ describe("createCheckoutSession — membership check prevents cross-org billing"
         organizationId: ORG_A_ID,
         userId: "user-outside",
         priceId: "price_pro_test_123",
+        locale: "en",
       }),
     ).rejects.toThrow(ForbiddenError);
   });
@@ -223,6 +224,7 @@ describe("createCheckoutSession — membership check prevents cross-org billing"
         organizationId: "nonexistent-org",
         userId: USER_IN_ORG_A,
         priceId: "price_pro_test_123",
+        locale: "en",
       }),
     ).rejects.toThrow(NotFoundError);
   });
@@ -241,6 +243,7 @@ describe("createCheckoutSession — membership check prevents cross-org billing"
         organizationId: ORG_B_ID, // Attempting org B checkout
         userId: USER_IN_ORG_A, // User is from org A
         priceId: "price_pro_test_123",
+        locale: "en",
       }),
     ).rejects.toThrow(ForbiddenError);
 
@@ -283,6 +286,7 @@ describe("createCheckoutSession — membership check prevents cross-org billing"
       organizationId: ORG_A_ID,
       userId: USER_IN_ORG_A,
       priceId: "price_pro_test_123",
+      locale: "en",
     });
 
     expect(result.url).toBe("https://checkout.stripe.com/test");

@@ -1,5 +1,8 @@
 import "server-only";
 
+import { getStaticPathname } from "@/i18n/get-static-pathname";
+import type { Locale } from "next-intl";
+
 import { env } from "@/lib/env";
 import { prisma } from "@/lib/prisma";
 import { stripe } from "@/lib/stripe";
@@ -13,6 +16,7 @@ import {
 type CreatePortalSessionInput = {
   organizationId: string;
   userId: string;
+  locale: Locale;
 };
 
 type CreatePortalSessionResult = {
@@ -52,10 +56,12 @@ async function createPortalSession(
     throw new NotFoundError("errors.billing.noStripeCustomer");
   }
 
+  const billingPathname = getStaticPathname("/dashboard/billing", input.locale);
+
   const portalSession = await stripe.billingPortal.sessions.create(
     {
       customer: stripeCustomer.stripeCustomerId,
-      return_url: `${env.NEXT_PUBLIC_BASE_URL}/dashboard/facturation`,
+      return_url: `${env.NEXT_PUBLIC_BASE_URL}${billingPathname}`,
     },
     { idempotencyKey: `portal-org-${input.organizationId}` },
   );

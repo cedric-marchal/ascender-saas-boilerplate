@@ -1,5 +1,6 @@
 import "server-only";
 
+import { getStaticPathname } from "@/i18n/get-static-pathname";
 import { getTranslator } from "@/i18n/get-translator";
 import type { Locale } from "next-intl";
 
@@ -23,7 +24,11 @@ type SendInvitationEmailInput = {
 async function sendInvitationEmail(
   input: SendInvitationEmailInput,
 ): Promise<void> {
-  const acceptLink = `${env.NEXT_PUBLIC_BASE_URL}/accepter-invitation/${input.invitationId}`;
+  const acceptPathname = getStaticPathname(
+    "/accept-invitation/[invitationId]",
+    input.locale,
+  ).replace("[invitationId]", input.invitationId);
+  const acceptLink = `${env.NEXT_PUBLIC_BASE_URL}${acceptPathname}`;
   const translate = getTranslator(input.locale);
 
   await sendEmailSafe({

@@ -68,6 +68,7 @@ const validInput = {
   organizationId: "org-123",
   userId: "user-123",
   priceId: "price_pro_123",
+  locale: "en" as const,
 };
 
 describe("createCheckoutSession", () => {
@@ -113,9 +114,54 @@ describe("createCheckoutSession", () => {
         },
       ],
       mode: "subscription",
+      success_url: "https://test.example.com/en/dashboard/billing?success=true",
+      cancel_url: "https://test.example.com/en/pricing?canceled=true",
+      metadata: {
+        organizationId: "org-123",
+      },
+    });
+  });
+
+  it("builds French locale-prefixed success/cancel URLs", async () => {
+    mockPrismaOrganizationFindUnique.mockResolvedValue({
+      id: "org-123",
+      name: "Acme Corp",
+    });
+
+    mockPrismaMemberFindFirst.mockResolvedValue({ id: "member-1" });
+
+    mockPrismaStripeCustomerFindUnique.mockResolvedValue({
+      stripeCustomerId: "cus_123",
+    });
+
+    mockStripeCustomersRetrieve.mockResolvedValue({
+      id: "cus_123",
+      deleted: false,
+      name: "Acme Corp",
+    });
+
+    mockStripeSubscriptionsList.mockResolvedValue({
+      data: [],
+    });
+
+    mockStripeCheckoutCreate.mockResolvedValue({
+      url: "https://checkout.stripe.com/session_123",
+    });
+
+    await createCheckoutSession({ ...validInput, locale: "fr" });
+
+    expect(mockStripeCheckoutCreate).toHaveBeenCalledWith({
+      customer: "cus_123",
+      line_items: [
+        {
+          price: "price_pro_123",
+          quantity: 1,
+        },
+      ],
+      mode: "subscription",
       success_url:
-        "https://test.example.com/dashboard/facturation?success=true",
-      cancel_url: "https://test.example.com/tarifs?canceled=true",
+        "https://test.example.com/fr/dashboard/facturation?success=true",
+      cancel_url: "https://test.example.com/fr/tarifs?canceled=true",
       metadata: {
         organizationId: "org-123",
       },

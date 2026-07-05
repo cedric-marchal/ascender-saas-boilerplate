@@ -1,5 +1,8 @@
 import "server-only";
 
+import { getStaticPathname } from "@/i18n/get-static-pathname";
+import type { Locale } from "next-intl";
+
 import { ALLOWED_PRICE_IDS } from "@/features/billing/constants/plan.constant";
 
 import { env } from "@/lib/env";
@@ -17,6 +20,7 @@ type CreateCheckoutSessionInput = {
   organizationId: string;
   userId: string;
   priceId: string;
+  locale: Locale;
 };
 
 type CreateCheckoutSessionResult = {
@@ -172,6 +176,9 @@ async function createCheckoutSession(
     throw new ConflictError("errors.billing.alreadySubscribed");
   }
 
+  const billingPathname = getStaticPathname("/dashboard/billing", input.locale);
+  const pricingPathname = getStaticPathname("/pricing", input.locale);
+
   const stripeSession = await stripe.checkout.sessions.create({
     customer: stripeCustomerId,
     line_items: [
@@ -181,8 +188,8 @@ async function createCheckoutSession(
       },
     ],
     mode: "subscription",
-    success_url: `${env.NEXT_PUBLIC_BASE_URL}/dashboard/facturation?success=true`,
-    cancel_url: `${env.NEXT_PUBLIC_BASE_URL}/tarifs?canceled=true`,
+    success_url: `${env.NEXT_PUBLIC_BASE_URL}${billingPathname}?success=true`,
+    cancel_url: `${env.NEXT_PUBLIC_BASE_URL}${pricingPathname}?canceled=true`,
     metadata: {
       organizationId: organization.id,
     },

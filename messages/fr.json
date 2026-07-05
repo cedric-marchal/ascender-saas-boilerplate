@@ -297,6 +297,13 @@
       "submittingLabel": "Envoi en cours...",
       "successToast": "Invitation envoyée avec succès !"
     },
+    "acceptInvitation": {
+      "title": "Invitation à rejoindre l'organisation",
+      "description": "Acceptez cette invitation pour rejoindre l'organisation.",
+      "acceptButton": "Accepter l'invitation",
+      "acceptingButton": "Acceptation en cours...",
+      "successToast": "Invitation acceptée avec succès !"
+    },
     "roleForm": {
       "label": "Nouveau rôle",
       "placeholder": "Sélectionnez un rôle",
