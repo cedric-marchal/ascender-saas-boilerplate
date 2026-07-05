@@ -354,6 +354,8 @@
     "oldSubscriptions": "Anciens abonnements",
     "cancelingTitle": "Abonnement en cours d'annulation",
     "cancelingDescription": "Votre abonnement sera annulé le {date}. Vous pouvez réactiver votre abonnement via le portail de facturation.",
+    "pastDueTitle": "Échec de paiement",
+    "pastDueDescription": "Nous n'avons pas pu traiter votre dernier paiement. Merci de mettre à jour votre moyen de paiement via le portail de facturation pour conserver votre abonnement actif.",
     "activeMembers": "Membres actifs",
     "memberCountInOrg": "{count, plural, one {# membre} other {# membres}} dans l'organisation",
     "planUnknown": "Inconnu",
@@ -1003,6 +1005,15 @@
       "cta": "Accepter l'invitation",
       "expiry": "Cliquez sur le bouton ci-dessous pour accepter l'invitation. Ce lien est valable 48 heures.",
       "ignore": "Si vous n'attendiez pas cette invitation, vous pouvez ignorer cet email.",
+      "fallbackIntro": "Si le bouton ne fonctionne pas, copiez ce lien dans votre navigateur :"
+    },
+    "paymentFailed": {
+      "subject": "Échec de paiement pour {organizationName} sur {appName}",
+      "preview": "Un paiement récent pour {organizationName} n'a pas pu être traité",
+      "heading": "Échec de paiement",
+      "greeting": "Bonjour,",
+      "body": "Nous n'avons pas pu traiter le dernier paiement de {organizationName} sur {appName}. Merci de mettre à jour votre moyen de paiement pour éviter toute interruption de service.",
+      "cta": "Gérer la facturation",
       "fallbackIntro": "Si le bouton ne fonctionne pas, copiez ce lien dans votre navigateur :"
     },
     "accountDeleted": {

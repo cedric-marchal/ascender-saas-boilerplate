@@ -12,6 +12,10 @@ function stripeEventIdempotencyCacheKey(eventId: string): string {
   return `stripe:event:${eventId}`;
 }
 
+function paymentFailedEmailCacheKey(invoiceId: string): string {
+  return `stripe:payment-failed-email:${invoiceId}`;
+}
+
 function orgMembersCacheKey(organizationId: string): string {
   return `members:org:${organizationId}`;
 }
@@ -20,5 +24,6 @@ export {
   billingInvoicesCacheKey,
   billingSubscriptionsCacheKey,
   orgMembersCacheKey,
+  paymentFailedEmailCacheKey,
   stripeEventIdempotencyCacheKey,
 };

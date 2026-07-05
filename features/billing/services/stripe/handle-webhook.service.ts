@@ -1,12 +1,15 @@
 import "server-only";
 
+import { routing } from "@/i18n/routing";
 import type Stripe from "stripe";
 
 import { STRIPE_TO_DB_SUBSCRIPTION_STATUS } from "@/features/billing/constants/subscription-status.constant";
+import { sendPaymentFailedEmail } from "@/features/billing/services/send-payment-failed-email.service";
 
 import {
   billingInvoicesCacheKey,
   billingSubscriptionsCacheKey,
+  paymentFailedEmailCacheKey,
   stripeEventIdempotencyCacheKey,
 } from "@/lib/cache-keys";
 import { env } from "@/lib/env";
@@ -27,6 +30,84 @@ function isTransientDbError(error: unknown): boolean {
 }
 
 const EVENT_TTL_SECONDS = 86400;
+
+async function findOrganizationOwnerEmail(
+  organizationId: string,
+): Promise<string | null> {
+  const ownerMember = await prisma.member.findFirst({
+    where: {
+      organizationId,
+      role: "owner",
+    },
+    select: {
+      user: {
+        select: {
+          email: true,
+        },
+      },
+    },
+  });
+
+  return ownerMember?.user.email ?? null;
+}
+
+/**
+ * Sends the dunning email at most once per invoice, deduped in Redis on the
+ * invoice id (not the Stripe event id) — Stripe fires a fresh event id on
+ * each payment retry attempt for the same invoice, so event-level
+ * idempotency alone would not stop repeat emails.
+ *
+ * Locale: webhook processing has no request context to derive a locale
+ * from (no cookies/headers, and `User` has no stored locale preference), so
+ * this falls back to `routing.defaultLocale` — same fallback documented for
+ * other context-free boundaries in `i18n.md`.
+ */
+async function sendDunningEmailOnce(
+  invoiceId: string,
+  organizationId: string,
+): Promise<void> {
+  const dedupeKey = paymentFailedEmailCacheKey(invoiceId);
+
+  try {
+    const alreadySent = await redis.get(dedupeKey);
+
+    if (alreadySent) {
+      return;
+    }
+  } catch (redisError: unknown) {
+    console.error("Redis payment-failed dedupe check failed:", redisError);
+    // Redis unavailable → continue without dedupe (better than dropping the dunning email)
+  }
+
+  const organization = await prisma.organization.findUnique({
+    where: { id: organizationId },
+    select: { name: true },
+  });
+
+  const ownerEmail = await findOrganizationOwnerEmail(organizationId);
+
+  if (!organization || !ownerEmail) {
+    console.warn(
+      `Cannot send dunning email: missing organization or owner for org ${organizationId}`,
+    );
+
+    return;
+  }
+
+  await sendPaymentFailedEmail({
+    email: ownerEmail,
+    organizationName: organization.name,
+    locale: routing.defaultLocale,
+  });
+
+  try {
+    await redis.set(dedupeKey, 1, { ex: EVENT_TTL_SECONDS });
+  } catch (redisError: unknown) {
+    console.error("Redis payment-failed dedupe set failed:", redisError);
+    // Non-fatal: dedupe key not set, a later retry of a different event id
+    // for the same invoice may send a duplicate email — acceptable tradeoff.
+  }
+}
 
 type WebhookResult = {
   status: number;
@@ -254,6 +335,10 @@ async function handleStripeWebhook(
           console.warn(
             `[Cache invalidated] Invoices cache for org ${stripeCustomer.organizationId} - Event: ${event.type}`,
           );
+        }
+
+        if (event.type === "invoice.payment_failed") {
+          await sendDunningEmailOnce(invoice.id, stripeCustomer.organizationId);
         }
 
         break;

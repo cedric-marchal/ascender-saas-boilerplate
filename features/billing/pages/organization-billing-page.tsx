@@ -9,7 +9,10 @@ import { SubscriptionCard } from "@/features/billing/components/subscription-car
 import { SubscriptionListEmpty } from "@/features/billing/components/subscription-list-empty";
 import { SubscriptionStatusCard } from "@/features/billing/components/subscription-status-card";
 import { getPlanLabel } from "@/features/billing/constants/plan.constant";
-import { ACTIVE_SUBSCRIPTION_STATUSES } from "@/features/billing/constants/subscription-status.constant";
+import {
+  ACTIVE_SUBSCRIPTION_STATUSES,
+  PAST_DUE_SUBSCRIPTION_STATUSES,
+} from "@/features/billing/constants/subscription-status.constant";
 import type {
   BillingSubscription,
   GetBillingResult,
@@ -111,6 +114,20 @@ function OrganizationBillingPage({
 
       {subscriptions.length > 0 && (
         <section className="space-y-6">
+          {activeSubscription &&
+            PAST_DUE_SUBSCRIPTION_STATUSES.includes(
+              activeSubscription.status,
+            ) && (
+              <Alert variant="destructive">
+                <AlertCircle className="size-4" aria-hidden="true" />
+                <AlertTitle>{t("pastDueTitle")}</AlertTitle>
+                <AlertDescription className="flex flex-col gap-3">
+                  <span>{t("pastDueDescription")}</span>
+                  <BillingPortalButton />
+                </AlertDescription>
+              </Alert>
+            )}
+
           <div className="grid gap-6 lg:grid-cols-2">
             <div className="space-y-4">
               <h2 className="text-lg font-semibold">{t("status")}</h2>

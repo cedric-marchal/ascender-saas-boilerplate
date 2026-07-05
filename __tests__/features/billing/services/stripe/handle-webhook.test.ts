@@ -8,6 +8,9 @@ const mockPrismaFindUnique = vi.fn();
 const mockRedisGet = vi.fn();
 const mockRedisSet = vi.fn();
 const mockRedisDel = vi.fn();
+const mockPrismaOrganizationFindUnique = vi.fn();
+const mockPrismaMemberFindFirst = vi.fn();
+const mockSendPaymentFailedEmail = vi.fn();
 
 vi.mock("@/lib/stripe", () => ({
   stripe: {
@@ -26,6 +29,12 @@ vi.mock("@/lib/prisma", () => ({
       upsert: mockPrismaUpsert,
       deleteMany: mockPrismaDeleteMany,
     },
+    organization: {
+      findUnique: mockPrismaOrganizationFindUnique,
+    },
+    member: {
+      findFirst: mockPrismaMemberFindFirst,
+    },
   },
 }));
 
@@ -43,6 +52,13 @@ vi.mock("@/lib/env", () => ({
   },
 }));
 
+vi.mock(
+  "@/features/billing/services/send-payment-failed-email.service",
+  () => ({
+    sendPaymentFailedEmail: mockSendPaymentFailedEmail,
+  }),
+);
+
 // Import after mocks
 const { handleStripeWebhook } =
   await import("@/features/billing/services/stripe/handle-webhook.service");
@@ -54,6 +70,9 @@ describe("handleStripeWebhook", () => {
     vi.spyOn(console, "error").mockImplementation(() => {});
     mockRedisGet.mockResolvedValue(null);
     mockRedisSet.mockResolvedValue("OK");
+    mockPrismaOrganizationFindUnique.mockResolvedValue(null);
+    mockPrismaMemberFindFirst.mockResolvedValue(null);
+    mockSendPaymentFailedEmail.mockResolvedValue(undefined);
   });
 
   describe("signature validation", () => {
@@ -556,6 +575,154 @@ describe("handleStripeWebhook", () => {
       await handleStripeWebhook("body", "sig");
 
       expect(mockRedisDel).toHaveBeenCalledWith("invoices:org:org_inv_obj");
+    });
+  });
+
+  describe("invoice.payment_failed dunning email", () => {
+    function buildPaymentFailedEvent(eventId: string, invoiceId: string) {
+      return {
+        id: eventId,
+        type: "invoice.payment_failed",
+        data: {
+          object: {
+            id: invoiceId,
+            customer: "cus_dunning",
+          },
+        },
+      };
+    }
+
+    it("sends the dunning email to the organization owner", async () => {
+      mockConstructEvent.mockReturnValue(
+        buildPaymentFailedEvent("evt_dunning_1", "in_dunning_1"),
+      );
+      mockPrismaFindUnique.mockResolvedValue({
+        organizationId: "org_dunning",
+      });
+      mockPrismaOrganizationFindUnique.mockResolvedValue({
+        name: "Acme Inc.",
+      });
+      mockPrismaMemberFindFirst.mockResolvedValue({
+        user: { email: "owner@acme.test" },
+      });
+
+      const result = await handleStripeWebhook("body", "sig");
+
+      expect(mockPrismaMemberFindFirst).toHaveBeenCalledWith({
+        where: { organizationId: "org_dunning", role: "owner" },
+        select: { user: { select: { email: true } } },
+      });
+      expect(mockSendPaymentFailedEmail).toHaveBeenCalledWith({
+        email: "owner@acme.test",
+        organizationName: "Acme Inc.",
+        locale: "en",
+      });
+      expect(mockRedisSet).toHaveBeenCalledWith(
+        "stripe:payment-failed-email:in_dunning_1",
+        1,
+        { ex: 86400 },
+      );
+      expect(result.status).toBe(200);
+    });
+
+    it("does not send when no owner can be resolved for the organization", async () => {
+      mockConstructEvent.mockReturnValue(
+        buildPaymentFailedEvent("evt_dunning_no_owner", "in_dunning_no_owner"),
+      );
+      mockPrismaFindUnique.mockResolvedValue({
+        organizationId: "org_no_owner",
+      });
+      mockPrismaOrganizationFindUnique.mockResolvedValue({
+        name: "Orphan Org",
+      });
+      mockPrismaMemberFindFirst.mockResolvedValue(null);
+
+      const result = await handleStripeWebhook("body", "sig");
+
+      expect(mockSendPaymentFailedEmail).not.toHaveBeenCalled();
+      expect(console.warn).toHaveBeenCalledWith(
+        expect.stringContaining("Cannot send dunning email"),
+      );
+      expect(result.status).toBe(200);
+    });
+
+    it("sends nothing on a second event for the SAME invoice (dedupe by invoice id)", async () => {
+      mockConstructEvent.mockReturnValue(
+        buildPaymentFailedEvent("evt_dunning_retry", "in_dunning_dupe"),
+      );
+      mockPrismaFindUnique.mockResolvedValue({
+        organizationId: "org_dupe",
+      });
+
+      // Event-level idempotency key is unset (different event id), but the
+      // invoice-level dedupe key was already set by a prior attempt.
+      mockRedisGet.mockImplementation(async (key: string) => {
+        if (key === "stripe:payment-failed-email:in_dunning_dupe") {
+          return "1";
+        }
+
+        return null;
+      });
+
+      const result = await handleStripeWebhook("body", "sig");
+
+      expect(mockSendPaymentFailedEmail).not.toHaveBeenCalled();
+      expect(result.status).toBe(200);
+    });
+
+    it("sends again for a DIFFERENT invoice even for the same organization", async () => {
+      mockConstructEvent.mockReturnValue(
+        buildPaymentFailedEvent("evt_dunning_other", "in_dunning_other"),
+      );
+      mockPrismaFindUnique.mockResolvedValue({
+        organizationId: "org_dupe",
+      });
+      mockPrismaOrganizationFindUnique.mockResolvedValue({
+        name: "Dupe Org",
+      });
+      mockPrismaMemberFindFirst.mockResolvedValue({
+        user: { email: "owner@dupe.test" },
+      });
+
+      mockRedisGet.mockImplementation(async (key: string) => {
+        if (key === "stripe:payment-failed-email:in_dunning_dupe") {
+          return "1";
+        }
+
+        return null;
+      });
+
+      await handleStripeWebhook("body", "sig");
+
+      expect(mockSendPaymentFailedEmail).toHaveBeenCalledWith({
+        email: "owner@dupe.test",
+        organizationName: "Dupe Org",
+        locale: "en",
+      });
+    });
+
+    it("returns 5xx and does not poison any idempotency key when the email send fails", async () => {
+      mockConstructEvent.mockReturnValue(
+        buildPaymentFailedEvent("evt_dunning_fail", "in_dunning_fail"),
+      );
+      mockPrismaFindUnique.mockResolvedValue({
+        organizationId: "org_fail",
+      });
+      mockPrismaOrganizationFindUnique.mockResolvedValue({
+        name: "Failing Org",
+      });
+      mockPrismaMemberFindFirst.mockResolvedValue({
+        user: { email: "owner@failing.test" },
+      });
+      mockSendPaymentFailedEmail.mockRejectedValue(
+        new Error("Resend unavailable"),
+      );
+
+      const result = await handleStripeWebhook("body", "sig");
+
+      expect(result.status).toBeGreaterThanOrEqual(500);
+      // Neither the event-level nor the invoice-level dedupe key is set.
+      expect(mockRedisSet).not.toHaveBeenCalled();
     });
   });
 

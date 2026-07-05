@@ -358,6 +358,8 @@
     "oldSubscriptions": "Previous subscriptions",
     "cancelingTitle": "Subscription being canceled",
     "cancelingDescription": "Your subscription will be canceled on {date}. You can reactivate your subscription via the billing portal.",
+    "pastDueTitle": "Payment failed",
+    "pastDueDescription": "We were unable to process your last payment. Please update your payment method via the billing portal to keep your subscription active.",
     "activeMembers": "Active members",
     "memberCountInOrg": "{count, plural, one {# member} other {# members}} in the organization",
     "planUnknown": "Unknown",
@@ -1003,6 +1005,15 @@
       "cta": "Accept the invitation",
       "expiry": "Click the button below to accept the invitation. This link is valid for 48 hours.",
       "ignore": "If you were not expecting this invitation, you can ignore this email.",
+      "fallbackIntro": "If the button doesn't work, copy this link into your browser:"
+    },
+    "paymentFailed": {
+      "subject": "Payment failed for {organizationName} on {appName}",
+      "preview": "A recent payment for {organizationName} could not be processed",
+      "heading": "Payment failed",
+      "greeting": "Hello,",
+      "body": "We were unable to process the latest payment for {organizationName} on {appName}. Please update your payment method to avoid any interruption of service.",
+      "cta": "Manage billing",
       "fallbackIntro": "If the button doesn't work, copy this link into your browser:"
     },
     "accountDeleted": {
