@@ -1,0 +1,29 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+
+import { CreateProjectSchema } from "@/features/projects/schemas/project.schema";
+import { createProject } from "@/features/projects/services/create-project.service";
+
+import { orgActionClient } from "@/lib/safe-action";
+
+const createProjectAction = orgActionClient
+  .inputSchema(CreateProjectSchema)
+  .action(async ({ parsedInput, ctx }) => {
+    const project = await createProject({
+      organizationId: ctx.organizationId,
+      userId: ctx.userId,
+      name: parsedInput.name,
+      description: parsedInput.description,
+      status: parsedInput.status,
+    });
+
+    revalidatePath("/dashboard/projets");
+
+    return {
+      success: true,
+      project,
+    };
+  });
+
+export { createProjectAction };

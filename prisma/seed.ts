@@ -22,6 +22,7 @@ import {
   cleanOrganizations,
   seedOrganizations,
 } from "./seed/organization.seed";
+import { cleanProjects, seedProjects } from "./seed/project.seed";
 import {
   cleanVerifications,
   seedVerifications,
@@ -52,6 +53,11 @@ const SEEDERS: Seeder[] = [
     name: "Billing (stripe customers, subscriptions)",
     clean: () => cleanBilling(prisma),
     run: () => seedBilling(prisma),
+  },
+  {
+    name: "Projects",
+    clean: () => cleanProjects(prisma),
+    run: () => seedProjects(prisma),
   },
   {
     name: "Verifications",
