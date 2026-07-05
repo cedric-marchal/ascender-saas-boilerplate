@@ -229,6 +229,16 @@ Follow-up fix for the two stale-link bugs Log #4 flagged out of scope — now cl
 - **Test updates**: new `__tests__/features/organizations/services/send-invitation-email.test.ts` (3 tests — English/French locale-prefixed accept link via `react-email`'s `render()`, plus recipient-address assertion). Extended `create-checkout-session.test.ts` and `create-portal-session.test.ts` with a French-locale assertion each (English case updated in place to assert the new `/en/dashboard/billing`, `/en/pricing` URLs instead of the old unprefixed French paths). `billing-org-scope.test.ts`'s 4 `createCheckoutSession` calls updated with the now-required `locale: "en"` field (typecheck-driven, no behavior change to that test's IDOR assertions).
 - `pnpm test` (612 tests, up from 607), `pnpm typecheck`, and `pnpm lint` all green.
 
+### #6 - 2026-07-05T00:00:00Z
+
+🤖 Runtime bug found by the user in dev: the root `app/not-found.tsx` crashed with "No intl context found" — it rendered `NotFoundPage`, which used the `@/i18n/navigation` `Link` (client component requiring `NextIntlClientProvider`), but the root not-found boundary lives OUTSIDE `app/[locale]/` where no provider exists. This boundary is hit often: every guard `notFound()` (e.g. `requireAdmin`) bubbles to it. Phase 2 missed this — same class as the documented `error-page.tsx` exception. Fix:
+
+- `components/pages/not-found-page.tsx` is now context-free: takes a `locale: Locale` prop, translates via `getTranslator` (core `createTranslator`, no request config), links via plain `next/link` + `getStaticPathname` (`as Route` keeps typedRoutes coverage) — same pattern as the email templates.
+- `app/not-found.tsx`: derives locale from the `NEXT_LOCALE` cookie (`getLocaleFromCookies`), metadata via `getTranslator`.
+- New `app/[locale]/not-found.tsx` (locale from `getLocale()`) + `app/[locale]/[...rest]/page.tsx` catch-all calling `notFound()`, so unknown URLs under a valid locale (`/en/xyz`) render the 404 with the URL's locale inside the locale layout, instead of falling through to the cookie-guessed root boundary.
+- Verified on `next start`: `/en/unknown-page` renders "Page not found"/"Back to home", `/fr/page-inconnue` renders "Page introuvable"/"Retour à l'accueil", no crash. `pnpm test` (612) + `pnpm typecheck` + `pnpm build` green.
+- Known framework behavior, accepted: streamed `notFound()` under PPR returns HTTP 200 with Next's automatic `<meta name="robots" content="noindex"/>` (documented Next.js mitigation), not a hard 404 status. Forcing a hard 404 would require opting the `[locale]` layout out of Partial Prerendering — a bad perf trade for every page. 404 URLs are absent from the sitemap; noindex excludes them from indexing.
+
 ## Validation flow demonstration
 
 1. Visit `/` with `Accept-Language: en` → English home at `/en`
