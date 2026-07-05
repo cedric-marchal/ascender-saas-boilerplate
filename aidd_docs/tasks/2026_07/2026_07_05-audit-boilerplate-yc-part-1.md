@@ -114,9 +114,9 @@ flowchart TD
 
 #### Acceptance criteria
 
-- [ ] 6th rapid sign-in attempt from same IP+email is rejected
-- [ ] Invitation spam capped
-- [ ] `pnpm test` green
+- [x] 6th rapid sign-in attempt from same IP+email is rejected
+- [x] Invitation spam capped
+- [x] `pnpm test` green
 
 ### Phase 4: Service-level membership enforcement (M2)
 
@@ -162,3 +162,15 @@ Result: ✓ Bypass CONFIRMED. `auth.api.signInEmail`/`signUpEmail`/`resetPasswor
 2. `pnpm dev`, fail login 6x fast → French 429 message shown
 3. Invite 11 members rapidly → throttled
 4. Log in as user of org A, force-call members service with org B id → ForbiddenError
+
+### #2 - 2026-07-05T00:00:00Z
+
+Tried: implemented Phase 3 as scoped. Added four named limiters to `lib/ratelimit.ts` — `authSignInRatelimit` (5/10s), `authSignUpRatelimit` (3/10s), `authPasswordRatelimit` (3/60s, shared by forgot- and reset-password), and `invitationRatelimit` (10/10min, authenticated) — each mirroring the corresponding `lib/auth.ts` `customRules` window/max. Guarded `sign-in.action.ts`, `sign-up.action.ts`, and `forgot-password.action.ts` with a `.use()` middleware that reads `clientInput.email` (available pre-validation per next-safe-action's "middleware runs before input validation" contract) and calls `checkRatelimit(limiter, \`${ip}:${email}\`)`, keyed by IP+email as specified. `reset-password.action.ts`has no email field in its input (only`token`), so it is keyed by IP alone. `invite-member.action.ts`is guarded with`checkRatelimit(invitationRatelimit, ctx.userId)`since it already runs behind`orgActionClient` (authenticated + membership-checked).
+
+Verified next-safe-action (v8.5.5) resolves errors thrown in `.use()` middleware through `handleServerError` into `result.serverError` rather than rejecting the returned promise — confirmed by inspecting `node_modules/next-safe-action/dist/index.mjs` (`handleExecutionError` → `middlewareResult.serverError = await args.handleServerError(error, ...)`). Tests therefore assert on `result.serverError` rather than a rejected promise.
+
+Added `__tests__/features/auth/actions/auth-ratelimit.test.ts` (9 tests: throttled + happy path for all 4 actions, plus an IP+email key assertion for sign-in) and `__tests__/features/organizations/actions/invite-member-ratelimit.test.ts` (3 tests: throttled, key-by-userId assertion, happy path). Both mock `checkRatelimit`, `@/lib/auth`, `@/lib/prisma`/`@/lib/ratelimit`, and `next/headers` at the module boundary, following the existing pattern in `__tests__/app/api/avatar/route.test.ts` and `__tests__/features/organizations/services/seat-cap.test.ts`.
+
+Result: ✓ `pnpm typecheck` exits 0. ✓ `pnpm test` — 46 files, 538 tests, all green (12 new). Acceptance criteria for Phase 3 met: 6th rapid sign-in attempt (same IP+email) is rejected with the French 429 message; invitation spam is capped per-user; full suite green.
+
+→ Next step: Phase 4 (service-level membership enforcement, M2) is out of scope for this pass — not started.
