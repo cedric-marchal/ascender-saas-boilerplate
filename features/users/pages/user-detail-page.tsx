@@ -1,3 +1,4 @@
+import { LOCALE_METADATA } from "@/i18n/locale-metadata.constant";
 import { Link } from "@/i18n/navigation";
 import {
   ArrowLeft,
@@ -7,6 +8,7 @@ import {
   MonitorSmartphone,
   UserCircle,
 } from "lucide-react";
+import { useLocale, useTranslations, type Locale } from "next-intl";
 
 import { roleLabels } from "@/features/users/constants/users-filters.constant";
 import type {
@@ -39,13 +41,18 @@ type UserDetailPageProps = {
 };
 
 function UserDetailPage({ user }: UserDetailPageProps) {
+  const t = useTranslations("admin.userDetail");
+  const tRoles = useTranslations("admin.users.roles");
+  const locale = useLocale();
+  const bcp47 = LOCALE_METADATA[locale as Locale].bcp47;
+
   return (
     <Main className="flex flex-col gap-6 p-6">
       <div>
         <Button type="button" variant="ghost" size="sm" asChild>
           <Link href="/admin/users">
             <ArrowLeft className="mr-2 size-4" aria-hidden="true" />
-            Retour aux utilisateurs
+            {t("backButton")}
           </Link>
         </Button>
       </div>
@@ -71,7 +78,7 @@ function UserDetailPage({ user }: UserDetailPageProps) {
             <Badge
               variant={user.role === UserRole.ADMIN ? "default" : "secondary"}
             >
-              {roleLabels[user.role]}
+              {tRoles(roleLabels[user.role])}
             </Badge>
           </div>
           <p className="text-muted-foreground text-sm">{user.email}</p>
@@ -87,43 +94,57 @@ function UserDetailPage({ user }: UserDetailPageProps) {
               className="text-muted-foreground size-5"
               aria-hidden="true"
             />
-            <CardTitle>Informations générales</CardTitle>
+            <CardTitle>{t("generalInfo.title")}</CardTitle>
           </CardHeader>
           <CardContent>
             <dl className="space-y-3">
               <div className="flex justify-between gap-2">
-                <dt className="text-muted-foreground text-sm">Identifiant</dt>
+                <dt className="text-muted-foreground text-sm">
+                  {t("generalInfo.id")}
+                </dt>
                 <dd className="font-mono text-xs">{user.id}</dd>
               </div>
               <Separator />
               <div className="flex justify-between gap-2">
-                <dt className="text-muted-foreground text-sm">Slug</dt>
+                <dt className="text-muted-foreground text-sm">
+                  {t("generalInfo.slug")}
+                </dt>
                 <dd className="font-mono text-xs">{user.slug}</dd>
               </div>
               <Separator />
               <div className="flex justify-between gap-2">
-                <dt className="text-muted-foreground text-sm">Nom</dt>
+                <dt className="text-muted-foreground text-sm">
+                  {t("generalInfo.name")}
+                </dt>
                 <dd className="text-sm">{truncateName(user.name)}</dd>
               </div>
               <Separator />
               <div className="flex justify-between gap-2">
-                <dt className="text-muted-foreground text-sm">Email</dt>
+                <dt className="text-muted-foreground text-sm">
+                  {t("generalInfo.email")}
+                </dt>
                 <dd className="text-sm">{truncate(user.email, 40)}</dd>
               </div>
               <Separator />
               <div className="flex justify-between gap-2">
-                <dt className="text-muted-foreground text-sm">Email vérifié</dt>
+                <dt className="text-muted-foreground text-sm">
+                  {t("generalInfo.emailVerified")}
+                </dt>
                 <dd>
                   <Badge variant={user.emailVerified ? "default" : "outline"}>
-                    {user.emailVerified ? "Vérifié" : "Non vérifié"}
+                    {user.emailVerified
+                      ? t("generalInfo.verified")
+                      : t("generalInfo.unverified")}
                   </Badge>
                 </dd>
               </div>
               <Separator />
               <div className="flex justify-between gap-2">
-                <dt className="text-muted-foreground text-sm">Inscrit le</dt>
+                <dt className="text-muted-foreground text-sm">
+                  {t("generalInfo.createdAt")}
+                </dt>
                 <dd className="text-sm">
-                  {new Intl.DateTimeFormat("fr-FR", {
+                  {new Intl.DateTimeFormat(bcp47, {
                     dateStyle: "long",
                     timeStyle: "short",
                   }).format(new Date(user.createdAt))}
@@ -131,9 +152,11 @@ function UserDetailPage({ user }: UserDetailPageProps) {
               </div>
               <Separator />
               <div className="flex justify-between gap-2">
-                <dt className="text-muted-foreground text-sm">Mis à jour le</dt>
+                <dt className="text-muted-foreground text-sm">
+                  {t("generalInfo.updatedAt")}
+                </dt>
                 <dd className="text-sm">
-                  {new Intl.DateTimeFormat("fr-FR", {
+                  {new Intl.DateTimeFormat(bcp47, {
                     dateStyle: "long",
                     timeStyle: "short",
                   }).format(new Date(user.updatedAt))}
@@ -150,15 +173,13 @@ function UserDetailPage({ user }: UserDetailPageProps) {
               aria-hidden="true"
             />
             <div>
-              <CardTitle>Facturation</CardTitle>
-              <CardDescription>
-                Gérée au niveau de l&apos;organisation
-              </CardDescription>
+              <CardTitle>{t("billing.title")}</CardTitle>
+              <CardDescription>{t("billing.description")}</CardDescription>
             </div>
           </CardHeader>
           <CardContent>
             <div className="text-muted-foreground flex h-24 items-center justify-center rounded-lg border border-dashed text-sm">
-              La facturation est désormais gérée par organisation
+              {t("billing.notice")}
             </div>
           </CardContent>
         </Card>
@@ -171,18 +192,16 @@ function UserDetailPage({ user }: UserDetailPageProps) {
             aria-hidden="true"
           />
           <div>
-            <CardTitle>Sessions</CardTitle>
+            <CardTitle>{t("sessions.title")}</CardTitle>
             <CardDescription>
-              {user.sessions.length} session
-              {user.sessions.length > 1 ? "s" : ""} active
-              {user.sessions.length > 1 ? "s" : ""}
+              {t("sessions.count", { count: user.sessions.length })}
             </CardDescription>
           </div>
         </CardHeader>
         <CardContent>
           {user.sessions.length === 0 ? (
             <div className="text-muted-foreground flex h-16 items-center justify-center rounded-lg border border-dashed text-sm">
-              Aucune session
+              {t("sessions.empty")}
             </div>
           ) : (
             <ul className="divide-y">
@@ -207,18 +226,20 @@ function UserDetailPage({ user }: UserDetailPageProps) {
                     </div>
                     <div className="text-muted-foreground shrink-0 space-y-1 text-right text-xs">
                       <p>
-                        Créée le{" "}
-                        {new Intl.DateTimeFormat("fr-FR", {
-                          dateStyle: "short",
-                          timeStyle: "short",
-                        }).format(new Date(session.createdAt))}
+                        {t("sessions.createdOn", {
+                          date: new Intl.DateTimeFormat(bcp47, {
+                            dateStyle: "short",
+                            timeStyle: "short",
+                          }).format(new Date(session.createdAt)),
+                        })}
                       </p>
                       <p>
-                        Expire le{" "}
-                        {new Intl.DateTimeFormat("fr-FR", {
-                          dateStyle: "short",
-                          timeStyle: "short",
-                        }).format(new Date(session.expiresAt))}
+                        {t("sessions.expiresOn", {
+                          date: new Intl.DateTimeFormat(bcp47, {
+                            dateStyle: "short",
+                            timeStyle: "short",
+                          }).format(new Date(session.expiresAt)),
+                        })}
                       </p>
                     </div>
                   </div>
@@ -236,18 +257,16 @@ function UserDetailPage({ user }: UserDetailPageProps) {
             aria-hidden="true"
           />
           <div>
-            <CardTitle>Comptes liés</CardTitle>
+            <CardTitle>{t("accounts.title")}</CardTitle>
             <CardDescription>
-              {user.accounts.length} compte
-              {user.accounts.length > 1 ? "s" : ""} lié
-              {user.accounts.length > 1 ? "s" : ""}
+              {t("accounts.count", { count: user.accounts.length })}
             </CardDescription>
           </div>
         </CardHeader>
         <CardContent>
           {user.accounts.length === 0 ? (
             <div className="text-muted-foreground flex h-16 items-center justify-center rounded-lg border border-dashed text-sm">
-              Aucun compte lié
+              {t("accounts.empty")}
             </div>
           ) : (
             <ul className="divide-y">
@@ -263,7 +282,7 @@ function UserDetailPage({ user }: UserDetailPageProps) {
                       </p>
                     </div>
                     <p className="text-muted-foreground shrink-0 text-xs">
-                      {new Intl.DateTimeFormat("fr-FR", {
+                      {new Intl.DateTimeFormat(bcp47, {
                         dateStyle: "short",
                       }).format(new Date(account.createdAt))}
                     </p>

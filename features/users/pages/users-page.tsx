@@ -1,4 +1,5 @@
 import { Users } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import {
   usersColumns,
@@ -24,6 +25,8 @@ function UsersPage({
   totalPages,
   currentPage,
 }: UsersPageProps) {
+  const t = useTranslations("admin.users");
+
   return (
     <Main className="flex flex-col gap-6 p-6">
       <header className="flex items-center justify-between">
@@ -33,11 +36,10 @@ function UsersPage({
           </div>
           <div>
             <h1 className="text-2xl font-semibold tracking-tight">
-              Utilisateurs
+              {t("title")}
             </h1>
             <p className="text-muted-foreground text-sm">
-              {totalCount} utilisateur{totalCount > 1 ? "s" : ""} trouvé
-              {totalCount > 1 ? "s" : ""}
+              {t("count", { count: totalCount })}
             </p>
           </div>
         </div>

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 import type { Locale } from "next-intl";
-import { setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { createLoader, type SearchParams } from "nuqs/server";
 
 import { usersSearchParams } from "@/features/users/constants/users-filters.constant";
@@ -15,18 +15,28 @@ import { TooManyRequestsPage } from "@/components/pages/too-many-requests-page";
 
 const loadSearchParams = createLoader(usersSearchParams);
 
-export const metadata: Metadata = {
-  title: "Gestion des utilisateurs",
-  robots: {
-    index: false,
-    follow: false,
-  },
-};
-
 type AdminUsersRouteProps = {
   params: Promise<{ locale: string }>;
   searchParams: Promise<SearchParams>;
 };
+
+export async function generateMetadata({
+  params,
+}: AdminUsersRouteProps): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({
+    locale: locale as Locale,
+    namespace: "admin.users",
+  });
+
+  return {
+    title: t("pageTitle"),
+    robots: {
+      index: false,
+      follow: false,
+    },
+  };
+}
 
 export default async function AdminUsersRoute({
   params,

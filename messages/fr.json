@@ -447,6 +447,129 @@
       "successToast": "Projet supprimé avec succès"
     }
   },
+  "admin": {
+    "dashboard": {
+      "title": "Tableau de bord",
+      "pageTitle": "Administration",
+      "subtitle": "Vue d'ensemble de la plateforme et des statistiques",
+      "totalUsers": "Utilisateurs totaux",
+      "growthVsLastMonth": "{growth} par rapport au mois dernier",
+      "activeSubscriptions": "Abonnements actifs",
+      "activeSubscriptionsHint": "Abonnements en cours ou en essai",
+      "activeSessions": "Sessions actives",
+      "activeSessionsHint": "Utilisateurs actuellement connectés",
+      "monthlyGrowth": "Croissance mensuelle",
+      "newThisMonth": "{count, plural, one {# nouvel utilisateur} other {# nouveaux utilisateurs}} ce mois",
+      "usersCard": {
+        "title": "Utilisateurs",
+        "description": "Gérer les comptes utilisateurs"
+      },
+      "orgsCard": {
+        "title": "Organisations",
+        "description": "Gérer les organisations"
+      },
+      "recentUsers": {
+        "title": "Derniers inscrits",
+        "description": "Les 5 derniers utilisateurs inscrits",
+        "viewAll": "Voir tout",
+        "empty": "Aucun utilisateur inscrit"
+      },
+      "stats": {
+        "title": "Statistiques",
+        "description": "Aperçu des métriques clés",
+        "newThisMonth": "Nouveaux ce mois",
+        "activeSubscriptions": "Abonnements actifs",
+        "verifiedEmails": "Emails vérifiés"
+      }
+    },
+    "organizations": {
+      "title": "Organisations",
+      "pageTitle": "Gestion des organisations",
+      "count": "{count, plural, one {# organisation trouvée} other {# organisations trouvées}}",
+      "loadingLabel": "Chargement de la liste des organisations",
+      "noOwner": "—",
+      "columns": {
+        "nameHeader": "Nom",
+        "ownerHeader": "Propriétaire",
+        "membersHeader": "Membres",
+        "planHeader": "Plan",
+        "createdAtHeader": "Date de création"
+      },
+      "filters": {
+        "searchPlaceholder": "Rechercher par nom ou slug...",
+        "applyButton": "Appliquer",
+        "loadingButton": "Chargement...",
+        "clearButton": "Effacer"
+      }
+    },
+    "users": {
+      "title": "Utilisateurs",
+      "pageTitle": "Gestion des utilisateurs",
+      "count": "{count, plural, one {# utilisateur trouvé} other {# utilisateurs trouvés}}",
+      "loadingLabel": "Chargement de la liste des utilisateurs",
+      "columns": {
+        "nameHeader": "Nom",
+        "emailHeader": "Email",
+        "roleHeader": "Rôle",
+        "verifiedHeader": "Email vérifié",
+        "createdAtHeader": "Date d'inscription",
+        "verified": "Vérifié",
+        "unverified": "Non vérifié"
+      },
+      "filters": {
+        "searchPlaceholder": "Rechercher par nom ou email...",
+        "roleLabel": "Rôle",
+        "statusLabel": "Statut",
+        "applyButton": "Appliquer",
+        "loadingButton": "Chargement...",
+        "clearButton": "Effacer"
+      },
+      "roles": {
+        "all": "Tous les rôles",
+        "ADMIN": "Administrateur",
+        "CUSTOMER": "Client"
+      },
+      "verification": {
+        "all": "Tous",
+        "verified": "Vérifiés",
+        "unverified": "Non vérifiés"
+      }
+    },
+    "userDetail": {
+      "backButton": "Retour aux utilisateurs",
+      "loadingLabel": "Chargement du détail utilisateur",
+      "notFoundTitle": "Utilisateur introuvable",
+      "generalInfo": {
+        "title": "Informations générales",
+        "id": "Identifiant",
+        "slug": "Slug",
+        "name": "Nom",
+        "email": "Email",
+        "emailVerified": "Email vérifié",
+        "createdAt": "Inscrit le",
+        "updatedAt": "Mis à jour le",
+        "verified": "Vérifié",
+        "unverified": "Non vérifié"
+      },
+      "billing": {
+        "title": "Facturation",
+        "description": "Gérée au niveau de l'organisation",
+        "notice": "La facturation est désormais gérée par organisation"
+      },
+      "sessions": {
+        "title": "Sessions",
+        "count": "{count, plural, one {# session active} other {# sessions actives}}",
+        "empty": "Aucune session",
+        "createdOn": "Créée le {date}",
+        "expiresOn": "Expire le {date}"
+      },
+      "accounts": {
+        "title": "Comptes liés",
+        "count": "{count, plural, one {# compte lié} other {# comptes liés}}",
+        "empty": "Aucun compte lié"
+      }
+    }
+  },
   "home": {
     "title": "Hello World",
     "seoDescription": "Découvrez les solutions innovantes de {appName} pour transformer votre entreprise."
@@ -664,6 +787,11 @@
       "descriptionTooLong": "La description doit contenir moins de 2000 caractères",
       "invalidStatus": "Statut invalide",
       "projectIdRequired": "L'identifiant du projet est requis"
+    },
+    "users": {
+      "searchTooLong": "La recherche doit contenir moins de 100 caractères",
+      "invalidRole": "Rôle invalide",
+      "invalidVerification": "Statut de vérification invalide"
     },
     "contact": {
       "subject": {

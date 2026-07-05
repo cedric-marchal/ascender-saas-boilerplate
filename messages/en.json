@@ -451,6 +451,129 @@
       "successToast": "Project deleted successfully"
     }
   },
+  "admin": {
+    "dashboard": {
+      "title": "Dashboard",
+      "pageTitle": "Administration",
+      "subtitle": "Overview of the platform and statistics",
+      "totalUsers": "Total users",
+      "growthVsLastMonth": "{growth} compared to last month",
+      "activeSubscriptions": "Active subscriptions",
+      "activeSubscriptionsHint": "Subscriptions active or trialing",
+      "activeSessions": "Active sessions",
+      "activeSessionsHint": "Currently connected users",
+      "monthlyGrowth": "Monthly growth",
+      "newThisMonth": "{count, plural, one {# new user} other {# new users}} this month",
+      "usersCard": {
+        "title": "Users",
+        "description": "Manage user accounts"
+      },
+      "orgsCard": {
+        "title": "Organizations",
+        "description": "Manage organizations"
+      },
+      "recentUsers": {
+        "title": "Recent sign-ups",
+        "description": "The last 5 registered users",
+        "viewAll": "View all",
+        "empty": "No registered users"
+      },
+      "stats": {
+        "title": "Statistics",
+        "description": "Overview of key metrics",
+        "newThisMonth": "New this month",
+        "activeSubscriptions": "Active subscriptions",
+        "verifiedEmails": "Verified emails"
+      }
+    },
+    "organizations": {
+      "title": "Organizations",
+      "pageTitle": "Organization management",
+      "count": "{count, plural, one {# organization found} other {# organizations found}}",
+      "loadingLabel": "Loading organization list",
+      "noOwner": "—",
+      "columns": {
+        "nameHeader": "Name",
+        "ownerHeader": "Owner",
+        "membersHeader": "Members",
+        "planHeader": "Plan",
+        "createdAtHeader": "Created on"
+      },
+      "filters": {
+        "searchPlaceholder": "Search by name or slug...",
+        "applyButton": "Apply",
+        "loadingButton": "Loading...",
+        "clearButton": "Clear"
+      }
+    },
+    "users": {
+      "title": "Users",
+      "pageTitle": "User management",
+      "count": "{count, plural, one {# user found} other {# users found}}",
+      "loadingLabel": "Loading user list",
+      "columns": {
+        "nameHeader": "Name",
+        "emailHeader": "Email",
+        "roleHeader": "Role",
+        "verifiedHeader": "Email verified",
+        "createdAtHeader": "Sign-up date",
+        "verified": "Verified",
+        "unverified": "Not verified"
+      },
+      "filters": {
+        "searchPlaceholder": "Search by name or email...",
+        "roleLabel": "Role",
+        "statusLabel": "Status",
+        "applyButton": "Apply",
+        "loadingButton": "Loading...",
+        "clearButton": "Clear"
+      },
+      "roles": {
+        "all": "All roles",
+        "ADMIN": "Admin",
+        "CUSTOMER": "Customer"
+      },
+      "verification": {
+        "all": "All",
+        "verified": "Verified",
+        "unverified": "Not verified"
+      }
+    },
+    "userDetail": {
+      "backButton": "Back to users",
+      "loadingLabel": "Loading user detail",
+      "notFoundTitle": "User not found",
+      "generalInfo": {
+        "title": "General information",
+        "id": "ID",
+        "slug": "Slug",
+        "name": "Name",
+        "email": "Email",
+        "emailVerified": "Email verified",
+        "createdAt": "Signed up on",
+        "updatedAt": "Updated on",
+        "verified": "Verified",
+        "unverified": "Not verified"
+      },
+      "billing": {
+        "title": "Billing",
+        "description": "Managed at the organization level",
+        "notice": "Billing is now managed per organization"
+      },
+      "sessions": {
+        "title": "Sessions",
+        "count": "{count, plural, one {# active session} other {# active sessions}}",
+        "empty": "No sessions",
+        "createdOn": "Created on {date}",
+        "expiresOn": "Expires on {date}"
+      },
+      "accounts": {
+        "title": "Linked accounts",
+        "count": "{count, plural, one {# linked account} other {# linked accounts}}",
+        "empty": "No linked accounts"
+      }
+    }
+  },
   "pricing": {
     "heading": "Clear pricing, built to grow with you",
     "subheading": "Whether you're a freelancer, a small team, or a larger organization, {appName} offers flexible, no-commitment plans so you can move at your own pace.",
@@ -664,6 +787,11 @@
       "descriptionTooLong": "Description must be under 2000 characters",
       "invalidStatus": "Invalid status",
       "projectIdRequired": "Project ID is required"
+    },
+    "users": {
+      "searchTooLong": "Search must be under 100 characters",
+      "invalidRole": "Invalid role",
+      "invalidVerification": "Invalid verification status"
     },
     "contact": {
       "subject": {
