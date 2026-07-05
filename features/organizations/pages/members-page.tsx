@@ -1,4 +1,5 @@
 import { Users } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { MembersFilters } from "@/features/organizations/components/members-filters";
 import { MembersTable } from "@/features/organizations/components/members-table";
@@ -28,6 +29,7 @@ function MembersPage({
   memberRole,
   organizationName,
 }: MembersPageProps) {
+  const t = useTranslations("organizations.membersPage");
   const canManage = memberRole === "owner" || memberRole === "admin";
 
   return (
@@ -42,7 +44,7 @@ function MembersPage({
               {organizationName}
             </h1>
             <p className="text-muted-foreground text-sm">
-              {totalCount} membre{totalCount > 1 ? "s" : ""}
+              {t("memberCount", { count: totalCount })}
             </p>
           </div>
         </div>

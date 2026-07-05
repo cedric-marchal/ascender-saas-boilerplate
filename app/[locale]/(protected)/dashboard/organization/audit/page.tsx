@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 import type { Locale } from "next-intl";
-import { setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { AuditLogPage } from "@/features/organizations/pages/audit-log-page";
 import { getAuditLog } from "@/features/organizations/services/get-audit-log.service";
@@ -11,18 +11,28 @@ import { requireSession } from "@/lib/session";
 
 import { TooManyRequestsPage } from "@/components/pages/too-many-requests-page";
 
-export const metadata: Metadata = {
-  title: "Journal d'activité",
-  robots: {
-    index: false,
-    follow: false,
-  },
-};
-
 type OrganizationAuditRouteProps = {
   params: Promise<{ locale: string }>;
   searchParams: Promise<{ page?: string }>;
 };
+
+export async function generateMetadata({
+  params,
+}: OrganizationAuditRouteProps): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({
+    locale: locale as Locale,
+    namespace: "organizations.auditLog",
+  });
+
+  return {
+    title: t("title"),
+    robots: {
+      index: false,
+      follow: false,
+    },
+  };
+}
 
 export default async function OrganizationAuditRoute({
   params,
@@ -35,11 +45,14 @@ export default async function OrganizationAuditRoute({
   const session = await requireSession();
 
   if (!session.activeOrganizationId) {
+    const t = await getTranslations({
+      locale: locale as Locale,
+      namespace: "organizations",
+    });
+
     return (
       <div className="flex items-center justify-center p-6">
-        <p className="text-muted-foreground">
-          Aucune organisation active. Veuillez sélectionner une organisation.
-        </p>
+        <p className="text-muted-foreground">{t("noActiveOrganization")}</p>
       </div>
     );
   }

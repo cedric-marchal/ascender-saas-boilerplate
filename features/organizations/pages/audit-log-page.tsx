@@ -1,5 +1,8 @@
+import { LOCALE_METADATA } from "@/i18n/locale-metadata.constant";
 import { Activity } from "lucide-react";
+import { useLocale, useTranslations, type Locale } from "next-intl";
 
+import { AUDIT_ACTION_LABELS } from "@/features/organizations/constants/audit-actions.constant";
 import type { AuditLogItem } from "@/features/organizations/services/get-audit-log.service";
 
 import { Main } from "@/components/main";
@@ -19,6 +22,10 @@ function AuditLogPage({
   totalPages,
   currentPage,
 }: AuditLogPageProps) {
+  const t = useTranslations("organizations.auditLog");
+  const tActions = useTranslations("organizations.auditActions");
+  const locale = useLocale();
+
   return (
     <Main className="flex flex-col gap-6 p-6">
       <header className="flex items-center gap-3">
@@ -27,10 +34,10 @@ function AuditLogPage({
         </div>
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">
-            Journal d&apos;activité
+            {t("title")}
           </h1>
           <p className="text-muted-foreground text-sm">
-            {totalCount} événement{totalCount > 1 ? "s" : ""}
+            {t("eventCount", { count: totalCount })}
           </p>
         </div>
       </header>
@@ -40,30 +47,44 @@ function AuditLogPage({
       <section className="space-y-4">
         {entries.length === 0 ? (
           <p className="text-muted-foreground py-8 text-center text-sm">
-            Aucune activité enregistrée pour le moment.
+            {t("empty")}
           </p>
         ) : (
           <ul className="divide-y">
             {entries.map((entry: AuditLogItem) => (
               <li key={entry.id} className="flex flex-col gap-1 py-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">{entry.action}</span>
+                  <span className="text-sm font-medium">
+                    {entry.action in AUDIT_ACTION_LABELS
+                      ? tActions(
+                          AUDIT_ACTION_LABELS[
+                            entry.action as keyof typeof AUDIT_ACTION_LABELS
+                          ],
+                        )
+                      : entry.action}
+                  </span>
                   <time
                     dateTime={entry.createdAt.toISOString()}
                     className="text-muted-foreground text-xs"
                   >
-                    {entry.createdAt.toLocaleDateString("fr-FR", {
-                      day: "numeric",
-                      month: "long",
-                      year: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
+                    {entry.createdAt.toLocaleDateString(
+                      LOCALE_METADATA[locale as Locale].bcp47,
+                      {
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      },
+                    )}
                   </time>
                 </div>
                 <p className="text-muted-foreground text-xs">
-                  Par {entry.user.name} ({entry.user.email}) ·{" "}
-                  {entry.entityType}
+                  {t("byUser", {
+                    name: entry.user.name,
+                    email: entry.user.email,
+                  })}{" "}
+                  · {entry.entityType}
                   {entry.entityId !== null && ` · ${entry.entityId}`}
                 </p>
               </li>

@@ -72,7 +72,9 @@ describe("UpdateAvatarSchema", () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.issues[0]?.message).toBe("L'image est requise");
+        expect(result.error.issues[0]?.message).toBe(
+          "validation.avatar.required",
+        );
       }
     });
 
@@ -83,7 +85,9 @@ describe("UpdateAvatarSchema", () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.issues[0]?.message).toContain("image est requise");
+        expect(result.error.issues[0]?.message).toBe(
+          "validation.avatar.required",
+        );
       }
     });
   });
@@ -100,8 +104,9 @@ describe("UpdateAvatarSchema", () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.issues[0]?.message).toContain("trop volumineuse");
-        expect(result.error.issues[0]?.message).toContain("5MB");
+        expect(result.error.issues[0]?.message).toBe(
+          "validation.avatar.tooLarge",
+        );
       }
     });
 
@@ -115,7 +120,9 @@ describe("UpdateAvatarSchema", () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.issues[0]?.message).toContain("volumineuse");
+        expect(result.error.issues[0]?.message).toBe(
+          "validation.avatar.tooLarge",
+        );
       }
     });
   });
@@ -131,7 +138,7 @@ describe("UpdateAvatarSchema", () => {
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.error.issues[0]?.message).toBe(
-          "Format non supporté. Formats acceptés : JPEG, PNG, WebP",
+          "validation.avatar.unsupportedFormat",
         );
       }
     });
@@ -145,10 +152,9 @@ describe("UpdateAvatarSchema", () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.issues[0]?.message).toContain(
-          "Format non supporté",
+        expect(result.error.issues[0]?.message).toBe(
+          "validation.avatar.unsupportedFormat",
         );
-        expect(result.error.issues[0]?.message).toContain("JPEG, PNG, WebP");
       }
     });
 
@@ -161,8 +167,8 @@ describe("UpdateAvatarSchema", () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.issues[0]?.message).toContain(
-          "Format non supporté",
+        expect(result.error.issues[0]?.message).toBe(
+          "validation.avatar.unsupportedFormat",
         );
       }
     });
@@ -176,8 +182,8 @@ describe("UpdateAvatarSchema", () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.issues[0]?.message).toContain(
-          "Format non supporté",
+        expect(result.error.issues[0]?.message).toBe(
+          "validation.avatar.unsupportedFormat",
         );
       }
     });
@@ -191,8 +197,8 @@ describe("UpdateAvatarSchema", () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.issues[0]?.message).toContain(
-          "Format non supporté",
+        expect(result.error.issues[0]?.message).toBe(
+          "validation.avatar.unsupportedFormat",
         );
       }
     });
@@ -204,8 +210,8 @@ describe("UpdateAvatarSchema", () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.issues[0]?.message).toContain(
-          "Format non supporté",
+        expect(result.error.issues[0]?.message).toBe(
+          "validation.avatar.unsupportedFormat",
         );
       }
     });

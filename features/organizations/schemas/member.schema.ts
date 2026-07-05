@@ -7,14 +7,18 @@ type OrganizationMemberRole = (typeof ORGANIZATION_MEMBER_ROLES)[number];
 type OrganizationChangeableRole =
   (typeof ORGANIZATION_CHANGEABLE_ROLES)[number];
 
+/**
+ * Messages are translation KEYS (resolved against the `validation` message
+ * namespace) — see `utils/errors/translate-field-errors.ts`.
+ */
 const ChangeMemberRoleSchema = z.object({
   memberId: z
     .string()
-    .min(1, "L'identifiant du membre est requis")
-    .max(255, "L'identifiant est invalide")
+    .min(1, "validation.organizations.memberIdRequired")
+    .max(255, "validation.organizations.memberIdInvalid")
     .trim(),
   role: z.enum(ORGANIZATION_CHANGEABLE_ROLES, {
-    message: "Le rôle doit être 'admin' ou 'member'",
+    message: "validation.organizations.invalidRole",
   }),
 });
 
@@ -23,8 +27,8 @@ type ChangeMemberRoleSchemaType = z.infer<typeof ChangeMemberRoleSchema>;
 const RemoveMemberSchema = z.object({
   memberId: z
     .string()
-    .min(1, "L'identifiant du membre est requis")
-    .max(255, "L'identifiant est invalide")
+    .min(1, "validation.organizations.memberIdRequired")
+    .max(255, "validation.organizations.memberIdInvalid")
     .trim(),
 });
 
@@ -33,8 +37,8 @@ type RemoveMemberSchemaType = z.infer<typeof RemoveMemberSchema>;
 const TransferOwnershipSchema = z.object({
   memberId: z
     .string()
-    .min(1, "L'identifiant du membre est requis")
-    .max(255, "L'identifiant est invalide")
+    .min(1, "validation.organizations.memberIdRequired")
+    .max(255, "validation.organizations.memberIdInvalid")
     .trim(),
 });
 

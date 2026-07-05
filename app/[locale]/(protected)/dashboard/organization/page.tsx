@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 import type { Locale } from "next-intl";
-import { setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { createLoader, type SearchParams } from "nuqs/server";
 
 import { membersSearchParams } from "@/features/organizations/constants/members-filters.constant";
@@ -16,18 +16,28 @@ import { TooManyRequestsPage } from "@/components/pages/too-many-requests-page";
 
 const loadSearchParams = createLoader(membersSearchParams);
 
-export const metadata: Metadata = {
-  title: "Organisation",
-  robots: {
-    index: false,
-    follow: false,
-  },
-};
-
 type OrganizationRouteProps = {
   params: Promise<{ locale: string }>;
   searchParams: Promise<SearchParams>;
 };
+
+export async function generateMetadata({
+  params,
+}: OrganizationRouteProps): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({
+    locale: locale as Locale,
+    namespace: "organizations",
+  });
+
+  return {
+    title: t("title"),
+    robots: {
+      index: false,
+      follow: false,
+    },
+  };
+}
 
 export default async function OrganizationRoute({
   params,
@@ -40,11 +50,14 @@ export default async function OrganizationRoute({
   const session = await requireSession();
 
   if (!session.activeOrganizationId) {
+    const t = await getTranslations({
+      locale: locale as Locale,
+      namespace: "organizations",
+    });
+
     return (
       <div className="flex items-center justify-center p-6">
-        <p className="text-muted-foreground">
-          Aucune organisation active. Veuillez sélectionner une organisation.
-        </p>
+        <p className="text-muted-foreground">{t("noActiveOrganization")}</p>
       </div>
     );
   }

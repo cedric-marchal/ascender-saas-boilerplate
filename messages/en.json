@@ -203,6 +203,111 @@
       "descriptionWithSubscription": "This action is irreversible. Your account, your data, and your Stripe subscription will be permanently deleted."
     }
   },
+  "organizations": {
+    "title": "Organization",
+    "noActiveOrganization": "No active organization. Please select an organization.",
+    "roles": {
+      "all": "All roles",
+      "owner": "Owner",
+      "admin": "Admin",
+      "member": "Member"
+    },
+    "membersPage": {
+      "memberCount": "{count, plural, one {# member} other {# members}}"
+    },
+    "membersLoading": {
+      "ariaLabel": "Loading member list"
+    },
+    "membersFilters": {
+      "searchPlaceholder": "Search by name or email...",
+      "roleLabel": "Role",
+      "rolePlaceholder": "Role",
+      "applyButton": "Apply",
+      "loadingButton": "Loading...",
+      "clearButton": "Clear"
+    },
+    "membersColumns": {
+      "nameHeader": "Name",
+      "emailHeader": "Email",
+      "roleHeader": "Role",
+      "actionsFor": "Actions for {name}",
+      "changeRole": "Change role",
+      "transferOwnership": "Transfer ownership",
+      "removeMember": "Remove from project",
+      "ownerNotEditable": "Owner (not editable)",
+      "changeRoleDialog": {
+        "title": "Change role",
+        "description": "Change {name}'s role in the organization."
+      },
+      "removeDialog": {
+        "title": "Remove this member?",
+        "description": "{name} will no longer have access to the organization. This action is reversible.",
+        "cancel": "Cancel",
+        "confirm": "Remove",
+        "confirming": "Removing...",
+        "successToast": "Member removed successfully"
+      },
+      "transferDialog": {
+        "title": "Transfer ownership?",
+        "description": "{name} will become owner and you will be demoted to admin. This action is irreversible without the new owner's consent.",
+        "cancel": "Cancel",
+        "confirm": "Transfer",
+        "confirming": "Transferring...",
+        "successToast": "Ownership transferred successfully"
+      }
+    },
+    "inviteModal": {
+      "triggerLabel": "Invite a member",
+      "closeLabel": "Close",
+      "title": "Invite a member",
+      "description": "Invite a collaborator to join your organization by email."
+    },
+    "inviteForm": {
+      "emailLabel": "Email address",
+      "emailPlaceholder": "member@example.com",
+      "roleLabel": "Role",
+      "rolePlaceholder": "Select a role",
+      "submitLabel": "Invite",
+      "submittingLabel": "Sending...",
+      "successToast": "Invitation sent successfully!"
+    },
+    "roleForm": {
+      "label": "New role",
+      "placeholder": "Select a role",
+      "submitLabel": "Change role",
+      "submittingLabel": "Updating...",
+      "successToast": "Role changed successfully!"
+    },
+    "orgSwitcher": {
+      "fallbackName": "Organization",
+      "myOrganization": "My organization",
+      "switchErrorToast": "An error occurred while switching organization"
+    },
+    "auditLog": {
+      "title": "Activity log",
+      "eventCount": "{count, plural, one {# event} other {# events}}",
+      "empty": "No activity recorded yet.",
+      "loadingLabel": "Loading...",
+      "byUser": "By {name} ({email})"
+    },
+    "featureLabels": {
+      "advancedAnalytics": "Advanced analytics",
+      "apiAccess": "API access",
+      "prioritySupport": "Priority support"
+    },
+    "auditActions": {
+      "MEMBER_INVITED": "Member invited",
+      "MEMBER_ACCEPTED": "Member accepted invitation",
+      "MEMBER_REMOVED": "Member removed",
+      "ROLE_CHANGED": "Role changed",
+      "OWNERSHIP_TRANSFERRED": "Ownership transferred",
+      "ORG_CREATED": "Organization created",
+      "ORG_UPDATED": "Organization updated",
+      "BILLING_CHECKOUT": "Checkout completed",
+      "BILLING_PLAN_CHANGED": "Plan changed",
+      "ACCOUNT_DELETED": "Account deleted"
+    }
+  },
   "pricing": {
     "heading": "Clear pricing, built to grow with you",
     "subheading": "Whether you're a freelancer, a small team, or a larger organization, {appName} offers flexible, no-commitment plans so you can move at your own pace.",
@@ -397,6 +502,15 @@
       "required": "Image is required",
       "tooLarge": "Image is too large (max 4.5MB)",
       "unsupportedFormat": "Unsupported format. Accepted formats: JPEG, PNG, WebP"
+    },
+    "organizations": {
+      "invalidRole": "Role must be 'admin' or 'member'",
+      "invitationIdRequired": "Invitation ID is required",
+      "invitationIdInvalid": "Invitation ID is invalid",
+      "memberIdRequired": "Member ID is required",
+      "memberIdInvalid": "Member ID is invalid",
+      "organizationIdRequired": "Organization ID is required",
+      "logoUrlTooLong": "Logo URL must be under 500 characters"
     },
     "contact": {
       "subject": {

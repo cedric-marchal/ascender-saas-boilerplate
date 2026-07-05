@@ -199,6 +199,111 @@
       "descriptionWithSubscription": "Cette action est irréversible. Votre compte, vos données et votre abonnement Stripe seront définitivement supprimés."
     }
   },
+  "organizations": {
+    "title": "Organisation",
+    "noActiveOrganization": "Aucune organisation active. Veuillez sélectionner une organisation.",
+    "roles": {
+      "all": "Tous les rôles",
+      "owner": "Propriétaire",
+      "admin": "Administrateur",
+      "member": "Membre"
+    },
+    "membersPage": {
+      "memberCount": "{count, plural, one {# membre} other {# membres}}"
+    },
+    "membersLoading": {
+      "ariaLabel": "Chargement de la liste des membres"
+    },
+    "membersFilters": {
+      "searchPlaceholder": "Rechercher par nom ou email...",
+      "roleLabel": "Rôle",
+      "rolePlaceholder": "Rôle",
+      "applyButton": "Appliquer",
+      "loadingButton": "Chargement...",
+      "clearButton": "Effacer"
+    },
+    "membersColumns": {
+      "nameHeader": "Nom",
+      "emailHeader": "Email",
+      "roleHeader": "Rôle",
+      "actionsFor": "Actions pour {name}",
+      "changeRole": "Modifier le rôle",
+      "transferOwnership": "Transférer la propriété",
+      "removeMember": "Retirer du projet",
+      "ownerNotEditable": "Propriétaire (non modifiable)",
+      "changeRoleDialog": {
+        "title": "Modifier le rôle",
+        "description": "Modifier le rôle de {name} dans l'organisation."
+      },
+      "removeDialog": {
+        "title": "Retirer ce membre ?",
+        "description": "{name} n'aura plus accès à l'organisation. Cette action est réversible.",
+        "cancel": "Annuler",
+        "confirm": "Retirer",
+        "confirming": "Suppression...",
+        "successToast": "Membre retiré avec succès"
+      },
+      "transferDialog": {
+        "title": "Transférer la propriété ?",
+        "description": "{name} deviendra propriétaire et vous serez rétrogradé au rôle d'administrateur. Cette action est irréversible sans le consentement du nouveau propriétaire.",
+        "cancel": "Annuler",
+        "confirm": "Transférer",
+        "confirming": "Transfert en cours...",
+        "successToast": "Propriété transférée avec succès"
+      }
+    },
+    "inviteModal": {
+      "triggerLabel": "Inviter un membre",
+      "closeLabel": "Fermer",
+      "title": "Inviter un membre",
+      "description": "Invitez un collaborateur à rejoindre votre organisation par email."
+    },
+    "inviteForm": {
+      "emailLabel": "Adresse email",
+      "emailPlaceholder": "membre@exemple.com",
+      "roleLabel": "Rôle",
+      "rolePlaceholder": "Sélectionnez un rôle",
+      "submitLabel": "Inviter",
+      "submittingLabel": "Envoi en cours...",
+      "successToast": "Invitation envoyée avec succès !"
+    },
+    "roleForm": {
+      "label": "Nouveau rôle",
+      "placeholder": "Sélectionnez un rôle",
+      "submitLabel": "Modifier le rôle",
+      "submittingLabel": "Modification en cours...",
+      "successToast": "Rôle modifié avec succès !"
+    },
+    "orgSwitcher": {
+      "fallbackName": "Organisation",
+      "myOrganization": "Mon organisation",
+      "switchErrorToast": "Une erreur est survenue lors du changement d'organisation"
+    },
+    "auditLog": {
+      "title": "Journal d'activité",
+      "eventCount": "{count, plural, one {# événement} other {# événements}}",
+      "empty": "Aucune activité enregistrée pour le moment.",
+      "loadingLabel": "Chargement...",
+      "byUser": "Par {name} ({email})"
+    },
+    "featureLabels": {
+      "advancedAnalytics": "Analytiques avancées",
+      "apiAccess": "Accès API",
+      "prioritySupport": "Support prioritaire"
+    },
+    "auditActions": {
+      "MEMBER_INVITED": "Membre invité",
+      "MEMBER_ACCEPTED": "Membre a accepté l'invitation",
+      "MEMBER_REMOVED": "Membre retiré",
+      "ROLE_CHANGED": "Rôle modifié",
+      "OWNERSHIP_TRANSFERRED": "Propriété transférée",
+      "ORG_CREATED": "Organisation créée",
+      "ORG_UPDATED": "Organisation mise à jour",
+      "BILLING_CHECKOUT": "Paiement effectué",
+      "BILLING_PLAN_CHANGED": "Plan modifié",
+      "ACCOUNT_DELETED": "Compte supprimé"
+    }
+  },
   "home": {
     "title": "Hello World",
     "seoDescription": "Découvrez les solutions innovantes de {appName} pour transformer votre entreprise."
@@ -397,6 +502,15 @@
       "required": "L'image est requise",
       "tooLarge": "L'image est trop volumineuse (max 4.5MB)",
       "unsupportedFormat": "Format non supporté. Formats acceptés : JPEG, PNG, WebP"
+    },
+    "organizations": {
+      "invalidRole": "Le rôle doit être 'admin' ou 'member'",
+      "invitationIdRequired": "L'identifiant de l'invitation est requis",
+      "invitationIdInvalid": "L'identifiant est invalide",
+      "memberIdRequired": "L'identifiant du membre est requis",
+      "memberIdInvalid": "L'identifiant est invalide",
+      "organizationIdRequired": "L'identifiant de l'organisation est requis",
+      "logoUrlTooLong": "L'URL du logo doit contenir moins de 500 caractères"
     },
     "contact": {
       "subject": {

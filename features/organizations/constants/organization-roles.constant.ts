@@ -26,10 +26,14 @@ const memberRole = ac.newRole({
   invitation: [],
 });
 
+/**
+ * Values are translation KEYS (resolved against the `organizations.roles`
+ * message namespace via `useTranslations`), not literal labels.
+ */
 const ORGANIZATION_ROLE_LABELS: Record<string, string> = {
-  owner: "Propriétaire",
-  admin: "Administrateur",
-  member: "Membre",
+  owner: "owner",
+  admin: "admin",
+  member: "member",
 };
 
 export { ac, adminRole, memberRole, ORGANIZATION_ROLE_LABELS, ownerRole };

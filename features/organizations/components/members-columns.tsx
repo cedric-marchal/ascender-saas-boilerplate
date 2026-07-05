@@ -13,6 +13,7 @@ import {
   ShieldOff,
   Trash2,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useQueryStates } from "nuqs";
 import { toast } from "sonner";
 
@@ -23,6 +24,7 @@ import {
   membersSearchParams,
   type MemberSortableField,
 } from "@/features/organizations/constants/members-filters.constant";
+import { ORGANIZATION_ROLE_LABELS } from "@/features/organizations/constants/organization-roles.constant";
 import type { MemberItem } from "@/features/organizations/services/get-organization-members.service";
 
 import {
@@ -55,12 +57,6 @@ const roleBadgeVariant: Record<string, "default" | "secondary" | "outline"> = {
   member: "outline",
 };
 
-const roleDisplayLabels: Record<string, string> = {
-  owner: "Propriétaire",
-  admin: "Administrateur",
-  member: "Membre",
-};
-
 type MembersTableContext = {
   currentUserId: string;
   memberRole: string;
@@ -68,11 +64,13 @@ type MembersTableContext = {
 
 function SortableHeader({
   field,
-  label,
+  labelKey,
 }: {
   field: MemberSortableField;
-  label: string;
+  labelKey: "nameHeader" | "emailHeader";
 }) {
+  const t = useTranslations("organizations.membersColumns");
+  const label = t(labelKey);
   const [isLoading, startTransition] = useTransition();
 
   const [filters, setFilters] = useQueryStates(membersSearchParams, {
@@ -119,6 +117,23 @@ function SortableHeader({
   );
 }
 
+function RoleHeader() {
+  const t = useTranslations("organizations.membersColumns");
+
+  return t("roleHeader");
+}
+
+function RoleBadgeCell({ role }: { role: string }) {
+  const t = useTranslations("organizations.roles");
+  const labelKey = ORGANIZATION_ROLE_LABELS[role];
+
+  return (
+    <Badge variant={roleBadgeVariant[role] ?? "outline"}>
+      {labelKey ? t(labelKey) : role}
+    </Badge>
+  );
+}
+
 type MemberActionsProps = {
   member: MemberItem;
   currentUserId: string;
@@ -130,6 +145,7 @@ function MemberActions({
   currentUserId,
   memberRole,
 }: MemberActionsProps) {
+  const t = useTranslations("organizations.membersColumns");
   const [isRoleDialogOpen, setIsRoleDialogOpen] = useState(false);
   const [isRemoveDialogOpen, setIsRemoveDialogOpen] = useState(false);
   const [isTransferDialogOpen, setIsTransferDialogOpen] = useState(false);
@@ -149,7 +165,7 @@ function MemberActions({
     try {
       getActionResult(await removeMemberAction({ memberId: member.id }));
 
-      toast.success("Membre retiré avec succès");
+      toast.success(t("removeDialog.successToast"));
       setIsRemoveDialogOpen(false);
     } catch (error: unknown) {
       toast.error(getErrorMessage(error));
@@ -164,7 +180,7 @@ function MemberActions({
     try {
       getActionResult(await transferOwnershipAction({ memberId: member.id }));
 
-      toast.success("Propriété transférée avec succès");
+      toast.success(t("transferDialog.successToast"));
       setIsTransferDialogOpen(false);
     } catch (error: unknown) {
       toast.error(getErrorMessage(error));
@@ -179,20 +195,22 @@ function MemberActions({
         <DropdownMenuTrigger asChild>
           <Button type="button" variant="ghost" size="icon">
             <MoreHorizontal className="h-4 w-4" aria-hidden="true" />
-            <span className="sr-only">Actions pour {member.user.name}</span>
+            <span className="sr-only">
+              {t("actionsFor", { name: member.user.name })}
+            </span>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           {!isTargetOwner && (
             <DropdownMenuItem onSelect={() => setIsRoleDialogOpen(true)}>
               <Shield className="mr-2 h-4 w-4" aria-hidden="true" />
-              Modifier le rôle
+              {t("changeRole")}
             </DropdownMenuItem>
           )}
           {memberRole === "owner" && !isTargetOwner && (
             <DropdownMenuItem onSelect={() => setIsTransferDialogOpen(true)}>
               <Crown className="mr-2 h-4 w-4" aria-hidden="true" />
-              Transférer la propriété
+              {t("transferOwnership")}
             </DropdownMenuItem>
           )}
           {!isTargetOwner && <DropdownMenuSeparator />}
@@ -202,13 +220,13 @@ function MemberActions({
               className="text-destructive focus:text-destructive"
             >
               <Trash2 className="mr-2 h-4 w-4" aria-hidden="true" />
-              Retirer du projet
+              {t("removeMember")}
             </DropdownMenuItem>
           )}
           {isTargetOwner && memberRole !== "owner" && (
             <DropdownMenuItem disabled>
               <ShieldOff className="mr-2 h-4 w-4" aria-hidden="true" />
-              Propriétaire (non modifiable)
+              {t("ownerNotEditable")}
             </DropdownMenuItem>
           )}
         </DropdownMenuContent>
@@ -217,9 +235,9 @@ function MemberActions({
       <AlertDialog open={isRoleDialogOpen} onOpenChange={setIsRoleDialogOpen}>
         <AlertDialogContent className="sm:max-w-lg">
           <AlertDialogHeader>
-            <AlertDialogTitle>Modifier le rôle</AlertDialogTitle>
+            <AlertDialogTitle>{t("changeRoleDialog.title")}</AlertDialogTitle>
             <AlertDialogDescription>
-              Modifier le rôle de {member.user.name} dans l'organisation.
+              {t("changeRoleDialog.description", { name: member.user.name })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <RoleForm
@@ -236,9 +254,9 @@ function MemberActions({
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Retirer ce membre ?</AlertDialogTitle>
+            <AlertDialogTitle>{t("removeDialog.title")}</AlertDialogTitle>
             <AlertDialogDescription>
-              {`${member.user.name} n'aura plus accès à l'organisation. Cette action est réversible.`}
+              {t("removeDialog.description", { name: member.user.name })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -248,7 +266,7 @@ function MemberActions({
               onClick={() => setIsRemoveDialogOpen(false)}
               disabled={isExecuting}
             >
-              Annuler
+              {t("removeDialog.cancel")}
             </Button>
             <Button
               type="button"
@@ -256,7 +274,9 @@ function MemberActions({
               onClick={handleRemove}
               disabled={isExecuting}
             >
-              {isExecuting ? "Suppression..." : "Retirer"}
+              {isExecuting
+                ? t("removeDialog.confirming")
+                : t("removeDialog.confirm")}
             </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -268,9 +288,9 @@ function MemberActions({
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Transférer la propriété ?</AlertDialogTitle>
+            <AlertDialogTitle>{t("transferDialog.title")}</AlertDialogTitle>
             <AlertDialogDescription>
-              {`${member.user.name} deviendra propriétaire et vous serez rétrogradé au rôle d'administrateur. Cette action est irréversible sans le consentement du nouveau propriétaire.`}
+              {t("transferDialog.description", { name: member.user.name })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -280,14 +300,16 @@ function MemberActions({
               onClick={() => setIsTransferDialogOpen(false)}
               disabled={isExecuting}
             >
-              Annuler
+              {t("transferDialog.cancel")}
             </Button>
             <Button
               type="button"
               onClick={handleTransferOwnership}
               disabled={isExecuting}
             >
-              {isExecuting ? "Transfert en cours..." : "Transférer"}
+              {isExecuting
+                ? t("transferDialog.confirming")
+                : t("transferDialog.confirm")}
             </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -302,7 +324,7 @@ function createMembersColumns(
   return [
     {
       accessorKey: "user.name",
-      header: () => <SortableHeader field="name" label="Nom" />,
+      header: () => <SortableHeader field="name" labelKey="nameHeader" />,
       cell: ({ row }) => {
         const member = row.original;
         return (
@@ -319,20 +341,13 @@ function createMembersColumns(
     },
     {
       accessorKey: "user.email",
-      header: () => <SortableHeader field="email" label="Email" />,
+      header: () => <SortableHeader field="email" labelKey="emailHeader" />,
       cell: ({ row }) => truncate(row.original.user.email, 40),
     },
     {
       accessorKey: "role",
-      header: "Rôle",
-      cell: ({ row }) => {
-        const role = row.original.role;
-        return (
-          <Badge variant={roleBadgeVariant[role] ?? "outline"}>
-            {roleDisplayLabels[role] ?? role}
-          </Badge>
-        );
-      },
+      header: () => <RoleHeader />,
+      cell: ({ row }) => <RoleBadgeCell role={row.original.role} />,
     },
     {
       id: "actions",

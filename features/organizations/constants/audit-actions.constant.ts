@@ -13,6 +13,23 @@ const AUDIT_ACTION = {
 
 type AuditAction = (typeof AUDIT_ACTION)[keyof typeof AUDIT_ACTION];
 
-export { AUDIT_ACTION };
+/**
+ * Values are translation KEYS (resolved against the `organizations.auditActions`
+ * message namespace via `useTranslations`), not literal labels.
+ */
+const AUDIT_ACTION_LABELS: Record<AuditAction, string> = {
+  MEMBER_INVITED: "MEMBER_INVITED",
+  MEMBER_ACCEPTED: "MEMBER_ACCEPTED",
+  MEMBER_REMOVED: "MEMBER_REMOVED",
+  ROLE_CHANGED: "ROLE_CHANGED",
+  OWNERSHIP_TRANSFERRED: "OWNERSHIP_TRANSFERRED",
+  ORG_CREATED: "ORG_CREATED",
+  ORG_UPDATED: "ORG_UPDATED",
+  BILLING_CHECKOUT: "BILLING_CHECKOUT",
+  BILLING_PLAN_CHANGED: "BILLING_PLAN_CHANGED",
+  ACCOUNT_DELETED: "ACCOUNT_DELETED",
+};
+
+export { AUDIT_ACTION, AUDIT_ACTION_LABELS };
 
 export type { AuditAction };
