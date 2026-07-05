@@ -4,6 +4,8 @@ import { createSafeActionClient } from "next-safe-action";
 
 import { auth } from "@/lib/auth";
 import { UserRole } from "@/lib/generated/prisma/client";
+import { logger } from "@/lib/logger";
+import { captureException } from "@/lib/observability";
 import { prisma } from "@/lib/prisma";
 
 import {
@@ -23,7 +25,7 @@ function parseUserRole(role: string): UserRole {
 
 export const actionClient = createSafeActionClient({
   async handleServerError(error: Error) {
-    console.error("Action error:", error.message);
+    logger.warn("Action error", { message: error.message });
 
     const locale = await getLocale();
 
@@ -31,7 +33,11 @@ export const actionClient = createSafeActionClient({
       return translateAppError(error, locale);
     }
 
-    console.error("Unexpected action error:", error);
+    logger.error("Unexpected action error", {
+      message: error.message,
+      name: error.name,
+    });
+    captureException(error);
 
     if (process.env.NODE_ENV === "development") {
       return error.message;

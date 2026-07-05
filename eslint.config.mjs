@@ -89,11 +89,27 @@ const eslintConfig = defineConfig([
       "no-console": "off",
     },
   },
+  // lib/logger.ts is the single designated console transport (see
+  // docs/OBSERVABILITY.md) — every other file must go through `logger.*`.
+  {
+    files: ["lib/logger.ts"],
+    rules: {
+      "no-console": "off",
+    },
+  },
   // Tests: allow `any` for mocks and stubs.
   {
     files: ["__tests__/**"],
     rules: {
       "@typescript-eslint/no-explicit-any": "off",
+    },
+  },
+  // Logger/analytics contract tests spy on console.log directly to assert
+  // the dev-mode console transport.
+  {
+    files: ["__tests__/lib/logger.test.ts", "__tests__/lib/analytics.test.ts"],
+    rules: {
+      "no-console": "off",
     },
   },
 ]);

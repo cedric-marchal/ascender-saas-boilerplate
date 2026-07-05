@@ -9,8 +9,19 @@ const mockPrismaMemberUpdate = vi.fn();
 const mockRedisGet = vi.fn();
 const mockRedisSet = vi.fn();
 const mockSendSeatLimitExceededEmail = vi.fn();
+const mockLoggerWarn = vi.fn();
+const mockLoggerError = vi.fn();
 
 vi.mock("server-only", () => ({}));
+
+vi.mock("@/lib/logger", () => ({
+  logger: {
+    debug: vi.fn(),
+    info: vi.fn(),
+    warn: mockLoggerWarn,
+    error: mockLoggerError,
+  },
+}));
 
 vi.mock("@/lib/prisma", () => ({
   prisma: {
@@ -151,8 +162,9 @@ describe("reconcileSeatsOnDowngrade", () => {
       await reconcileSeatsOnDowngrade(ORG_ID);
 
       expect(mockSendSeatLimitExceededEmail).not.toHaveBeenCalled();
-      expect(console.warn).toHaveBeenCalledWith(
-        expect.stringContaining("Cannot send seat-limit-exceeded email"),
+      expect(mockLoggerWarn).toHaveBeenCalledWith(
+        "Cannot send seat-limit-exceeded email: missing organization or owner",
+        expect.objectContaining({ organizationId: ORG_ID }),
       );
     });
   });

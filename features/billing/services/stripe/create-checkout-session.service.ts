@@ -6,6 +6,7 @@ import type { Locale } from "next-intl";
 import { ALLOWED_PRICE_IDS } from "@/features/billing/constants/plan.constant";
 
 import { env } from "@/lib/env";
+import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
 import { stripe } from "@/lib/stripe";
 
@@ -44,19 +45,15 @@ async function syncStripeCustomerIfNeeded(
         name: organizationName,
       });
 
-      if (process.env.NODE_ENV === "development") {
-        console.warn(
-          `Stripe customer synchronized during checkout for organization ${organizationId}`,
-        );
-      }
+      logger.debug("Stripe customer synchronized during checkout", {
+        organizationId,
+      });
     }
   } catch (error: unknown) {
-    if (process.env.NODE_ENV === "development") {
-      console.error(
-        `Failed to sync Stripe customer during checkout for organization ${organizationId}:`,
-        error,
-      );
-    }
+    logger.error("Failed to sync Stripe customer during checkout", {
+      organizationId,
+      error: error instanceof Error ? error.message : String(error),
+    });
   }
 }
 

@@ -2,6 +2,7 @@ import "server-only";
 
 import type { AuditAction } from "@/features/organizations/constants/audit-actions.constant";
 
+import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
 
 type LogEventInput = {
@@ -26,7 +27,12 @@ async function logEvent(input: LogEventInput): Promise<void> {
       },
     });
   } catch (error: unknown) {
-    console.error("Failed to write audit log:", error);
+    logger.error("Failed to write audit log", {
+      organizationId: input.organizationId,
+      userId: input.userId,
+      action: input.action,
+      error: error instanceof Error ? error.message : String(error),
+    });
   }
 }
 

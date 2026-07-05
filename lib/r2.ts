@@ -9,6 +9,7 @@ import {
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 import { env } from "@/lib/env";
+import { logger } from "@/lib/logger";
 
 import {
   BadRequestError,
@@ -86,7 +87,10 @@ async function uploadFile(
       }),
     );
   } catch (error: unknown) {
-    console.error("R2 upload error:", error);
+    logger.error("R2 upload error", {
+      key,
+      error: error instanceof Error ? error.message : String(error),
+    });
     throw new ServiceUnavailableError("errors.storage.serviceUnavailable");
   }
 }
@@ -102,7 +106,10 @@ async function deleteFile(key: string): Promise<void> {
       }),
     );
   } catch (error: unknown) {
-    console.error("R2 delete error:", error);
+    logger.error("R2 delete error", {
+      key,
+      error: error instanceof Error ? error.message : String(error),
+    });
     throw new ServiceUnavailableError("errors.storage.serviceUnavailable");
   }
 }
@@ -142,7 +149,10 @@ async function getPrivateUrl(
 
     return url;
   } catch (error: unknown) {
-    console.error("R2 signed URL error:", error);
+    logger.error("R2 signed URL error", {
+      key,
+      error: error instanceof Error ? error.message : String(error),
+    });
     throw new ServiceUnavailableError("errors.storage.serviceUnavailable");
   }
 }

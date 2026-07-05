@@ -3,6 +3,7 @@ import "server-only";
 import { Resend, type CreateEmailOptions } from "resend";
 
 import { env } from "@/lib/env";
+import { logger } from "@/lib/logger";
 
 const resend = new Resend(env.RESEND_API_KEY);
 
@@ -26,12 +27,11 @@ async function sendEmail(
   const result = await resend.emails.send(emailOptions);
 
   if (result.error) {
-    console.error("[Resend Error]", {
+    logger.error("Resend send error", {
       environment: process.env.NODE_ENV,
       name: result.error.name,
       message: result.error.message,
       subject: emailOptions.subject,
-      timestamp: new Date().toISOString(),
     });
   }
 
@@ -44,10 +44,9 @@ async function sendEmailSafe(
   try {
     return await sendEmail(options);
   } catch (error: unknown) {
-    console.error("[Resend Critical Error]", {
+    logger.error("Resend critical error", {
       error: error instanceof Error ? error.message : "Unknown error",
       subject: options.subject,
-      timestamp: new Date().toISOString(),
     });
 
     return {

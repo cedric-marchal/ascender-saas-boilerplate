@@ -39,6 +39,10 @@ const env = createEnv({
     STRIPE_SECRET_KEY: z.string().min(1),
     STRIPE_WEBHOOK_SECRET: z.string().min(1),
     STRIPE_PRICE_ID_PRO: z.string().min(1),
+
+    // Observability (optional — absent = disabled, app still boots).
+    // Activated by the observability plan (see docs/OBSERVABILITY.md).
+    SENTRY_DSN: z.string().optional(),
   },
   client: {
     NEXT_PUBLIC_APP_NAME: z.string().min(1),
@@ -56,6 +60,12 @@ const env = createEnv({
       })
       .default(4718592)
       .pipe(z.number({ message: "Maximum file size is 4.5MB" })),
+
+    // Observability (optional — absent = disabled, app still boots).
+    // Activated by the observability plan (see docs/OBSERVABILITY.md).
+    NEXT_PUBLIC_SENTRY_DSN: z.string().optional(),
+    NEXT_PUBLIC_POSTHOG_KEY: z.string().optional(),
+    NEXT_PUBLIC_POSTHOG_HOST: z.string().optional(),
   },
   runtimeEnv: {
     // Server
@@ -86,12 +96,18 @@ const env = createEnv({
     STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
     STRIPE_PRICE_ID_PRO: process.env.STRIPE_PRICE_ID_PRO,
 
+    SENTRY_DSN: process.env.SENTRY_DSN,
+
     // Client
     NEXT_PUBLIC_APP_NAME: process.env.NEXT_PUBLIC_APP_NAME,
     NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL,
     NEXT_PUBLIC_R2_PUBLIC_URL: process.env.NEXT_PUBLIC_R2_PUBLIC_URL,
     NEXT_PUBLIC_VERCEL_MAX_UPLOAD_SIZE:
       process.env.NEXT_PUBLIC_VERCEL_MAX_UPLOAD_SIZE,
+
+    NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
+    NEXT_PUBLIC_POSTHOG_KEY: process.env.NEXT_PUBLIC_POSTHOG_KEY,
+    NEXT_PUBLIC_POSTHOG_HOST: process.env.NEXT_PUBLIC_POSTHOG_HOST,
   },
   emptyStringAsUndefined: true,
   skipValidation: false,

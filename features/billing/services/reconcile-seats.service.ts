@@ -6,6 +6,7 @@ import { sendSeatLimitExceededEmail } from "@/features/billing/services/send-sea
 import { getSeatCapStatus } from "@/features/organizations/services/check-seat-capacity.service";
 
 import { seatLimitExceededEmailCacheKey } from "@/lib/cache-keys";
+import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
 import { redis } from "@/lib/redis";
 
@@ -68,7 +69,11 @@ async function reconcileSeatsOnDowngrade(
       return;
     }
   } catch (redisError: unknown) {
-    console.error("Redis seat-limit dedupe check failed:", redisError);
+    logger.error("Redis seat-limit dedupe check failed", {
+      organizationId,
+      error:
+        redisError instanceof Error ? redisError.message : String(redisError),
+    });
     // Redis unavailable → continue without dedupe (better than dropping the notice)
   }
 
@@ -80,8 +85,11 @@ async function reconcileSeatsOnDowngrade(
   const ownerEmail = await findOrganizationOwnerEmail(organizationId);
 
   if (!organization || !ownerEmail) {
-    console.warn(
-      `Cannot send seat-limit-exceeded email: missing organization or owner for org ${organizationId}`,
+    logger.warn(
+      "Cannot send seat-limit-exceeded email: missing organization or owner",
+      {
+        organizationId,
+      },
     );
 
     return;
@@ -98,7 +106,11 @@ async function reconcileSeatsOnDowngrade(
   try {
     await redis.set(dedupeKey, 1, { ex: DEDUPE_TTL_SECONDS });
   } catch (redisError: unknown) {
-    console.error("Redis seat-limit dedupe set failed:", redisError);
+    logger.error("Redis seat-limit dedupe set failed", {
+      organizationId,
+      error:
+        redisError instanceof Error ? redisError.message : String(redisError),
+    });
     // Non-fatal: dedupe key not set, a later retry may send a duplicate
     // notification — acceptable tradeoff, same as the payment-failed dunning path.
   }

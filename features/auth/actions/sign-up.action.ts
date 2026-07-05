@@ -6,6 +6,7 @@ import { APIError } from "better-auth/api";
 
 import { SignUpSchema } from "@/features/auth/schemas/auth.schema";
 
+import { trackEvent } from "@/lib/analytics";
 import { auth } from "@/lib/auth";
 import { authSignUpRatelimit } from "@/lib/ratelimit";
 import { actionClient } from "@/lib/safe-action";
@@ -40,6 +41,8 @@ const signUpAction = actionClient
 
       throw error;
     }
+
+    trackEvent("user_signed_up", { email: parsedInput.email });
 
     return {
       success: true,

@@ -3,6 +3,7 @@ import "server-only";
 import { headers } from "next/headers";
 
 import { auth } from "@/lib/auth";
+import { logger } from "@/lib/logger";
 import { optimizeAvatar } from "@/lib/optimize";
 import { prisma } from "@/lib/prisma";
 import { deleteFile, getPublicUrl, uploadFile } from "@/lib/r2";
@@ -43,7 +44,11 @@ async function deleteOldAvatar(userId: string): Promise<void> {
   try {
     await deleteFile(oldKey);
   } catch (error: unknown) {
-    console.error("Failed to delete old avatar:", error);
+    logger.error("Failed to delete old avatar", {
+      userId,
+      oldKey,
+      error: error instanceof Error ? error.message : String(error),
+    });
   }
 }
 

@@ -16,6 +16,7 @@ import {
 } from "@/lib/cache-keys";
 import { env } from "@/lib/env";
 import type { SubscriptionStatus } from "@/lib/generated/prisma/client";
+import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
 import { redis } from "@/lib/redis";
 import { stripe } from "@/lib/stripe";
@@ -77,7 +78,12 @@ async function sendDunningEmailOnce(
       return;
     }
   } catch (redisError: unknown) {
-    console.error("Redis payment-failed dedupe check failed:", redisError);
+    logger.error("Redis payment-failed dedupe check failed", {
+      invoiceId,
+      organizationId,
+      error:
+        redisError instanceof Error ? redisError.message : String(redisError),
+    });
     // Redis unavailable → continue without dedupe (better than dropping the dunning email)
   }
 
@@ -89,9 +95,10 @@ async function sendDunningEmailOnce(
   const ownerEmail = await findOrganizationOwnerEmail(organizationId);
 
   if (!organization || !ownerEmail) {
-    console.warn(
-      `Cannot send dunning email: missing organization or owner for org ${organizationId}`,
-    );
+    logger.warn("Cannot send dunning email: missing organization or owner", {
+      organizationId,
+      invoiceId,
+    });
 
     return;
   }
@@ -105,7 +112,12 @@ async function sendDunningEmailOnce(
   try {
     await redis.set(dedupeKey, 1, { ex: EVENT_TTL_SECONDS });
   } catch (redisError: unknown) {
-    console.error("Redis payment-failed dedupe set failed:", redisError);
+    logger.error("Redis payment-failed dedupe set failed", {
+      invoiceId,
+      organizationId,
+      error:
+        redisError instanceof Error ? redisError.message : String(redisError),
+    });
     // Non-fatal: dedupe key not set, a later retry of a different event id
     // for the same invoice may send a duplicate email — acceptable tradeoff.
   }
@@ -139,9 +151,15 @@ async function reconcileSeatsIfCapReduced(
       await reconcileSeatsOnDowngrade(organizationId);
     }
   } catch (reconciliationError: unknown) {
-    console.error(
-      "Seat reconciliation failed (non-fatal, provisioning already succeeded):",
-      reconciliationError,
+    logger.error(
+      "Seat reconciliation failed (non-fatal, provisioning already succeeded)",
+      {
+        organizationId,
+        error:
+          reconciliationError instanceof Error
+            ? reconciliationError.message
+            : String(reconciliationError),
+      },
     );
   }
 }
@@ -167,9 +185,9 @@ async function handleStripeWebhook(
     const errorMessage =
       error instanceof Error ? error.message : "Erreur inconnue";
 
-    if (process.env.NODE_ENV === "development") {
-      console.error(`Webhook signature verification failed: ${errorMessage}`);
-    }
+    logger.error("Webhook signature verification failed", {
+      error: errorMessage,
+    });
 
     return {
       status: 400,
@@ -180,9 +198,7 @@ async function handleStripeWebhook(
     };
   }
 
-  if (process.env.NODE_ENV === "development") {
-    console.warn(`Received Stripe event: ${event.type}`);
-  }
+  logger.debug("Received Stripe event", { eventType: event.type });
 
   const eventKey = stripeEventIdempotencyCacheKey(event.id);
 
@@ -199,7 +215,12 @@ async function handleStripeWebhook(
       };
     }
   } catch (redisError: unknown) {
-    console.error("Redis idempotency check failed:", redisError);
+    logger.error("Redis idempotency check failed", {
+      eventId: event.id,
+      eventType: event.type,
+      error:
+        redisError instanceof Error ? redisError.message : String(redisError),
+    });
     // Redis unavailable → continue without idempotence (better than blocking)
   }
 
@@ -224,9 +245,10 @@ async function handleStripeWebhook(
         });
 
         if (!stripeCustomer) {
-          console.warn(
-            `StripeCustomer not found for ${customerId}. Event: ${event.type}`,
-          );
+          logger.warn("StripeCustomer not found", {
+            customerId,
+            eventType: event.type,
+          });
           break;
         }
 
@@ -234,9 +256,10 @@ async function handleStripeWebhook(
         const priceId = subscriptionItem?.price?.id;
 
         if (!priceId || !subscriptionItem) {
-          console.warn(
-            `Missing priceId for subscription ${subscription.id}. Event: ${event.type}`,
-          );
+          logger.warn("Missing priceId for subscription", {
+            subscriptionId: subscription.id,
+            eventType: event.type,
+          });
           break;
         }
 
@@ -248,9 +271,11 @@ async function handleStripeWebhook(
         )[subscription.status];
 
         if (!subscriptionStatus) {
-          console.warn(
-            `Unknown subscription status "${subscription.status}" for ${subscription.id}. Event: ${event.type}`,
-          );
+          logger.warn("Unknown subscription status", {
+            subscriptionId: subscription.id,
+            status: subscription.status,
+            eventType: event.type,
+          });
           break;
         }
 
@@ -300,11 +325,11 @@ async function handleStripeWebhook(
           );
         }
 
-        if (process.env.NODE_ENV === "development") {
-          console.warn(
-            `[Subscription synced] ${subscription.id} (${subscription.status}) for org ${stripeCustomer.organizationId}`,
-          );
-        }
+        logger.debug("Subscription synced", {
+          subscriptionId: subscription.id,
+          status: subscription.status,
+          organizationId: stripeCustomer.organizationId,
+        });
 
         break;
       }
@@ -326,9 +351,10 @@ async function handleStripeWebhook(
         });
 
         if (!stripeCustomer) {
-          console.warn(
-            `StripeCustomer not found for ${customerId}. Event: ${event.type}`,
-          );
+          logger.warn("StripeCustomer not found", {
+            customerId,
+            eventType: event.type,
+          });
           break;
         }
 
@@ -351,11 +377,10 @@ async function handleStripeWebhook(
           previousSeatCapStatus.seatCap,
         );
 
-        if (process.env.NODE_ENV === "development") {
-          console.warn(
-            `[Subscription deleted] ${subscription.id} for org ${stripeCustomer.organizationId}`,
-          );
-        }
+        logger.debug("Subscription deleted", {
+          subscriptionId: subscription.id,
+          organizationId: stripeCustomer.organizationId,
+        });
 
         break;
       }
@@ -369,7 +394,7 @@ async function handleStripeWebhook(
             : invoice.customer?.id;
 
         if (!customerId) {
-          console.warn(`No customer ID in invoice. Event: ${event.type}`);
+          logger.warn("No customer ID in invoice", { eventType: event.type });
           break;
         }
 
@@ -383,19 +408,19 @@ async function handleStripeWebhook(
         });
 
         if (!stripeCustomer) {
-          console.warn(
-            `StripeCustomer not found for ${customerId}. Event: ${event.type}`,
-          );
+          logger.warn("StripeCustomer not found", {
+            customerId,
+            eventType: event.type,
+          });
           break;
         }
 
         await redis.del(billingInvoicesCacheKey(stripeCustomer.organizationId));
 
-        if (process.env.NODE_ENV === "development") {
-          console.warn(
-            `[Cache invalidated] Invoices cache for org ${stripeCustomer.organizationId} - Event: ${event.type}`,
-          );
-        }
+        logger.debug("Invoices cache invalidated", {
+          organizationId: stripeCustomer.organizationId,
+          eventType: event.type,
+        });
 
         if (event.type === "invoice.payment_failed") {
           await sendDunningEmailOnce(invoice.id, stripeCustomer.organizationId);
@@ -405,12 +430,14 @@ async function handleStripeWebhook(
       }
 
       default:
-        if (process.env.NODE_ENV === "development") {
-          console.warn(`Unhandled event type: ${event.type}`);
-        }
+        logger.debug("Unhandled event type", { eventType: event.type });
     }
   } catch (error: unknown) {
-    console.error("Webhook processing error:", error);
+    logger.error("Webhook processing error", {
+      eventId: event.id,
+      eventType: event.type,
+      error: error instanceof Error ? error.message : String(error),
+    });
 
     if (isTransientDbError(error)) {
       // Do NOT set the idempotency key — allow Stripe to retry
@@ -440,7 +467,12 @@ async function handleStripeWebhook(
   try {
     await redis.set(eventKey, 1, { ex: EVENT_TTL_SECONDS });
   } catch (redisError: unknown) {
-    console.error("Redis idempotency set failed:", redisError);
+    logger.error("Redis idempotency set failed", {
+      eventId: event.id,
+      eventType: event.type,
+      error:
+        redisError instanceof Error ? redisError.message : String(redisError),
+    });
     // Non-fatal: idempotency key not set, event may be reprocessed.
     // Acceptable tradeoff — better than dropping a successfully-processed event.
   }

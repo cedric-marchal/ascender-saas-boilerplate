@@ -4,6 +4,7 @@ import {
   billingInvoicesCacheKey,
   billingSubscriptionsCacheKey,
 } from "@/lib/cache-keys";
+import { logger } from "@/lib/logger";
 import { redis } from "@/lib/redis";
 import { stripe } from "@/lib/stripe";
 
@@ -22,7 +23,11 @@ async function cleanupBillingForOrganization(
   try {
     await stripe.customers.del(stripeCustomerId);
   } catch (error: unknown) {
-    console.error("Failed to delete Stripe customer:", error);
+    logger.error("Failed to delete Stripe customer", {
+      organizationId,
+      stripeCustomerId,
+      error: error instanceof Error ? error.message : String(error),
+    });
   }
 
   try {
@@ -31,7 +36,10 @@ async function cleanupBillingForOrganization(
       redis.del(billingInvoicesCacheKey(organizationId)),
     ]);
   } catch (error: unknown) {
-    console.error("Failed to delete Redis cache:", error);
+    logger.error("Failed to delete Redis cache", {
+      organizationId,
+      error: error instanceof Error ? error.message : String(error),
+    });
   }
 }
 
