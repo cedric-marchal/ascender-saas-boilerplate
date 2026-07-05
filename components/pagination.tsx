@@ -3,6 +3,7 @@
 import { useTransition } from "react";
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useQueryState } from "nuqs";
 
 import { parseAsPage } from "@/lib/parsers/nuqs";
@@ -15,6 +16,7 @@ type PaginationProps = {
 };
 
 function Pagination({ currentPage, totalPages }: PaginationProps) {
+  const t = useTranslations("common.pagination");
   const [isLoading, startTransition] = useTransition();
 
   const [page, setPage] = useQueryState(
@@ -44,7 +46,7 @@ function Pagination({ currentPage, totalPages }: PaginationProps) {
 
   return (
     <nav
-      aria-label="Pagination"
+      aria-label={t("navLabel")}
       className="flex items-center justify-center gap-4"
     >
       <Button
@@ -55,11 +57,11 @@ function Pagination({ currentPage, totalPages }: PaginationProps) {
         disabled={currentPage <= 1 || isLoading}
       >
         <ChevronLeft className="mr-1 h-4 w-4" aria-hidden="true" />
-        Précédent
+        {t("previous")}
       </Button>
 
       <span className="text-muted-foreground text-sm">
-        Page {currentPage} sur {totalPages}
+        {t("pageOf", { currentPage, totalPages })}
       </span>
 
       <Button
@@ -69,7 +71,7 @@ function Pagination({ currentPage, totalPages }: PaginationProps) {
         onClick={handleNext}
         disabled={currentPage >= totalPages || isLoading}
       >
-        Suivant
+        {t("next")}
         <ChevronRight className="ml-1 h-4 w-4" aria-hidden="true" />
       </Button>
     </nav>

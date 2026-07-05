@@ -1,6 +1,36 @@
 {
   "common": {
     "appName": "Next SaaS Boilerplate",
+    "pagination": {
+      "navLabel": "Pagination",
+      "previous": "Previous",
+      "next": "Next",
+      "pageOf": "Page {currentPage} of {totalPages}"
+    },
+    "dataTable": {
+      "emptyMessage": "No results"
+    },
+    "dashboardSidebar": {
+      "tagline": "Dashboard",
+      "navigationGroup": "Navigation",
+      "managementGroup": "Management",
+      "dashboard": "Dashboard",
+      "projects": "Projects",
+      "organization": "Organization",
+      "billing": "Billing",
+      "settings": "Settings",
+      "myAccount": "My account"
+    },
+    "adminSidebar": {
+      "tagline": "Administration",
+      "navigationGroup": "Navigation",
+      "configurationGroup": "Configuration",
+      "dashboard": "Dashboard",
+      "users": "Users",
+      "settings": "Settings",
+      "adminRole": "Admin",
+      "myAccount": "My account"
+    },
     "nav": {
       "home": "Home",
       "pricing": "Pricing",
