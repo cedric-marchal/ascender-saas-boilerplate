@@ -110,9 +110,9 @@ flowchart TD
 
 #### Acceptance criteria
 
-- [ ] Full CRUD works at `/dashboard/projets`, scoped to active org
-- [ ] Cross-org access test proves IDOR safety
-- [ ] `pnpm test` green
+- [x] Full CRUD works at `/dashboard/projets`, scoped to active org
+- [x] Cross-org access test proves IDOR safety
+- [x] `pnpm test` green
 
 ### Phase 3: README + human docs
 
@@ -143,6 +143,24 @@ Phase 1 (Repo cleanup) executed.
 - Ran `pnpm prisma generate` to regenerate the client against the updated schema.
 - Grepped `features/` and `lib/` (excluding generated client) for `updatedAt` usage on `Organization` — no application code reads or branches on nullability of this field, so no adjustments were required.
 - `pnpm typecheck && pnpm test` both green (526 tests passed, 0 failures).
+
+### #2 - 2026-07-05
+
+Phase 2 (Project reference domain) executed — `features/projects` is now the full reference slice.
+
+- **Prisma**: added `ProjectStatus` enum (`DRAFT`, `ACTIVE`, `ARCHIVED`) and `Project` model (`id`, `name`, `description?`, `status`, `organizationId` FK → `Organization`, `createdAt`/`updatedAt`, `@@index([organizationId])`, `@@index([organizationId, status])`), plus the inverse `projects Project[]` relation on `Organization`. Ran `pnpm prisma generate` then `pnpm db:push --accept-data-loss` against the configured Neon dev DB (no migration files — this repo is `db:push`-only, confirmed in Phase 1's log). Push succeeded cleanly.
+- **Schemas** (`features/projects/schemas/project.schema.ts`): `CreateProjectSchema` → `UpdateProjectSchema` → `DeleteProjectSchema`, French messages, `.min().max().trim()` order, status validated against `projectStatuses` from constants (never redefined in the schema).
+- **Constants** (`features/projects/constants/project-filters.constant.ts`): `ProjectStatusFilter` type, `projectStatusFilters` (`as const satisfies`), `projectsSortableFields`, `projectStatusLabels: Record<ProjectStatusFilter, string>`, Nuqs `projectsSearchParams`, `isProjectStatusFilter` type guard. Imports `ProjectStatus` from `prisma/browser` per client-safe convention. No separate SEO constant was created — `/dashboard/projets` is a protected page, and the existing protected reference pages (`organisation`, `admin/utilisateurs`) don't have one either (title + `robots: { index: false }` only); adding one would contradict the actual codebase convention the plan asks this feature to mirror.
+- **Services** (all `import "server-only"`, `select` + `take` + `$transaction` for lists, membership re-checked _inside_ every service via `prisma.member.findFirst({ organizationId, userId })` — hardened beyond `orgActionClient`'s own check, so a service called directly can never leak cross-org data):
+  - `get-projects.service.ts` — list with search/status/sort/pagination.
+  - `get-project.service.ts` — the literal `security.md` worked example, made real: `findFirst({ id, organizationId })` (not `findUnique`, since the compound isn't a unique constraint) → `NotFoundError` if absent.
+  - `create-project.service.ts`, `update-project.service.ts` (partial update, ownership re-verified before `update`), `delete-project.service.ts` (ownership re-verified before `delete`).
+- **Actions** (`features/projects/actions/`): `create-project.action.ts`, `update-project.action.ts`, `delete-project.action.ts`, all built on `orgActionClient` (membership + `ctx.organizationId` already enforced there; the service-level check is defense in depth), `revalidatePath("/dashboard/projets")` after mutation, exports at the bottom per the current repo style (`git log` — `style(actions): move exports to bottom of file`).
+- **UI**: `components/forms/create-project-form.tsx` + `edit-project-form.tsx` (TanStack Form, name/description/status fields), `components/modals/create-project-modal.tsx` (self-contained trigger, mirrors `InviteModal`), `edit-project-modal.tsx` + `delete-project-modal.tsx` (controlled `open`/`onOpenChange`, opened from a row action menu), `components/projects-columns.tsx` (sortable columns + `ProjectActions` dropdown), `components/projects-filters.tsx` (search + status, Nuqs-driven), `components/projects-empty.tsx` (distinct message for "no projects" vs "no results for filters"). `features/projects/pages/projects-page.tsx` rewritten from the hardcoded stub to a real list (table/empty-state/pagination), `projects-loading.tsx` added mirroring `MembersLoading`.
+- **Routes**: `app/(protected)/dashboard/projets/page.tsx` rewritten as a thin shim — kept the existing `requireCustomerPlan("pro")` guard (pre-existing convention showcase for plan-gated features), added Nuqs `createLoader`, `filterRatelimit` at the entry point, and the `getProjects` call scoped to `session.activeOrganizationId`. `loading.tsx` added.
+- **Seed** (`prisma/seed/project.seed.ts`, registered in `prisma/seed.ts` after billing): 15 projects — 12 on demo org A covering every `ProjectStatus`, a null-description project, a 3-char boundary name, and a long name + long description boundary pair; demo org B intentionally gets 0 projects (empty-state coverage); 3 personal orgs get 1 project each for realism. Verified end-to-end with `pnpm db:seed` against the real dev DB — seed ran clean, `prisma.project.groupBy` confirmed the expected distribution (12/0/1/1/1).
+- **Tests** (`__tests__/features/projects/`): `schemas/project.schema.test.ts` (boundary + invalid-enum coverage for all three schemas), `services/project-isolation.test.ts` mirroring `organization-isolation.test.ts`'s mocking style — proves for every service (`getProjects`, `getProject`, `createProject`, `updateProject`, `deleteProject`) that (a) a non-member is rejected with `ForbiddenError` before any Prisma project query runs, and (b) a project belonging to another org is rejected with `NotFoundError` (cross-org `findFirst` scoping), i.e. the literal IDOR proof the plan asked for. No pre-existing action-test pattern exists in this repo (only one `get-action-result.test.ts` utility test), so action tests were not added — the service layer already carries the security-relevant logic and is fully covered; this is flagged in `items_remaining`/notes rather than silently skipped.
+- `pnpm prisma generate`, `pnpm lint`, `pnpm typecheck`, and `pnpm test` all green (46 test files, 560 tests passed, 0 failures — up from 526 pre-phase).
 
 ## Validation flow demonstration
 
