@@ -308,6 +308,77 @@
       "ACCOUNT_DELETED": "Account deleted"
     }
   },
+  "billing": {
+    "title": "Billing",
+    "subtitle": "Manage your subscriptions and payment information",
+    "loadingLabel": "Loading billing",
+    "orgLoadingLabel": "Loading...",
+    "discoverOffers": "Discover our plans",
+    "invoiceHistory": "Invoice history",
+    "status": "Status",
+    "activeSubscription": "Active subscription",
+    "oldSubscriptions": "Previous subscriptions",
+    "cancelingTitle": "Subscription being canceled",
+    "cancelingDescription": "Your subscription will be canceled on {date}. You can reactivate your subscription via the billing portal.",
+    "activeMembers": "Active members",
+    "memberCountInOrg": "{count, plural, one {# member} other {# members}} in the organization",
+    "planUnknown": "Unknown",
+    "planFree": "Free",
+    "portalButton": {
+      "loading": "Loading...",
+      "manage": "Manage my subscription"
+    },
+    "invoiceListEmpty": {
+      "title": "No invoices",
+      "description": "Your invoices will appear here once you've made a payment."
+    },
+    "invoiceCard": {
+      "titlePrefix": "Invoice {number}",
+      "unknownDate": "Unknown date",
+      "paidOn": "Paid on {date}",
+      "download": "Download"
+    },
+    "subscriptionListEmpty": {
+      "title": "No active subscription",
+      "description": "You don't have a subscription yet. Discover our plans to start using every feature."
+    },
+    "subscriptionCard": {
+      "titlePrefix": "{plan} subscription",
+      "periodStart": "Period start",
+      "periodEnd": "Period end",
+      "canceledOn": "Canceled on",
+      "unknownDate": "Unknown date"
+    },
+    "subscriptionStatusCard": {
+      "title": "Your subscription status",
+      "description": "Information about your current subscription",
+      "statusLabel": "Status",
+      "subscribed": "Subscribed",
+      "notSubscribed": "Not subscribed",
+      "planPrefix": "Plan {plan}",
+      "typeLabel": "Type",
+      "renewalLabel": "Renewal",
+      "cancellationLabel": "Cancellation",
+      "endOfPeriod": "End of period"
+    },
+    "subscriptionStatuses": {
+      "INCOMPLETE": "Incomplete",
+      "INCOMPLETE_EXPIRED": "Expired",
+      "TRIALING": "Trial",
+      "ACTIVE": "Active",
+      "PAST_DUE": "Past due",
+      "CANCELED": "Canceled",
+      "UNPAID": "Unpaid",
+      "PAUSED": "Paused"
+    },
+    "invoiceStatuses": {
+      "draft": "Draft",
+      "open": "Open",
+      "paid": "Paid",
+      "uncollectible": "Uncollectible",
+      "void": "Void"
+    }
+  },
   "pricing": {
     "heading": "Clear pricing, built to grow with you",
     "subheading": "Whether you're a freelancer, a small team, or a larger organization, {appName} offers flexible, no-commitment plans so you can move at your own pace.",
@@ -511,6 +582,10 @@
       "memberIdInvalid": "Member ID is invalid",
       "organizationIdRequired": "Organization ID is required",
       "logoUrlTooLong": "Logo URL must be under 500 characters"
+    },
+    "billing": {
+      "priceIdRequired": "Price ID is required",
+      "priceIdInvalid": "Price ID is invalid"
     },
     "contact": {
       "subject": {

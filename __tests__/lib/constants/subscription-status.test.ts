@@ -27,15 +27,17 @@ describe("subscriptionStatusLabels", () => {
     }
   });
 
-  it("has French labels", () => {
-    expect(subscriptionStatusLabels.INCOMPLETE).toBe("Incomplet");
-    expect(subscriptionStatusLabels.INCOMPLETE_EXPIRED).toBe("Expiré");
-    expect(subscriptionStatusLabels.TRIALING).toBe("Essai");
-    expect(subscriptionStatusLabels.ACTIVE).toBe("Actif");
-    expect(subscriptionStatusLabels.PAST_DUE).toBe("En retard");
-    expect(subscriptionStatusLabels.CANCELED).toBe("Annulé");
-    expect(subscriptionStatusLabels.UNPAID).toBe("Impayé");
-    expect(subscriptionStatusLabels.PAUSED).toBe("En pause");
+  it("maps each status to its own translation key", () => {
+    expect(subscriptionStatusLabels.INCOMPLETE).toBe("INCOMPLETE");
+    expect(subscriptionStatusLabels.INCOMPLETE_EXPIRED).toBe(
+      "INCOMPLETE_EXPIRED",
+    );
+    expect(subscriptionStatusLabels.TRIALING).toBe("TRIALING");
+    expect(subscriptionStatusLabels.ACTIVE).toBe("ACTIVE");
+    expect(subscriptionStatusLabels.PAST_DUE).toBe("PAST_DUE");
+    expect(subscriptionStatusLabels.CANCELED).toBe("CANCELED");
+    expect(subscriptionStatusLabels.UNPAID).toBe("UNPAID");
+    expect(subscriptionStatusLabels.PAUSED).toBe("PAUSED");
   });
 
   it("has exactly 8 entries", () => {

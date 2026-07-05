@@ -1,14 +1,19 @@
 import { SubscriptionStatus } from "@/lib/generated/prisma/browser";
 
+/**
+ * Values are translation KEYS (resolved against the
+ * `billing.subscriptionStatuses` message namespace via `useTranslations`),
+ * not literal labels.
+ */
 const subscriptionStatusLabels: Record<SubscriptionStatus, string> = {
-  INCOMPLETE: "Incomplet",
-  INCOMPLETE_EXPIRED: "Expiré",
-  TRIALING: "Essai",
-  ACTIVE: "Actif",
-  PAST_DUE: "En retard",
-  CANCELED: "Annulé",
-  UNPAID: "Impayé",
-  PAUSED: "En pause",
+  INCOMPLETE: "INCOMPLETE",
+  INCOMPLETE_EXPIRED: "INCOMPLETE_EXPIRED",
+  TRIALING: "TRIALING",
+  ACTIVE: "ACTIVE",
+  PAST_DUE: "PAST_DUE",
+  CANCELED: "CANCELED",
+  UNPAID: "UNPAID",
+  PAUSED: "PAUSED",
 };
 
 const ALL_SUBSCRIPTION_STATUSES: SubscriptionStatus[] = [

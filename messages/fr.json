@@ -304,6 +304,77 @@
       "ACCOUNT_DELETED": "Compte supprimé"
     }
   },
+  "billing": {
+    "title": "Facturation",
+    "subtitle": "Gérez vos abonnements et vos informations de paiement",
+    "loadingLabel": "Chargement de la facturation",
+    "orgLoadingLabel": "Chargement...",
+    "discoverOffers": "Découvrir nos offres",
+    "invoiceHistory": "Historique des factures",
+    "status": "Statut",
+    "activeSubscription": "Abonnement actif",
+    "oldSubscriptions": "Anciens abonnements",
+    "cancelingTitle": "Abonnement en cours d'annulation",
+    "cancelingDescription": "Votre abonnement sera annulé le {date}. Vous pouvez réactiver votre abonnement via le portail de facturation.",
+    "activeMembers": "Membres actifs",
+    "memberCountInOrg": "{count, plural, one {# membre} other {# membres}} dans l'organisation",
+    "planUnknown": "Inconnu",
+    "planFree": "Gratuit",
+    "portalButton": {
+      "loading": "Chargement...",
+      "manage": "Gérer mon abonnement"
+    },
+    "invoiceListEmpty": {
+      "title": "Aucune facture",
+      "description": "Vos factures apparaîtront ici une fois que vous aurez effectué un paiement."
+    },
+    "invoiceCard": {
+      "titlePrefix": "Facture {number}",
+      "unknownDate": "Date inconnue",
+      "paidOn": "Payé le {date}",
+      "download": "Télécharger"
+    },
+    "subscriptionListEmpty": {
+      "title": "Aucun abonnement actif",
+      "description": "Vous n'avez pas encore d'abonnement. Découvrez nos offres pour commencer à utiliser toutes les fonctionnalités."
+    },
+    "subscriptionCard": {
+      "titlePrefix": "Abonnement {plan}",
+      "periodStart": "Début de période",
+      "periodEnd": "Fin de période",
+      "canceledOn": "Annulé le",
+      "unknownDate": "Date inconnue"
+    },
+    "subscriptionStatusCard": {
+      "title": "Statut de votre abonnement",
+      "description": "Informations sur votre abonnement actuel",
+      "statusLabel": "Statut",
+      "subscribed": "Abonné",
+      "notSubscribed": "Non abonné",
+      "planPrefix": "Plan {plan}",
+      "typeLabel": "Type",
+      "renewalLabel": "Renouvellement",
+      "cancellationLabel": "Annulation",
+      "endOfPeriod": "Fin de période"
+    },
+    "subscriptionStatuses": {
+      "INCOMPLETE": "Incomplet",
+      "INCOMPLETE_EXPIRED": "Expiré",
+      "TRIALING": "Essai",
+      "ACTIVE": "Actif",
+      "PAST_DUE": "En retard",
+      "CANCELED": "Annulé",
+      "UNPAID": "Impayé",
+      "PAUSED": "En pause"
+    },
+    "invoiceStatuses": {
+      "draft": "Brouillon",
+      "open": "Ouverte",
+      "paid": "Payée",
+      "uncollectible": "Irrécouvrable",
+      "void": "Annulée"
+    }
+  },
   "home": {
     "title": "Hello World",
     "seoDescription": "Découvrez les solutions innovantes de {appName} pour transformer votre entreprise."
@@ -511,6 +582,10 @@
       "memberIdInvalid": "L'identifiant est invalide",
       "organizationIdRequired": "L'identifiant de l'organisation est requis",
       "logoUrlTooLong": "L'URL du logo doit contenir moins de 500 caractères"
+    },
+    "billing": {
+      "priceIdRequired": "L'identifiant du prix est requis",
+      "priceIdInvalid": "L'identifiant du prix est invalide"
     },
     "contact": {
       "subject": {

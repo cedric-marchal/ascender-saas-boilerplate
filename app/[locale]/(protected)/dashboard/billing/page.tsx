@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 import type { Locale } from "next-intl";
-import { setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { BillingEmptyPage } from "@/features/billing/pages/billing-empty-page";
 import { OrganizationBillingPage } from "@/features/billing/pages/organization-billing-page";
@@ -15,17 +15,27 @@ import { TooManyRequestsPage } from "@/components/pages/too-many-requests-page";
 
 import { ForbiddenError } from "@/utils/errors/errors";
 
-export const metadata: Metadata = {
-  title: "Facturation",
-  robots: {
-    index: false,
-    follow: false,
-  },
-};
-
 type DashboardBillingRouteProps = {
   params: Promise<{ locale: string }>;
 };
+
+export async function generateMetadata({
+  params,
+}: DashboardBillingRouteProps): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({
+    locale: locale as Locale,
+    namespace: "billing",
+  });
+
+  return {
+    title: t("title"),
+    robots: {
+      index: false,
+      follow: false,
+    },
+  };
+}
 
 export default async function DashboardBillingRoute({
   params,

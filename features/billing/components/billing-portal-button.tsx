@@ -1,6 +1,7 @@
 "use client";
 
 import { ExternalLink, Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useAction } from "next-safe-action/hooks";
 import { toast } from "sonner";
 
@@ -12,6 +13,7 @@ import { getActionResult } from "@/utils/errors/get-action-result";
 import { getErrorMessage } from "@/utils/errors/get-error-message";
 
 function BillingPortalButton() {
+  const t = useTranslations("billing.portalButton");
   const { executeAsync, isExecuting } = useAction(createPortalSessionAction);
 
   async function handleOpenPortal() {
@@ -35,7 +37,7 @@ function BillingPortalButton() {
         <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
       )}
       <ExternalLink className="mr-2 h-4 w-4" aria-hidden="true" />
-      {isExecuting ? "Chargement..." : "Gérer mon abonnement"}
+      {isExecuting ? t("loading") : t("manage")}
     </Button>
   );
 }
