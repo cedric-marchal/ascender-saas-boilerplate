@@ -73,6 +73,7 @@ describe("getOrganizationMembers — cross-org isolation", () => {
     mockTransaction.mockImplementation(async (queries: Promise<unknown>[]) =>
       Promise.all(queries),
     );
+    mockMemberFindFirst.mockResolvedValue({ id: "member-1" });
   });
 
   it("returns members only for the requested organizationId", async () => {

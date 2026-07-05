@@ -130,8 +130,8 @@ flowchart TD
 
 #### Acceptance criteria
 
-- [ ] Calling either service with a non-member userId throws `ForbiddenError` with no data query executed
-- [ ] `pnpm test && pnpm typecheck` green
+- [x] Calling either service with a non-member userId throws `ForbiddenError` with no data query executed
+- [x] `pnpm test && pnpm typecheck` green
 
 ## Amendments
 
@@ -174,3 +174,15 @@ Added `__tests__/features/auth/actions/auth-ratelimit.test.ts` (9 tests: throttl
 Result: ✓ `pnpm typecheck` exits 0. ✓ `pnpm test` — 46 files, 538 tests, all green (12 new). Acceptance criteria for Phase 3 met: 6th rapid sign-in attempt (same IP+email) is rejected with the French 429 message; invitation spam is capped per-user; full suite green.
 
 → Next step: Phase 4 (service-level membership enforcement, M2) is out of scope for this pass — not started.
+
+### #3 - 2026-07-05T00:00:00Z
+
+Tried: implemented Phase 4 as scoped. `getOrganizationMembers` (`features/organizations/services/get-organization-members.service.ts`) now runs a `prisma.member.findFirst({ where: { organizationId, userId }, select: { id: true } })` membership check before the existing `$transaction` (findMany + count) and throws `ForbiddenError("Vous n'êtes pas membre de cette organisation")` — the exact message/pattern mirrored from `get-organization.service.ts` and `get-audit-log.service.ts`. Kept it as a distinct query rather than restructuring the paginated/filtered/sorted list query to double as a membership probe — the list query's `where` clause is dynamic (search/role filters) and reusing it for authorization would couple correctness of the security check to filter state; a separate cheap indexed lookup (`organizationId` + `userId`, matching the `@@unique` member index) is clearer and matches the established pattern used by the two sibling services.
+
+`getBilling` (`features/billing/services/get-billing.service.ts`) changed signature from `getBilling(organizationId: string)` to `getBilling(input: { organizationId: string; userId: string })`, matching the object-input convention used by `getOrganization`/`getAuditLog`/`getOrganizationMembers`. The same `member.findFirst` membership check runs first, before the Redis-cached `fetchInvoices`/`fetchSubscriptions` paths and before any Stripe customer lookup — a non-member throws before touching cache or Stripe, and Redis cache keys stay org-scoped (`billingInvoicesCacheKey`/`billingSubscriptionsCacheKey`, unchanged, still keyed by `organizationId` only). Updated the sole call site, `app/(protected)/dashboard/facturation/page.tsx`, to pass `{ organizationId, userId: session.user.id }`; its existing owner/admin role check (`prisma.member.findFirst` with `role: { in: ["owner", "admin"] }`) is left intact and unchanged — `getBilling`'s new check is a plain membership gate (defense in depth), not a role gate, so the two checks are complementary, not redundant.
+
+Updated existing tests that called the old positional `getBilling(organizationId)` signature to the new object form, adding a `prisma.member.findFirst` mock (default: resolves to a membership) to each: `__tests__/lib/get-billing.test.ts` and `__tests__/features/organizations/services/billing-org-scope.test.ts` (also added a new rejection-path test there — non-member throws `ForbiddenError` with zero Stripe/Redis/Prisma-customer calls). Updated `__tests__/features/organizations/services/organization-isolation.test.ts`'s `getOrganizationMembers` describe block to seed `mockMemberFindFirst` with a valid membership in `beforeEach` (it already declared but did not use that mock, since the audit-log tests below it needed it). Created `__tests__/features/organizations/services/get-organization-members-authorization.test.ts` (4 tests): non-member → `ForbiddenError`, no `$transaction`/`findMany`/`count` call when rejected, membership check uses both `organizationId` AND `userId`, and the happy path still lists members when the caller is a member.
+
+Result: ✓ `pnpm test` — 47 files, 543 tests, all green (5 net new: 4 in the new authorization file + 1 new rejection test in `billing-org-scope.test.ts`). ✓ `pnpm typecheck` exits 0. Acceptance criteria for Phase 4 met: both services throw `ForbiddenError` for a non-member `userId` with no data query executed, full suite green.
+
+→ Next step: Phase 4 complete. Remaining part-1 scope is Phase 2 (secrets rotation, manual ops — explicitly out of scope for this pass per instruction).

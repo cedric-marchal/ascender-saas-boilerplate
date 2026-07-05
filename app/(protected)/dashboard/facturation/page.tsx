@@ -55,7 +55,10 @@ export default async function DashboardBillingRoute() {
   }
 
   const [billing, organization, memberCount] = await Promise.all([
-    getBilling(organizationId),
+    getBilling({
+      organizationId,
+      userId: session.user.id,
+    }),
     prisma.organization.findUnique({
       where: {
         id: organizationId,

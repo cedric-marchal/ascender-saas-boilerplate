@@ -8,6 +8,8 @@ import type {
 import { PAGE_SIZE, type SortOrder } from "@/lib/parsers/filters";
 import { prisma } from "@/lib/prisma";
 
+import { ForbiddenError } from "@/utils/errors/errors";
+
 type GetOrganizationMembersInput = {
   organizationId: string;
   userId: string;
@@ -40,6 +42,20 @@ type GetOrganizationMembersResult = {
 async function getOrganizationMembers(
   input: GetOrganizationMembersInput,
 ): Promise<GetOrganizationMembersResult> {
+  const membership = await prisma.member.findFirst({
+    where: {
+      organizationId: input.organizationId,
+      userId: input.userId,
+    },
+    select: {
+      id: true,
+    },
+  });
+
+  if (!membership) {
+    throw new ForbiddenError("Vous n'êtes pas membre de cette organisation");
+  }
+
   const searchFilter = input.search
     ? {
         user: {
