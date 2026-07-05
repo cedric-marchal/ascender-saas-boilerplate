@@ -10,6 +10,7 @@ import { logEvent } from "@/features/organizations/services/audit-log.service";
 
 import { env } from "@/lib/env";
 import { UserRole } from "@/lib/generated/prisma/client";
+import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
 import { deleteFile } from "@/lib/r2";
 import { sendEmail } from "@/lib/resend";
@@ -48,7 +49,10 @@ async function cleanupAvatar(image: string | null): Promise<void> {
   try {
     await deleteFile(image);
   } catch (error: unknown) {
-    console.error("Failed to delete user avatar:", error);
+    logger.error("Failed to delete user avatar", {
+      image,
+      error: error instanceof Error ? error.message : String(error),
+    });
   }
 }
 
@@ -164,7 +168,10 @@ async function deleteAccount(input: DeleteAccountInput): Promise<void> {
         },
       });
     } catch (error: unknown) {
-      console.error(`Failed to cascade-delete organization ${org.id}:`, error);
+      logger.error("Failed to cascade-delete organization", {
+        organizationId: org.id,
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   }
 
@@ -186,7 +193,10 @@ async function deleteAccount(input: DeleteAccountInput): Promise<void> {
       }),
     });
   } catch (error: unknown) {
-    console.error("Failed to send account deletion email:", error);
+    logger.error("Failed to send account deletion email", {
+      userId: user.id,
+      error: error instanceof Error ? error.message : String(error),
+    });
   }
 }
 

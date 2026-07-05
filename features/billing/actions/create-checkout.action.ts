@@ -7,6 +7,7 @@ import { createCheckoutSession } from "@/features/billing/services/stripe/create
 import { AUDIT_ACTION } from "@/features/organizations/constants/audit-actions.constant";
 import { logEvent } from "@/features/organizations/services/audit-log.service";
 
+import { trackEvent } from "@/lib/analytics";
 import { authenticatedRatelimit } from "@/lib/ratelimit";
 import { orgActionClient } from "@/lib/safe-action";
 
@@ -42,6 +43,11 @@ const createCheckoutAction = orgActionClient
       metadata: {
         priceId: parsedInput.priceId,
       },
+    });
+
+    trackEvent("checkout_started", {
+      organizationId: ctx.organizationId,
+      priceId: parsedInput.priceId,
     });
 
     return result;

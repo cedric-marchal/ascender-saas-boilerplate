@@ -6,6 +6,9 @@ import { getLocaleFromCookies } from "@/i18n/get-locale-from-cookies";
 import { getTranslator } from "@/i18n/get-translator";
 import { ZodError } from "zod";
 
+import { logger } from "@/lib/logger";
+import { captureException } from "@/lib/observability";
+
 import { AppError } from "@/utils/errors/errors";
 import { translateAppError } from "@/utils/errors/translate-app-error";
 
@@ -41,7 +44,10 @@ async function handleApiError(error: unknown): Promise<NextResponse> {
     );
   }
 
-  console.error("Unexpected API error:", error);
+  logger.error("Unexpected API error", {
+    message: error instanceof Error ? error.message : String(error),
+  });
+  captureException(error);
 
   const message =
     process.env.NODE_ENV === "development" && error instanceof Error

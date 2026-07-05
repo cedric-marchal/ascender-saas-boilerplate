@@ -12,6 +12,7 @@ import {
 import { handleApiError } from "@/utils/errors/handle-api-error";
 
 const mockCookiesGet = vi.fn();
+const mockCaptureException = vi.fn();
 
 vi.mock("next/server", () => ({
   NextResponse: {
@@ -30,9 +31,14 @@ vi.mock("next/headers", () => ({
   ),
 }));
 
+vi.mock("@/lib/observability", () => ({
+  captureException: (...args: unknown[]) => mockCaptureException(...args),
+}));
+
 describe("handleApiError", () => {
   afterEach(() => {
     mockCookiesGet.mockReset();
+    mockCaptureException.mockReset();
     vi.unstubAllEnvs();
   });
 
@@ -128,6 +134,13 @@ describe("handleApiError", () => {
       const response = (await handleApiError(error)) as any;
       expect(response.body.message).toBe("Vous devez être connecté");
     });
+
+    it("does NOT call captureException for an AppError (expected business error)", async () => {
+      const error = new BadRequestError("Invalid data");
+      await handleApiError(error);
+
+      expect(mockCaptureException).not.toHaveBeenCalled();
+    });
   });
 
   describe("Unknown error handling", () => {
@@ -139,6 +152,21 @@ describe("handleApiError", () => {
       expect(response.body.success).toBe(false);
       expect(response.body.type).toBe("ServerError");
       expect(response.body.message).toBe("An unexpected error occurred");
+    });
+
+    it("calls captureException for an unexpected error", async () => {
+      const error = new Error("unexpected failure");
+      await handleApiError(error);
+
+      expect(mockCaptureException).toHaveBeenCalledTimes(1);
+      expect(mockCaptureException).toHaveBeenCalledWith(error);
+    });
+
+    it("does NOT call captureException for a ZodError (expected validation error)", async () => {
+      const zodError = new ZodError([]);
+      await handleApiError(zodError);
+
+      expect(mockCaptureException).not.toHaveBeenCalled();
     });
 
     it("returns error message in development for Error instances", async () => {

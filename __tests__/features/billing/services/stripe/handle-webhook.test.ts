@@ -14,6 +14,18 @@ const mockPrismaMemberCount = vi.fn();
 const mockPrismaSubscriptionFindFirst = vi.fn();
 const mockSendPaymentFailedEmail = vi.fn();
 const mockReconcileSeatsOnDowngrade = vi.fn();
+const mockLoggerWarn = vi.fn();
+const mockLoggerError = vi.fn();
+const mockLoggerDebug = vi.fn();
+
+vi.mock("@/lib/logger", () => ({
+  logger: {
+    debug: mockLoggerDebug,
+    info: vi.fn(),
+    warn: mockLoggerWarn,
+    error: mockLoggerError,
+  },
+}));
 
 vi.mock("@/lib/stripe", () => ({
   stripe: {
@@ -328,8 +340,9 @@ describe("handleStripeWebhook", () => {
 
       await handleStripeWebhook("body", "sig");
 
-      expect(console.warn).toHaveBeenCalledWith(
-        expect.stringContaining("StripeCustomer not found"),
+      expect(mockLoggerWarn).toHaveBeenCalledWith(
+        "StripeCustomer not found",
+        expect.objectContaining({ customerId: "cus_missing" }),
       );
       expect(mockPrismaUpsert).not.toHaveBeenCalled();
     });
@@ -356,8 +369,9 @@ describe("handleStripeWebhook", () => {
 
       await handleStripeWebhook("body", "sig");
 
-      expect(console.warn).toHaveBeenCalledWith(
-        expect.stringContaining("Missing priceId"),
+      expect(mockLoggerWarn).toHaveBeenCalledWith(
+        "Missing priceId for subscription",
+        expect.objectContaining({ subscriptionId: "sub_abc" }),
       );
       expect(mockPrismaUpsert).not.toHaveBeenCalled();
     });
@@ -392,8 +406,9 @@ describe("handleStripeWebhook", () => {
 
       await handleStripeWebhook("body", "sig");
 
-      expect(console.warn).toHaveBeenCalledWith(
-        expect.stringContaining("Unknown subscription status"),
+      expect(mockLoggerWarn).toHaveBeenCalledWith(
+        "Unknown subscription status",
+        expect.objectContaining({ subscriptionId: "sub_def" }),
       );
       expect(mockPrismaUpsert).not.toHaveBeenCalled();
     });
@@ -477,8 +492,9 @@ describe("handleStripeWebhook", () => {
 
       await handleStripeWebhook("body", "sig");
 
-      expect(console.warn).toHaveBeenCalledWith(
-        expect.stringContaining("StripeCustomer not found"),
+      expect(mockLoggerWarn).toHaveBeenCalledWith(
+        "StripeCustomer not found",
+        expect.objectContaining({ customerId: "cus_missing" }),
       );
       expect(mockPrismaDeleteMany).not.toHaveBeenCalled();
     });
@@ -543,8 +559,9 @@ describe("handleStripeWebhook", () => {
 
       await handleStripeWebhook("body", "sig");
 
-      expect(console.warn).toHaveBeenCalledWith(
-        expect.stringContaining("No customer ID in invoice"),
+      expect(mockLoggerWarn).toHaveBeenCalledWith(
+        "No customer ID in invoice",
+        expect.objectContaining({ eventType: "invoice.payment_succeeded" }),
       );
       expect(mockRedisDel).not.toHaveBeenCalled();
     });
@@ -564,8 +581,9 @@ describe("handleStripeWebhook", () => {
 
       await handleStripeWebhook("body", "sig");
 
-      expect(console.warn).toHaveBeenCalledWith(
-        expect.stringContaining("StripeCustomer not found"),
+      expect(mockLoggerWarn).toHaveBeenCalledWith(
+        "StripeCustomer not found",
+        expect.objectContaining({ customerId: "cus_missing" }),
       );
       expect(mockRedisDel).not.toHaveBeenCalled();
     });
@@ -653,8 +671,9 @@ describe("handleStripeWebhook", () => {
       const result = await handleStripeWebhook("body", "sig");
 
       expect(mockSendPaymentFailedEmail).not.toHaveBeenCalled();
-      expect(console.warn).toHaveBeenCalledWith(
-        expect.stringContaining("Cannot send dunning email"),
+      expect(mockLoggerWarn).toHaveBeenCalledWith(
+        "Cannot send dunning email: missing organization or owner",
+        expect.objectContaining({ organizationId: "org_no_owner" }),
       );
       expect(result.status).toBe(200);
     });
@@ -970,9 +989,9 @@ describe("handleStripeWebhook", () => {
 
       const result = await handleStripeWebhook("body", "sig");
 
-      expect(console.error).toHaveBeenCalledWith(
-        "Webhook processing error:",
-        expect.any(Error),
+      expect(mockLoggerError).toHaveBeenCalledWith(
+        "Webhook processing error",
+        expect.objectContaining({ eventId: "evt_error", error: "DB error" }),
       );
       // Must return 5xx so Stripe retries the event
       expect(result.status).toBe(500);

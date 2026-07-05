@@ -28,6 +28,7 @@ import { sendInvitationEmail } from "@/features/organizations/services/send-invi
 
 import { env } from "@/lib/env";
 import { UserRole } from "@/lib/generated/prisma/client";
+import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
 import { redis } from "@/lib/redis";
 import { sendEmailSafe } from "@/lib/resend";
@@ -225,10 +226,10 @@ const auth = betterAuth({
               name: user.name,
             });
           } catch (error: unknown) {
-            console.error(
-              `Failed to create personal organization for user ${user.id}:`,
-              error,
-            );
+            logger.error("Failed to create personal organization for user", {
+              userId: user.id,
+              error: error instanceof Error ? error.message : String(error),
+            });
           }
         },
       },
@@ -357,10 +358,10 @@ const auth = betterAuth({
               },
             });
           } catch (error: unknown) {
-            console.error(
-              `Failed to create Stripe customer for organization ${organization.id}:`,
-              error,
-            );
+            logger.error("Failed to create Stripe customer for organization", {
+              organizationId: organization.id,
+              error: error instanceof Error ? error.message : String(error),
+            });
           }
         },
       },
