@@ -3,9 +3,8 @@
 import { useEffect, useState } from "react";
 
 import dynamic from "next/dynamic";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
 
+import { Link, usePathname } from "@/i18n/navigation";
 import { Cookie, Shield } from "lucide-react";
 
 import { useCookieConsent } from "@/features/cookie-consent/hooks/use-cookie-consent";
@@ -90,7 +89,7 @@ function CookieBanner() {
                 pouvez accepter tous les cookies, les refuser ou gérer vos
                 préférences.{" "}
                 <Link
-                  href="/politique-des-cookies"
+                  href="/cookie-policy"
                   className="hover:text-foreground underline"
                 >
                   En savoir plus

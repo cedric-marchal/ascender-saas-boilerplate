@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 
 import { Button } from "@/components/ui/button";
 
@@ -9,7 +9,7 @@ type PricingFreeButtonProps = {
 function PricingFreeButton({ children }: PricingFreeButtonProps) {
   return (
     <Button type="button" variant="outline" className="mt-4 w-full" asChild>
-      <Link href="/inscription">{children}</Link>
+      <Link href="/sign-up">{children}</Link>
     </Button>
   );
 }

@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 
 import { getTermsOfServiceSchema } from "@/features/legal/constants/legal-seo.constant";
 
@@ -190,7 +190,7 @@ function TermsOfServicePage() {
                 résiliation, votre accès au service sera révoqué et vos données
                 traitées conformément à notre{" "}
                 <Link
-                  href="/politique-de-confidentialite"
+                  href="/privacy-policy"
                   className="underline underline-offset-4"
                 >
                   politique de confidentialité

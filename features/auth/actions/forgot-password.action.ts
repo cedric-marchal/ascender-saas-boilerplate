@@ -28,7 +28,7 @@ const forgotPasswordAction = actionClient
       await auth.api.requestPasswordReset({
         body: {
           email: parsedInput.email,
-          redirectTo: "/nouveau-mot-de-passe",
+          redirectTo: "/reset-password",
         },
         headers: await headers(),
       });

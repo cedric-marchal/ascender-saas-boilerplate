@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 
 import { getCookiePolicySchema } from "@/features/legal/constants/legal-seo.constant";
 

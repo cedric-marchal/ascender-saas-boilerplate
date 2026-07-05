@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 
 import { getPrivacyPolicySchema } from "@/features/legal/constants/legal-seo.constant";
 
@@ -251,7 +251,7 @@ function PrivacyPolicyPage() {
                 améliorer votre expérience. Pour un détail complet des cookies
                 utilisés et de leurs finalités, consultez notre{" "}
                 <Link
-                  href="/politique-des-cookies"
+                  href="/cookie-policy"
                   className="underline underline-offset-4"
                 >
                   politique des cookies

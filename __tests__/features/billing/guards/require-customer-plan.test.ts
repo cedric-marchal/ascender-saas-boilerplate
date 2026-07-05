@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const mockRedirect = vi.fn();
 const mockRequireCustomer = vi.fn();
 const mockSubscriptionFindFirst = vi.fn();
+const mockGetLocale = vi.fn();
 
 vi.mock("react", async (importOriginal) => {
   const actual = (await importOriginal()) as Record<string, unknown>;
@@ -13,8 +14,12 @@ vi.mock("react", async (importOriginal) => {
   };
 });
 
-vi.mock("next/navigation", () => ({
+vi.mock("@/i18n/navigation", () => ({
   redirect: mockRedirect,
+}));
+
+vi.mock("next-intl/server", () => ({
+  getLocale: mockGetLocale,
 }));
 
 vi.mock("@/lib/session", () => ({
@@ -61,15 +66,19 @@ const makeSession = (
 describe("requireCustomerPlan", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockGetLocale.mockResolvedValue("fr");
   });
 
-  it("redirects to /tarifs if no active subscription", async () => {
+  it("redirects to the localized pricing page if no active subscription", async () => {
     mockRequireCustomer.mockResolvedValue(makeSession());
     mockSubscriptionFindFirst.mockResolvedValue(null);
 
     await requireCustomerPlan("pro");
 
-    expect(mockRedirect).toHaveBeenCalledWith("/tarifs");
+    expect(mockRedirect).toHaveBeenCalledWith({
+      href: "/pricing",
+      locale: "fr",
+    });
   });
 
   it("returns session if active subscription exists", async () => {

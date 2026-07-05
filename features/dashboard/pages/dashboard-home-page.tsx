@@ -1,5 +1,4 @@
-import Link from "next/link";
-
+import { Link } from "@/i18n/navigation";
 import { ArrowRight, CreditCard, FolderKanban, Settings } from "lucide-react";
 
 import { Main } from "@/components/main";
@@ -19,10 +18,7 @@ type DashboardHomePageProps = {
 type QuickAction = {
   title: string;
   description: string;
-  href:
-    | "/dashboard/projets"
-    | "/dashboard/facturation"
-    | "/dashboard/parametres";
+  href: "/dashboard/projects" | "/dashboard/billing" | "/dashboard/settings";
   icon: typeof FolderKanban;
   color: string;
   iconColor: string;
@@ -32,7 +28,7 @@ const quickActions = [
   {
     title: "Projets",
     description: "Gérez vos projets et suivez leur avancement",
-    href: "/dashboard/projets" as const,
+    href: "/dashboard/projects" as const,
     icon: FolderKanban,
     color: "bg-blue-500/10",
     iconColor: "text-blue-500",
@@ -40,7 +36,7 @@ const quickActions = [
   {
     title: "Facturation",
     description: "Consultez vos factures et abonnements",
-    href: "/dashboard/facturation" as const,
+    href: "/dashboard/billing" as const,
     icon: CreditCard,
     color: "bg-emerald-500/10",
     iconColor: "text-emerald-500",
@@ -48,7 +44,7 @@ const quickActions = [
   {
     title: "Paramètres",
     description: "Modifiez votre profil et vos préférences",
-    href: "/dashboard/parametres" as const,
+    href: "/dashboard/settings" as const,
     icon: Settings,
     color: "bg-orange-500/10",
     iconColor: "text-orange-500",

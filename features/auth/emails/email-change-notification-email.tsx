@@ -50,7 +50,7 @@ function EmailChangeNotificationEmail({
               Si vous n&apos;êtes pas à l&apos;origine de cette demande,
               veuillez immédiatement{" "}
               <Link
-                href={`${BASE_URL}/mot-de-passe-oublie`}
+                href={`${BASE_URL}/forgot-password`}
                 className="text-zinc-900 underline underline-offset-4"
               >
                 réinitialiser votre mot de passe

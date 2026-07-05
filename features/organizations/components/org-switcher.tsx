@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 
+import { Link } from "@/i18n/navigation";
 import { Building2, Check, ChevronsUpDown } from "lucide-react";
 import { toast } from "sonner";
 
@@ -103,10 +104,10 @@ function OrgSwitcher({
         ))}
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-          <a href="/dashboard/organisation" className="gap-2">
+          <Link href="/dashboard/organization" className="gap-2">
             <Building2 className="size-4" aria-hidden="true" />
             <span>Mon organisation</span>
-          </a>
+          </Link>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

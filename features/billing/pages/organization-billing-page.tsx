@@ -1,5 +1,4 @@
-import Link from "next/link";
-
+import { Link } from "@/i18n/navigation";
 import { AlertCircle, CreditCard, Users } from "lucide-react";
 
 import { BillingPortalButton } from "@/features/billing/components/billing-portal-button";
@@ -99,7 +98,7 @@ function OrganizationBillingPage({
 
           <div className="flex justify-center">
             <Button type="button" asChild>
-              <Link href="/tarifs">Découvrir nos offres</Link>
+              <Link href="/pricing">Découvrir nos offres</Link>
             </Button>
           </div>
         </div>

@@ -3,7 +3,10 @@ import "server-only";
 import { cache } from "react";
 
 import { headers } from "next/headers";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
+
+import { redirect } from "@/i18n/navigation";
+import { getLocale } from "next-intl/server";
 
 import { auth } from "@/lib/auth";
 import { UserRole } from "@/lib/generated/prisma/client";
@@ -63,7 +66,9 @@ const requireGuest = async (): Promise<void> => {
   const session = await getSession();
 
   if (session) {
-    redirect(ROLE_DASHBOARD_URL[session.user.role]);
+    const locale = await getLocale();
+
+    redirect({ href: ROLE_DASHBOARD_URL[session.user.role], locale });
   }
 };
 
@@ -75,7 +80,9 @@ const requireSession = async (): Promise<Session> => {
   const session = await getSession();
 
   if (!session) {
-    return redirect("/connexion");
+    const locale = await getLocale();
+
+    return redirect({ href: "/sign-in", locale });
   }
 
   return session;
@@ -104,7 +111,9 @@ const requireCustomerVerifiedEmail = async (): Promise<Session> => {
   const session = await requireCustomer();
 
   if (!session.user.emailVerified) {
-    return redirect("/dashboard/parametres");
+    const locale = await getLocale();
+
+    return redirect({ href: "/dashboard/settings", locale });
   }
 
   return session;
@@ -133,7 +142,9 @@ const requireAdminVerifiedEmail = async (): Promise<Session> => {
   const session = await requireAdmin();
 
   if (!session.user.emailVerified) {
-    return redirect("/admin/parametres");
+    const locale = await getLocale();
+
+    return redirect({ href: "/admin/settings", locale });
   }
 
   return session;

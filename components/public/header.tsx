@@ -1,10 +1,9 @@
-import Link from "next/link";
-
 import { Menu } from "lucide-react";
 
 import { SignOutButton } from "@/features/auth/components/sign-out-button";
 import { ROLE_DASHBOARD_URL } from "@/lib/navigation";
 
+import { Link } from "@/i18n/navigation";
 import { env } from "@/lib/env";
 import { type UserRole } from "@/lib/generated/prisma/client";
 import { getSession } from "@/lib/session";
@@ -43,7 +42,7 @@ async function Header() {
         </Link>
 
         <nav className="hidden items-center gap-1 md:flex">
-          <NavLink href="/tarifs">Tarifs</NavLink>
+          <NavLink href="/pricing">Tarifs</NavLink>
           <NavLink href="/contact">Contact</NavLink>
         </nav>
 
@@ -58,10 +57,10 @@ async function Header() {
           ) : (
             <>
               <Button asChild variant="ghost" size="sm">
-                <Link href="/connexion">Connexion</Link>
+                <Link href="/sign-in">Connexion</Link>
               </Button>
               <Button asChild size="sm">
-                <Link href="/inscription">Créer un compte</Link>
+                <Link href="/sign-up">Créer un compte</Link>
               </Button>
             </>
           )}
@@ -112,7 +111,7 @@ async function Header() {
                     </li>
                     <li>
                       <SheetClose asChild>
-                        <NavLink href="/tarifs" className={MOBILE_LINK_CLASS}>
+                        <NavLink href="/pricing" className={MOBILE_LINK_CLASS}>
                           Tarifs
                         </NavLink>
                       </SheetClose>
@@ -147,7 +146,7 @@ async function Header() {
                       <li>
                         <SheetClose asChild>
                           <NavLink
-                            href="/connexion"
+                            href="/sign-in"
                             className={MOBILE_LINK_CLASS}
                           >
                             Connexion
@@ -157,7 +156,7 @@ async function Header() {
                       <li>
                         <SheetClose asChild>
                           <NavLink
-                            href="/inscription"
+                            href="/sign-up"
                             className={MOBILE_LINK_CLASS}
                           >
                             Inscription

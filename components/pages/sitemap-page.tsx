@@ -1,5 +1,4 @@
-import Link from "next/link";
-
+import { Link } from "@/i18n/navigation";
 import type { WebPage, WithContext } from "schema-dts";
 
 import { env } from "@/lib/env";
@@ -10,15 +9,15 @@ type SitemapLink = {
   label: string;
   href:
     | "/"
-    | "/tarifs"
+    | "/pricing"
     | "/contact"
-    | "/inscription"
-    | "/connexion"
-    | "/mentions-legales"
-    | "/politique-de-confidentialite"
-    | "/politique-des-cookies"
-    | "/conditions-d-utilisation"
-    | "/conditions-de-vente";
+    | "/sign-up"
+    | "/sign-in"
+    | "/legal-notice"
+    | "/privacy-policy"
+    | "/cookie-policy"
+    | "/terms-of-service"
+    | "/terms-of-sale";
 };
 
 type SitemapSection = {
@@ -35,31 +34,31 @@ const STATIC_SECTIONS: SitemapSection[] = [
     title: "Navigation",
     links: [
       { label: "Accueil", href: "/" },
-      { label: "Tarifs", href: "/tarifs" },
+      { label: "Tarifs", href: "/pricing" },
       { label: "Contact", href: "/contact" },
     ],
   },
   {
     title: "Compte",
     links: [
-      { label: "Inscription", href: "/inscription" },
-      { label: "Connexion", href: "/connexion" },
+      { label: "Inscription", href: "/sign-up" },
+      { label: "Connexion", href: "/sign-in" },
     ],
   },
   {
     title: "Légal",
     links: [
-      { label: "Mentions légales", href: "/mentions-legales" },
+      { label: "Mentions légales", href: "/legal-notice" },
       {
         label: "Politique de confidentialité",
-        href: "/politique-de-confidentialite",
+        href: "/privacy-policy",
       },
-      { label: "Politique des cookies", href: "/politique-des-cookies" },
+      { label: "Politique des cookies", href: "/cookie-policy" },
       {
         label: "Conditions d'utilisation",
-        href: "/conditions-d-utilisation",
+        href: "/terms-of-service",
       },
-      { label: "Conditions de vente", href: "/conditions-de-vente" },
+      { label: "Conditions de vente", href: "/terms-of-sale" },
     ],
   },
 ];

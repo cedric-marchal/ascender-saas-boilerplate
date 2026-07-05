@@ -1,7 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-
+import { useRouter } from "@/i18n/navigation";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { toast } from "sonner";
@@ -36,7 +35,7 @@ function PricingCheckoutButton({
 
   async function handleCheckout() {
     if (!isAuthenticated) {
-      router.push("/inscription");
+      router.push("/sign-up");
       return;
     }
 
@@ -44,7 +43,7 @@ function PricingCheckoutButton({
       toast.error(
         "Vous devez vérifier votre adresse e-mail avant de vous abonner",
       );
-      router.push("/dashboard/parametres");
+      router.push("/dashboard/settings");
       return;
     }
 

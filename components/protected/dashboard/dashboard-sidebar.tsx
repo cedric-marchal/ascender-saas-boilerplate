@@ -2,9 +2,7 @@
 
 import { useEffect, type ComponentType } from "react";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-
+import { Link, usePathname } from "@/i18n/navigation";
 import {
   Building2,
   ChevronsUpDown,
@@ -55,10 +53,10 @@ type MenuItem = {
   title: string;
   url:
     | "/dashboard"
-    | "/dashboard/projets"
-    | "/dashboard/facturation"
-    | "/dashboard/parametres"
-    | "/dashboard/organisation";
+    | "/dashboard/projects"
+    | "/dashboard/billing"
+    | "/dashboard/settings"
+    | "/dashboard/organization";
   icon: ComponentType<React.SVGProps<SVGSVGElement>>;
 };
 
@@ -70,7 +68,7 @@ const navigationItems: MenuItem[] = [
   },
   {
     title: "Projets",
-    url: "/dashboard/projets",
+    url: "/dashboard/projects",
     icon: FolderKanban,
   },
 ];
@@ -78,17 +76,17 @@ const navigationItems: MenuItem[] = [
 const managementItems: MenuItem[] = [
   {
     title: "Organisation",
-    url: "/dashboard/organisation",
+    url: "/dashboard/organization",
     icon: Building2,
   },
   {
     title: "Facturation",
-    url: "/dashboard/facturation",
+    url: "/dashboard/billing",
     icon: CreditCard,
   },
   {
     title: "Paramètres",
-    url: "/dashboard/parametres",
+    url: "/dashboard/settings",
     icon: Settings,
   },
 ];
@@ -239,13 +237,13 @@ function DashboardSidebar({
                 sideOffset={4}
               >
                 <DropdownMenuItem asChild>
-                  <Link href="/dashboard/parametres">
+                  <Link href="/dashboard/settings">
                     <User className="size-4" aria-hidden="true" />
                     <span>Mon compte</span>
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link href="/dashboard/facturation">
+                  <Link href="/dashboard/billing">
                     <CreditCard className="size-4" aria-hidden="true" />
                     <span>Facturation</span>
                   </Link>

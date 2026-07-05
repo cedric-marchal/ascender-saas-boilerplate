@@ -2,8 +2,7 @@
 
 import type { ChangeEvent, SubmitEvent } from "react";
 
-import { useRouter } from "next/navigation";
-
+import { useRouter } from "@/i18n/navigation";
 import { useForm } from "@tanstack/react-form";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
@@ -43,7 +42,7 @@ function ResetPasswordForm({ token }: ResetPasswordFormProps) {
       try {
         getActionResult(await executeAsync(value));
         toast.success("Mot de passe mis à jour avec succès");
-        router.push("/connexion");
+        router.push("/sign-in");
       } catch (error: unknown) {
         toast.error(getErrorMessage(error));
       }

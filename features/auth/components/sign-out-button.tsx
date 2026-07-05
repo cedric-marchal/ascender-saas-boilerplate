@@ -1,7 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-
+import { useRouter } from "@/i18n/navigation";
 import { useAction } from "next-safe-action/hooks";
 import { toast } from "sonner";
 
@@ -23,7 +22,7 @@ function SignOutButton({ variant = "button" }: SignOutButtonProps) {
   async function handleSignOut() {
     try {
       getActionResult(await executeAsync());
-      router.push("/connexion");
+      router.push("/sign-in");
     } catch (error: unknown) {
       toast.error(getErrorMessage(error));
     }

@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 
+import type { Route } from "next";
 import Link from "next/link";
 
 import { AlertTriangle } from "lucide-react";
@@ -57,7 +58,11 @@ function ErrorPage({ error, reset }: ErrorPageProps) {
           </Button>
 
           <Button type="button" variant="outline" asChild>
-            <Link href="/">Retour à l'accueil</Link>
+            {/* Plain next/link to the unlocalized root: the error boundary
+                may render outside the [locale] segment's
+                NextIntlClientProvider, so the i18n Link is avoided here.
+                proxy.ts negotiates the correct locale on the next request. */}
+            <Link href={"/" as Route}>Retour à l'accueil</Link>
           </Button>
         </div>
       </div>

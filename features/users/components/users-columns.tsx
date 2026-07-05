@@ -2,8 +2,7 @@
 
 import { useTransition } from "react";
 
-import Link from "next/link";
-
+import { Link } from "@/i18n/navigation";
 import type { ColumnDef } from "@tanstack/react-table";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import { useQueryStates } from "nuqs";
@@ -97,7 +96,10 @@ const usersColumns: ColumnDef<UserTableData>[] = [
       const user = row.original;
       return (
         <Link
-          href={`/admin/utilisateurs/${user.slug}`}
+          href={{
+            pathname: "/admin/users/[slug]",
+            params: { slug: user.slug },
+          }}
           className="flex items-center gap-3 hover:underline"
         >
           <Avatar className="h-8 w-8">

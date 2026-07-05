@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidateLocalizedPath } from "@/i18n/revalidate-localized-path";
 
 import { AUDIT_ACTION } from "@/features/organizations/constants/audit-actions.constant";
 import { TransferOwnershipSchema } from "@/features/organizations/schemas/member.schema";
@@ -88,7 +88,7 @@ const transferOwnershipAction = orgActionClient
       },
     });
 
-    revalidatePath("/dashboard/organisation");
+    revalidateLocalizedPath("/dashboard/organization");
 
     return {
       success: true,

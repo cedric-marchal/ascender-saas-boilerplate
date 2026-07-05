@@ -1,5 +1,4 @@
-import Link from "next/link";
-
+import { Link } from "@/i18n/navigation";
 import { env } from "@/lib/env";
 
 import { CopyrightYear } from "@/components/public/copyright-year";
@@ -31,7 +30,7 @@ function Footer() {
               <ul className="text-muted-foreground space-y-2.5 text-sm">
                 <li>
                   <Link
-                    href="/tarifs"
+                    href="/pricing"
                     className="hover:text-foreground transition-colors"
                   >
                     Tarifs
@@ -53,7 +52,7 @@ function Footer() {
               <ul className="text-muted-foreground space-y-2.5 text-sm">
                 <li>
                   <Link
-                    href="/inscription"
+                    href="/sign-up"
                     className="hover:text-foreground transition-colors"
                   >
                     Inscription
@@ -61,7 +60,7 @@ function Footer() {
                 </li>
                 <li>
                   <Link
-                    href="/connexion"
+                    href="/sign-in"
                     className="hover:text-foreground transition-colors"
                   >
                     Connexion
@@ -75,7 +74,7 @@ function Footer() {
               <ul className="text-muted-foreground space-y-2.5 text-sm">
                 <li>
                   <Link
-                    href="/mentions-legales"
+                    href="/legal-notice"
                     className="hover:text-foreground transition-colors"
                   >
                     Mentions légales
@@ -83,7 +82,7 @@ function Footer() {
                 </li>
                 <li>
                   <Link
-                    href="/politique-de-confidentialite"
+                    href="/privacy-policy"
                     className="hover:text-foreground transition-colors"
                   >
                     Confidentialité
@@ -91,7 +90,7 @@ function Footer() {
                 </li>
                 <li>
                   <Link
-                    href="/politique-des-cookies"
+                    href="/cookie-policy"
                     className="hover:text-foreground transition-colors"
                   >
                     Cookies
@@ -99,7 +98,7 @@ function Footer() {
                 </li>
                 <li>
                   <Link
-                    href="/conditions-d-utilisation"
+                    href="/terms-of-service"
                     className="hover:text-foreground transition-colors"
                   >
                     Conditions d'utilisation
@@ -107,7 +106,7 @@ function Footer() {
                 </li>
                 <li>
                   <Link
-                    href="/conditions-de-vente"
+                    href="/terms-of-sale"
                     className="hover:text-foreground transition-colors"
                   >
                     Conditions de vente
@@ -133,7 +132,7 @@ function Footer() {
               Contact
             </Link>
             <Link
-              href="/plan-du-site"
+              href="/sitemap-page"
               className="hover:text-foreground transition-colors"
             >
               Plan du site

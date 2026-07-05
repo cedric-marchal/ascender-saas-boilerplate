@@ -1,5 +1,4 @@
-import Link from "next/link";
-
+import { Link } from "@/i18n/navigation";
 import { LogIn } from "lucide-react";
 
 import { Main } from "@/components/main";
@@ -34,7 +33,7 @@ function UnauthorizedPage() {
 
         <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
           <Button type="button" asChild>
-            <Link href="/connexion">Se connecter</Link>
+            <Link href="/sign-in">Se connecter</Link>
           </Button>
 
           <Button type="button" variant="outline" asChild>

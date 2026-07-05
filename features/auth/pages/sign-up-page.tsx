@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 
 import { SignUpForm } from "@/features/auth/components/forms/sign-up-form";
 import { getSignUpSchema } from "@/features/auth/constants/auth-seo.constant";
@@ -38,7 +38,7 @@ function SignUpPage() {
             <p className="text-muted-foreground text-center text-sm">
               Vous avez déjà un compte ?{" "}
               <Link
-                href="/connexion"
+                href="/sign-in"
                 className="text-foreground hover:text-primary font-medium underline underline-offset-4"
               >
                 Se connecter
@@ -48,14 +48,14 @@ function SignUpPage() {
             <p className="text-muted-foreground text-center text-xs">
               En créant un compte, vous acceptez nos{" "}
               <Link
-                href="/mentions-legales"
+                href="/legal-notice"
                 className="hover:text-foreground underline underline-offset-4"
               >
                 mentions légales
               </Link>{" "}
               et notre{" "}
               <Link
-                href="/politique-de-confidentialite"
+                href="/privacy-policy"
                 className="hover:text-foreground underline underline-offset-4"
               >
                 politique de confidentialité

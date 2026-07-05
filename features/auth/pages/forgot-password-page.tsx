@@ -1,5 +1,4 @@
-import Link from "next/link";
-
+import { Link } from "@/i18n/navigation";
 import { ArrowLeft } from "lucide-react";
 
 import { ForgotPasswordForm } from "@/features/auth/components/forms/forgot-password-form";
@@ -39,7 +38,7 @@ function ForgotPasswordPage() {
             <ForgotPasswordForm />
 
             <Link
-              href="/connexion"
+              href="/sign-in"
               className="text-muted-foreground hover:text-foreground flex items-center justify-center gap-2 text-sm"
             >
               <ArrowLeft className="size-4" aria-hidden="true" />

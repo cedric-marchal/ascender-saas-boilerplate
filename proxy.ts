@@ -1,6 +1,10 @@
-import { NextResponse, type NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
+import { isLegacyFrenchPath } from "@/i18n/legacy-redirects";
+import { routing } from "@/i18n/routing";
 import { getSessionCookie } from "better-auth/cookies";
+import type { Locale } from "next-intl";
+import createMiddleware from "next-intl/middleware";
 
 const MAINTENANCE_ENABLED = process.env.MAINTENANCE_ENABLED === "true";
 const MAINTENANCE_PATH = "/maintenance";
@@ -18,6 +22,12 @@ const STATIC_SECURITY_HEADERS: Record<string, string> = {
   "Strict-Transport-Security": "max-age=63072000; includeSubDomains; preload",
   "X-DNS-Prefetch-Control": "on",
 };
+
+const LOCALE_PREFIX_PATTERN = new RegExp(
+  `^/(${routing.locales.join("|")})(/.*)?$`,
+);
+
+const handleI18nRouting = createMiddleware(routing);
 
 function generateCsp(nonce: string): string {
   const isDev = process.env.NODE_ENV === "development";
@@ -66,6 +76,27 @@ function isProtectedApiRoute(pathname: string): boolean {
   );
 }
 
+/**
+ * Splits an incoming pathname into its locale prefix (when present) and the
+ * remainder, without ever branching on a specific locale value — any locale
+ * not present in the URL falls back to `routing.defaultLocale`.
+ */
+function splitLocaleFromPathname(pathname: string): {
+  locale: Locale;
+  pathnameWithoutLocale: string;
+} {
+  const match = pathname.match(LOCALE_PREFIX_PATTERN);
+
+  if (!match) {
+    return { locale: routing.defaultLocale, pathnameWithoutLocale: pathname };
+  }
+
+  return {
+    locale: match[1] as Locale,
+    pathnameWithoutLocale: match[2] || "/",
+  };
+}
+
 export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
@@ -104,44 +135,74 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 
-  // Auth check — routes protégées sans cookie de session
-  const isProtected =
-    isProtectedRoute(pathname) || isProtectedApiRoute(pathname);
-  const sessionCookie = isProtected ? getSessionCookie(request) : null;
+  // API et assets — pas de négociation de langue, headers de sécurité + auth API
+  if (isApi || isAsset) {
+    const sessionCookie = isProtectedApiRoute(pathname)
+      ? getSessionCookie(request)
+      : null;
 
-  // Non authentifié — API protégée → 401
-  if (isProtected && !sessionCookie && isApi) {
+    if (isProtectedApiRoute(pathname) && !sessionCookie) {
+      return applySecurityHeaders(
+        NextResponse.json(
+          {
+            success: false,
+            type: "UnauthorizedError",
+            message: "Vous devez être connecté",
+          },
+          { status: 401 },
+        ),
+        nonce,
+      );
+    }
+
+    return applySecurityHeaders(NextResponse.next(), nonce);
+  }
+
+  // Legacy — anciennes URLs françaises non préfixées → 301 vers /fr/...
+  if (isLegacyFrenchPath(pathname)) {
     return applySecurityHeaders(
-      NextResponse.json(
-        {
-          success: false,
-          type: "UnauthorizedError",
-          message: "Vous devez être connecté",
-        },
-        { status: 401 },
-      ),
+      NextResponse.redirect(new URL(`/fr${pathname}`, request.url), 301),
       nonce,
     );
   }
 
-  // Non authentifié — page protégée → redirection connexion
-  if (isProtected && !sessionCookie) {
-    return NextResponse.redirect(new URL("/connexion", request.url));
-  }
-
-  // Passage normal avec headers de sécurité et nonce
+  // Négociation de langue next-intl (ajout du préfixe, réécriture des slugs localisés)
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-nonce", nonce);
 
-  const response = NextResponse.next({
-    request: { headers: requestHeaders },
+  const requestWithNonce = new NextRequest(request, {
+    headers: requestHeaders,
   });
 
-  if (isProtectedRoute(pathname)) {
-    response.headers.set("Cache-Control", "private, no-store");
+  const intlResponse = handleI18nRouting(requestWithNonce);
+
+  // La négociation a produit une redirection (ajout de préfixe, etc.) — on
+  // la laisse suivre son cours, l'auth sera vérifiée sur la requête suivante.
+  if (intlResponse.headers.get("location")) {
+    return applySecurityHeaders(intlResponse, nonce);
   }
 
-  return applySecurityHeaders(response, nonce);
+  const { locale, pathnameWithoutLocale } = splitLocaleFromPathname(pathname);
+
+  // Auth check — routes protégées sans cookie de session
+  const isProtected = isProtectedRoute(pathnameWithoutLocale);
+  const sessionCookie = isProtected ? getSessionCookie(request) : null;
+
+  // Non authentifié — page protégée → redirection connexion localisée
+  if (isProtected && !sessionCookie) {
+    const signInPath = routing.pathnames["/sign-in"][locale];
+
+    return applySecurityHeaders(
+      NextResponse.redirect(new URL(`/${locale}${signInPath}`, request.url)),
+      nonce,
+    );
+  }
+
+  if (isProtected) {
+    intlResponse.headers.set("Cache-Control", "private, no-store");
+  }
+
+  return applySecurityHeaders(intlResponse, nonce);
 }
 
 export const config = {

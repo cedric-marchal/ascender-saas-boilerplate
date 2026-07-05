@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidateLocalizedPath } from "@/i18n/revalidate-localized-path";
 
 import { UpdateProjectSchema } from "@/features/projects/schemas/project.schema";
 import { updateProject } from "@/features/projects/services/update-project.service";
@@ -19,7 +19,7 @@ const updateProjectAction = orgActionClient
       status: parsedInput.status,
     });
 
-    revalidatePath("/dashboard/projets");
+    revalidateLocalizedPath("/dashboard/projects");
 
     return {
       success: true,

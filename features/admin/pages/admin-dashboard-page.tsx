@@ -1,5 +1,4 @@
-import Link from "next/link";
-
+import { Link } from "@/i18n/navigation";
 import {
   Activity,
   ArrowRight,
@@ -144,7 +143,7 @@ function AdminDashboardPage({ metrics }: AdminDashboardPageProps) {
 
       <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <Link
-          href="/admin/utilisateurs"
+          href="/admin/users"
           className="group hover:bg-muted/50 flex items-center gap-4 rounded-lg border p-4 transition-colors"
         >
           <div className="bg-primary/10 flex size-10 items-center justify-center rounded-lg">
@@ -163,7 +162,7 @@ function AdminDashboardPage({ metrics }: AdminDashboardPageProps) {
         </Link>
 
         <Link
-          href="/admin/organisations"
+          href="/admin/organizations"
           className="group hover:bg-muted/50 flex items-center gap-4 rounded-lg border p-4 transition-colors"
         >
           <div className="flex size-10 items-center justify-center rounded-lg bg-violet-500/10">
@@ -192,7 +191,7 @@ function AdminDashboardPage({ metrics }: AdminDashboardPageProps) {
               </CardDescription>
             </div>
             <Link
-              href="/admin/utilisateurs"
+              href="/admin/users"
               className="text-muted-foreground hover:text-foreground flex items-center gap-1 text-sm transition-colors"
             >
               Voir tout
@@ -209,7 +208,10 @@ function AdminDashboardPage({ metrics }: AdminDashboardPageProps) {
                 {metrics.recentUsers.map((user: RecentUser) => (
                   <li key={user.id} className="py-3 first:pt-0 last:pb-0">
                     <Link
-                      href={`/admin/utilisateurs/${user.slug}`}
+                      href={{
+                        pathname: "/admin/users/[slug]",
+                        params: { slug: user.slug },
+                      }}
                       className="flex items-center justify-between gap-3 transition-opacity hover:opacity-80"
                     >
                       <div className="flex items-center gap-3">

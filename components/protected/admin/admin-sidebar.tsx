@@ -2,9 +2,7 @@
 
 import { useEffect, type ComponentType } from "react";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-
+import { Link, usePathname } from "@/i18n/navigation";
 import {
   ChevronsUpDown,
   LayoutDashboard,
@@ -49,7 +47,7 @@ import { truncateName } from "@/utils/string/truncate";
 
 type MenuItem = {
   title: string;
-  url: "/admin" | "/admin/utilisateurs" | "/admin/parametres";
+  url: "/admin" | "/admin/users" | "/admin/settings";
   icon: ComponentType<React.SVGProps<SVGSVGElement>>;
 };
 
@@ -61,7 +59,7 @@ const navigationItems: MenuItem[] = [
   },
   {
     title: "Utilisateurs",
-    url: "/admin/utilisateurs",
+    url: "/admin/users",
     icon: Users,
   },
 ];
@@ -69,7 +67,7 @@ const navigationItems: MenuItem[] = [
 const settingsItems: MenuItem[] = [
   {
     title: "Paramètres",
-    url: "/admin/parametres",
+    url: "/admin/settings",
     icon: Settings,
   },
 ];
@@ -205,7 +203,7 @@ function AdminSidebar({ image, name }: AdminSidebarProps) {
                 sideOffset={4}
               >
                 <DropdownMenuItem asChild>
-                  <Link href="/admin/parametres">
+                  <Link href="/admin/settings">
                     <User className="size-4" aria-hidden="true" />
                     <span>Mon compte</span>
                   </Link>

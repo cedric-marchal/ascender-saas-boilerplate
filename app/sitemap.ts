@@ -1,5 +1,8 @@
 import type { MetadataRoute } from "next";
 
+import { getPathname } from "@/i18n/navigation";
+import { routing } from "@/i18n/routing";
+
 import { env } from "@/lib/env";
 
 /**
@@ -15,8 +18,19 @@ const PRIORITY = {
   MINIMAL: 0.5, // Pages légales, archives
 } as const;
 
-type SitemapEntry = {
-  path: string;
+type SitemapPage = {
+  href:
+    | "/"
+    | "/pricing"
+    | "/contact"
+    | "/sign-in"
+    | "/sign-up"
+    | "/legal-notice"
+    | "/privacy-policy"
+    | "/cookie-policy"
+    | "/terms-of-service"
+    | "/terms-of-sale"
+    | "/sitemap-page";
   changeFrequency: "yearly" | "monthly" | "weekly" | "daily";
   priority: (typeof PRIORITY)[keyof typeof PRIORITY];
 };
@@ -24,71 +38,72 @@ type SitemapEntry = {
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const BASE_URL = env.NEXT_PUBLIC_BASE_URL;
 
-  const staticPages: SitemapEntry[] = [
+  const staticPages: SitemapPage[] = [
     {
-      path: "",
+      href: "/",
       changeFrequency: "weekly",
       priority: PRIORITY.CRITICAL,
     },
     {
-      path: "/tarifs",
+      href: "/pricing",
       changeFrequency: "monthly",
       priority: PRIORITY.HIGH,
     },
     {
-      path: "/contact",
+      href: "/contact",
       changeFrequency: "monthly",
       priority: PRIORITY.IMPORTANT,
     },
     {
-      path: "/connexion",
+      href: "/sign-in",
       changeFrequency: "monthly",
       priority: PRIORITY.MEDIUM,
     },
     {
-      path: "/inscription",
+      href: "/sign-up",
       changeFrequency: "monthly",
       priority: PRIORITY.MEDIUM,
     },
     {
-      path: "/mentions-legales",
+      href: "/legal-notice",
       changeFrequency: "yearly",
       priority: PRIORITY.MINIMAL,
     },
     {
-      path: "/politique-de-confidentialite",
+      href: "/privacy-policy",
       changeFrequency: "yearly",
       priority: PRIORITY.MINIMAL,
     },
     {
-      path: "/politique-des-cookies",
+      href: "/cookie-policy",
       changeFrequency: "yearly",
       priority: PRIORITY.MINIMAL,
     },
     {
-      path: "/conditions-d-utilisation",
+      href: "/terms-of-service",
       changeFrequency: "yearly",
       priority: PRIORITY.MINIMAL,
     },
     {
-      path: "/conditions-de-vente",
+      href: "/terms-of-sale",
       changeFrequency: "yearly",
       priority: PRIORITY.MINIMAL,
     },
     {
-      path: "/plan-du-site",
+      href: "/sitemap-page",
       changeFrequency: "yearly",
       priority: PRIORITY.MINIMAL,
     },
   ];
 
-  const staticEntries: MetadataRoute.Sitemap = staticPages.map(
-    (page: SitemapEntry) => ({
-      url: `${BASE_URL}${page.path}`,
-      lastModified: new Date(),
-      changeFrequency: page.changeFrequency,
-      priority: page.priority,
-    }),
+  const staticEntries: MetadataRoute.Sitemap = routing.locales.flatMap(
+    (locale: (typeof routing.locales)[number]) =>
+      staticPages.map((page: SitemapPage) => ({
+        url: `${BASE_URL}${getPathname({ href: page.href, locale })}`,
+        lastModified: new Date(),
+        changeFrequency: page.changeFrequency,
+        priority: page.priority,
+      })),
   );
 
   // 🚀 SECTION: Pages dynamiques (décommentez quand nécessaire)

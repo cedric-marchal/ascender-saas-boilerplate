@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 
 import { getTermsOfSaleSchema } from "@/features/legal/constants/legal-seo.constant";
 
@@ -43,7 +43,7 @@ function TermsOfSalePage() {
               <p>
                 Ces CGV doivent être lues en complément des{" "}
                 <Link
-                  href="/conditions-d-utilisation"
+                  href="/terms-of-service"
                   className="underline underline-offset-4"
                 >
                   conditions d'utilisation
@@ -59,7 +59,7 @@ function TermsOfSalePage() {
                 Le service {APP_NAME} est proposé sous la forme d'abonnements à
                 durée indéterminée. Les offres disponibles et leurs
                 fonctionnalités sont décrites sur notre{" "}
-                <Link href="/tarifs" className="underline underline-offset-4">
+                <Link href="/pricing" className="underline underline-offset-4">
                   page de tarifs
                 </Link>
                 .
@@ -131,7 +131,7 @@ function TermsOfSalePage() {
                 Le fournisseur peut également résiler l'abonnement en cas de
                 violation grave des{" "}
                 <Link
-                  href="/conditions-d-utilisation"
+                  href="/terms-of-service"
                   className="underline underline-offset-4"
                 >
                   conditions d'utilisation
@@ -195,7 +195,7 @@ function TermsOfSalePage() {
                 Notre responsabilité est limitée conformément aux dispositions
                 des{" "}
                 <Link
-                  href="/conditions-d-utilisation"
+                  href="/terms-of-service"
                   className="underline underline-offset-4"
                 >
                   conditions d'utilisation

@@ -1,5 +1,4 @@
-import Link from "next/link";
-
+import { Link } from "@/i18n/navigation";
 import {
   ArrowLeft,
   CreditCard,
@@ -44,7 +43,7 @@ function UserDetailPage({ user }: UserDetailPageProps) {
     <Main className="flex flex-col gap-6 p-6">
       <div>
         <Button type="button" variant="ghost" size="sm" asChild>
-          <Link href="/admin/utilisateurs">
+          <Link href="/admin/users">
             <ArrowLeft className="mr-2 size-4" aria-hidden="true" />
             Retour aux utilisateurs
           </Link>

@@ -1,5 +1,4 @@
-import Link from "next/link";
-
+import { Link } from "@/i18n/navigation";
 import { CreditCard } from "lucide-react";
 
 import { SubscriptionListEmpty } from "@/features/billing/components/subscription-list-empty";
@@ -33,7 +32,7 @@ function BillingEmptyPage() {
 
       <div className="flex justify-center">
         <Button type="button" asChild>
-          <Link href="/tarifs">Découvrir nos offres</Link>
+          <Link href="/pricing">Découvrir nos offres</Link>
         </Button>
       </div>
     </Main>

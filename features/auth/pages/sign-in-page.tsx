@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 
 import { SignInForm } from "@/features/auth/components/forms/sign-in-form";
 import { getSignInSchema } from "@/features/auth/constants/auth-seo.constant";
@@ -38,7 +38,7 @@ function SignInPage() {
             <p className="text-muted-foreground text-center text-sm">
               Vous n&apos;avez pas de compte ?{" "}
               <Link
-                href="/inscription"
+                href="/sign-up"
                 className="text-foreground hover:text-primary font-medium underline underline-offset-4"
               >
                 Créer un compte

@@ -1,5 +1,4 @@
-import Link from "next/link";
-
+import { Link } from "@/i18n/navigation";
 import { FileQuestion } from "lucide-react";
 
 import { Main } from "@/components/main";

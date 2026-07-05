@@ -2,8 +2,7 @@
 
 import type { ChangeEvent, SubmitEvent } from "react";
 
-import { useRouter } from "next/navigation";
-
+import { useRouter } from "@/i18n/navigation";
 import { useForm } from "@tanstack/react-form";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
@@ -52,7 +51,7 @@ function SignInForm() {
   async function handleGoogleSignIn() {
     const { error } = await signIn.social({
       provider: "google",
-      callbackURL: "/connexion",
+      callbackURL: "/sign-in",
     });
 
     if (error) {
