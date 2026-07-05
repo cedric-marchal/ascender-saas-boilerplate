@@ -1,39 +1,51 @@
 import type { Metadata } from "next";
 
+import { getLocaleAlternates } from "@/i18n/get-locale-alternates";
 import type { Locale } from "next-intl";
-import { setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { CookiePolicyPage } from "@/features/legal/pages/cookie-policy-page";
-
-import { env } from "@/lib/env";
-
-const APP_NAME = env.NEXT_PUBLIC_APP_NAME;
-const DESCRIPTION = `Politique des cookies de ${APP_NAME}. Découvrez les cookies utilisés sur notre site et comment gérer vos préférences.`;
-
-export const metadata: Metadata = {
-  title: "Politique des cookies",
-  description: DESCRIPTION,
-  alternates: {
-    canonical: "/cookie-policy",
-  },
-  openGraph: {
-    title: `Politique des cookies | ${APP_NAME}`,
-    description: DESCRIPTION,
-    url: "/cookie-policy",
-  },
-  twitter: {
-    title: `Politique des cookies | ${APP_NAME}`,
-    description: DESCRIPTION,
-  },
-  robots: {
-    index: true,
-    follow: true,
-  },
-};
 
 type CookiePolicyRouteProps = {
   params: Promise<{ locale: string }>;
 };
+
+export async function generateMetadata({
+  params,
+}: CookiePolicyRouteProps): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({
+    locale: locale as Locale,
+    namespace: "legal.cookiePolicy",
+  });
+  const tCommon = await getTranslations({
+    locale: locale as Locale,
+    namespace: "common",
+  });
+
+  const appName = tCommon("appName");
+  const description = t("seoDescription", { appName });
+  const alternates = getLocaleAlternates("/cookie-policy", locale as Locale);
+
+  return {
+    title: t("title"),
+    description,
+    alternates,
+    openGraph: {
+      title: `${t("title")} | ${appName}`,
+      description,
+      url: alternates.canonical,
+    },
+    twitter: {
+      title: `${t("title")} | ${appName}`,
+      description,
+    },
+    robots: {
+      index: true,
+      follow: true,
+    },
+  };
+}
 
 export default async function CookiePolicyRoute({
   params,

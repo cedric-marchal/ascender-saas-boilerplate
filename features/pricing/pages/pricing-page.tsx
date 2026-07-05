@@ -1,25 +1,36 @@
 import type { ReactNode } from "react";
 
+import { getLocale, getTranslations } from "next-intl/server";
 import type { Product, WebPage, WithContext } from "schema-dts";
 
+import { getPricingPlans } from "@/features/pricing/constants/pricing-plans";
 import {
   getPricingProductSchemas,
   getPricingWebPageSchema,
 } from "@/features/pricing/constants/pricing-seo.constant";
 
-import { env } from "@/lib/env";
-
 import { Main } from "@/components/main";
-
-const APP_NAME = env.NEXT_PUBLIC_APP_NAME;
 
 type PricingPageProps = {
   children: ReactNode;
 };
 
-function PricingPage({ children }: PricingPageProps) {
-  const webPageSchema: WithContext<WebPage> = getPricingWebPageSchema();
-  const productSchemas: WithContext<Product>[] = getPricingProductSchemas();
+async function PricingPage({ children }: PricingPageProps) {
+  const locale = await getLocale();
+  const t = await getTranslations("pricing");
+  const tCommon = await getTranslations("common");
+  const plans = await getPricingPlans();
+
+  const description = t("seo.description", { appName: tCommon("appName") });
+
+  const webPageSchema: WithContext<WebPage> = getPricingWebPageSchema(
+    locale,
+    description,
+  );
+  const productSchemas: WithContext<Product>[] = getPricingProductSchemas(
+    locale,
+    plans,
+  );
 
   return (
     <>
@@ -44,21 +55,17 @@ function PricingPage({ children }: PricingPageProps) {
         <section className="mx-auto flex w-full max-w-5xl flex-col gap-10 px-4 py-12 sm:px-6 md:gap-12 md:py-16 lg:px-8 lg:py-20">
           <header className="space-y-4 text-center">
             <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-              Des tarifs clairs, pensés pour grandir avec vous
+              {t("heading")}
             </h1>
             <p className="text-muted-foreground mx-auto max-w-2xl">
-              Que vous soyez indépendant, en petite équipe ou dans une structure
-              plus large, {APP_NAME} propose des offres flexibles, sans
-              engagement, pour vous permettre d&apos;avancer à votre rythme.
+              {t("subheading", { appName: tCommon("appName") })}
             </p>
           </header>
 
           {children}
 
           <p className="text-muted-foreground text-center text-xs">
-            Les tarifs affichés sont présentés à titre indicatif et peuvent
-            évoluer. Pour des besoins spécifiques ou des volumes importants,
-            contactez-nous.
+            {t("footerNote")}
           </p>
         </section>
       </Main>

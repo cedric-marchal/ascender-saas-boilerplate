@@ -1,5 +1,332 @@
 {
   "common": {
-    "appName": "Next SaaS Boilerplate"
+    "appName": "Next SaaS Boilerplate",
+    "nav": {
+      "home": "Accueil",
+      "pricing": "Tarifs",
+      "contact": "Contact",
+      "dashboard": "Dashboard",
+      "signIn": "Connexion",
+      "signUp": "Inscription",
+      "createAccount": "Créer un compte",
+      "openMenu": "Ouvrir le menu",
+      "menuDescription": "Menu de navigation du site",
+      "navigationLabel": "Navigation",
+      "accountLabel": "Compte"
+    },
+    "footer": {
+      "tagline": "Centralisez vos workflows, automatisez les tâches répétitives et livrez plus vite grâce à {appName}.",
+      "navigationTitle": "Navigation",
+      "accountTitle": "Compte",
+      "legalTitle": "Légal",
+      "pricing": "Tarifs",
+      "contact": "Contact",
+      "signUp": "Inscription",
+      "signIn": "Connexion",
+      "legalNotice": "Mentions légales",
+      "privacyPolicy": "Confidentialité",
+      "cookiePolicy": "Cookies",
+      "termsOfService": "Conditions d'utilisation",
+      "termsOfSale": "Conditions de vente",
+      "copyright": "Tous droits réservés.",
+      "sitemap": "Plan du site"
+    },
+    "signOut": {
+      "button": "Déconnexion"
+    },
+    "errorPages": {
+      "notFound": {
+        "title": "Page introuvable - 404",
+        "code": "404",
+        "heading": "Page introuvable",
+        "description": "Désolé, la page que vous recherchez n'existe pas ou a été déplacée.",
+        "backHome": "Retour à l'accueil",
+        "contactUs": "Contactez-nous"
+      },
+      "forbidden": {
+        "title": "Accès interdit - 403",
+        "code": "403",
+        "heading": "Accès interdit",
+        "description": "Vous n'avez pas les permissions nécessaires pour accéder à cette ressource.",
+        "backHome": "Retour à l'accueil",
+        "contactUs": "Contactez-nous"
+      },
+      "unauthorized": {
+        "title": "Authentification requise - 401",
+        "code": "401",
+        "heading": "Authentification requise",
+        "description": "Vous devez être connecté pour accéder à cette page.",
+        "signIn": "Se connecter",
+        "backHome": "Retour à l'accueil"
+      },
+      "tooManyRequests": {
+        "code": "429",
+        "heading": "Trop de requêtes",
+        "description": "Vous avez effectué trop de requêtes en peu de temps. Veuillez patienter quelques instants avant de réessayer.",
+        "backHome": "Retour à l'accueil"
+      },
+      "maintenance": {
+        "title": "Maintenance",
+        "heading": "Site en maintenance",
+        "description": "Nous effectuons actuellement une maintenance pour améliorer votre expérience. Merci de revenir dans quelques instants."
+      }
+    },
+    "sitemapPage": {
+      "title": "Plan du site",
+      "description": "Accédez rapidement à toutes les pages disponibles sur {appName}.",
+      "seoDescription": "Plan du site de {appName}. Accédez rapidement à toutes les pages disponibles.",
+      "sections": {
+        "navigation": {
+          "title": "Navigation",
+          "home": "Accueil",
+          "pricing": "Tarifs",
+          "contact": "Contact"
+        },
+        "account": {
+          "title": "Compte",
+          "signUp": "Inscription",
+          "signIn": "Connexion"
+        },
+        "legal": {
+          "title": "Légal",
+          "legalNotice": "Mentions légales",
+          "privacyPolicy": "Politique de confidentialité",
+          "cookiePolicy": "Politique des cookies",
+          "termsOfService": "Conditions d'utilisation",
+          "termsOfSale": "Conditions de vente"
+        }
+      }
+    }
+  },
+  "home": {
+    "title": "Hello World",
+    "seoDescription": "Découvrez les solutions innovantes de {appName} pour transformer votre entreprise."
+  },
+  "pricing": {
+    "heading": "Des tarifs clairs, pensés pour grandir avec vous",
+    "subheading": "Que vous soyez indépendant, en petite équipe ou dans une structure plus large, {appName} propose des offres flexibles, sans engagement, pour vous permettre d'avancer à votre rythme.",
+    "footerNote": "Les tarifs affichés sont présentés à titre indicatif et peuvent évoluer. Pour des besoins spécifiques ou des volumes importants, contactez-nous.",
+    "popularBadge": "Populaire",
+    "loadingLabel": "Chargement des tarifs",
+    "loadingButton": "Chargement...",
+    "monthlyPeriod": "mois",
+    "customPrice": "Sur mesure",
+    "verifyEmailToast": "Vous devez vérifier votre adresse e-mail avant de vous abonner",
+    "onlyCustomerToast": "Seuls les utilisateurs avec le rôle CUSTOMER peuvent souscrire à un abonnement",
+    "plans": {
+      "starter": {
+        "name": "Starter",
+        "description": "Pour démarrer et tester la plateforme en solo.",
+        "cta": "Commencer gratuitement",
+        "features": [
+          "1 projet actif",
+          "Jusqu'à 3 espaces de travail",
+          "Historique limité",
+          "Support par e-mail standard"
+        ]
+      },
+      "pro": {
+        "name": "Pro",
+        "description": "Pour les indépendants et petites équipes qui utilisent {appName} au quotidien.",
+        "cta": "Choisir l'offre Pro",
+        "features": [
+          "Projets illimités",
+          "Utilisateurs illimités dans votre équipe",
+          "Historique étendu",
+          "Support prioritaire par e-mail"
+        ]
+      },
+      "business": {
+        "name": "Business",
+        "description": "Pour les équipes avancées et besoins spécifiques.",
+        "cta": "Parler avec l'équipe",
+        "features": [
+          "SLA et support dédié",
+          "Intégrations avancées",
+          "Accompagnement à l'onboarding",
+          "Conditions contractuelles personnalisées"
+        ]
+      }
+    },
+    "seo": {
+      "description": "Découvrez les tarifs de {appName} : offres flexibles pour les indépendants, équipes et entreprises, sans engagement.",
+      "keywords": ["tarifs", "prix", "abonnements", "saas pricing"]
+    }
+  },
+  "contact": {
+    "heading": "Contactez-nous",
+    "subheading": "Une question, un projet ou un besoin spécifique ? Remplissez le formulaire ci-dessous et nous vous répondons sous 24h.",
+    "infoTitle": "Informations",
+    "emailLabel": "Email",
+    "addressLabel": "Adresse",
+    "addressValue": "Paris, France",
+    "hoursTitle": "Horaires",
+    "hoursDescription": "Du lundi au vendredi, de 9h à 18h (heure de Paris).",
+    "form": {
+      "nameLabel": "Nom",
+      "namePlaceholder": "Jean Dupont",
+      "emailLabel": "Email",
+      "emailPlaceholder": "jean@exemple.fr",
+      "subjectLabel": "Sujet",
+      "subjectPlaceholder": "Comment pouvons-nous vous aider ?",
+      "messageLabel": "Message",
+      "messagePlaceholder": "Décrivez votre demande...",
+      "submitLabel": "Envoyer le message",
+      "submittingLabel": "Envoi en cours...",
+      "successToast": "Message envoyé avec succès !"
+    },
+    "seo": {
+      "description": "Contactez l'équipe {appName}. Une question, un projet ou un besoin spécifique ? Nous vous répondons sous 24h.",
+      "keywords": ["contact", "support", "aide", "question"]
+    }
+  },
+  "legal": {
+    "lastUpdated": "Dernière mise à jour : 4 février 2026",
+    "legalNotice": {
+      "title": "Mentions légales",
+      "seoDescription": "Mentions légales de {appName}. Informations sur l'éditeur, l'hébergeur et les conditions d'utilisation du site."
+    },
+    "privacyPolicy": {
+      "title": "Politique de confidentialité",
+      "seoDescription": "Politique de confidentialité de {appName}. Découvrez comment nous collectons, utilisons et protégeons vos données personnelles."
+    },
+    "cookiePolicy": {
+      "title": "Politique des cookies",
+      "seoDescription": "Politique des cookies de {appName}. Découvrez les cookies utilisés sur notre site et comment gérer vos préférences."
+    },
+    "termsOfService": {
+      "title": "Conditions d'utilisation",
+      "seoDescription": "Conditions d'utilisation de {appName}. Lisez les règles et obligations régissant l'utilisation de notre service."
+    },
+    "termsOfSale": {
+      "title": "Conditions de vente",
+      "seoDescription": "Conditions de vente de {appName}. Découvrez les termes régissant les achats et abonnements sur notre plateforme."
+    }
+  },
+  "auth": {
+    "signIn": {
+      "title": "Connexion",
+      "description": "Entrez vos identifiants pour accéder à votre compte",
+      "emailLabel": "Email",
+      "passwordLabel": "Mot de passe",
+      "forgotPasswordLink": "Mot de passe oublié ?",
+      "submitLabel": "Se connecter",
+      "submittingLabel": "Connexion...",
+      "googleButton": "Se connecter avec Google",
+      "noAccount": "Vous n'avez pas de compte ?",
+      "createAccount": "Créer un compte",
+      "seoDescription": "Connectez-vous à votre compte {appName}. Accédez à votre tableau de bord et gérez vos projets."
+    },
+    "signUp": {
+      "title": "Créer un compte",
+      "description": "Entrez vos informations pour créer votre compte",
+      "nameLabel": "Nom",
+      "emailLabel": "Email",
+      "passwordLabel": "Mot de passe",
+      "submitLabel": "Créer un compte",
+      "submittingLabel": "Création en cours...",
+      "googleButton": "Créer un compte avec Google",
+      "haveAccount": "Vous avez déjà un compte ?",
+      "signInLink": "Se connecter",
+      "termsPrefix": "En créant un compte, vous acceptez nos",
+      "legalNoticeLink": "mentions légales",
+      "and": "et notre",
+      "privacyPolicyLink": "politique de confidentialité",
+      "successToast": "Compte créé avec succès",
+      "seoDescription": "Créez votre compte {appName} gratuitement. Accédez à toutes les fonctionnalités en quelques secondes."
+    },
+    "forgotPassword": {
+      "title": "Mot de passe oublié",
+      "description": "Entrez votre adresse email pour recevoir un lien de réinitialisation",
+      "emailLabel": "Email",
+      "backToSignIn": "Retour à la connexion",
+      "submitLabel": "Envoyer le lien de réinitialisation",
+      "submittingLabel": "Envoi en cours...",
+      "successMessage": "Si un compte existe avec cette adresse email, vous recevrez un lien de réinitialisation dans quelques instants.",
+      "successHint": "Pensez à vérifier vos spams.",
+      "seoDescription": "Réinitialisez votre mot de passe {appName}. Recevez un lien de réinitialisation par email."
+    },
+    "resetPassword": {
+      "title": "Nouveau mot de passe",
+      "description": "Choisissez un nouveau mot de passe pour votre compte",
+      "passwordLabel": "Nouveau mot de passe",
+      "confirmPasswordLabel": "Confirmer le mot de passe",
+      "submitLabel": "Mettre à jour le mot de passe",
+      "submittingLabel": "Mise à jour en cours...",
+      "successToast": "Mot de passe mis à jour avec succès",
+      "seoDescription": "Créez un nouveau mot de passe pour votre compte {appName}."
+    },
+    "socialErrorToast": "Une erreur est survenue"
+  },
+  "validation": {
+    "name": {
+      "required": "Le nom est requis",
+      "tooLong": "Le nom doit contenir moins de 100 caractères"
+    },
+    "email": {
+      "required": "L'email est requis",
+      "tooLong": "L'email doit contenir moins de 254 caractères",
+      "invalid": "Format d'email invalide"
+    },
+    "password": {
+      "required": "Le mot de passe est requis",
+      "tooLongLogin": "Le nom doit contenir moins de 128 caractères",
+      "tooShort": "Le mot de passe doit contenir au moins 12 caractères",
+      "tooLong": "Le mot de passe doit contenir moins de 128 caractères",
+      "lowercase": "Au moins une lettre minuscule",
+      "uppercase": "Au moins une lettre majuscule",
+      "number": "Au moins un chiffre"
+    },
+    "confirmPassword": {
+      "required": "La confirmation est requise",
+      "mismatch": "Les mots de passe ne correspondent pas"
+    },
+    "token": {
+      "required": "Token requis"
+    },
+    "contact": {
+      "subject": {
+        "required": "Le sujet est requis",
+        "tooLong": "Le sujet doit contenir moins de 200 caractères"
+      },
+      "message": {
+        "tooShort": "Le message doit contenir au moins 10 caractères",
+        "tooLong": "Le message doit contenir moins de 5000 caractères"
+      }
+    }
+  },
+  "cookieConsent": {
+    "banner": {
+      "message": "Nous utilisons des cookies pour améliorer votre expérience sur notre site. Les cookies nécessaires sont toujours activés. Vous pouvez accepter tous les cookies, les refuser ou gérer vos préférences.",
+      "learnMore": "En savoir plus",
+      "acceptAll": "Accepter tout",
+      "rejectAll": "Refuser tout",
+      "managePreferences": "Gérer mes préférences",
+      "manageAriaLabel": "Gérer mes préférences de cookies",
+      "dialogAriaLabel": "Consentement aux cookies"
+    },
+    "modal": {
+      "title": "Préférences de cookies",
+      "description": "Activez ou désactivez chaque catégorie de cookies. Les cookies nécessaires ne peuvent pas être désactivés.",
+      "saveButton": "Sauvegarder mes préférences"
+    },
+    "categories": {
+      "essential": {
+        "label": "Nécessaires",
+        "description": "Ces cookies sont indispensables au bon fonctionnement du site. Ils ne peuvent pas être désactivés."
+      },
+      "functional": {
+        "label": "Fonctionnalités",
+        "description": "Ces cookies permettent de mémoriser vos préférences comme votre thème ou votre langue."
+      },
+      "analytics": {
+        "label": "Analytiques",
+        "description": "Ces cookies nous aident à comprendre comment vous utilisez notre site pour l'améliorer."
+      },
+      "marketing": {
+        "label": "Marketing",
+        "description": "Ces cookies sont utilisés pour vous proposer du contenu personnalisé et des publicités adaptées."
+      }
+    }
   }
 }

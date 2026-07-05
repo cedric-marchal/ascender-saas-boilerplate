@@ -1,46 +1,54 @@
 import type { Metadata } from "next";
 
+import { getLocaleAlternates } from "@/i18n/get-locale-alternates";
 import type { Locale } from "next-intl";
-import { setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { SignUpPage } from "@/features/auth/pages/sign-up-page";
 
-import { env } from "@/lib/env";
 import { requireGuest } from "@/lib/session";
-
-const APP_NAME = env.NEXT_PUBLIC_APP_NAME;
-const DESCRIPTION = `Créez votre compte ${APP_NAME} gratuitement. Accédez à toutes les fonctionnalités en quelques secondes.`;
-
-export const metadata: Metadata = {
-  title: "Inscription",
-  description: DESCRIPTION,
-  keywords: [
-    APP_NAME.toLowerCase(),
-    "inscription",
-    "sign up",
-    "créer un compte",
-  ],
-  alternates: {
-    canonical: "/sign-up",
-  },
-  openGraph: {
-    title: `Inscription | ${APP_NAME}`,
-    description: DESCRIPTION,
-    url: "/sign-up",
-  },
-  twitter: {
-    title: `Inscription | ${APP_NAME}`,
-    description: DESCRIPTION,
-  },
-  robots: {
-    index: true,
-    follow: true,
-  },
-};
 
 type SignUpRouteProps = {
   params: Promise<{ locale: string }>;
 };
+
+export async function generateMetadata({
+  params,
+}: SignUpRouteProps): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({
+    locale: locale as Locale,
+    namespace: "auth.signUp",
+  });
+  const tCommon = await getTranslations({
+    locale: locale as Locale,
+    namespace: "common",
+  });
+
+  const appName = tCommon("appName");
+  const description = t("seoDescription", { appName });
+  const alternates = getLocaleAlternates("/sign-up", locale as Locale);
+
+  return {
+    title: t("title"),
+    description,
+    keywords: [appName.toLowerCase(), "sign up"],
+    alternates,
+    openGraph: {
+      title: `${t("title")} | ${appName}`,
+      description,
+      url: alternates.canonical,
+    },
+    twitter: {
+      title: `${t("title")} | ${appName}`,
+      description,
+    },
+    robots: {
+      index: true,
+      follow: true,
+    },
+  };
+}
 
 export default async function SignUpRoute({ params }: SignUpRouteProps) {
   const { locale } = await params;

@@ -1,40 +1,52 @@
 import type { Metadata } from "next";
 
+import { getLocaleAlternates } from "@/i18n/get-locale-alternates";
 import type { Locale } from "next-intl";
-import { setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { ContactPage } from "@/features/contact/pages/contact-page";
-
-import { env } from "@/lib/env";
-
-const APP_NAME = env.NEXT_PUBLIC_APP_NAME;
-const DESCRIPTION = `Contactez l'équipe ${APP_NAME}. Une question, un projet ou un besoin spécifique ? Nous vous répondons sous 24h.`;
-
-export const metadata: Metadata = {
-  title: "Contact",
-  description: DESCRIPTION,
-  keywords: ["contact", APP_NAME.toLowerCase(), "support", "aide", "question"],
-  alternates: {
-    canonical: "/contact",
-  },
-  openGraph: {
-    title: `Contact | ${APP_NAME}`,
-    description: DESCRIPTION,
-    url: "/contact",
-  },
-  twitter: {
-    title: `Contact | ${APP_NAME}`,
-    description: DESCRIPTION,
-  },
-  robots: {
-    index: true,
-    follow: true,
-  },
-};
 
 type ContactRouteProps = {
   params: Promise<{ locale: string }>;
 };
+
+export async function generateMetadata({
+  params,
+}: ContactRouteProps): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({
+    locale: locale as Locale,
+    namespace: "contact",
+  });
+  const tCommon = await getTranslations({
+    locale: locale as Locale,
+    namespace: "common",
+  });
+
+  const appName = tCommon("appName");
+  const description = t("seo.description", { appName });
+  const alternates = getLocaleAlternates("/contact", locale as Locale);
+
+  return {
+    title: t("heading"),
+    description,
+    keywords: [...t.raw("seo.keywords"), appName.toLowerCase()],
+    alternates,
+    openGraph: {
+      title: `${t("heading")} | ${appName}`,
+      description,
+      url: alternates.canonical,
+    },
+    twitter: {
+      title: `${t("heading")} | ${appName}`,
+      description,
+    },
+    robots: {
+      index: true,
+      follow: true,
+    },
+  };
+}
 
 export default async function ContactRoute({ params }: ContactRouteProps) {
   const { locale } = await params;

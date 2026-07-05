@@ -1,21 +1,22 @@
 import type { MetadataRoute } from "next";
 
+import { getLocaleAlternates } from "@/i18n/get-locale-alternates";
 import { getPathname } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 
 import { env } from "@/lib/env";
 
 /**
- * Échelle de priorité SEO standardisée
+ * Standardized SEO priority scale
  * @see https://www.sitemaps.org/protocol.html
  */
 const PRIORITY = {
-  CRITICAL: 1.0, // Page d'accueil uniquement
-  HIGH: 0.9, // Pages de conversion critiques (tarifs, features)
-  IMPORTANT: 0.8, // Pages importantes (contact, about)
-  MEDIUM: 0.7, // Contenu secondaire (blog, auth)
-  LOW: 0.6, // Contenu tertiaire
-  MINIMAL: 0.5, // Pages légales, archives
+  CRITICAL: 1.0, // Home page only
+  HIGH: 0.9, // Critical conversion pages (pricing, features)
+  IMPORTANT: 0.8, // Important pages (contact, about)
+  MEDIUM: 0.7, // Secondary content (blog, auth)
+  LOW: 0.6, // Tertiary content
+  MINIMAL: 0.5, // Legal pages, archives
 } as const;
 
 type SitemapPage = {
@@ -103,11 +104,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         lastModified: new Date(),
         changeFrequency: page.changeFrequency,
         priority: page.priority,
+        alternates: {
+          languages: getLocaleAlternates(page.href, locale).languages,
+        },
       })),
   );
 
-  // 🚀 SECTION: Pages dynamiques (décommentez quand nécessaire)
-  // Exemple avec blog posts
+  // 🚀 SECTION: Dynamic pages (uncomment when needed)
+  // Example with blog posts
   // const blogPosts = await prisma.post.findMany({
   //   where: { published: true },
   //   select: { slug: true, updatedAt: true },
@@ -121,7 +125,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   //   priority: PRIORITY.MEDIUM,
   // }));
 
-  // 🚀 SECTION: Autres contenus dynamiques (projets, articles, etc.)
+  // 🚀 SECTION: Other dynamic content (projects, articles, etc.)
   // const projects = await prisma.project.findMany({
   //   where: { published: true },
   //   select: { slug: true, updatedAt: true },

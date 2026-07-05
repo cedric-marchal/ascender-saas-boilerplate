@@ -1,9 +1,13 @@
+import { useTranslations } from "next-intl";
+
 import { Main } from "@/components/main";
 import { Skeleton } from "@/components/ui/skeleton";
 
 function PricingLoading() {
+  const t = useTranslations("pricing");
+
   return (
-    <Main aria-busy="true" aria-label="Chargement des tarifs">
+    <Main aria-busy="true" aria-label={t("loadingLabel")}>
       <section className="mx-auto flex w-full max-w-5xl flex-col gap-10 px-4 py-12 sm:px-6 md:gap-12 md:py-16 lg:px-8 lg:py-20">
         <header className="space-y-4 text-center">
           <Skeleton className="mx-auto h-10 w-3/4 sm:w-1/2" />

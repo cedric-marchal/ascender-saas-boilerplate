@@ -5,6 +5,7 @@ import type { ChangeEvent, SubmitEvent } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { useForm } from "@tanstack/react-form";
 import { Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useAction } from "next-safe-action/hooks";
 import { toast } from "sonner";
 
@@ -24,9 +25,13 @@ import { PasswordInput } from "@/components/ui/password-input";
 
 import { getActionResult } from "@/utils/errors/get-action-result";
 import { getErrorMessage } from "@/utils/errors/get-error-message";
+import { translateFieldErrors } from "@/utils/errors/translate-field-errors";
 
 function SignInForm() {
   const router = useRouter();
+  const t = useTranslations("auth.signIn");
+  const tAuth = useTranslations("auth");
+  const tValidation = useTranslations("validation");
   const { executeAsync, isExecuting } = useAction(signInAction);
 
   const form = useForm({
@@ -55,7 +60,7 @@ function SignInForm() {
     });
 
     if (error) {
-      toast.error(error.message || "Une erreur est survenue");
+      toast.error(error.message || tAuth("socialErrorToast"));
     }
   }
 
@@ -80,7 +85,9 @@ function SignInForm() {
 
             return (
               <Field data-invalid={isInvalid}>
-                <FieldLabel htmlFor="sign-in-email">Email</FieldLabel>
+                <FieldLabel htmlFor="sign-in-email">
+                  {t("emailLabel")}
+                </FieldLabel>
                 <Input
                   id="sign-in-email"
                   type="email"
@@ -92,7 +99,14 @@ function SignInForm() {
                   placeholder="jean@exemple.fr"
                   autoComplete="email"
                 />
-                {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                {isInvalid && (
+                  <FieldError
+                    errors={translateFieldErrors(
+                      field.state.meta.errors,
+                      tValidation,
+                    )}
+                  />
+                )}
               </Field>
             );
           }}
@@ -112,7 +126,7 @@ function SignInForm() {
               <Field data-invalid={isInvalid}>
                 <div className="flex items-center justify-between">
                   <FieldLabel htmlFor="sign-in-password">
-                    Mot de passe
+                    {t("passwordLabel")}
                   </FieldLabel>
                   <ForgotPasswordLink />
                 </div>
@@ -126,7 +140,14 @@ function SignInForm() {
                   placeholder="••••••••••••"
                   autoComplete="current-password"
                 />
-                {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                {isInvalid && (
+                  <FieldError
+                    errors={translateFieldErrors(
+                      field.state.meta.errors,
+                      tValidation,
+                    )}
+                  />
+                )}
               </Field>
             );
           }}
@@ -147,14 +168,16 @@ function SignInForm() {
                   aria-hidden="true"
                 />
               ) : null}
-              {isExecuting || isSubmitting ? "Connexion..." : "Se connecter"}
+              {isExecuting || isSubmitting
+                ? t("submittingLabel")
+                : t("submitLabel")}
             </Button>
           )}
         </form.Subscribe>
       </form>
 
       <Button type="button" onClick={handleGoogleSignIn} className="w-full">
-        Se connecter avec Google
+        {t("googleButton")}
       </Button>
     </>
   );

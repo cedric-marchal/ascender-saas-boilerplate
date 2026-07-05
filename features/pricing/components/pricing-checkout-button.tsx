@@ -2,6 +2,7 @@
 
 import { useRouter } from "@/i18n/navigation";
 import { Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useAction } from "next-safe-action/hooks";
 import { toast } from "sonner";
 
@@ -30,6 +31,7 @@ function PricingCheckoutButton({
   featured = false,
 }: PricingCheckoutButtonProps) {
   const router = useRouter();
+  const t = useTranslations("pricing");
 
   const { executeAsync, isExecuting } = useAction(createCheckoutAction);
 
@@ -40,17 +42,13 @@ function PricingCheckoutButton({
     }
 
     if (!isEmailVerified) {
-      toast.error(
-        "Vous devez vérifier votre adresse e-mail avant de vous abonner",
-      );
+      toast.error(t("verifyEmailToast"));
       router.push("/dashboard/settings");
       return;
     }
 
     if (!isCustomer) {
-      toast.error(
-        "Seuls les utilisateurs avec le rôle CUSTOMER peuvent souscrire à un abonnement",
-      );
+      toast.error(t("onlyCustomerToast"));
       return;
     }
 
@@ -74,7 +72,7 @@ function PricingCheckoutButton({
       {isExecuting && (
         <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
       )}
-      {isExecuting ? "Chargement..." : children}
+      {isExecuting ? t("loadingButton") : children}
     </Button>
   );
 }

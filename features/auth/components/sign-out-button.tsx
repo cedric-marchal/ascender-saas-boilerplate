@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 import { useAction } from "next-safe-action/hooks";
 import { toast } from "sonner";
 
@@ -17,6 +18,7 @@ type SignOutButtonProps = {
 
 function SignOutButton({ variant = "button" }: SignOutButtonProps) {
   const router = useRouter();
+  const t = useTranslations("common.signOut");
   const { executeAsync, isExecuting } = useAction(signOutAction);
 
   async function handleSignOut() {
@@ -41,7 +43,7 @@ function SignOutButton({ variant = "button" }: SignOutButtonProps) {
         }}
         className={isExecuting ? "pointer-events-none opacity-50" : ""}
       >
-        Déconnexion
+        {t("button")}
       </span>
     );
   }
@@ -54,7 +56,7 @@ function SignOutButton({ variant = "button" }: SignOutButtonProps) {
       disabled={isExecuting}
       className="cursor-pointer transition hover:opacity-80"
     >
-      Déconnexion
+      {t("button")}
     </Button>
   );
 }

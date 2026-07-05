@@ -4,6 +4,7 @@ import { useState, type ChangeEvent, type SubmitEvent } from "react";
 
 import { useForm } from "@tanstack/react-form";
 import { Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useAction } from "next-safe-action/hooks";
 import { toast } from "sonner";
 
@@ -19,8 +20,11 @@ import { Input } from "@/components/ui/input";
 
 import { getActionResult } from "@/utils/errors/get-action-result";
 import { getErrorMessage } from "@/utils/errors/get-error-message";
+import { translateFieldErrors } from "@/utils/errors/translate-field-errors";
 
 function ForgotPasswordForm() {
+  const t = useTranslations("auth.forgotPassword");
+  const tValidation = useTranslations("validation");
   const { executeAsync, isExecuting } = useAction(forgotPasswordAction);
 
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -45,13 +49,8 @@ function ForgotPasswordForm() {
   if (isSubmitted) {
     return (
       <div className="border-border bg-muted/50 rounded-md border p-4 text-center">
-        <p className="text-foreground text-sm">
-          Si un compte existe avec cette adresse email, vous recevrez un lien de
-          réinitialisation dans quelques instants.
-        </p>
-        <p className="text-muted-foreground mt-2 text-xs">
-          Pensez à vérifier vos spams.
-        </p>
+        <p className="text-foreground text-sm">{t("successMessage")}</p>
+        <p className="text-muted-foreground mt-2 text-xs">{t("successHint")}</p>
       </div>
     );
   }
@@ -76,7 +75,9 @@ function ForgotPasswordForm() {
 
           return (
             <Field data-invalid={isInvalid}>
-              <FieldLabel htmlFor="forgot-password-email">Email</FieldLabel>
+              <FieldLabel htmlFor="forgot-password-email">
+                {t("emailLabel")}
+              </FieldLabel>
               <Input
                 id="forgot-password-email"
                 type="email"
@@ -88,7 +89,14 @@ function ForgotPasswordForm() {
                 placeholder="jean@exemple.fr"
                 autoComplete="email"
               />
-              {isInvalid && <FieldError errors={field.state.meta.errors} />}
+              {isInvalid && (
+                <FieldError
+                  errors={translateFieldErrors(
+                    field.state.meta.errors,
+                    tValidation,
+                  )}
+                />
+              )}
             </Field>
           );
         }}
@@ -110,8 +118,8 @@ function ForgotPasswordForm() {
               />
             ) : null}
             {isExecuting || isSubmitting
-              ? "Envoi en cours..."
-              : "Envoyer le lien de réinitialisation"}
+              ? t("submittingLabel")
+              : t("submitLabel")}
           </Button>
         )}
       </form.Subscribe>

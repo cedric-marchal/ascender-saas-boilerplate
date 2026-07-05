@@ -5,6 +5,7 @@ import type { ChangeEvent, SubmitEvent } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { useForm } from "@tanstack/react-form";
 import { Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useAction } from "next-safe-action/hooks";
 import { toast } from "sonner";
 
@@ -23,9 +24,13 @@ import { PasswordInput } from "@/components/ui/password-input";
 
 import { getActionResult } from "@/utils/errors/get-action-result";
 import { getErrorMessage } from "@/utils/errors/get-error-message";
+import { translateFieldErrors } from "@/utils/errors/translate-field-errors";
 
 function SignUpForm() {
   const router = useRouter();
+  const t = useTranslations("auth.signUp");
+  const tAuth = useTranslations("auth");
+  const tValidation = useTranslations("validation");
   const { executeAsync, isExecuting } = useAction(signUpAction);
 
   const form = useForm({
@@ -40,7 +45,7 @@ function SignUpForm() {
     onSubmit: async ({ value }) => {
       try {
         getActionResult(await executeAsync(value));
-        toast.success("Compte créé avec succès");
+        toast.success(t("successToast"));
         router.push("/dashboard");
         router.refresh();
       } catch (error: unknown) {
@@ -56,7 +61,7 @@ function SignUpForm() {
     });
 
     if (error) {
-      toast.error(error.message || "Une erreur est survenue");
+      toast.error(error.message || tAuth("socialErrorToast"));
     }
   }
 
@@ -81,7 +86,7 @@ function SignUpForm() {
 
             return (
               <Field data-invalid={isInvalid}>
-                <FieldLabel htmlFor="sign-up-name">Nom</FieldLabel>
+                <FieldLabel htmlFor="sign-up-name">{t("nameLabel")}</FieldLabel>
                 <Input
                   id="sign-up-name"
                   name={field.name}
@@ -91,7 +96,14 @@ function SignUpForm() {
                   aria-invalid={isInvalid}
                   placeholder="Jean Dupont"
                 />
-                {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                {isInvalid && (
+                  <FieldError
+                    errors={translateFieldErrors(
+                      field.state.meta.errors,
+                      tValidation,
+                    )}
+                  />
+                )}
               </Field>
             );
           }}
@@ -109,7 +121,9 @@ function SignUpForm() {
 
             return (
               <Field data-invalid={isInvalid}>
-                <FieldLabel htmlFor="sign-up-email">Email</FieldLabel>
+                <FieldLabel htmlFor="sign-up-email">
+                  {t("emailLabel")}
+                </FieldLabel>
                 <Input
                   id="sign-up-email"
                   type="email"
@@ -121,7 +135,14 @@ function SignUpForm() {
                   placeholder="jean@exemple.fr"
                   autoComplete="email"
                 />
-                {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                {isInvalid && (
+                  <FieldError
+                    errors={translateFieldErrors(
+                      field.state.meta.errors,
+                      tValidation,
+                    )}
+                  />
+                )}
               </Field>
             );
           }}
@@ -139,7 +160,9 @@ function SignUpForm() {
 
             return (
               <Field data-invalid={isInvalid}>
-                <FieldLabel htmlFor="sign-up-password">Mot de passe</FieldLabel>
+                <FieldLabel htmlFor="sign-up-password">
+                  {t("passwordLabel")}
+                </FieldLabel>
                 <PasswordInput
                   id="sign-up-password"
                   name={field.name}
@@ -150,7 +173,14 @@ function SignUpForm() {
                   placeholder="••••••••••••"
                   autoComplete="new-password"
                 />
-                {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                {isInvalid && (
+                  <FieldError
+                    errors={translateFieldErrors(
+                      field.state.meta.errors,
+                      tValidation,
+                    )}
+                  />
+                )}
               </Field>
             );
           }}
@@ -172,15 +202,15 @@ function SignUpForm() {
                 />
               ) : null}
               {isExecuting || isSubmitting
-                ? "Création en cours..."
-                : "Créer un compte"}
+                ? t("submittingLabel")
+                : t("submitLabel")}
             </Button>
           )}
         </form.Subscribe>
       </form>
 
       <Button type="button" onClick={handleGoogleSignUp} className="w-full">
-        Créer un compte avec Google
+        {t("googleButton")}
       </Button>
     </>
   );

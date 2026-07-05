@@ -1,33 +1,45 @@
 import type { Metadata } from "next";
 
+import { getLocaleAlternates } from "@/i18n/get-locale-alternates";
 import { redirect } from "@/i18n/navigation";
 import type { Locale } from "next-intl";
-import { setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { ResetPasswordPage } from "@/features/auth/pages/reset-password-page";
 
-import { env } from "@/lib/env";
 import { requireGuest } from "@/lib/session";
-
-const APP_NAME = env.NEXT_PUBLIC_APP_NAME;
-const DESCRIPTION = `Créez un nouveau mot de passe pour votre compte ${APP_NAME}.`;
-
-export const metadata: Metadata = {
-  title: "Nouveau mot de passe",
-  description: DESCRIPTION,
-  alternates: {
-    canonical: "/reset-password",
-  },
-  robots: {
-    index: false,
-    follow: false,
-  },
-};
 
 type ResetPasswordRouteProps = {
   params: Promise<{ locale: string }>;
   searchParams: Promise<{ token?: string }>;
 };
+
+export async function generateMetadata({
+  params,
+}: ResetPasswordRouteProps): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({
+    locale: locale as Locale,
+    namespace: "auth.resetPassword",
+  });
+  const tCommon = await getTranslations({
+    locale: locale as Locale,
+    namespace: "common",
+  });
+
+  const description = t("seoDescription", { appName: tCommon("appName") });
+  const alternates = getLocaleAlternates("/reset-password", locale as Locale);
+
+  return {
+    title: t("title"),
+    description,
+    alternates,
+    robots: {
+      index: false,
+      follow: false,
+    },
+  };
+}
 
 export default async function ResetPasswordRoute({
   params,

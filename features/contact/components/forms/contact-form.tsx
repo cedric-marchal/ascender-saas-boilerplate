@@ -4,6 +4,7 @@ import type { ChangeEvent, SubmitEvent } from "react";
 
 import { useForm } from "@tanstack/react-form";
 import { Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useAction } from "next-safe-action/hooks";
 import { toast } from "sonner";
 
@@ -20,8 +21,11 @@ import { Textarea } from "@/components/ui/textarea";
 
 import { getActionResult } from "@/utils/errors/get-action-result";
 import { getErrorMessage } from "@/utils/errors/get-error-message";
+import { translateFieldErrors } from "@/utils/errors/translate-field-errors";
 
 function ContactForm() {
+  const t = useTranslations("contact.form");
+  const tValidation = useTranslations("validation");
   const { executeAsync, isExecuting } = useAction(createContactAction);
 
   const form = useForm({
@@ -38,7 +42,7 @@ function ContactForm() {
       try {
         getActionResult(await executeAsync(value));
 
-        toast.success("Message envoyé avec succès !");
+        toast.success(t("successToast"));
 
         form.reset();
       } catch (error: unknown) {
@@ -68,7 +72,7 @@ function ContactForm() {
 
             return (
               <Field data-invalid={isInvalid}>
-                <FieldLabel htmlFor="contact-name">Nom</FieldLabel>
+                <FieldLabel htmlFor="contact-name">{t("nameLabel")}</FieldLabel>
                 <Input
                   id="contact-name"
                   name={field.name}
@@ -76,9 +80,16 @@ function ContactForm() {
                   onBlur={field.handleBlur}
                   onChange={handleChange}
                   aria-invalid={isInvalid}
-                  placeholder="Jean Dupont"
+                  placeholder={t("namePlaceholder")}
                 />
-                {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                {isInvalid && (
+                  <FieldError
+                    errors={translateFieldErrors(
+                      field.state.meta.errors,
+                      tValidation,
+                    )}
+                  />
+                )}
               </Field>
             );
           }}
@@ -96,7 +107,9 @@ function ContactForm() {
 
             return (
               <Field data-invalid={isInvalid}>
-                <FieldLabel htmlFor="contact-email">Email</FieldLabel>
+                <FieldLabel htmlFor="contact-email">
+                  {t("emailLabel")}
+                </FieldLabel>
                 <Input
                   id="contact-email"
                   type="email"
@@ -105,9 +118,16 @@ function ContactForm() {
                   onBlur={field.handleBlur}
                   onChange={handleChange}
                   aria-invalid={isInvalid}
-                  placeholder="jean@exemple.fr"
+                  placeholder={t("emailPlaceholder")}
                 />
-                {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                {isInvalid && (
+                  <FieldError
+                    errors={translateFieldErrors(
+                      field.state.meta.errors,
+                      tValidation,
+                    )}
+                  />
+                )}
               </Field>
             );
           }}
@@ -126,7 +146,9 @@ function ContactForm() {
 
           return (
             <Field data-invalid={isInvalid}>
-              <FieldLabel htmlFor="contact-subject">Sujet</FieldLabel>
+              <FieldLabel htmlFor="contact-subject">
+                {t("subjectLabel")}
+              </FieldLabel>
               <Input
                 id="contact-subject"
                 name={field.name}
@@ -134,9 +156,16 @@ function ContactForm() {
                 onBlur={field.handleBlur}
                 onChange={handleChange}
                 aria-invalid={isInvalid}
-                placeholder="Comment pouvons-nous vous aider ?"
+                placeholder={t("subjectPlaceholder")}
               />
-              {isInvalid && <FieldError errors={field.state.meta.errors} />}
+              {isInvalid && (
+                <FieldError
+                  errors={translateFieldErrors(
+                    field.state.meta.errors,
+                    tValidation,
+                  )}
+                />
+              )}
             </Field>
           );
         }}
@@ -154,7 +183,9 @@ function ContactForm() {
 
           return (
             <Field data-invalid={isInvalid}>
-              <FieldLabel htmlFor="contact-message">Message</FieldLabel>
+              <FieldLabel htmlFor="contact-message">
+                {t("messageLabel")}
+              </FieldLabel>
               <Textarea
                 id="contact-message"
                 name={field.name}
@@ -162,10 +193,17 @@ function ContactForm() {
                 onBlur={field.handleBlur}
                 onChange={handleChange}
                 aria-invalid={isInvalid}
-                placeholder="Décrivez votre demande..."
+                placeholder={t("messagePlaceholder")}
                 className="min-h-32 resize-none"
               />
-              {isInvalid && <FieldError errors={field.state.meta.errors} />}
+              {isInvalid && (
+                <FieldError
+                  errors={translateFieldErrors(
+                    field.state.meta.errors,
+                    tValidation,
+                  )}
+                />
+              )}
             </Field>
           );
         }}
@@ -187,8 +225,8 @@ function ContactForm() {
               />
             ) : null}
             {isExecuting || isSubmitting
-              ? "Envoi en cours..."
-              : "Envoyer le message"}
+              ? t("submittingLabel")
+              : t("submitLabel")}
           </Button>
         )}
       </form.Subscribe>

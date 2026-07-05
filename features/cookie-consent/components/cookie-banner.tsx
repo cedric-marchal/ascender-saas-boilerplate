@@ -6,6 +6,7 @@ import dynamic from "next/dynamic";
 
 import { Link, usePathname } from "@/i18n/navigation";
 import { Cookie, Shield } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { useCookieConsent } from "@/features/cookie-consent/hooks/use-cookie-consent";
 
@@ -20,6 +21,7 @@ const CookiePreferencesModal = dynamic(
 );
 
 function CookieBanner() {
+  const t = useTranslations("cookieConsent.banner");
   const pathname = usePathname();
 
   const [isHydrated, setIsHydrated] = useState(false);
@@ -65,7 +67,7 @@ function CookieBanner() {
           type="button"
           variant="outline"
           size="icon"
-          aria-label="Gérer mes préférences de cookies"
+          aria-label={t("manageAriaLabel")}
           onClick={openPreferences}
           className="fixed right-4 bottom-4 z-50 rounded-full shadow-lg hover:shadow-xl"
         >
@@ -74,7 +76,7 @@ function CookieBanner() {
       ) : (
         <div
           role="dialog"
-          aria-label="Consentement aux cookies"
+          aria-label={t("dialogAriaLabel")}
           className="bg-background fixed right-0 bottom-0 left-0 z-50 border-t shadow-[0_-2px_8px_rgba(0,0,0,0.1)]"
         >
           <div className="mx-auto max-w-5xl px-4 py-4">
@@ -84,28 +86,25 @@ function CookieBanner() {
                 aria-hidden="true"
               />
               <p className="text-muted-foreground text-sm">
-                Nous utilisons des cookies pour améliorer votre expérience sur
-                notre site. Les cookies nécessaires sont toujours activés. Vous
-                pouvez accepter tous les cookies, les refuser ou gérer vos
-                préférences.{" "}
+                {t("message")}{" "}
                 <Link
                   href="/cookie-policy"
                   className="hover:text-foreground underline"
                 >
-                  En savoir plus
+                  {t("learnMore")}
                 </Link>
               </p>
             </div>
 
             <div className="flex flex-col gap-3 sm:flex-row">
               <Button type="button" onClick={acceptAll}>
-                Accepter tout
+                {t("acceptAll")}
               </Button>
               <Button type="button" variant="outline" onClick={rejectAll}>
-                Refuser tout
+                {t("rejectAll")}
               </Button>
               <Button type="button" variant="ghost" onClick={openPreferences}>
-                Gérer mes préférences
+                {t("managePreferences")}
               </Button>
             </div>
           </div>

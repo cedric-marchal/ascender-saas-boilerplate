@@ -1,39 +1,51 @@
 import type { Metadata } from "next";
 
+import { getLocaleAlternates } from "@/i18n/get-locale-alternates";
 import type { Locale } from "next-intl";
-import { setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { LegalNoticePage } from "@/features/legal/pages/legal-notice-page";
-
-import { env } from "@/lib/env";
-
-const APP_NAME = env.NEXT_PUBLIC_APP_NAME;
-const DESCRIPTION = `Mentions légales de ${APP_NAME}. Informations sur l'éditeur, l'hébergeur et les conditions d'utilisation du site.`;
-
-export const metadata: Metadata = {
-  title: "Mentions légales",
-  description: DESCRIPTION,
-  alternates: {
-    canonical: "/legal-notice",
-  },
-  openGraph: {
-    title: `Mentions légales | ${APP_NAME}`,
-    description: DESCRIPTION,
-    url: "/legal-notice",
-  },
-  twitter: {
-    title: `Mentions légales | ${APP_NAME}`,
-    description: DESCRIPTION,
-  },
-  robots: {
-    index: true,
-    follow: true,
-  },
-};
 
 type LegalNoticeRouteProps = {
   params: Promise<{ locale: string }>;
 };
+
+export async function generateMetadata({
+  params,
+}: LegalNoticeRouteProps): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({
+    locale: locale as Locale,
+    namespace: "legal.legalNotice",
+  });
+  const tCommon = await getTranslations({
+    locale: locale as Locale,
+    namespace: "common",
+  });
+
+  const appName = tCommon("appName");
+  const description = t("seoDescription", { appName });
+  const alternates = getLocaleAlternates("/legal-notice", locale as Locale);
+
+  return {
+    title: t("title"),
+    description,
+    alternates,
+    openGraph: {
+      title: `${t("title")} | ${appName}`,
+      description,
+      url: alternates.canonical,
+    },
+    twitter: {
+      title: `${t("title")} | ${appName}`,
+      description,
+    },
+    robots: {
+      index: true,
+      follow: true,
+    },
+  };
+}
 
 export default async function LegalNoticeRoute({
   params,

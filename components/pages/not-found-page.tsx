@@ -1,10 +1,13 @@
 import { Link } from "@/i18n/navigation";
 import { FileQuestion } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 
 import { Main } from "@/components/main";
 import { Button } from "@/components/ui/button";
 
-function NotFoundPage() {
+async function NotFoundPage() {
+  const t = await getTranslations("common.errorPages.notFound");
+
   return (
     <Main
       className="flex flex-col items-center justify-center px-4"
@@ -23,24 +26,22 @@ function NotFoundPage() {
           id="not-found-title"
           className="text-foreground mb-2 text-4xl font-bold tabular-nums"
         >
-          404
+          {t("code")}
         </h1>
 
         <h2 className="text-foreground mb-3 text-xl font-semibold">
-          Page introuvable
+          {t("heading")}
         </h2>
 
-        <p className="text-muted-foreground mb-8 text-sm">
-          Désolé, la page que vous recherchez n'existe pas ou a été déplacée.
-        </p>
+        <p className="text-muted-foreground mb-8 text-sm">{t("description")}</p>
 
         <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
           <Button type="button" asChild>
-            <Link href="/">Retour à l'accueil</Link>
+            <Link href="/">{t("backHome")}</Link>
           </Button>
 
           <Button type="button" variant="outline" asChild>
-            <Link href="/contact">Contactez-nous</Link>
+            <Link href="/contact">{t("contactUs")}</Link>
           </Button>
         </div>
       </div>

@@ -1,39 +1,51 @@
 import type { Metadata } from "next";
 
+import { getLocaleAlternates } from "@/i18n/get-locale-alternates";
 import type { Locale } from "next-intl";
-import { setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { TermsOfSalePage } from "@/features/legal/pages/terms-of-sale-page";
-
-import { env } from "@/lib/env";
-
-const APP_NAME = env.NEXT_PUBLIC_APP_NAME;
-const DESCRIPTION = `Conditions de vente de ${APP_NAME}. Découvrez les termes régissant les achats et abonnements sur notre plateforme.`;
-
-export const metadata: Metadata = {
-  title: "Conditions de vente",
-  description: DESCRIPTION,
-  alternates: {
-    canonical: "/terms-of-sale",
-  },
-  openGraph: {
-    title: `Conditions de vente | ${APP_NAME}`,
-    description: DESCRIPTION,
-    url: "/terms-of-sale",
-  },
-  twitter: {
-    title: `Conditions de vente | ${APP_NAME}`,
-    description: DESCRIPTION,
-  },
-  robots: {
-    index: true,
-    follow: true,
-  },
-};
 
 type TermsOfSaleRouteProps = {
   params: Promise<{ locale: string }>;
 };
+
+export async function generateMetadata({
+  params,
+}: TermsOfSaleRouteProps): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({
+    locale: locale as Locale,
+    namespace: "legal.termsOfSale",
+  });
+  const tCommon = await getTranslations({
+    locale: locale as Locale,
+    namespace: "common",
+  });
+
+  const appName = tCommon("appName");
+  const description = t("seoDescription", { appName });
+  const alternates = getLocaleAlternates("/terms-of-sale", locale as Locale);
+
+  return {
+    title: t("title"),
+    description,
+    alternates,
+    openGraph: {
+      title: `${t("title")} | ${appName}`,
+      description,
+      url: alternates.canonical,
+    },
+    twitter: {
+      title: `${t("title")} | ${appName}`,
+      description,
+    },
+    robots: {
+      index: true,
+      follow: true,
+    },
+  };
+}
 
 export default async function TermsOfSaleRoute({
   params,

@@ -1,27 +1,32 @@
 import { z } from "zod";
 
+/**
+ * Messages are translation KEYS (resolved against the `validation` message
+ * namespace), not literal text — see `utils/errors/translate-field-errors.ts`
+ * for the display-time resolution pattern shared by every schema.
+ */
 const CreateContactSchema = z.object({
   name: z
     .string()
-    .min(1, "Le nom est requis")
-    .max(100, "Le nom doit contenir moins de 100 caractères")
+    .min(1, "validation.name.required")
+    .max(100, "validation.name.tooLong")
     .trim(),
   email: z
     .string()
-    .min(1, "L'email est requis")
-    .max(254, "L'email doit contenir moins de 254 caractères")
+    .min(1, "validation.email.required")
+    .max(254, "validation.email.tooLong")
     .trim()
     .toLowerCase()
-    .pipe(z.email({ message: "Format d'email invalide" })),
+    .pipe(z.email({ message: "validation.email.invalid" })),
   subject: z
     .string()
-    .min(1, "Le sujet est requis")
-    .max(200, "Le sujet doit contenir moins de 200 caractères")
+    .min(1, "validation.contact.subject.required")
+    .max(200, "validation.contact.subject.tooLong")
     .trim(),
   message: z
     .string()
-    .min(10, "Le message doit contenir au moins 10 caractères")
-    .max(5000, "Le message doit contenir moins de 5000 caractères")
+    .min(10, "validation.contact.message.tooShort")
+    .max(5000, "validation.contact.message.tooLong")
     .trim(),
 });
 

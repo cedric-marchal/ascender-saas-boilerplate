@@ -1,6 +1,6 @@
-import { env } from "@/lib/env";
+import { getTranslations } from "next-intl/server";
 
-const APP_NAME = env.NEXT_PUBLIC_APP_NAME;
+import { env } from "@/lib/env";
 
 type Plan = {
   name: string;
@@ -12,58 +12,60 @@ type Plan = {
   priceId: string | null;
   featured: boolean;
   isFree: boolean;
+  isCustomPrice: boolean;
 };
 
-const PLANS: Plan[] = [
-  {
-    name: "Starter",
-    description: "Pour démarrer et tester la plateforme en solo.",
-    price: "0",
-    period: "mois",
-    features: [
-      "1 projet actif",
-      "Jusqu'à 3 espaces de travail",
-      "Historique limité",
-      "Support par e-mail standard",
-    ],
-    cta: "Commencer gratuitement",
-    priceId: null,
-    featured: false,
-    isFree: true,
-  },
-  {
-    name: "Pro",
-    description: `Pour les indépendants et petites équipes qui utilisent ${APP_NAME} au quotidien.`,
-    price: "19",
-    period: "mois",
-    features: [
-      "Projets illimités",
-      "Utilisateurs illimités dans votre équipe",
-      "Historique étendu",
-      "Support prioritaire par e-mail",
-    ],
-    cta: "Choisir l'offre Pro",
-    priceId: env.STRIPE_PRICE_ID_PRO,
-    featured: true,
-    isFree: false,
-  },
-  {
-    name: "Business",
-    description: "Pour les équipes avancées et besoins spécifiques.",
-    price: "Sur mesure",
-    period: null,
-    features: [
-      "SLA et support dédié",
-      "Intégrations avancées",
-      "Accompagnement à l'onboarding",
-      "Conditions contractuelles personnalisées",
-    ],
-    cta: "Parler avec l'équipe",
-    priceId: null,
-    featured: false,
-    isFree: false,
-  },
-];
+/**
+ * Plan copy (name, description, features, cta) is locale-dependent, so the
+ * static `PLANS` array became an async getter resolved from the `pricing`
+ * message namespace. Non-copy fields (`price`, `priceId`, `featured`,
+ * `isFree`) never vary by locale.
+ */
+async function getPricingPlans(): Promise<Plan[]> {
+  const t = await getTranslations("pricing");
+  const appName = env.NEXT_PUBLIC_APP_NAME;
+  const monthlyPeriod = t("monthlyPeriod");
+  const customPrice = t("customPrice");
 
-export { PLANS };
+  return [
+    {
+      name: t("plans.starter.name"),
+      description: t("plans.starter.description"),
+      price: "0",
+      period: monthlyPeriod,
+      features: t.raw("plans.starter.features") as string[],
+      cta: t("plans.starter.cta"),
+      priceId: null,
+      featured: false,
+      isFree: true,
+      isCustomPrice: false,
+    },
+    {
+      name: t("plans.pro.name"),
+      description: t("plans.pro.description", { appName }),
+      price: "19",
+      period: monthlyPeriod,
+      features: t.raw("plans.pro.features") as string[],
+      cta: t("plans.pro.cta"),
+      priceId: env.STRIPE_PRICE_ID_PRO,
+      featured: true,
+      isFree: false,
+      isCustomPrice: false,
+    },
+    {
+      name: t("plans.business.name"),
+      description: t("plans.business.description"),
+      price: customPrice,
+      period: null,
+      features: t.raw("plans.business.features") as string[],
+      cta: t("plans.business.cta"),
+      priceId: null,
+      featured: false,
+      isFree: false,
+      isCustomPrice: true,
+    },
+  ];
+}
+
+export { getPricingPlans };
 export type { Plan };
