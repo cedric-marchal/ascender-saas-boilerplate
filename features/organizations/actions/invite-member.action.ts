@@ -23,9 +23,7 @@ const inviteMemberAction = orgActionClient
   .inputSchema(InviteMemberSchema)
   .action(async ({ parsedInput, ctx }) => {
     if (ctx.memberRole !== "owner" && ctx.memberRole !== "admin") {
-      throw new ForbiddenError(
-        "Seuls les propriétaires et administrateurs peuvent inviter des membres",
-      );
+      throw new ForbiddenError("errors.organizations.inviteForbidden");
     }
 
     await checkSeatCapacity(ctx.organizationId);

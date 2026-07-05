@@ -60,7 +60,7 @@ async function checkSeatCapacity(organizationId: string): Promise<void> {
   });
 
   if (!organization) {
-    throw new ForbiddenError("Organisation introuvable");
+    throw new ForbiddenError("errors.organizations.notFound");
   }
 
   const planConfig = activeSubscription
@@ -70,9 +70,9 @@ async function checkSeatCapacity(organizationId: string): Promise<void> {
   const seatCap = planConfig?.seatsIncluded ?? FREE_PLAN_SEAT_CAP;
 
   if (memberCount >= seatCap) {
-    throw new ForbiddenError(
-      `Votre plan ne permet pas d'ajouter plus de ${seatCap} membre${seatCap > 1 ? "s" : ""}. Passez à un plan supérieur pour inviter davantage de membres.`,
-    );
+    throw new ForbiddenError("errors.organizations.seatCapReached", {
+      params: { seatCap },
+    });
   }
 }
 

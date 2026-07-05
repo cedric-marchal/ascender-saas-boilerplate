@@ -27,7 +27,7 @@ const acceptInvitationAction = authActionClient
     });
 
     if (!invitation || invitation.status !== "pending") {
-      throw new NotFoundError("Invitation introuvable ou déjà traitée");
+      throw new NotFoundError("errors.organizations.invitationNotFound");
     }
 
     // Pre-check: fast guard before the Better Auth call.

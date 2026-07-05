@@ -31,42 +31,40 @@ type ImageMetadata = {
 
 async function validateImageBuffer(input: Buffer): Promise<void> {
   if (!input || input.length === 0) {
-    throw new BadRequestError("Le fichier image est vide");
+    throw new BadRequestError("errors.image.emptyFile");
   }
 
   try {
     const metadata = await sharp(input).metadata();
 
     if (!metadata.format) {
-      throw new BadRequestError("Format d'image non reconnu");
+      throw new BadRequestError("errors.image.unrecognizedFormat");
     }
 
     const mimeType = `image/${metadata.format}`;
 
     if (!ACCEPTED_IMAGE_FORMATS.includes(mimeType)) {
-      throw new BadRequestError(
-        "Format d'image non supporté. Formats acceptés : JPEG, PNG, WebP",
-      );
+      throw new BadRequestError("errors.image.unsupportedFormat");
     }
 
     if (!metadata.width || !metadata.height) {
-      throw new BadRequestError("Impossible de lire les dimensions de l'image");
+      throw new BadRequestError("errors.image.dimensionsUnreadable");
     }
 
     if (
       metadata.width > MAX_IMAGE_WIDTH ||
       metadata.height > MAX_IMAGE_HEIGHT
     ) {
-      throw new BadRequestError(
-        `L'image est trop grande (max ${MAX_IMAGE_WIDTH}x${MAX_IMAGE_HEIGHT}px)`,
-      );
+      throw new BadRequestError("errors.image.tooLarge", {
+        params: { maxWidth: MAX_IMAGE_WIDTH, maxHeight: MAX_IMAGE_HEIGHT },
+      });
     }
   } catch (error: unknown) {
     if (error instanceof BadRequestError) {
       throw error;
     }
 
-    throw new BadRequestError("Le fichier fourni n'est pas une image valide");
+    throw new BadRequestError("errors.image.invalid");
   }
 }
 
@@ -98,7 +96,7 @@ async function optimizeImage(
       size: buffer.length,
     };
   } catch (error: unknown) {
-    throw new BadRequestError("Échec de l'optimisation de l'image", {
+    throw new BadRequestError("errors.image.optimizeFailed", {
       cause: error,
     });
   }
@@ -122,7 +120,7 @@ async function optimizeAvatar(input: Buffer): Promise<OptimizeImageResult> {
       size: buffer.length,
     };
   } catch (error: unknown) {
-    throw new BadRequestError("Échec de l'optimisation de l'avatar", {
+    throw new BadRequestError("errors.image.avatarOptimizeFailed", {
       cause: error,
     });
   }
@@ -146,7 +144,7 @@ async function optimizeBanner(input: Buffer): Promise<OptimizeImageResult> {
       size: buffer.length,
     };
   } catch (error: unknown) {
-    throw new BadRequestError("Échec de l'optimisation de la bannière", {
+    throw new BadRequestError("errors.image.bannerOptimizeFailed", {
       cause: error,
     });
   }
@@ -164,7 +162,7 @@ async function getImageMetadata(input: Buffer): Promise<ImageMetadata> {
       format: metadata.format ?? "unknown",
     };
   } catch (error: unknown) {
-    throw new BadRequestError("Impossible de lire les métadonnées de l'image", {
+    throw new BadRequestError("errors.image.metadataUnreadable", {
       cause: error,
     });
   }

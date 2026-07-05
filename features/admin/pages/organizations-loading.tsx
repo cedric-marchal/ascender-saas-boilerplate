@@ -1,13 +1,17 @@
+import { useTranslations } from "next-intl";
+
 import { Main } from "@/components/main";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 
 function OrganizationsLoading() {
+  const t = useTranslations("admin.organizations");
+
   return (
     <Main
       className="flex flex-col gap-6 p-6"
       aria-busy="true"
-      aria-label="Chargement de la liste des organisations"
+      aria-label={t("loadingLabel")}
     >
       <div className="flex items-center gap-3">
         <Skeleton className="size-10 rounded-lg" />

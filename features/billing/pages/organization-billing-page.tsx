@@ -1,6 +1,7 @@
-import Link from "next/link";
-
+import { LOCALE_METADATA } from "@/i18n/locale-metadata.constant";
+import { Link } from "@/i18n/navigation";
 import { AlertCircle, CreditCard, Users } from "lucide-react";
+import { useLocale, useTranslations, type Locale } from "next-intl";
 
 import { BillingPortalButton } from "@/features/billing/components/billing-portal-button";
 import { InvoiceList } from "@/features/billing/components/invoice-list";
@@ -33,6 +34,9 @@ function OrganizationBillingPage({
   memberCount,
   plan,
 }: OrganizationBillingPageProps) {
+  const t = useTranslations("billing");
+  const locale = useLocale();
+  const bcp47 = LOCALE_METADATA[locale as Locale].bcp47;
   const { invoices, subscriptions } = billing;
 
   const activeSubscription = subscriptions.find(
@@ -46,8 +50,8 @@ function OrganizationBillingPage({
   );
 
   const planLabel = activeSubscription?.priceId
-    ? getPlanLabel(activeSubscription.priceId)
-    : "Gratuit";
+    ? (getPlanLabel(activeSubscription.priceId) ?? t("planUnknown"))
+    : t("planFree");
 
   return (
     <Main className="flex flex-col gap-6 p-6">
@@ -61,10 +65,11 @@ function OrganizationBillingPage({
           </div>
           <div>
             <h1 className="text-2xl font-semibold tracking-tight">
-              Facturation
+              {t("title")}
             </h1>
             <p className="text-muted-foreground text-sm">
-              {organizationName} — Plan {planLabel}
+              {organizationName} —{" "}
+              {t("subscriptionStatusCard.planPrefix", { plan: planLabel })}
             </p>
           </div>
         </div>
@@ -76,10 +81,9 @@ function OrganizationBillingPage({
       <div className="flex items-center gap-3 rounded-lg border p-4">
         <Users className="text-muted-foreground size-5" aria-hidden="true" />
         <div className="flex-1">
-          <p className="text-sm font-medium">Membres actifs</p>
+          <p className="text-sm font-medium">{t("activeMembers")}</p>
           <p className="text-muted-foreground text-sm">
-            {memberCount} membre{memberCount > 1 ? "s" : ""} dans
-            l&apos;organisation
+            {t("memberCountInOrg", { count: memberCount })}
           </p>
         </div>
         <Badge variant="secondary">{plan}</Badge>
@@ -92,14 +96,14 @@ function OrganizationBillingPage({
 
           {invoices.length > 0 && (
             <div className="space-y-4">
-              <h2 className="text-lg font-semibold">Historique des factures</h2>
+              <h2 className="text-lg font-semibold">{t("invoiceHistory")}</h2>
               <InvoiceList invoices={invoices} />
             </div>
           )}
 
           <div className="flex justify-center">
             <Button type="button" asChild>
-              <Link href="/tarifs">Découvrir nos offres</Link>
+              <Link href="/pricing">{t("discoverOffers")}</Link>
             </Button>
           </div>
         </div>
@@ -109,32 +113,31 @@ function OrganizationBillingPage({
         <section className="space-y-6">
           <div className="grid gap-6 lg:grid-cols-2">
             <div className="space-y-4">
-              <h2 className="text-lg font-semibold">Statut</h2>
+              <h2 className="text-lg font-semibold">{t("status")}</h2>
               <SubscriptionStatusCard subscriptions={subscriptions} />
             </div>
 
             {activeSubscription && (
               <div className="space-y-4">
-                <h2 className="text-lg font-semibold">Abonnement actif</h2>
+                <h2 className="text-lg font-semibold">
+                  {t("activeSubscription")}
+                </h2>
                 <SubscriptionCard subscription={activeSubscription} />
 
                 {activeSubscription.cancelAtPeriodEnd && (
                   <Alert variant="destructive">
                     <AlertCircle className="size-4" aria-hidden="true" />
-                    <AlertTitle>
-                      Abonnement en cours d&apos;annulation
-                    </AlertTitle>
+                    <AlertTitle>{t("cancelingTitle")}</AlertTitle>
                     <AlertDescription>
-                      Votre abonnement sera annulé le{" "}
-                      {new Date(
-                        activeSubscription.currentPeriodEnd * 1000,
-                      ).toLocaleDateString("fr-FR", {
-                        day: "numeric",
-                        month: "long",
-                        year: "numeric",
+                      {t("cancelingDescription", {
+                        date: new Date(
+                          activeSubscription.currentPeriodEnd * 1000,
+                        ).toLocaleDateString(bcp47, {
+                          day: "numeric",
+                          month: "long",
+                          year: "numeric",
+                        }),
                       })}
-                      . Vous pouvez réactiver votre abonnement via le portail de
-                      facturation.
                     </AlertDescription>
                   </Alert>
                 )}
@@ -143,13 +146,13 @@ function OrganizationBillingPage({
           </div>
 
           <div className="space-y-4">
-            <h2 className="text-lg font-semibold">Historique des factures</h2>
+            <h2 className="text-lg font-semibold">{t("invoiceHistory")}</h2>
             <InvoiceList invoices={invoices} />
           </div>
 
           {inactiveSubscriptions.length > 0 && (
             <div className="space-y-4">
-              <h2 className="text-lg font-semibold">Anciens abonnements</h2>
+              <h2 className="text-lg font-semibold">{t("oldSubscriptions")}</h2>
 
               <div className="grid gap-4">
                 {inactiveSubscriptions.map(

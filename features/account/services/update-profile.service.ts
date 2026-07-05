@@ -1,7 +1,8 @@
 import "server-only";
 
-import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
+
+import { revalidateLocalizedPath } from "@/i18n/revalidate-localized-path";
 
 import { auth } from "@/lib/auth";
 import { env } from "@/lib/env";
@@ -41,7 +42,7 @@ async function updateProfile(
   });
 
   if (!currentUser) {
-    throw new BadRequestError("Utilisateur introuvable");
+    throw new BadRequestError("errors.account.userNotFound");
   }
 
   const emailChanged = currentUser.email !== input.email;
@@ -58,7 +59,7 @@ async function updateProfile(
     });
 
     if (existingUser) {
-      throw new ConflictError("Cette adresse email est déjà utilisée");
+      throw new ConflictError("errors.account.emailAlreadyUsed");
     }
   }
 
@@ -70,7 +71,7 @@ async function updateProfile(
       headers: await headers(),
     });
 
-    revalidatePath("/dashboard/parametres");
+    revalidateLocalizedPath("/dashboard/settings");
 
     return {
       user: {
@@ -96,12 +97,12 @@ async function updateProfile(
     await auth.api.changeEmail({
       body: {
         newEmail: input.email,
-        callbackURL: `${env.NEXT_PUBLIC_BASE_URL}/dashboard/parametres`,
+        callbackURL: `${env.NEXT_PUBLIC_BASE_URL}/dashboard/settings`,
       },
       headers: await headers(),
     });
 
-    revalidatePath("/dashboard/parametres");
+    revalidateLocalizedPath("/dashboard/settings");
 
     return {
       user: {

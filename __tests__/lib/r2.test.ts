@@ -37,32 +37,32 @@ const { deleteFile, fileExists, getPrivateUrl, getPublicUrl, uploadFile } =
 describe("validateKey (via getPublicUrl)", () => {
   it("throws for empty key", () => {
     expect(() => getPublicUrl("")).toThrow(BadRequestError);
-    expect(() => getPublicUrl("")).toThrow("La clé du fichier est requise");
+    expect(() => getPublicUrl("")).toThrow("errors.storage.keyRequired");
   });
 
   it("throws for whitespace-only key", () => {
     expect(() => getPublicUrl("   ")).toThrow(BadRequestError);
-    expect(() => getPublicUrl("   ")).toThrow("La clé du fichier est requise");
+    expect(() => getPublicUrl("   ")).toThrow("errors.storage.keyRequired");
   });
 
   it("throws for key too long (>1024)", () => {
     const longKey = "a".repeat(1025);
 
     expect(() => getPublicUrl(longKey)).toThrow(BadRequestError);
-    expect(() => getPublicUrl(longKey)).toThrow("trop longue");
+    expect(() => getPublicUrl(longKey)).toThrow("errors.storage.keyTooLong");
   });
 
   it("throws for key with ..", () => {
     expect(() => getPublicUrl("path/../sensitive")).toThrow(BadRequestError);
     expect(() => getPublicUrl("path/../sensitive")).toThrow(
-      "caractères invalides",
+      "errors.storage.invalidKey",
     );
   });
 
   it("throws for key starting with /", () => {
     expect(() => getPublicUrl("/absolute/path")).toThrow(BadRequestError);
     expect(() => getPublicUrl("/absolute/path")).toThrow(
-      "caractères invalides",
+      "errors.storage.invalidKey",
     );
   });
 
@@ -118,7 +118,7 @@ describe("uploadFile", () => {
     ).rejects.toThrow(BadRequestError);
     await expect(
       uploadFile("key", null as never, "text/plain"),
-    ).rejects.toThrow("Le contenu du fichier est requis");
+    ).rejects.toThrow("errors.storage.contentRequired");
   });
 
   it("throws BadRequestError for empty contentType", async () => {
@@ -126,7 +126,7 @@ describe("uploadFile", () => {
 
     await expect(uploadFile("key", body, "")).rejects.toThrow(BadRequestError);
     await expect(uploadFile("key", body, "")).rejects.toThrow(
-      "Le type de contenu est requis",
+      "errors.storage.contentTypeRequired",
     );
   });
 
@@ -137,7 +137,7 @@ describe("uploadFile", () => {
       BadRequestError,
     );
     await expect(uploadFile("key", body, "   ")).rejects.toThrow(
-      "Le type de contenu est requis",
+      "errors.storage.contentTypeRequired",
     );
   });
 
@@ -150,7 +150,7 @@ describe("uploadFile", () => {
       ServiceUnavailableError,
     );
     await expect(uploadFile("key", body, "text/plain")).rejects.toThrow(
-      "temporairement indisponible",
+      "errors.storage.serviceUnavailable",
     );
   });
 });
@@ -182,7 +182,7 @@ describe("deleteFile", () => {
 
     await expect(deleteFile("key")).rejects.toThrow(ServiceUnavailableError);
     await expect(deleteFile("key")).rejects.toThrow(
-      "temporairement indisponible",
+      "errors.storage.serviceUnavailable",
     );
   });
 
@@ -262,7 +262,7 @@ describe("getPrivateUrl", () => {
       BadRequestError,
     );
     await expect(getPrivateUrl("file.txt", 30)).rejects.toThrow(
-      "durée d'expiration",
+      "errors.storage.invalidExpiresIn",
     );
   });
 
@@ -271,7 +271,7 @@ describe("getPrivateUrl", () => {
       BadRequestError,
     );
     await expect(getPrivateUrl("file.txt", 700000)).rejects.toThrow(
-      "durée d'expiration",
+      "errors.storage.invalidExpiresIn",
     );
   });
 
@@ -299,7 +299,7 @@ describe("getPrivateUrl", () => {
       ServiceUnavailableError,
     );
     await expect(getPrivateUrl("file.txt")).rejects.toThrow(
-      "temporairement indisponible",
+      "errors.storage.serviceUnavailable",
     );
   });
 

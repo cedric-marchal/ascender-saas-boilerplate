@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import {
   COOKIE_CATEGORIES,
   useCookieConsent,
@@ -19,6 +21,8 @@ import {
 import { Switch } from "@/components/ui/switch";
 
 function CookiePreferencesModal() {
+  const t = useTranslations("cookieConsent");
+
   const isPreferencesOpen = useCookieConsent(
     (state) => state.isPreferencesOpen,
   );
@@ -31,11 +35,8 @@ function CookiePreferencesModal() {
     <Sheet open={isPreferencesOpen} onOpenChange={closePreferences}>
       <SheetContent side="right">
         <SheetHeader>
-          <SheetTitle>Préférences de cookies</SheetTitle>
-          <SheetDescription>
-            Activez ou désactivez chaque catégorie de cookies. Les cookies
-            nécessaires ne peuvent pas être désactivés.
-          </SheetDescription>
+          <SheetTitle>{t("modal.title")}</SheetTitle>
+          <SheetDescription>{t("modal.description")}</SheetDescription>
         </SheetHeader>
 
         <div className="flex-1 overflow-y-auto px-4 py-6">
@@ -51,10 +52,10 @@ function CookiePreferencesModal() {
                   >
                     <div className="space-y-0.5">
                       <Label className="text-sm font-medium">
-                        {category.label}
+                        {t(`categories.${categoryId}.label`)}
                       </Label>
                       <p className="text-muted-foreground text-xs">
-                        {category.description}
+                        {t(`categories.${categoryId}.description`)}
                       </p>
                     </div>
 
@@ -74,7 +75,7 @@ function CookiePreferencesModal() {
 
         <SheetFooter>
           <Button type="button" onClick={savePreferences} className="w-full">
-            Sauvegarder mes préférences
+            {t("modal.saveButton")}
           </Button>
         </SheetFooter>
       </SheetContent>

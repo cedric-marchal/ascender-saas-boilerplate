@@ -25,9 +25,14 @@
 
 ```
 app/                          # Routes only (thin shims)
-├── (public)/                 # Public pages
-├── (protected)/              # Dashboard + Admin
-└── api/                      # API route handlers
+├── [locale]/                 # All localized routes (English canonical folder names)
+│   ├── (public)/             # Public pages
+│   └── (protected)/          # Dashboard + Admin
+├── api/                      # API route handlers
+└── *.tsx                     # Root boundaries (not-found, forbidden...) — context-free i18n
+
+i18n/                         # routing.ts (pathnames = source of truth), navigation, helpers
+messages/                     # en.json + fr.json catalogs (key parity enforced by test)
 
 features/                     # ALL business logic
 ├── {feature}/
@@ -70,22 +75,22 @@ NEVER skip this step, even for small changes.
 
 ## Core Conventions
 
-| Rule              | Convention                                                                    |
-| ----------------- | ----------------------------------------------------------------------------- |
-| **Imports**       | Absolute `@/`, combine types+values: `import { value, type Type } from "mod"` |
-| **Exports**       | Named only (NEVER default)                                                    |
-| **Naming**        | Full words (NEVER abbreviations: `event` not `e`, `index` not `i`)            |
-| **Components**    | Server by default, `"use client"` only for hooks/events/browser APIs          |
-| **Props**         | Inline if ≤2, separate `{Name}Props` type if >2 (use `type`, never interface) |
-| **File naming**   | kebab-case.tsx                                                                |
-| **Booleans**      | `is`, `has`, `can`, `should` prefixes                                         |
-| **Strings**       | Template literals only, NEVER concatenation with `+`                          |
-| **If braces**     | Always, even single-line                                                      |
-| **Spacing**       | Blank line after `}` if code follows, blank line before final `return`        |
-| **Callbacks**     | Always type params: `.map((item: Item) => ...)`                               |
-| **Buttons**       | `type="button"` (except submit), `aria-hidden="true"` on decorative icons     |
-| **Links**         | `<Link>` for internal routes, `<a>` for external URLs                         |
-| **User messages** | French. Code/comments: English.                                               |
+| Rule              | Convention                                                                                                   |
+| ----------------- | ------------------------------------------------------------------------------------------------------------ |
+| **Imports**       | Absolute `@/`, combine types+values: `import { value, type Type } from "mod"`                                |
+| **Exports**       | Named only (NEVER default)                                                                                   |
+| **Naming**        | Full words (NEVER abbreviations: `event` not `e`, `index` not `i`)                                           |
+| **Components**    | Server by default, `"use client"` only for hooks/events/browser APIs                                         |
+| **Props**         | Inline if ≤2, separate `{Name}Props` type if >2 (use `type`, never interface)                                |
+| **File naming**   | kebab-case.tsx                                                                                               |
+| **Booleans**      | `is`, `has`, `can`, `should` prefixes                                                                        |
+| **Strings**       | Template literals only, NEVER concatenation with `+`                                                         |
+| **If braces**     | Always, even single-line                                                                                     |
+| **Spacing**       | Blank line after `}` if code follows, blank line before final `return`                                       |
+| **Callbacks**     | Always type params: `.map((item: Item) => ...)`                                                              |
+| **Buttons**       | `type="button"` (except submit), `aria-hidden="true"` on decorative icons                                    |
+| **Links**         | `<Link>` for internal routes, `<a>` for external URLs                                                        |
+| **User messages** | Translation keys in `messages/en.json` + `fr.json` (parity enforced). Code/comments: English. See `i18n.md`. |
 
 ## Prisma
 
@@ -132,6 +137,7 @@ Detailed rules are in `.claude/rules/` — loaded conditionally per file path:
 - **Security (IDOR)**: `security.md`
 - **Code Style (spacing, strings, control flow)**: `code-style.md`
 - **Cache (`"use cache"`, Redis keys, PPR)**: `cache.md`
+- **i18n & Routing (pathnames source of truth, locales, context-free boundaries)**: `i18n.md`
 
 ## Engineering Judgment (CRITICAL)
 

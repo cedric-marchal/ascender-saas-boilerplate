@@ -1,4 +1,5 @@
 import { CheckCircle2, XCircle } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { Badge } from "@/components/ui/badge";
 
@@ -7,6 +8,8 @@ type EmailVerificationBadgeProps = {
 };
 
 function EmailVerificationBadge({ isVerified }: EmailVerificationBadgeProps) {
+  const t = useTranslations("account.emailVerificationBadge");
+
   if (isVerified) {
     return (
       <Badge
@@ -14,7 +17,7 @@ function EmailVerificationBadge({ isVerified }: EmailVerificationBadgeProps) {
         className="gap-1 border-green-200 text-green-700"
       >
         <CheckCircle2 className="h-3 w-3" aria-hidden="true" />
-        Email vérifié
+        {t("verified")}
       </Badge>
     );
   }
@@ -25,7 +28,7 @@ function EmailVerificationBadge({ isVerified }: EmailVerificationBadgeProps) {
       className="gap-1 border-orange-200 text-orange-700"
     >
       <XCircle className="h-3 w-3" aria-hidden="true" />
-      Email non vérifié
+      {t("unverified")}
     </Badge>
   );
 }

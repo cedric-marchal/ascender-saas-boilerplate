@@ -10,6 +10,7 @@ import {
   type HeaderGroup,
   type Row,
 } from "@tanstack/react-table";
+import { useTranslations } from "next-intl";
 
 import {
   Table,
@@ -29,8 +30,10 @@ type DataTableProps<TData, TValue> = {
 function DataTable<TData, TValue>({
   columns,
   data,
-  emptyMessage = "Aucun résultat",
+  emptyMessage,
 }: DataTableProps<TData, TValue>) {
+  const t = useTranslations("common.dataTable");
+  const resolvedEmptyMessage = emptyMessage ?? t("emptyMessage");
   const table = useReactTable({
     data,
     columns,
@@ -73,7 +76,7 @@ function DataTable<TData, TValue>({
           ) : (
             <TableRow>
               <TableCell colSpan={columns.length} className="h-24 text-center">
-                {emptyMessage}
+                {resolvedEmptyMessage}
               </TableCell>
             </TableRow>
           )}

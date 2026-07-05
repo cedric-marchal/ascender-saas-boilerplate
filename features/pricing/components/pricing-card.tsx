@@ -1,3 +1,5 @@
+import { getTranslations } from "next-intl/server";
+
 import { PricingCheckoutButton } from "@/features/pricing/components/pricing-checkout-button";
 import { PricingContactButton } from "@/features/pricing/components/pricing-contact-button";
 import { PricingFreeButton } from "@/features/pricing/components/pricing-free-button";
@@ -18,12 +20,14 @@ type PricingCardProps = {
   isCustomer: boolean;
 };
 
-function PricingCard({
+async function PricingCard({
   plan,
   isAuthenticated,
   isEmailVerified,
   isCustomer,
 }: PricingCardProps) {
+  const t = await getTranslations("pricing");
+
   return (
     <Card
       className={
@@ -35,7 +39,7 @@ function PricingCard({
       <CardHeader>
         {plan.featured && (
           <p className="text-primary text-xs font-semibold tracking-wide uppercase">
-            Populaire
+            {t("popularBadge")}
           </p>
         )}
         <CardTitle className="text-base">{plan.name}</CardTitle>
@@ -45,7 +49,7 @@ function PricingCard({
       <CardContent className="mt-auto space-y-4 text-sm">
         <div className="space-y-1">
           <p className="text-2xl font-semibold">
-            {plan.price === "Sur mesure" ? (
+            {plan.isCustomPrice ? (
               plan.price
             ) : (
               <>

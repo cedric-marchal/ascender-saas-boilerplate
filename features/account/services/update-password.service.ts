@@ -2,6 +2,9 @@ import "server-only";
 
 import { headers } from "next/headers";
 
+import { getTranslator } from "@/i18n/get-translator";
+import { getLocale } from "next-intl/server";
+
 import { PasswordChangedEmail } from "@/features/auth/emails/password-changed-email";
 
 import { auth } from "@/lib/auth";
@@ -25,12 +28,18 @@ async function updatePassword(input: UpdatePasswordInput): Promise<void> {
     headers: await headers(),
   });
 
+  const locale = await getLocale();
+  const translate = getTranslator(locale);
+
   await sendEmail({
-    from: `${env.NEXT_PUBLIC_APP_NAME} Sécurité <${env.RESEND_EMAIL_SECURITY}>`,
+    from: `${translate("emails.common.securityFromName", { appName: env.NEXT_PUBLIC_APP_NAME })} <${env.RESEND_EMAIL_SECURITY}>`,
     to: input.userEmail,
-    subject: `Votre mot de passe ${env.NEXT_PUBLIC_APP_NAME} a été modifié`,
+    subject: translate("emails.passwordChanged.subject", {
+      appName: env.NEXT_PUBLIC_APP_NAME,
+    }),
     react: PasswordChangedEmail({
       name: input.userName,
+      locale,
     }),
   });
 }

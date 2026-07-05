@@ -4,6 +4,10 @@ import { ForbiddenError } from "@/utils/errors/errors";
 
 vi.mock("server-only", () => ({}));
 
+vi.mock("next-intl/server", () => ({
+  getLocale: vi.fn().mockResolvedValue("en"),
+}));
+
 // ---------------------------------------------------------------------------
 // Mock prisma BEFORE importing services
 // ---------------------------------------------------------------------------

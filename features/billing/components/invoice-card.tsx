@@ -1,4 +1,6 @@
+import { LOCALE_METADATA } from "@/i18n/locale-metadata.constant";
 import { Calendar, Download, FileText } from "lucide-react";
+import { useLocale, useTranslations, type Locale } from "next-intl";
 
 import {
   invoiceStatusLabels,
@@ -44,18 +46,19 @@ const STATUS_CONFIG: Record<InvoiceStatus, InvoiceStatusConfig> = {
   },
 };
 
-function formatAmount(amount: number | null): string {
-  if (amount === null) {
-    return "0,00 €";
-  }
-
-  return new Intl.NumberFormat("fr-FR", {
+function formatAmount(amount: number | null, bcp47: string): string {
+  return new Intl.NumberFormat(bcp47, {
     style: "currency",
     currency: "eur",
-  }).format(amount / 100);
+  }).format((amount ?? 0) / 100);
 }
 
 function InvoiceCard({ invoice }: { invoice: BillingInvoice }) {
+  const t = useTranslations("billing.invoiceCard");
+  const tStatuses = useTranslations("billing.invoiceStatuses");
+  const locale = useLocale();
+  const bcp47 = LOCALE_METADATA[locale as Locale].bcp47;
+
   const config = invoice.status
     ? (STATUS_CONFIG[invoice.status] ?? STATUS_CONFIG.draft)
     : STATUS_CONFIG.draft;
@@ -71,20 +74,20 @@ function InvoiceCard({ invoice }: { invoice: BillingInvoice }) {
                 aria-hidden="true"
               />
               <CardTitle className="text-base">
-                Facture {invoice.number || invoice.id}
+                {t("titlePrefix", { number: invoice.number || invoice.id })}
               </CardTitle>
             </div>
             <CardDescription>
               {invoice.created
-                ? new Date(invoice.created * 1000).toLocaleDateString("fr-FR", {
+                ? new Date(invoice.created * 1000).toLocaleDateString(bcp47, {
                     day: "numeric",
                     month: "long",
                     year: "numeric",
                   })
-                : "Date inconnue"}
+                : t("unknownDate")}
             </CardDescription>
           </div>
-          <Badge variant={config.variant}>{config.label}</Badge>
+          <Badge variant={config.variant}>{tStatuses(config.label)}</Badge>
         </div>
       </CardHeader>
 
@@ -92,17 +95,21 @@ function InvoiceCard({ invoice }: { invoice: BillingInvoice }) {
         <div className="flex items-center justify-between">
           <div className="space-y-1">
             <p className="text-2xl font-bold">
-              {formatAmount(invoice.amountPaid)}
+              {formatAmount(invoice.amountPaid, bcp47)}
             </p>
             {invoice.status === "paid" && invoice.paidAt && (
               <div className="text-muted-foreground flex items-center gap-2 text-sm">
                 <Calendar className="h-3 w-3" aria-hidden="true" />
                 <span>
-                  Payé le{" "}
-                  {new Date(invoice.paidAt * 1000).toLocaleDateString("fr-FR", {
-                    day: "numeric",
-                    month: "long",
-                    year: "numeric",
+                  {t("paidOn", {
+                    date: new Date(invoice.paidAt * 1000).toLocaleDateString(
+                      bcp47,
+                      {
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric",
+                      },
+                    ),
                   })}
                 </span>
               </div>
@@ -117,7 +124,7 @@ function InvoiceCard({ invoice }: { invoice: BillingInvoice }) {
                 rel="noopener noreferrer"
               >
                 <Download className="mr-2 h-4 w-4" aria-hidden="true" />
-                Télécharger
+                {t("download")}
               </a>
             </Button>
           )}

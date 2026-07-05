@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import { deleteProjectAction } from "@/features/projects/actions/delete-project.action";
@@ -31,6 +32,7 @@ function DeleteProjectModal({
   open,
   onOpenChange,
 }: DeleteProjectModalProps) {
+  const t = useTranslations("projects.deleteModal");
   const [isExecuting, setIsExecuting] = useState(false);
 
   async function handleDelete() {
@@ -39,7 +41,7 @@ function DeleteProjectModal({
     try {
       getActionResult(await deleteProjectAction({ projectId: project.id }));
 
-      toast.success("Projet supprimé avec succès");
+      toast.success(t("successToast"));
       onOpenChange(false);
     } catch (error: unknown) {
       toast.error(getErrorMessage(error));
@@ -52,9 +54,9 @@ function DeleteProjectModal({
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Supprimer ce projet ?</AlertDialogTitle>
+          <AlertDialogTitle>{t("title")}</AlertDialogTitle>
           <AlertDialogDescription>
-            {`${project.name} sera définitivement supprimé. Cette action est irréversible.`}
+            {t("description", { name: project.name })}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
@@ -64,7 +66,7 @@ function DeleteProjectModal({
             onClick={() => onOpenChange(false)}
             disabled={isExecuting}
           >
-            Annuler
+            {t("cancel")}
           </Button>
           <Button
             type="button"
@@ -72,7 +74,7 @@ function DeleteProjectModal({
             onClick={handleDelete}
             disabled={isExecuting}
           >
-            {isExecuting ? "Suppression..." : "Supprimer"}
+            {isExecuting ? t("confirming") : t("confirm")}
           </Button>
         </AlertDialogFooter>
       </AlertDialogContent>

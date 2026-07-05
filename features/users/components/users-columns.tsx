@@ -2,10 +2,11 @@
 
 import { useTransition } from "react";
 
-import Link from "next/link";
-
+import { LOCALE_METADATA } from "@/i18n/locale-metadata.constant";
+import { Link } from "@/i18n/navigation";
 import type { ColumnDef } from "@tanstack/react-table";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
+import { useLocale, useTranslations, type Locale } from "next-intl";
 import { useQueryStates } from "nuqs";
 
 import {
@@ -38,11 +39,13 @@ type UserTableData = Pick<
 
 function SortableHeader({
   field,
-  label,
+  labelKey,
 }: {
   field: UserSortableField;
-  label: string;
+  labelKey: "nameHeader" | "emailHeader" | "createdAtHeader";
 }) {
+  const t = useTranslations("admin.users.columns");
+  const label = t(labelKey);
   const [isLoading, startTransition] = useTransition();
 
   const [filters, setFilters] = useQueryStates(usersSearchParams, {
@@ -89,15 +92,59 @@ function SortableHeader({
   );
 }
 
+function RoleHeader() {
+  const t = useTranslations("admin.users.columns");
+
+  return t("roleHeader");
+}
+
+function RoleBadgeCell({ role }: { role: UserRole }) {
+  const t = useTranslations("admin.users.roles");
+
+  return (
+    <Badge variant={role === UserRole.ADMIN ? "default" : "secondary"}>
+      {t(roleLabels[role])}
+    </Badge>
+  );
+}
+
+function VerifiedHeader() {
+  const t = useTranslations("admin.users.columns");
+
+  return t("verifiedHeader");
+}
+
+function VerifiedBadgeCell({ verified }: { verified: boolean }) {
+  const t = useTranslations("admin.users.columns");
+
+  return (
+    <Badge variant={verified ? "default" : "outline"}>
+      {verified ? t("verified") : t("unverified")}
+    </Badge>
+  );
+}
+
+function CreatedAtCell({ createdAt }: { createdAt: Date }) {
+  const locale = useLocale();
+  const bcp47 = LOCALE_METADATA[locale as Locale].bcp47;
+
+  return new Intl.DateTimeFormat(bcp47, {
+    dateStyle: "medium",
+  }).format(new Date(createdAt));
+}
+
 const usersColumns: ColumnDef<UserTableData>[] = [
   {
     accessorKey: "name",
-    header: () => <SortableHeader field="name" label="Nom" />,
+    header: () => <SortableHeader field="name" labelKey="nameHeader" />,
     cell: ({ row }) => {
       const user = row.original;
       return (
         <Link
-          href={`/admin/utilisateurs/${user.slug}`}
+          href={{
+            pathname: "/admin/users/[slug]",
+            params: { slug: user.slug },
+          }}
           className="flex items-center gap-3 hover:underline"
         >
           <Avatar className="h-8 w-8">
@@ -117,44 +164,27 @@ const usersColumns: ColumnDef<UserTableData>[] = [
   },
   {
     accessorKey: "email",
-    header: () => <SortableHeader field="email" label="Email" />,
+    header: () => <SortableHeader field="email" labelKey="emailHeader" />,
     cell: ({ row }) => truncate(row.original.email, 40),
   },
   {
     accessorKey: "role",
-    header: "Rôle",
-    cell: ({ row }) => {
-      const role = row.original.role;
-      return (
-        <Badge variant={role === UserRole.ADMIN ? "default" : "secondary"}>
-          {roleLabels[role]}
-        </Badge>
-      );
-    },
+    header: () => <RoleHeader />,
+    cell: ({ row }) => <RoleBadgeCell role={row.original.role} />,
   },
   {
     accessorKey: "emailVerified",
-    header: "Email vérifié",
-    cell: ({ row }) => {
-      const verified = row.original.emailVerified;
-      return (
-        <Badge variant={verified ? "default" : "outline"}>
-          {verified ? "Vérifié" : "Non vérifié"}
-        </Badge>
-      );
-    },
+    header: () => <VerifiedHeader />,
+    cell: ({ row }) => (
+      <VerifiedBadgeCell verified={row.original.emailVerified} />
+    ),
   },
   {
     accessorKey: "createdAt",
     header: () => (
-      <SortableHeader field="createdAt" label="Date d'inscription" />
+      <SortableHeader field="createdAt" labelKey="createdAtHeader" />
     ),
-    cell: ({ row }) => {
-      const date = new Date(row.original.createdAt);
-      return new Intl.DateTimeFormat("fr-FR", {
-        dateStyle: "medium",
-      }).format(date);
-    },
+    cell: ({ row }) => <CreatedAtCell createdAt={row.original.createdAt} />,
   },
 ];
 

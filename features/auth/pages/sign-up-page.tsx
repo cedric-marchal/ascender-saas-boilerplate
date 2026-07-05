@@ -1,7 +1,8 @@
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
+import { getLocale, getTranslations } from "next-intl/server";
 
 import { SignUpForm } from "@/features/auth/components/forms/sign-up-form";
-import { getSignUpSchema } from "@/features/auth/constants/auth-seo.constant";
+import { getAuthPageSchema } from "@/features/auth/constants/auth-seo.constant";
 
 import { Main } from "@/components/main";
 import {
@@ -12,8 +13,17 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-function SignUpPage() {
-  const webPageSchema = getSignUpSchema();
+async function SignUpPage() {
+  const locale = await getLocale();
+  const t = await getTranslations("auth.signUp");
+  const tCommon = await getTranslations("common");
+
+  const webPageSchema = getAuthPageSchema(
+    "/sign-up",
+    locale,
+    `${t("title")} | ${tCommon("appName")}`,
+    t("seoDescription", { appName: tCommon("appName") }),
+  );
 
   return (
     <>
@@ -27,38 +37,36 @@ function SignUpPage() {
       <Main className="flex items-center justify-center px-4 py-12">
         <Card className="w-full max-w-sm">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Créer un compte</CardTitle>
-            <CardDescription>
-              Entrez vos informations pour créer votre compte
-            </CardDescription>
+            <CardTitle className="text-2xl">{t("title")}</CardTitle>
+            <CardDescription>{t("description")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <SignUpForm />
 
             <p className="text-muted-foreground text-center text-sm">
-              Vous avez déjà un compte ?{" "}
+              {t("haveAccount")}{" "}
               <Link
-                href="/connexion"
+                href="/sign-in"
                 className="text-foreground hover:text-primary font-medium underline underline-offset-4"
               >
-                Se connecter
+                {t("signInLink")}
               </Link>
             </p>
 
             <p className="text-muted-foreground text-center text-xs">
-              En créant un compte, vous acceptez nos{" "}
+              {t("termsPrefix")}{" "}
               <Link
-                href="/mentions-legales"
+                href="/legal-notice"
                 className="hover:text-foreground underline underline-offset-4"
               >
-                mentions légales
+                {t("legalNoticeLink")}
               </Link>{" "}
-              et notre{" "}
+              {t("and")}{" "}
               <Link
-                href="/politique-de-confidentialite"
+                href="/privacy-policy"
                 className="hover:text-foreground underline underline-offset-4"
               >
-                politique de confidentialité
+                {t("privacyPolicyLink")}
               </Link>
               .
             </p>

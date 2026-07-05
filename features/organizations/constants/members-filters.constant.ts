@@ -19,11 +19,15 @@ const membersSortableFields = ["name", "email", "createdAt"] as const;
 
 type MemberSortableField = (typeof membersSortableFields)[number];
 
+/**
+ * Values are translation KEYS (resolved against the `organizations.roles`
+ * message namespace via `useTranslations`), not literal labels.
+ */
 const memberRoleFilterLabels: Record<MemberRoleFilter, string> = {
-  all: "Tous les rôles",
-  owner: "Propriétaire",
-  admin: "Administrateur",
-  member: "Membre",
+  all: "all",
+  owner: "owner",
+  admin: "admin",
+  member: "member",
 };
 
 const membersSearchParams = {

@@ -1,3 +1,5 @@
+import { LOCALE_METADATA } from "@/i18n/locale-metadata.constant";
+import type { Locale } from "next-intl";
 import type { Organization, WebSite, WithContext } from "schema-dts";
 
 import { env } from "@/lib/env";
@@ -5,18 +7,18 @@ import { env } from "@/lib/env";
 const APP_NAME = env.NEXT_PUBLIC_APP_NAME;
 const BASE_URL = env.NEXT_PUBLIC_BASE_URL;
 
-const HOME_DESCRIPTION =
-  "Découvrez les solutions innovantes de Next SaaS Boilerplate pour transformer votre entreprise.";
-
-function getHomeWebsiteSchema(): WithContext<WebSite> {
+function getHomeWebsiteSchema(
+  locale: Locale,
+  description: string,
+): WithContext<WebSite> {
   return {
     "@context": "https://schema.org",
     "@type": "WebSite",
     "@id": `${BASE_URL}/#website`,
     name: APP_NAME,
     url: BASE_URL,
-    description: HOME_DESCRIPTION,
-    inLanguage: "fr-FR",
+    description,
+    inLanguage: LOCALE_METADATA[locale].bcp47,
   };
 }
 

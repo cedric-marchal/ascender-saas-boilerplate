@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { EditProjectForm } from "@/features/projects/components/forms/edit-project-form";
 import type { ProjectItem } from "@/features/projects/services/get-projects.service";
 
@@ -22,6 +24,8 @@ function EditProjectModal({
   open,
   onOpenChange,
 }: EditProjectModalProps) {
+  const t = useTranslations("projects.editModal");
+
   function handleSuccess() {
     onOpenChange(false);
   }
@@ -30,9 +34,9 @@ function EditProjectModal({
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent className="sm:max-w-lg">
         <AlertDialogHeader>
-          <AlertDialogTitle>Modifier le projet</AlertDialogTitle>
+          <AlertDialogTitle>{t("title")}</AlertDialogTitle>
           <AlertDialogDescription>
-            Modifiez les informations de {project.name}.
+            {t("description", { name: project.name })}
           </AlertDialogDescription>
         </AlertDialogHeader>
 

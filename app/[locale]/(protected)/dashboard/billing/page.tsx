@@ -1,0 +1,114 @@
+import type { Metadata } from "next";
+
+import { getTranslator } from "@/i18n/get-translator";
+import type { Locale } from "next-intl";
+import { getTranslations, setRequestLocale } from "next-intl/server";
+
+import { BillingEmptyPage } from "@/features/billing/pages/billing-empty-page";
+import { OrganizationBillingPage } from "@/features/billing/pages/organization-billing-page";
+import { getBilling } from "@/features/billing/services/get-billing.service";
+
+import { prisma } from "@/lib/prisma";
+import { filterRatelimit } from "@/lib/ratelimit";
+import { requireCustomerVerifiedEmail } from "@/lib/session";
+
+import { TooManyRequestsPage } from "@/components/pages/too-many-requests-page";
+
+import { ForbiddenError } from "@/utils/errors/errors";
+
+type DashboardBillingRouteProps = {
+  params: Promise<{ locale: string }>;
+};
+
+export async function generateMetadata({
+  params,
+}: DashboardBillingRouteProps): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({
+    locale: locale as Locale,
+    namespace: "billing",
+  });
+
+  return {
+    title: t("title"),
+    robots: {
+      index: false,
+      follow: false,
+    },
+  };
+}
+
+export default async function DashboardBillingRoute({
+  params,
+}: DashboardBillingRouteProps) {
+  const { locale } = await params;
+
+  setRequestLocale(locale as Locale);
+
+  const session = await requireCustomerVerifiedEmail();
+
+  const { success } = await filterRatelimit.limit(session.user.id);
+
+  if (!success) {
+    return <TooManyRequestsPage />;
+  }
+
+  const organizationId = session.activeOrganizationId;
+
+  if (!organizationId) {
+    return <BillingEmptyPage />;
+  }
+
+  const membership = await prisma.member.findFirst({
+    where: {
+      userId: session.user.id,
+      organizationId,
+      role: {
+        in: ["owner", "admin"],
+      },
+    },
+    select: {
+      id: true,
+    },
+  });
+
+  if (!membership) {
+    const translate = getTranslator(locale as Locale);
+
+    throw new ForbiddenError(translate("errors.billing.accessForbidden"));
+  }
+
+  const [billing, organization, memberCount] = await Promise.all([
+    getBilling({
+      organizationId,
+      userId: session.user.id,
+    }),
+    prisma.organization.findUnique({
+      where: {
+        id: organizationId,
+      },
+      select: {
+        name: true,
+        plan: true,
+      },
+    }),
+    prisma.member.count({
+      where: {
+        organizationId,
+      },
+    }),
+  ]);
+
+  if (!billing || !organization) {
+    return <BillingEmptyPage />;
+  }
+
+  return (
+    <OrganizationBillingPage
+      billing={billing}
+      organizationName={organization.name}
+      memberCount={memberCount}
+      plan={organization.plan}
+    />
+  );
+}

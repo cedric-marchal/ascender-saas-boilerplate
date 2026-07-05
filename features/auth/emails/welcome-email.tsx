@@ -1,3 +1,5 @@
+import { getTranslator } from "@/i18n/get-translator";
+import type { Locale } from "next-intl";
 import {
   Body,
   Button,
@@ -17,30 +19,32 @@ import { env } from "@/lib/env";
 type WelcomeEmailProps = {
   name: string;
   verificationLink: string;
+  locale: Locale;
 };
 
-function WelcomeEmail({ name, verificationLink }: WelcomeEmailProps) {
+function WelcomeEmail({ name, verificationLink, locale }: WelcomeEmailProps) {
   const APP_NAME = env.NEXT_PUBLIC_APP_NAME;
+  const translate = getTranslator(locale);
 
   return (
     <Html>
       <Head />
-      <Preview>Bienvenue sur {APP_NAME} - Vérifiez votre adresse email</Preview>
+      <Preview>
+        {translate("emails.welcome.preview", { appName: APP_NAME })}
+      </Preview>
       <Tailwind>
         <Body className="bg-zinc-100 font-sans">
           <Container className="mx-auto my-10 max-w-xl rounded-md border border-zinc-200 bg-white p-8">
             <Heading className="m-0 mb-6 text-xl font-semibold text-zinc-900">
-              Bienvenue sur {APP_NAME} !
+              {translate("emails.welcome.heading", { appName: APP_NAME })}
             </Heading>
 
             <Text className="text-sm leading-relaxed text-zinc-700">
-              Bonjour {name},
+              {translate("emails.welcome.greeting", { name })}
             </Text>
 
             <Text className="text-sm leading-relaxed text-zinc-700">
-              Merci de vous être inscrit sur {APP_NAME}. Pour activer votre
-              compte et accéder à toutes les fonctionnalités, veuillez confirmer
-              votre adresse email en cliquant sur le bouton ci-dessous.
+              {translate("emails.welcome.body", { appName: APP_NAME })}
             </Text>
 
             <Section className="my-8 text-center">
@@ -48,20 +52,18 @@ function WelcomeEmail({ name, verificationLink }: WelcomeEmailProps) {
                 href={verificationLink}
                 className="rounded-md bg-zinc-900 px-6 py-3 text-sm font-medium text-white"
               >
-                Vérifier mon adresse email
+                {translate("emails.welcome.cta")}
               </Button>
             </Section>
 
             <Text className="text-sm leading-relaxed text-zinc-700">
-              Ce lien expire dans 24 heures. Si vous n&apos;avez pas créé de
-              compte sur {APP_NAME}, vous pouvez ignorer cet email.
+              {translate("emails.welcome.expiry", { appName: APP_NAME })}
             </Text>
 
             <Hr className="my-6 border-zinc-200" />
 
             <Text className="m-0 text-xs text-zinc-500">
-              Si le bouton ne fonctionne pas, copiez ce lien dans votre
-              navigateur :
+              {translate("emails.welcome.fallbackIntro")}
             </Text>
             <Text className="m-0 text-xs break-all text-zinc-500">
               {verificationLink}

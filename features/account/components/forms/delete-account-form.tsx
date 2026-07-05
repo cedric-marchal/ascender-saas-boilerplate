@@ -4,6 +4,7 @@ import type { ChangeEvent, SubmitEvent } from "react";
 
 import { useForm } from "@tanstack/react-form";
 import { Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useAction } from "next-safe-action/hooks";
 import { toast } from "sonner";
 
@@ -25,6 +26,7 @@ import { Input } from "@/components/ui/input";
 
 import { getActionResult } from "@/utils/errors/get-action-result";
 import { getErrorMessage } from "@/utils/errors/get-error-message";
+import { translateFieldErrors } from "@/utils/errors/translate-field-errors";
 
 type DeleteAccountFormProps = {
   email: string;
@@ -32,6 +34,8 @@ type DeleteAccountFormProps = {
 };
 
 function DeleteAccountForm({ email, onSuccess }: DeleteAccountFormProps) {
+  const t = useTranslations("account.deleteAccountForm");
+  const tValidation = useTranslations("validation");
   const { executeAsync, isExecuting } = useAction(deleteAccountAction);
 
   const form = useForm({
@@ -45,7 +49,7 @@ function DeleteAccountForm({ email, onSuccess }: DeleteAccountFormProps) {
       try {
         getActionResult(await executeAsync(value));
 
-        toast.success("Votre compte a été supprimé avec succès");
+        toast.success(t("successToast"));
         await signOutAction().catch(() => {});
 
         onSuccess();
@@ -76,7 +80,7 @@ function DeleteAccountForm({ email, onSuccess }: DeleteAccountFormProps) {
           return (
             <Field data-invalid={isInvalid}>
               <FieldLabel htmlFor="settings-delete-confirmation">
-                Confirmation
+                {t("confirmationLabel")}
               </FieldLabel>
               <Input
                 id="settings-delete-confirmation"
@@ -87,10 +91,15 @@ function DeleteAccountForm({ email, onSuccess }: DeleteAccountFormProps) {
                 aria-invalid={isInvalid}
                 placeholder={email}
               />
-              <FieldDescription>
-                Tapez votre adresse email pour confirmer la suppression
-              </FieldDescription>
-              {isInvalid && <FieldError errors={field.state.meta.errors} />}
+              <FieldDescription>{t("confirmationHint")}</FieldDescription>
+              {isInvalid && (
+                <FieldError
+                  errors={translateFieldErrors(
+                    field.state.meta.errors,
+                    tValidation,
+                  )}
+                />
+              )}
             </Field>
           );
         }}
@@ -113,8 +122,8 @@ function DeleteAccountForm({ email, onSuccess }: DeleteAccountFormProps) {
               />
             ) : null}
             {isExecuting || isSubmitting
-              ? "Suppression..."
-              : "Supprimer mon compte"}
+              ? t("submittingLabel")
+              : t("submitLabel")}
           </Button>
         )}
       </form.Subscribe>

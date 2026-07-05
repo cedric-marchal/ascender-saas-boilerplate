@@ -4,6 +4,7 @@ const mockRedirect = vi.fn();
 const mockNotFound = vi.fn();
 const mockGetSessionAuth = vi.fn();
 const mockMemberFindFirst = vi.fn();
+const mockGetLocale = vi.fn();
 
 vi.mock("@/lib/prisma", () => ({
   prisma: {
@@ -23,8 +24,15 @@ vi.mock("react", async (importOriginal) => {
 });
 
 vi.mock("next/navigation", () => ({
-  redirect: mockRedirect,
   notFound: mockNotFound,
+}));
+
+vi.mock("@/i18n/navigation", () => ({
+  redirect: mockRedirect,
+}));
+
+vi.mock("next-intl/server", () => ({
+  getLocale: mockGetLocale,
 }));
 
 vi.mock("next/headers", () => ({
@@ -91,7 +99,7 @@ describe("getSession", () => {
     mockGetSessionAuth.mockResolvedValue(makeSession({ role: "UNKNOWN_ROLE" }));
 
     await expect(getSession()).rejects.toThrow(
-      "Role invalide dans la session: UNKNOWN_ROLE",
+      "Invalid role in session: UNKNOWN_ROLE",
     );
   });
 });
@@ -99,14 +107,18 @@ describe("getSession", () => {
 describe("requireSession", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockGetLocale.mockResolvedValue("fr");
   });
 
-  it("redirects to /connexion if no session", async () => {
+  it("redirects to the localized sign-in page if no session", async () => {
     mockGetSessionAuth.mockResolvedValue(null);
 
     await requireSession();
 
-    expect(mockRedirect).toHaveBeenCalledWith("/connexion");
+    expect(mockRedirect).toHaveBeenCalledWith({
+      href: "/sign-in",
+      locale: "fr",
+    });
   });
 
   it("returns session if authenticated", async () => {
@@ -122,6 +134,7 @@ describe("requireSession", () => {
 describe("requireCustomer", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockGetLocale.mockResolvedValue("fr");
   });
 
   it("calls notFound if user is ADMIN", async () => {
@@ -145,16 +158,20 @@ describe("requireCustomer", () => {
 describe("requireCustomerVerifiedEmail", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockGetLocale.mockResolvedValue("fr");
   });
 
-  it("redirects to /dashboard/parametres if email not verified", async () => {
+  it("redirects to the localized settings page if email not verified", async () => {
     mockGetSessionAuth.mockResolvedValue(
       makeSession({ role: "CUSTOMER", emailVerified: false }),
     );
 
     await requireCustomerVerifiedEmail();
 
-    expect(mockRedirect).toHaveBeenCalledWith("/dashboard/parametres");
+    expect(mockRedirect).toHaveBeenCalledWith({
+      href: "/dashboard/settings",
+      locale: "fr",
+    });
   });
 
   it("returns session if email is verified", async () => {
@@ -172,6 +189,7 @@ describe("requireCustomerVerifiedEmail", () => {
 describe("requireAdmin", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockGetLocale.mockResolvedValue("fr");
   });
 
   it("calls notFound if user is CUSTOMER", async () => {
@@ -195,16 +213,20 @@ describe("requireAdmin", () => {
 describe("requireAdminVerifiedEmail", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockGetLocale.mockResolvedValue("fr");
   });
 
-  it("redirects to /admin/parametres if admin email not verified", async () => {
+  it("redirects to the localized admin settings page if admin email not verified", async () => {
     mockGetSessionAuth.mockResolvedValue(
       makeSession({ role: "ADMIN", emailVerified: false }),
     );
 
     await requireAdminVerifiedEmail();
 
-    expect(mockRedirect).toHaveBeenCalledWith("/admin/parametres");
+    expect(mockRedirect).toHaveBeenCalledWith({
+      href: "/admin/settings",
+      locale: "fr",
+    });
   });
 
   it("returns session if admin email is verified", async () => {

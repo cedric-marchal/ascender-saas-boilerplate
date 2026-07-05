@@ -1,4 +1,6 @@
+import { LOCALE_METADATA } from "@/i18n/locale-metadata.constant";
 import { CheckCircle2, XCircle } from "lucide-react";
+import { useLocale, useTranslations, type Locale } from "next-intl";
 
 import { getPlanLabel } from "@/features/billing/constants/plan.constant";
 import {
@@ -23,13 +25,19 @@ type SubscriptionStatusCardProps = {
 function SubscriptionStatusCard({
   subscriptions,
 }: SubscriptionStatusCardProps) {
+  const t = useTranslations("billing");
+  const tCard = useTranslations("billing.subscriptionStatusCard");
+  const tStatuses = useTranslations("billing.subscriptionStatuses");
+  const locale = useLocale();
+  const bcp47 = LOCALE_METADATA[locale as Locale].bcp47;
+
   const activeSubscription = subscriptions.find(
     (subscription: BillingSubscription) =>
       ACTIVE_SUBSCRIPTION_STATUSES.includes(subscription.status),
   );
 
   const planLabel = activeSubscription
-    ? getPlanLabel(activeSubscription.priceId)
+    ? (getPlanLabel(activeSubscription.priceId) ?? t("planUnknown"))
     : null;
 
   const isSubscribed = !!activeSubscription;
@@ -37,15 +45,13 @@ function SubscriptionStatusCard({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Statut de votre abonnement</CardTitle>
-        <CardDescription>
-          Informations sur votre abonnement actuel
-        </CardDescription>
+        <CardTitle>{tCard("title")}</CardTitle>
+        <CardDescription>{tCard("description")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex items-center justify-between">
           <div className="space-y-1">
-            <p className="text-sm font-medium">Statut</p>
+            <p className="text-sm font-medium">{tCard("statusLabel")}</p>
             <div className="flex items-center gap-2">
               {isSubscribed ? (
                 <>
@@ -54,7 +60,7 @@ function SubscriptionStatusCard({
                     aria-hidden="true"
                   />
                   <span className="text-lg font-semibold text-green-600">
-                    Abonné
+                    {tCard("subscribed")}
                   </span>
                 </>
               ) : (
@@ -64,16 +70,16 @@ function SubscriptionStatusCard({
                     aria-hidden="true"
                   />
                   <span className="text-muted-foreground text-lg font-semibold">
-                    Non abonné
+                    {tCard("notSubscribed")}
                   </span>
                 </>
               )}
             </div>
           </div>
 
-          {isSubscribed && (
+          {isSubscribed && planLabel && (
             <Badge variant="default" className="text-base">
-              {`Plan ${planLabel}`}
+              {tCard("planPrefix", { plan: planLabel })}
             </Badge>
           )}
         </div>
@@ -82,17 +88,23 @@ function SubscriptionStatusCard({
           <div className="bg-muted/50 space-y-2 rounded-lg border p-4">
             <div className="grid gap-2 text-sm">
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Type</span>
+                <span className="text-muted-foreground">
+                  {tCard("typeLabel")}
+                </span>
                 <span className="font-medium">
-                  {subscriptionStatusLabels[activeSubscription.status]}
+                  {tStatuses(
+                    subscriptionStatusLabels[activeSubscription.status],
+                  )}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Renouvellement</span>
+                <span className="text-muted-foreground">
+                  {tCard("renewalLabel")}
+                </span>
                 <span className="font-medium">
                   {new Date(
                     activeSubscription.currentPeriodEnd * 1000,
-                  ).toLocaleDateString("fr-FR", {
+                  ).toLocaleDateString(bcp47, {
                     day: "numeric",
                     month: "long",
                     year: "numeric",
@@ -101,9 +113,11 @@ function SubscriptionStatusCard({
               </div>
               {activeSubscription.cancelAtPeriodEnd && (
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Annulation</span>
+                  <span className="text-muted-foreground">
+                    {tCard("cancellationLabel")}
+                  </span>
                   <span className="text-destructive font-medium">
-                    Fin de période
+                    {tCard("endOfPeriod")}
                   </span>
                 </div>
               )}

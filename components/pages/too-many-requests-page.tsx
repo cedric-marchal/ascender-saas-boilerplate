@@ -1,11 +1,13 @@
-import Link from "next/link";
-
+import { Link } from "@/i18n/navigation";
 import { Clock } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 
 import { Main } from "@/components/main";
 import { Button } from "@/components/ui/button";
 
-function TooManyRequestsPage() {
+async function TooManyRequestsPage() {
+  const t = await getTranslations("common.errorPages.tooManyRequests");
+
   return (
     <Main
       className="flex flex-col items-center justify-center px-4"
@@ -21,20 +23,17 @@ function TooManyRequestsPage() {
           id="too-many-requests-title"
           className="text-foreground mb-2 text-4xl font-bold tabular-nums"
         >
-          429
+          {t("code")}
         </h1>
 
         <h2 className="text-foreground mb-3 text-xl font-semibold">
-          Trop de requêtes
+          {t("heading")}
         </h2>
 
-        <p className="text-muted-foreground mb-8 text-sm">
-          Vous avez effectué trop de requêtes en peu de temps. Veuillez
-          patienter quelques instants avant de réessayer.
-        </p>
+        <p className="text-muted-foreground mb-8 text-sm">{t("description")}</p>
 
         <Button type="button" asChild>
-          <Link href="/">Retour à l'accueil</Link>
+          <Link href="/">{t("backHome")}</Link>
         </Button>
       </div>
     </Main>

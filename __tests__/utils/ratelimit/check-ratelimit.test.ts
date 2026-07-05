@@ -26,13 +26,13 @@ describe("checkRatelimit", () => {
     ).rejects.toThrow(TooManyRequestsError);
   });
 
-  it("throws with correct French message when rate limit fails", async () => {
+  it("throws with the errors.common.tooManyRequests translation key", async () => {
     const mockRatelimiter = {
       limit: vi.fn().mockResolvedValue({ success: false }),
     };
 
     await expect(
       checkRatelimit(mockRatelimiter as any, "test-id"),
-    ).rejects.toThrow("Trop de requêtes. Veuillez réessayer plus tard.");
+    ).rejects.toThrow("errors.common.tooManyRequests");
   });
 });

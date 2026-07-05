@@ -2,9 +2,7 @@
 
 import { useEffect, type ComponentType } from "react";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-
+import { Link, usePathname } from "@/i18n/navigation";
 import {
   Building2,
   ChevronsUpDown,
@@ -16,6 +14,7 @@ import {
   Settings,
   User,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { SignOutButton } from "@/features/auth/components/sign-out-button";
 import { OrgSwitcher } from "@/features/organizations/components/org-switcher";
@@ -52,43 +51,43 @@ import { getInitials } from "@/utils/string/get-initials";
 import { truncateName } from "@/utils/string/truncate";
 
 type MenuItem = {
-  title: string;
+  titleKey: "dashboard" | "projects" | "organization" | "billing" | "settings";
   url:
     | "/dashboard"
-    | "/dashboard/projets"
-    | "/dashboard/facturation"
-    | "/dashboard/parametres"
-    | "/dashboard/organisation";
+    | "/dashboard/projects"
+    | "/dashboard/billing"
+    | "/dashboard/settings"
+    | "/dashboard/organization";
   icon: ComponentType<React.SVGProps<SVGSVGElement>>;
 };
 
 const navigationItems: MenuItem[] = [
   {
-    title: "Tableau de bord",
+    titleKey: "dashboard",
     url: "/dashboard",
     icon: LayoutDashboard,
   },
   {
-    title: "Projets",
-    url: "/dashboard/projets",
+    titleKey: "projects",
+    url: "/dashboard/projects",
     icon: FolderKanban,
   },
 ];
 
 const managementItems: MenuItem[] = [
   {
-    title: "Organisation",
-    url: "/dashboard/organisation",
+    titleKey: "organization",
+    url: "/dashboard/organization",
     icon: Building2,
   },
   {
-    title: "Facturation",
-    url: "/dashboard/facturation",
+    titleKey: "billing",
+    url: "/dashboard/billing",
     icon: CreditCard,
   },
   {
-    title: "Paramètres",
-    url: "/dashboard/parametres",
+    titleKey: "settings",
+    url: "/dashboard/settings",
     icon: Settings,
   },
 ];
@@ -106,6 +105,7 @@ function DashboardSidebar({
   organizations,
   activeOrganizationId,
 }: DashboardSidebarProps) {
+  const t = useTranslations("common.dashboardSidebar");
   const pathname = usePathname();
   const { setOpenMobile } = useSidebar();
 
@@ -136,7 +136,7 @@ function DashboardSidebar({
                     {env.NEXT_PUBLIC_APP_NAME}
                   </span>
                   <span className="text-muted-foreground truncate text-xs">
-                    Tableau de bord
+                    {t("tagline")}
                   </span>
                 </div>
               </Link>
@@ -158,19 +158,19 @@ function DashboardSidebar({
       {organizations.length < 2 && <SidebarSeparator />}
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+          <SidebarGroupLabel>{t("navigationGroup")}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {navigationItems.map((item: MenuItem) => (
-                <SidebarMenuItem key={item.title}>
+                <SidebarMenuItem key={item.titleKey}>
                   <SidebarMenuButton
                     asChild
                     isActive={isActive(item.url)}
-                    tooltip={item.title}
+                    tooltip={t(item.titleKey)}
                   >
                     <Link href={item.url}>
                       <item.icon aria-hidden="true" />
-                      <span>{item.title}</span>
+                      <span>{t(item.titleKey)}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -179,19 +179,19 @@ function DashboardSidebar({
           </SidebarGroupContent>
         </SidebarGroup>
         <SidebarGroup>
-          <SidebarGroupLabel>Gestion</SidebarGroupLabel>
+          <SidebarGroupLabel>{t("managementGroup")}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {managementItems.map((item: MenuItem) => (
-                <SidebarMenuItem key={item.title}>
+                <SidebarMenuItem key={item.titleKey}>
                   <SidebarMenuButton
                     asChild
                     isActive={isActive(item.url)}
-                    tooltip={item.title}
+                    tooltip={t(item.titleKey)}
                   >
                     <Link href={item.url}>
                       <item.icon aria-hidden="true" />
-                      <span>{item.title}</span>
+                      <span>{t(item.titleKey)}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -239,15 +239,15 @@ function DashboardSidebar({
                 sideOffset={4}
               >
                 <DropdownMenuItem asChild>
-                  <Link href="/dashboard/parametres">
+                  <Link href="/dashboard/settings">
                     <User className="size-4" aria-hidden="true" />
-                    <span>Mon compte</span>
+                    <span>{t("myAccount")}</span>
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link href="/dashboard/facturation">
+                  <Link href="/dashboard/billing">
                     <CreditCard className="size-4" aria-hidden="true" />
-                    <span>Facturation</span>
+                    <span>{t("billing")}</span>
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />

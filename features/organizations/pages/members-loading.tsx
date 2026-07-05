@@ -1,13 +1,17 @@
+import { useTranslations } from "next-intl";
+
 import { Main } from "@/components/main";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 
 function MembersLoading() {
+  const t = useTranslations("organizations.membersLoading");
+
   return (
     <Main
       className="flex flex-col gap-6 p-6"
       aria-busy="true"
-      aria-label="Chargement de la liste des membres"
+      aria-label={t("ariaLabel")}
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">

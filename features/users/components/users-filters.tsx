@@ -4,6 +4,7 @@ import { useTransition, type ChangeEvent, type SubmitEvent } from "react";
 
 import { useForm } from "@tanstack/react-form";
 import { Filter, Search, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useQueryStates } from "nuqs";
 
 import {
@@ -28,7 +29,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+import { translateFieldErrors } from "@/utils/errors/translate-field-errors";
+
 function UsersFilters() {
+  const t = useTranslations("admin.users.filters");
+  const tRoles = useTranslations("admin.users.roles");
+  const tVerification = useTranslations("admin.users.verification");
+  const tValidation = useTranslations("validation");
   const [isLoading, startTransition] = useTransition();
 
   const [urlFilters, setUrlFilters] = useQueryStates(usersSearchParams, {
@@ -95,7 +102,7 @@ function UsersFilters() {
                   />
                   <Input
                     type="search"
-                    placeholder="Rechercher par nom ou email..."
+                    placeholder={t("searchPlaceholder")}
                     className="pl-10"
                     name={field.name}
                     value={field.state.value}
@@ -106,7 +113,14 @@ function UsersFilters() {
                     aria-invalid={isInvalid}
                   />
                 </div>
-                {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                {isInvalid && (
+                  <FieldError
+                    errors={translateFieldErrors(
+                      field.state.meta.errors,
+                      tValidation,
+                    )}
+                  />
+                )}
               </Field>
             );
           }}
@@ -121,7 +135,7 @@ function UsersFilters() {
             return (
               <Field data-invalid={isInvalid} className="w-full sm:w-48">
                 <FieldLabel htmlFor="filter-role" className="sr-only">
-                  Rôle
+                  {t("roleLabel")}
                 </FieldLabel>
                 <Select
                   value={field.state.value}
@@ -130,17 +144,24 @@ function UsersFilters() {
                   }
                 >
                   <SelectTrigger id="filter-role">
-                    <SelectValue placeholder="Rôle" />
+                    <SelectValue placeholder={t("roleLabel")} />
                   </SelectTrigger>
                   <SelectContent>
                     {userRoleFilters.map((role: UserRoleFilter) => (
                       <SelectItem key={role} value={role}>
-                        {roleLabels[role]}
+                        {tRoles(roleLabels[role])}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-                {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                {isInvalid && (
+                  <FieldError
+                    errors={translateFieldErrors(
+                      field.state.meta.errors,
+                      tValidation,
+                    )}
+                  />
+                )}
               </Field>
             );
           }}
@@ -155,7 +176,7 @@ function UsersFilters() {
             return (
               <Field data-invalid={isInvalid} className="w-full sm:w-48">
                 <FieldLabel htmlFor="filter-verified" className="sr-only">
-                  Statut
+                  {t("statusLabel")}
                 </FieldLabel>
                 <Select
                   value={field.state.value}
@@ -164,17 +185,24 @@ function UsersFilters() {
                   }
                 >
                   <SelectTrigger id="filter-verified">
-                    <SelectValue placeholder="Statut" />
+                    <SelectValue placeholder={t("statusLabel")} />
                   </SelectTrigger>
                   <SelectContent>
                     {verificationFilters.map((status: VerificationFilter) => (
                       <SelectItem key={status} value={status}>
-                        {verificationLabels[status]}
+                        {tVerification(verificationLabels[status])}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-                {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                {isInvalid && (
+                  <FieldError
+                    errors={translateFieldErrors(
+                      field.state.meta.errors,
+                      tValidation,
+                    )}
+                  />
+                )}
               </Field>
             );
           }}
@@ -190,7 +218,7 @@ function UsersFilters() {
               className="gap-2"
             >
               <Filter className="h-4 w-4" aria-hidden="true" />
-              {isLoading ? "Chargement..." : "Appliquer"}
+              {isLoading ? t("loadingButton") : t("applyButton")}
             </Button>
           )}
         </form.Subscribe>
@@ -203,7 +231,7 @@ function UsersFilters() {
             className="gap-2"
           >
             <X className="h-4 w-4" aria-hidden="true" />
-            Effacer
+            {t("clearButton")}
           </Button>
         )}
       </form>

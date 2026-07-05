@@ -2,7 +2,8 @@ import "server-only";
 
 import { cache } from "react";
 
-import { redirect } from "next/navigation";
+import { redirect } from "@/i18n/navigation";
+import { getLocale } from "next-intl/server";
 
 import {
   ALLOWED_PRICE_IDS,
@@ -42,15 +43,16 @@ async function requireCustomerPlan(...plans: PlanKey[]): Promise<Session> {
   const priceIds = plans.length > 0 ? getPriceIds(...plans) : ALLOWED_PRICE_IDS;
   const session = await requireCustomer();
   const organizationId = session.activeOrganizationId;
+  const locale = await getLocale();
 
   if (!organizationId) {
-    return redirect("/tarifs");
+    return redirect({ href: "/pricing", locale });
   }
 
   const subscription = await getActiveSubscription(organizationId, priceIds);
 
   if (!subscription) {
-    return redirect("/tarifs");
+    return redirect({ href: "/pricing", locale });
   }
 
   return session;

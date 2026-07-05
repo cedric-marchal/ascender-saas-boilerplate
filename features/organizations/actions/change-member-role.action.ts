@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidateLocalizedPath } from "@/i18n/revalidate-localized-path";
 
 import { AUDIT_ACTION } from "@/features/organizations/constants/audit-actions.constant";
 import { ChangeMemberRoleSchema } from "@/features/organizations/schemas/member.schema";
@@ -16,9 +16,7 @@ const changeMemberRoleAction = orgActionClient
   .inputSchema(ChangeMemberRoleSchema)
   .action(async ({ parsedInput, ctx }) => {
     if (ctx.memberRole !== "owner" && ctx.memberRole !== "admin") {
-      throw new ForbiddenError(
-        "Seuls les propriétaires et administrateurs peuvent modifier les rôles",
-      );
+      throw new ForbiddenError("errors.organizations.changeRoleForbidden");
     }
 
     const member = await prisma.member.findFirst({
@@ -34,7 +32,7 @@ const changeMemberRoleAction = orgActionClient
     });
 
     if (!member) {
-      throw new NotFoundError("Membre introuvable");
+      throw new NotFoundError("errors.organizations.memberNotFound");
     }
 
     if (member.role === "owner") {
@@ -44,9 +42,7 @@ const changeMemberRoleAction = orgActionClient
       });
 
       if (lastOwner) {
-        throw new ForbiddenError(
-          "Impossible de rétrograder le dernier propriétaire. Transférez d'abord la propriété.",
-        );
+        throw new ForbiddenError("errors.organizations.cannotDemoteLastOwner");
       }
     }
 
@@ -75,7 +71,7 @@ const changeMemberRoleAction = orgActionClient
       },
     });
 
-    revalidatePath("/dashboard/organisation");
+    revalidateLocalizedPath("/dashboard/organization");
 
     return {
       success: true,

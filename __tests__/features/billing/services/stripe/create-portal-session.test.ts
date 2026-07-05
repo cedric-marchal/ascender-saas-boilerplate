@@ -45,6 +45,7 @@ const { createPortalSession } =
 const validInput = {
   organizationId: "org-123",
   userId: "user-123",
+  locale: "en" as const,
 };
 
 describe("createPortalSession", () => {
@@ -69,7 +70,29 @@ describe("createPortalSession", () => {
     expect(mockStripeBillingPortalCreate).toHaveBeenCalledWith(
       {
         customer: "cus_123",
-        return_url: "https://test.example.com/dashboard/facturation",
+        return_url: "https://test.example.com/en/dashboard/billing",
+      },
+      { idempotencyKey: "portal-org-org-123" },
+    );
+  });
+
+  it("builds a French locale-prefixed return URL", async () => {
+    mockPrismaMemberFindFirst.mockResolvedValue({ id: "member-1" });
+
+    mockPrismaStripeCustomerFindUnique.mockResolvedValue({
+      stripeCustomerId: "cus_123",
+    });
+
+    mockStripeBillingPortalCreate.mockResolvedValue({
+      url: "https://billing.stripe.com/session/portal_123",
+    });
+
+    await createPortalSession({ ...validInput, locale: "fr" });
+
+    expect(mockStripeBillingPortalCreate).toHaveBeenCalledWith(
+      {
+        customer: "cus_123",
+        return_url: "https://test.example.com/fr/dashboard/facturation",
       },
       { idempotencyKey: "portal-org-org-123" },
     );
@@ -82,7 +105,7 @@ describe("createPortalSession", () => {
       ForbiddenError,
     );
     await expect(createPortalSession(validInput)).rejects.toThrow(
-      "propriétaires et administrateurs",
+      "errors.billing.portalAccessForbidden",
     );
   });
 
@@ -95,7 +118,7 @@ describe("createPortalSession", () => {
       NotFoundError,
     );
     await expect(createPortalSession(validInput)).rejects.toThrow(
-      "Aucun client Stripe trouvé",
+      "errors.billing.noStripeCustomer",
     );
   });
 
@@ -114,7 +137,7 @@ describe("createPortalSession", () => {
       BadRequestError,
     );
     await expect(createPortalSession(validInput)).rejects.toThrow(
-      "Impossible de créer la session du portail",
+      "errors.billing.portalSessionFailed",
     );
   });
 

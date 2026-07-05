@@ -1,0 +1,1030 @@
+{
+  "common": {
+    "appName": "Next SaaS Boilerplate",
+    "pagination": {
+      "navLabel": "Pagination",
+      "previous": "Précédent",
+      "next": "Suivant",
+      "pageOf": "Page {currentPage} sur {totalPages}"
+    },
+    "dataTable": {
+      "emptyMessage": "Aucun résultat"
+    },
+    "dashboardSidebar": {
+      "tagline": "Tableau de bord",
+      "navigationGroup": "Navigation",
+      "managementGroup": "Gestion",
+      "dashboard": "Tableau de bord",
+      "projects": "Projets",
+      "organization": "Organisation",
+      "billing": "Facturation",
+      "settings": "Paramètres",
+      "myAccount": "Mon compte"
+    },
+    "adminSidebar": {
+      "tagline": "Administration",
+      "navigationGroup": "Navigation",
+      "configurationGroup": "Configuration",
+      "dashboard": "Tableau de bord",
+      "users": "Utilisateurs",
+      "settings": "Paramètres",
+      "adminRole": "Administrateur",
+      "myAccount": "Mon compte"
+    },
+    "nav": {
+      "home": "Accueil",
+      "pricing": "Tarifs",
+      "contact": "Contact",
+      "dashboard": "Dashboard",
+      "signIn": "Connexion",
+      "signUp": "Inscription",
+      "createAccount": "Créer un compte",
+      "openMenu": "Ouvrir le menu",
+      "menuDescription": "Menu de navigation du site",
+      "navigationLabel": "Navigation",
+      "accountLabel": "Compte"
+    },
+    "footer": {
+      "tagline": "Centralisez vos workflows, automatisez les tâches répétitives et livrez plus vite grâce à {appName}.",
+      "navigationTitle": "Navigation",
+      "accountTitle": "Compte",
+      "legalTitle": "Légal",
+      "pricing": "Tarifs",
+      "contact": "Contact",
+      "signUp": "Inscription",
+      "signIn": "Connexion",
+      "legalNotice": "Mentions légales",
+      "privacyPolicy": "Confidentialité",
+      "cookiePolicy": "Cookies",
+      "termsOfService": "Conditions d'utilisation",
+      "termsOfSale": "Conditions de vente",
+      "copyright": "Tous droits réservés.",
+      "sitemap": "Plan du site"
+    },
+    "signOut": {
+      "button": "Déconnexion"
+    },
+    "errorPages": {
+      "notFound": {
+        "title": "Page introuvable - 404",
+        "code": "404",
+        "heading": "Page introuvable",
+        "description": "Désolé, la page que vous recherchez n'existe pas ou a été déplacée.",
+        "backHome": "Retour à l'accueil",
+        "contactUs": "Contactez-nous"
+      },
+      "forbidden": {
+        "title": "Accès interdit - 403",
+        "code": "403",
+        "heading": "Accès interdit",
+        "description": "Vous n'avez pas les permissions nécessaires pour accéder à cette ressource.",
+        "backHome": "Retour à l'accueil",
+        "contactUs": "Contactez-nous"
+      },
+      "unauthorized": {
+        "title": "Authentification requise - 401",
+        "code": "401",
+        "heading": "Authentification requise",
+        "description": "Vous devez être connecté pour accéder à cette page.",
+        "signIn": "Se connecter",
+        "backHome": "Retour à l'accueil"
+      },
+      "tooManyRequests": {
+        "code": "429",
+        "heading": "Trop de requêtes",
+        "description": "Vous avez effectué trop de requêtes en peu de temps. Veuillez patienter quelques instants avant de réessayer.",
+        "backHome": "Retour à l'accueil"
+      },
+      "maintenance": {
+        "title": "Maintenance",
+        "heading": "Site en maintenance",
+        "description": "Nous effectuons actuellement une maintenance pour améliorer votre expérience. Merci de revenir dans quelques instants."
+      }
+    },
+    "sitemapPage": {
+      "title": "Plan du site",
+      "description": "Accédez rapidement à toutes les pages disponibles sur {appName}.",
+      "seoDescription": "Plan du site de {appName}. Accédez rapidement à toutes les pages disponibles.",
+      "sections": {
+        "navigation": {
+          "title": "Navigation",
+          "home": "Accueil",
+          "pricing": "Tarifs",
+          "contact": "Contact"
+        },
+        "account": {
+          "title": "Compte",
+          "signUp": "Inscription",
+          "signIn": "Connexion"
+        },
+        "legal": {
+          "title": "Légal",
+          "legalNotice": "Mentions légales",
+          "privacyPolicy": "Politique de confidentialité",
+          "cookiePolicy": "Politique des cookies",
+          "termsOfService": "Conditions d'utilisation",
+          "termsOfSale": "Conditions de vente"
+        }
+      }
+    }
+  },
+  "dashboard": {
+    "home": {
+      "title": "Tableau de bord",
+      "greeting": "Bonjour, {firstName}",
+      "welcome": "Bienvenue sur votre tableau de bord",
+      "loadingLabel": "Chargement du tableau de bord",
+      "quickActions": {
+        "projects": {
+          "title": "Projets",
+          "description": "Gérez vos projets et suivez leur avancement"
+        },
+        "billing": {
+          "title": "Facturation",
+          "description": "Consultez vos factures et abonnements"
+        },
+        "settings": {
+          "title": "Paramètres",
+          "description": "Modifiez votre profil et vos préférences"
+        }
+      },
+      "recentActivity": {
+        "title": "Activité récente",
+        "description": "Vos dernières actions sur la plateforme",
+        "empty": "Aucune activité récente"
+      }
+    }
+  },
+  "account": {
+    "settings": {
+      "title": "Paramètres",
+      "subtitle": "Gérez vos informations personnelles et votre sécurité",
+      "loadingLabel": "Chargement des paramètres",
+      "personalInfo": {
+        "title": "Informations personnelles",
+        "description": "Mettez à jour votre nom et votre adresse email"
+      },
+      "security": {
+        "title": "Sécurité",
+        "description": "Changez votre mot de passe pour sécuriser votre compte"
+      },
+      "avatarCard": {
+        "title": "Photo de profil",
+        "description": "Personnalisez votre avatar visible par les autres utilisateurs"
+      },
+      "dangerZone": {
+        "title": "Zone de danger",
+        "description": "La suppression de votre compte est irréversible. Toutes vos données seront définitivement supprimées.",
+        "descriptionWithSubscription": "La suppression de votre compte est irréversible. Toutes vos données et votre abonnement seront définitivement supprimés."
+      }
+    },
+    "emailVerificationBadge": {
+      "verified": "Email vérifié",
+      "unverified": "Email non vérifié"
+    },
+    "profileForm": {
+      "nameLabel": "Nom",
+      "namePlaceholder": "Votre nom",
+      "emailLabel": "Email",
+      "emailPlaceholder": "votre@email.com",
+      "verifyEmailHint": "Vérifiez votre email pour sécuriser votre compte",
+      "submitLabel": "Enregistrer les modifications",
+      "submittingLabel": "Enregistrement...",
+      "successToast": "Profil mis à jour avec succès",
+      "successToastEmailChanged": "Profil mis à jour avec succès. Un email de vérification a été envoyé."
+    },
+    "passwordForm": {
+      "currentPasswordLabel": "Mot de passe actuel",
+      "newPasswordLabel": "Nouveau mot de passe",
+      "newPasswordHint": "Minimum 12 caractères, différent de l'ancien",
+      "confirmPasswordLabel": "Confirmer le nouveau mot de passe",
+      "submitLabel": "Modifier le mot de passe",
+      "submittingLabel": "Modification...",
+      "successToast": "Mot de passe modifié avec succès. Un email de confirmation a été envoyé."
+    },
+    "avatarForm": {
+      "label": "Photo de profil",
+      "hint": "JPG, PNG ou WebP. Max 5MB.",
+      "changeLabel": "Changer l'avatar",
+      "dragText": "Glissez-déposez une image ou",
+      "browseText": "parcourir",
+      "removeFile": "Supprimer le fichier",
+      "formatHint": "JPG, PNG ou WebP. Maximum 5 MB.",
+      "submitLabel": "Mettre à jour l'avatar",
+      "submittingLabel": "Téléchargement...",
+      "successToast": "Avatar mis à jour avec succès"
+    },
+    "deleteAccountForm": {
+      "confirmationLabel": "Confirmation",
+      "confirmationHint": "Tapez votre adresse email pour confirmer la suppression",
+      "submitLabel": "Supprimer mon compte",
+      "submittingLabel": "Suppression...",
+      "successToast": "Votre compte a été supprimé avec succès"
+    },
+    "deleteAccountModal": {
+      "triggerLabel": "Supprimer mon compte",
+      "closeLabel": "Fermer",
+      "title": "Supprimer votre compte",
+      "description": "Cette action est irréversible. Votre compte et vos données seront définitivement supprimés.",
+      "descriptionWithSubscription": "Cette action est irréversible. Votre compte, vos données et votre abonnement Stripe seront définitivement supprimés."
+    }
+  },
+  "organizations": {
+    "title": "Organisation",
+    "noActiveOrganization": "Aucune organisation active. Veuillez sélectionner une organisation.",
+    "roles": {
+      "all": "Tous les rôles",
+      "owner": "Propriétaire",
+      "admin": "Administrateur",
+      "member": "Membre"
+    },
+    "membersPage": {
+      "memberCount": "{count, plural, one {# membre} other {# membres}}"
+    },
+    "membersLoading": {
+      "ariaLabel": "Chargement de la liste des membres"
+    },
+    "membersFilters": {
+      "searchPlaceholder": "Rechercher par nom ou email...",
+      "roleLabel": "Rôle",
+      "rolePlaceholder": "Rôle",
+      "applyButton": "Appliquer",
+      "loadingButton": "Chargement...",
+      "clearButton": "Effacer"
+    },
+    "membersColumns": {
+      "nameHeader": "Nom",
+      "emailHeader": "Email",
+      "roleHeader": "Rôle",
+      "actionsFor": "Actions pour {name}",
+      "changeRole": "Modifier le rôle",
+      "transferOwnership": "Transférer la propriété",
+      "removeMember": "Retirer du projet",
+      "ownerNotEditable": "Propriétaire (non modifiable)",
+      "changeRoleDialog": {
+        "title": "Modifier le rôle",
+        "description": "Modifier le rôle de {name} dans l'organisation."
+      },
+      "removeDialog": {
+        "title": "Retirer ce membre ?",
+        "description": "{name} n'aura plus accès à l'organisation. Cette action est réversible.",
+        "cancel": "Annuler",
+        "confirm": "Retirer",
+        "confirming": "Suppression...",
+        "successToast": "Membre retiré avec succès"
+      },
+      "transferDialog": {
+        "title": "Transférer la propriété ?",
+        "description": "{name} deviendra propriétaire et vous serez rétrogradé au rôle d'administrateur. Cette action est irréversible sans le consentement du nouveau propriétaire.",
+        "cancel": "Annuler",
+        "confirm": "Transférer",
+        "confirming": "Transfert en cours...",
+        "successToast": "Propriété transférée avec succès"
+      }
+    },
+    "inviteModal": {
+      "triggerLabel": "Inviter un membre",
+      "closeLabel": "Fermer",
+      "title": "Inviter un membre",
+      "description": "Invitez un collaborateur à rejoindre votre organisation par email."
+    },
+    "inviteForm": {
+      "emailLabel": "Adresse email",
+      "emailPlaceholder": "membre@exemple.com",
+      "roleLabel": "Rôle",
+      "rolePlaceholder": "Sélectionnez un rôle",
+      "submitLabel": "Inviter",
+      "submittingLabel": "Envoi en cours...",
+      "successToast": "Invitation envoyée avec succès !"
+    },
+    "acceptInvitation": {
+      "title": "Invitation à rejoindre l'organisation",
+      "description": "Acceptez cette invitation pour rejoindre l'organisation.",
+      "acceptButton": "Accepter l'invitation",
+      "acceptingButton": "Acceptation en cours...",
+      "successToast": "Invitation acceptée avec succès !"
+    },
+    "roleForm": {
+      "label": "Nouveau rôle",
+      "placeholder": "Sélectionnez un rôle",
+      "submitLabel": "Modifier le rôle",
+      "submittingLabel": "Modification en cours...",
+      "successToast": "Rôle modifié avec succès !"
+    },
+    "orgSwitcher": {
+      "fallbackName": "Organisation",
+      "myOrganization": "Mon organisation",
+      "switchErrorToast": "Une erreur est survenue lors du changement d'organisation"
+    },
+    "auditLog": {
+      "title": "Journal d'activité",
+      "eventCount": "{count, plural, one {# événement} other {# événements}}",
+      "empty": "Aucune activité enregistrée pour le moment.",
+      "loadingLabel": "Chargement...",
+      "byUser": "Par {name} ({email})",
+      "unknownUser": "Utilisateur inconnu"
+    },
+    "featureLabels": {
+      "advancedAnalytics": "Analytiques avancées",
+      "apiAccess": "Accès API",
+      "prioritySupport": "Support prioritaire"
+    },
+    "auditActions": {
+      "MEMBER_INVITED": "Membre invité",
+      "MEMBER_ACCEPTED": "Membre a accepté l'invitation",
+      "MEMBER_REMOVED": "Membre retiré",
+      "ROLE_CHANGED": "Rôle modifié",
+      "OWNERSHIP_TRANSFERRED": "Propriété transférée",
+      "ORG_CREATED": "Organisation créée",
+      "ORG_UPDATED": "Organisation mise à jour",
+      "BILLING_CHECKOUT": "Paiement effectué",
+      "BILLING_PLAN_CHANGED": "Plan modifié",
+      "ACCOUNT_DELETED": "Compte supprimé"
+    }
+  },
+  "billing": {
+    "title": "Facturation",
+    "subtitle": "Gérez vos abonnements et vos informations de paiement",
+    "loadingLabel": "Chargement de la facturation",
+    "orgLoadingLabel": "Chargement...",
+    "discoverOffers": "Découvrir nos offres",
+    "invoiceHistory": "Historique des factures",
+    "status": "Statut",
+    "activeSubscription": "Abonnement actif",
+    "oldSubscriptions": "Anciens abonnements",
+    "cancelingTitle": "Abonnement en cours d'annulation",
+    "cancelingDescription": "Votre abonnement sera annulé le {date}. Vous pouvez réactiver votre abonnement via le portail de facturation.",
+    "activeMembers": "Membres actifs",
+    "memberCountInOrg": "{count, plural, one {# membre} other {# membres}} dans l'organisation",
+    "planUnknown": "Inconnu",
+    "planFree": "Gratuit",
+    "portalButton": {
+      "loading": "Chargement...",
+      "manage": "Gérer mon abonnement"
+    },
+    "invoiceListEmpty": {
+      "title": "Aucune facture",
+      "description": "Vos factures apparaîtront ici une fois que vous aurez effectué un paiement."
+    },
+    "invoiceCard": {
+      "titlePrefix": "Facture {number}",
+      "unknownDate": "Date inconnue",
+      "paidOn": "Payé le {date}",
+      "download": "Télécharger"
+    },
+    "subscriptionListEmpty": {
+      "title": "Aucun abonnement actif",
+      "description": "Vous n'avez pas encore d'abonnement. Découvrez nos offres pour commencer à utiliser toutes les fonctionnalités."
+    },
+    "subscriptionCard": {
+      "titlePrefix": "Abonnement {plan}",
+      "periodStart": "Début de période",
+      "periodEnd": "Fin de période",
+      "canceledOn": "Annulé le",
+      "unknownDate": "Date inconnue"
+    },
+    "subscriptionStatusCard": {
+      "title": "Statut de votre abonnement",
+      "description": "Informations sur votre abonnement actuel",
+      "statusLabel": "Statut",
+      "subscribed": "Abonné",
+      "notSubscribed": "Non abonné",
+      "planPrefix": "Plan {plan}",
+      "typeLabel": "Type",
+      "renewalLabel": "Renouvellement",
+      "cancellationLabel": "Annulation",
+      "endOfPeriod": "Fin de période"
+    },
+    "subscriptionStatuses": {
+      "INCOMPLETE": "Incomplet",
+      "INCOMPLETE_EXPIRED": "Expiré",
+      "TRIALING": "Essai",
+      "ACTIVE": "Actif",
+      "PAST_DUE": "En retard",
+      "CANCELED": "Annulé",
+      "UNPAID": "Impayé",
+      "PAUSED": "En pause"
+    },
+    "invoiceStatuses": {
+      "draft": "Brouillon",
+      "open": "Ouverte",
+      "paid": "Payée",
+      "uncollectible": "Irrécouvrable",
+      "void": "Annulée"
+    }
+  },
+  "projects": {
+    "title": "Projets",
+    "loadingLabel": "Chargement des projets",
+    "projectCount": "{count, plural, one {# projet} other {# projets}}",
+    "newProject": "Nouveau projet",
+    "empty": {
+      "filtered": "Aucun projet ne correspond à vos filtres.",
+      "unfiltered": "Aucun projet pour le moment. Créez votre premier projet."
+    },
+    "filters": {
+      "searchPlaceholder": "Rechercher par nom...",
+      "statusLabel": "Statut",
+      "statusPlaceholder": "Statut",
+      "applyButton": "Appliquer",
+      "loadingButton": "Chargement...",
+      "clearButton": "Effacer"
+    },
+    "columns": {
+      "nameHeader": "Nom",
+      "descriptionHeader": "Description",
+      "statusHeader": "Statut",
+      "createdAtHeader": "Créé le",
+      "noDescription": "—",
+      "actionsFor": "Actions pour {name}",
+      "edit": "Modifier",
+      "delete": "Supprimer"
+    },
+    "statuses": {
+      "all": "Tous les statuts",
+      "DRAFT": "Brouillon",
+      "ACTIVE": "Actif",
+      "ARCHIVED": "Archivé"
+    },
+    "createModal": {
+      "triggerLabel": "Nouveau projet",
+      "closeLabel": "Fermer",
+      "title": "Nouveau projet",
+      "description": "Créez un nouveau projet pour votre organisation."
+    },
+    "createForm": {
+      "nameLabel": "Nom",
+      "namePlaceholder": "Refonte du site marketing",
+      "descriptionLabel": "Description",
+      "descriptionPlaceholder": "Décrivez l'objectif du projet",
+      "statusLabel": "Statut",
+      "statusPlaceholder": "Sélectionnez un statut",
+      "submitLabel": "Créer",
+      "submittingLabel": "Création en cours...",
+      "successToast": "Projet créé avec succès !"
+    },
+    "editModal": {
+      "title": "Modifier le projet",
+      "description": "Modifiez les informations de {name}."
+    },
+    "editForm": {
+      "nameLabel": "Nom",
+      "descriptionLabel": "Description",
+      "statusLabel": "Statut",
+      "statusPlaceholder": "Sélectionnez un statut",
+      "submitLabel": "Enregistrer",
+      "submittingLabel": "Modification en cours...",
+      "successToast": "Projet modifié avec succès !"
+    },
+    "deleteModal": {
+      "title": "Supprimer ce projet ?",
+      "description": "{name} sera définitivement supprimé. Cette action est irréversible.",
+      "cancel": "Annuler",
+      "confirm": "Supprimer",
+      "confirming": "Suppression...",
+      "successToast": "Projet supprimé avec succès"
+    }
+  },
+  "admin": {
+    "dashboard": {
+      "title": "Tableau de bord",
+      "pageTitle": "Administration",
+      "subtitle": "Vue d'ensemble de la plateforme et des statistiques",
+      "totalUsers": "Utilisateurs totaux",
+      "growthVsLastMonth": "{growth} par rapport au mois dernier",
+      "activeSubscriptions": "Abonnements actifs",
+      "activeSubscriptionsHint": "Abonnements en cours ou en essai",
+      "activeSessions": "Sessions actives",
+      "activeSessionsHint": "Utilisateurs actuellement connectés",
+      "monthlyGrowth": "Croissance mensuelle",
+      "newThisMonth": "{count, plural, one {# nouvel utilisateur} other {# nouveaux utilisateurs}} ce mois",
+      "usersCard": {
+        "title": "Utilisateurs",
+        "description": "Gérer les comptes utilisateurs"
+      },
+      "orgsCard": {
+        "title": "Organisations",
+        "description": "Gérer les organisations"
+      },
+      "recentUsers": {
+        "title": "Derniers inscrits",
+        "description": "Les 5 derniers utilisateurs inscrits",
+        "viewAll": "Voir tout",
+        "empty": "Aucun utilisateur inscrit"
+      },
+      "stats": {
+        "title": "Statistiques",
+        "description": "Aperçu des métriques clés",
+        "newThisMonth": "Nouveaux ce mois",
+        "activeSubscriptions": "Abonnements actifs",
+        "verifiedEmails": "Emails vérifiés"
+      }
+    },
+    "organizations": {
+      "title": "Organisations",
+      "pageTitle": "Gestion des organisations",
+      "count": "{count, plural, one {# organisation trouvée} other {# organisations trouvées}}",
+      "loadingLabel": "Chargement de la liste des organisations",
+      "noOwner": "—",
+      "columns": {
+        "nameHeader": "Nom",
+        "ownerHeader": "Propriétaire",
+        "membersHeader": "Membres",
+        "planHeader": "Plan",
+        "createdAtHeader": "Date de création"
+      },
+      "filters": {
+        "searchPlaceholder": "Rechercher par nom ou slug...",
+        "applyButton": "Appliquer",
+        "loadingButton": "Chargement...",
+        "clearButton": "Effacer"
+      }
+    },
+    "users": {
+      "title": "Utilisateurs",
+      "pageTitle": "Gestion des utilisateurs",
+      "count": "{count, plural, one {# utilisateur trouvé} other {# utilisateurs trouvés}}",
+      "loadingLabel": "Chargement de la liste des utilisateurs",
+      "columns": {
+        "nameHeader": "Nom",
+        "emailHeader": "Email",
+        "roleHeader": "Rôle",
+        "verifiedHeader": "Email vérifié",
+        "createdAtHeader": "Date d'inscription",
+        "verified": "Vérifié",
+        "unverified": "Non vérifié"
+      },
+      "filters": {
+        "searchPlaceholder": "Rechercher par nom ou email...",
+        "roleLabel": "Rôle",
+        "statusLabel": "Statut",
+        "applyButton": "Appliquer",
+        "loadingButton": "Chargement...",
+        "clearButton": "Effacer"
+      },
+      "roles": {
+        "all": "Tous les rôles",
+        "ADMIN": "Administrateur",
+        "CUSTOMER": "Client"
+      },
+      "verification": {
+        "all": "Tous",
+        "verified": "Vérifiés",
+        "unverified": "Non vérifiés"
+      }
+    },
+    "userDetail": {
+      "backButton": "Retour aux utilisateurs",
+      "loadingLabel": "Chargement du détail utilisateur",
+      "notFoundTitle": "Utilisateur introuvable",
+      "generalInfo": {
+        "title": "Informations générales",
+        "id": "Identifiant",
+        "slug": "Slug",
+        "name": "Nom",
+        "email": "Email",
+        "emailVerified": "Email vérifié",
+        "createdAt": "Inscrit le",
+        "updatedAt": "Mis à jour le",
+        "verified": "Vérifié",
+        "unverified": "Non vérifié"
+      },
+      "billing": {
+        "title": "Facturation",
+        "description": "Gérée au niveau de l'organisation",
+        "notice": "La facturation est désormais gérée par organisation"
+      },
+      "sessions": {
+        "title": "Sessions",
+        "count": "{count, plural, one {# session active} other {# sessions actives}}",
+        "empty": "Aucune session",
+        "createdOn": "Créée le {date}",
+        "expiresOn": "Expire le {date}"
+      },
+      "accounts": {
+        "title": "Comptes liés",
+        "count": "{count, plural, one {# compte lié} other {# comptes liés}}",
+        "empty": "Aucun compte lié"
+      }
+    }
+  },
+  "home": {
+    "title": "Hello World",
+    "seoDescription": "Découvrez les solutions innovantes de {appName} pour transformer votre entreprise."
+  },
+  "pricing": {
+    "heading": "Des tarifs clairs, pensés pour grandir avec vous",
+    "subheading": "Que vous soyez indépendant, en petite équipe ou dans une structure plus large, {appName} propose des offres flexibles, sans engagement, pour vous permettre d'avancer à votre rythme.",
+    "footerNote": "Les tarifs affichés sont présentés à titre indicatif et peuvent évoluer. Pour des besoins spécifiques ou des volumes importants, contactez-nous.",
+    "popularBadge": "Populaire",
+    "loadingLabel": "Chargement des tarifs",
+    "loadingButton": "Chargement...",
+    "monthlyPeriod": "mois",
+    "customPrice": "Sur mesure",
+    "verifyEmailToast": "Vous devez vérifier votre adresse e-mail avant de vous abonner",
+    "onlyCustomerToast": "Seuls les utilisateurs avec le rôle CUSTOMER peuvent souscrire à un abonnement",
+    "plans": {
+      "starter": {
+        "name": "Starter",
+        "description": "Pour démarrer et tester la plateforme en solo.",
+        "cta": "Commencer gratuitement",
+        "features": [
+          "1 projet actif",
+          "Jusqu'à 3 espaces de travail",
+          "Historique limité",
+          "Support par e-mail standard"
+        ]
+      },
+      "pro": {
+        "name": "Pro",
+        "description": "Pour les indépendants et petites équipes qui utilisent {appName} au quotidien.",
+        "cta": "Choisir l'offre Pro",
+        "features": [
+          "Projets illimités",
+          "Utilisateurs illimités dans votre équipe",
+          "Historique étendu",
+          "Support prioritaire par e-mail"
+        ]
+      },
+      "business": {
+        "name": "Business",
+        "description": "Pour les équipes avancées et besoins spécifiques.",
+        "cta": "Parler avec l'équipe",
+        "features": [
+          "SLA et support dédié",
+          "Intégrations avancées",
+          "Accompagnement à l'onboarding",
+          "Conditions contractuelles personnalisées"
+        ]
+      }
+    },
+    "seo": {
+      "description": "Découvrez les tarifs de {appName} : offres flexibles pour les indépendants, équipes et entreprises, sans engagement.",
+      "keywords": ["tarifs", "prix", "abonnements", "saas pricing"]
+    }
+  },
+  "contact": {
+    "heading": "Contactez-nous",
+    "subheading": "Une question, un projet ou un besoin spécifique ? Remplissez le formulaire ci-dessous et nous vous répondons sous 24h.",
+    "infoTitle": "Informations",
+    "emailLabel": "Email",
+    "addressLabel": "Adresse",
+    "addressValue": "Paris, France",
+    "hoursTitle": "Horaires",
+    "hoursDescription": "Du lundi au vendredi, de 9h à 18h (heure de Paris).",
+    "form": {
+      "nameLabel": "Nom",
+      "namePlaceholder": "Jean Dupont",
+      "emailLabel": "Email",
+      "emailPlaceholder": "jean@exemple.fr",
+      "subjectLabel": "Sujet",
+      "subjectPlaceholder": "Comment pouvons-nous vous aider ?",
+      "messageLabel": "Message",
+      "messagePlaceholder": "Décrivez votre demande...",
+      "submitLabel": "Envoyer le message",
+      "submittingLabel": "Envoi en cours...",
+      "successToast": "Message envoyé avec succès !"
+    },
+    "seo": {
+      "description": "Contactez l'équipe {appName}. Une question, un projet ou un besoin spécifique ? Nous vous répondons sous 24h.",
+      "keywords": ["contact", "support", "aide", "question"]
+    }
+  },
+  "legal": {
+    "lastUpdated": "Dernière mise à jour : 4 février 2026",
+    "legalNotice": {
+      "title": "Mentions légales",
+      "seoDescription": "Mentions légales de {appName}. Informations sur l'éditeur, l'hébergeur et les conditions d'utilisation du site."
+    },
+    "privacyPolicy": {
+      "title": "Politique de confidentialité",
+      "seoDescription": "Politique de confidentialité de {appName}. Découvrez comment nous collectons, utilisons et protégeons vos données personnelles."
+    },
+    "cookiePolicy": {
+      "title": "Politique des cookies",
+      "seoDescription": "Politique des cookies de {appName}. Découvrez les cookies utilisés sur notre site et comment gérer vos préférences."
+    },
+    "termsOfService": {
+      "title": "Conditions d'utilisation",
+      "seoDescription": "Conditions d'utilisation de {appName}. Lisez les règles et obligations régissant l'utilisation de notre service."
+    },
+    "termsOfSale": {
+      "title": "Conditions de vente",
+      "seoDescription": "Conditions de vente de {appName}. Découvrez les termes régissant les achats et abonnements sur notre plateforme."
+    }
+  },
+  "auth": {
+    "signIn": {
+      "title": "Connexion",
+      "description": "Entrez vos identifiants pour accéder à votre compte",
+      "emailLabel": "Email",
+      "passwordLabel": "Mot de passe",
+      "forgotPasswordLink": "Mot de passe oublié ?",
+      "submitLabel": "Se connecter",
+      "submittingLabel": "Connexion...",
+      "googleButton": "Se connecter avec Google",
+      "noAccount": "Vous n'avez pas de compte ?",
+      "createAccount": "Créer un compte",
+      "seoDescription": "Connectez-vous à votre compte {appName}. Accédez à votre tableau de bord et gérez vos projets."
+    },
+    "signUp": {
+      "title": "Créer un compte",
+      "description": "Entrez vos informations pour créer votre compte",
+      "nameLabel": "Nom",
+      "emailLabel": "Email",
+      "passwordLabel": "Mot de passe",
+      "submitLabel": "Créer un compte",
+      "submittingLabel": "Création en cours...",
+      "googleButton": "Créer un compte avec Google",
+      "haveAccount": "Vous avez déjà un compte ?",
+      "signInLink": "Se connecter",
+      "termsPrefix": "En créant un compte, vous acceptez nos",
+      "legalNoticeLink": "mentions légales",
+      "and": "et notre",
+      "privacyPolicyLink": "politique de confidentialité",
+      "successToast": "Compte créé avec succès",
+      "seoDescription": "Créez votre compte {appName} gratuitement. Accédez à toutes les fonctionnalités en quelques secondes."
+    },
+    "forgotPassword": {
+      "title": "Mot de passe oublié",
+      "description": "Entrez votre adresse email pour recevoir un lien de réinitialisation",
+      "emailLabel": "Email",
+      "backToSignIn": "Retour à la connexion",
+      "submitLabel": "Envoyer le lien de réinitialisation",
+      "submittingLabel": "Envoi en cours...",
+      "successMessage": "Si un compte existe avec cette adresse email, vous recevrez un lien de réinitialisation dans quelques instants.",
+      "successHint": "Pensez à vérifier vos spams.",
+      "seoDescription": "Réinitialisez votre mot de passe {appName}. Recevez un lien de réinitialisation par email."
+    },
+    "resetPassword": {
+      "title": "Nouveau mot de passe",
+      "description": "Choisissez un nouveau mot de passe pour votre compte",
+      "passwordLabel": "Nouveau mot de passe",
+      "confirmPasswordLabel": "Confirmer le mot de passe",
+      "submitLabel": "Mettre à jour le mot de passe",
+      "submittingLabel": "Mise à jour en cours...",
+      "successToast": "Mot de passe mis à jour avec succès",
+      "seoDescription": "Créez un nouveau mot de passe pour votre compte {appName}."
+    },
+    "socialErrorToast": "Une erreur est survenue"
+  },
+  "validation": {
+    "name": {
+      "required": "Le nom est requis",
+      "tooLong": "Le nom doit contenir moins de 100 caractères"
+    },
+    "email": {
+      "required": "L'email est requis",
+      "tooLong": "L'email doit contenir moins de 254 caractères",
+      "invalid": "Format d'email invalide"
+    },
+    "password": {
+      "required": "Le mot de passe est requis",
+      "tooLongLogin": "Le nom doit contenir moins de 128 caractères",
+      "tooShort": "Le mot de passe doit contenir au moins 12 caractères",
+      "tooLong": "Le mot de passe doit contenir moins de 128 caractères",
+      "lowercase": "Au moins une lettre minuscule",
+      "uppercase": "Au moins une lettre majuscule",
+      "number": "Au moins un chiffre"
+    },
+    "confirmPassword": {
+      "required": "La confirmation est requise",
+      "mismatch": "Les mots de passe ne correspondent pas"
+    },
+    "token": {
+      "required": "Token requis"
+    },
+    "account": {
+      "confirmationRequired": "La confirmation est requise",
+      "confirmationInvalid": "La confirmation est invalide",
+      "emailTooLong": "L'email doit contenir moins de 255 caractères",
+      "currentPasswordRequired": "Le mot de passe actuel est requis",
+      "currentPasswordInvalid": "Le mot de passe actuel est invalide",
+      "newPasswordSameAsCurrent": "Le nouveau mot de passe doit être différent de l'ancien"
+    },
+    "avatar": {
+      "required": "L'image est requise",
+      "tooLarge": "L'image est trop volumineuse (max 4.5MB)",
+      "unsupportedFormat": "Format non supporté. Formats acceptés : JPEG, PNG, WebP"
+    },
+    "organizations": {
+      "invalidRole": "Le rôle doit être 'admin' ou 'member'",
+      "invitationIdRequired": "L'identifiant de l'invitation est requis",
+      "invitationIdInvalid": "L'identifiant est invalide",
+      "memberIdRequired": "L'identifiant du membre est requis",
+      "memberIdInvalid": "L'identifiant est invalide",
+      "organizationIdRequired": "L'identifiant de l'organisation est requis",
+      "logoUrlTooLong": "L'URL du logo doit contenir moins de 500 caractères"
+    },
+    "billing": {
+      "priceIdRequired": "L'identifiant du prix est requis",
+      "priceIdInvalid": "L'identifiant du prix est invalide"
+    },
+    "projects": {
+      "nameTooLong": "Le nom doit contenir moins de 200 caractères",
+      "descriptionTooLong": "La description doit contenir moins de 2000 caractères",
+      "invalidStatus": "Statut invalide",
+      "projectIdRequired": "L'identifiant du projet est requis"
+    },
+    "users": {
+      "searchTooLong": "La recherche doit contenir moins de 100 caractères",
+      "invalidRole": "Rôle invalide",
+      "invalidVerification": "Statut de vérification invalide"
+    },
+    "contact": {
+      "subject": {
+        "required": "Le sujet est requis",
+        "tooLong": "Le sujet doit contenir moins de 200 caractères"
+      },
+      "message": {
+        "tooShort": "Le message doit contenir au moins 10 caractères",
+        "tooLong": "Le message doit contenir moins de 5000 caractères"
+      }
+    }
+  },
+  "cookieConsent": {
+    "banner": {
+      "message": "Nous utilisons des cookies pour améliorer votre expérience sur notre site. Les cookies nécessaires sont toujours activés. Vous pouvez accepter tous les cookies, les refuser ou gérer vos préférences.",
+      "learnMore": "En savoir plus",
+      "acceptAll": "Accepter tout",
+      "rejectAll": "Refuser tout",
+      "managePreferences": "Gérer mes préférences",
+      "manageAriaLabel": "Gérer mes préférences de cookies",
+      "dialogAriaLabel": "Consentement aux cookies"
+    },
+    "modal": {
+      "title": "Préférences de cookies",
+      "description": "Activez ou désactivez chaque catégorie de cookies. Les cookies nécessaires ne peuvent pas être désactivés.",
+      "saveButton": "Sauvegarder mes préférences"
+    },
+    "categories": {
+      "essential": {
+        "label": "Nécessaires",
+        "description": "Ces cookies sont indispensables au bon fonctionnement du site. Ils ne peuvent pas être désactivés."
+      },
+      "functional": {
+        "label": "Fonctionnalités",
+        "description": "Ces cookies permettent de mémoriser vos préférences comme votre thème ou votre langue."
+      },
+      "analytics": {
+        "label": "Analytiques",
+        "description": "Ces cookies nous aident à comprendre comment vous utilisez notre site pour l'améliorer."
+      },
+      "marketing": {
+        "label": "Marketing",
+        "description": "Ces cookies sont utilisés pour vous proposer du contenu personnalisé et des publicités adaptées."
+      }
+    }
+  },
+  "errors": {
+    "common": {
+      "unauthenticated": "Vous devez être connecté",
+      "notOrganizationMember": "Vous n'êtes pas membre de cette organisation",
+      "noActiveOrganization": "Aucune organisation active. Veuillez sélectionner une organisation.",
+      "adminOnly": "Accès non autorisé. Vous devez être administrateur.",
+      "unexpectedServerError": "Une erreur inattendue s'est produite. Veuillez réessayer.",
+      "unexpectedApiError": "Une erreur inattendue s'est produite",
+      "validationError": "Une erreur de validation s'est produite",
+      "tooManyRequests": "Trop de requêtes. Veuillez réessayer plus tard."
+    },
+    "organizations": {
+      "notFound": "Organisation introuvable",
+      "memberNotFound": "Membre introuvable",
+      "invitationNotFound": "Invitation introuvable ou déjà traitée",
+      "currentMemberNotFound": "Votre membre introuvable dans l'organisation",
+      "removeMembersForbidden": "Seuls les propriétaires et administrateurs peuvent retirer des membres",
+      "cannotRemoveLastOwner": "Impossible de retirer le dernier propriétaire. Transférez d'abord la propriété.",
+      "updateForbidden": "Seuls les propriétaires et administrateurs peuvent modifier l'organisation",
+      "inviteForbidden": "Seuls les propriétaires et administrateurs peuvent inviter des membres",
+      "transferOwnerOnly": "Seul le propriétaire peut transférer la propriété de l'organisation",
+      "alreadyOwner": "Vous êtes déjà propriétaire de cette organisation",
+      "auditLogForbidden": "Seuls les propriétaires et administrateurs peuvent consulter le journal d'activité",
+      "changeRoleForbidden": "Seuls les propriétaires et administrateurs peuvent modifier les rôles",
+      "cannotDemoteLastOwner": "Impossible de rétrograder le dernier propriétaire. Transférez d'abord la propriété.",
+      "seatCapReached": "Votre plan ne permet pas d'ajouter plus de {seatCap, plural, one {# membre} other {# membres}}. Passez à un plan supérieur pour inviter davantage de membres."
+    },
+    "projects": {
+      "notFound": "Projet introuvable"
+    },
+    "account": {
+      "userNotFound": "Utilisateur introuvable",
+      "emailAlreadyUsed": "Cette adresse email est déjà utilisée",
+      "onlyAdminCannotDelete": "Vous êtes le seul administrateur. Vous ne pouvez pas supprimer votre compte.",
+      "confirmationEmailMismatch": "L'email de confirmation ne correspond pas à votre adresse email"
+    },
+    "billing": {
+      "manageForbidden": "Seuls les propriétaires et administrateurs peuvent gérer la facturation",
+      "portalAccessForbidden": "Seuls les propriétaires et administrateurs peuvent accéder au portail de facturation",
+      "noStripeCustomer": "Aucun client Stripe trouvé. Vous devez d'abord souscrire à un abonnement.",
+      "portalSessionFailed": "Impossible de créer la session du portail de facturation",
+      "stripeAccountDeleted": "Votre compte Stripe a été supprimé. Veuillez contacter le support.",
+      "invalidPrice": "Prix invalide ou non autorisé",
+      "alreadySubscribed": "Cette organisation a déjà un abonnement actif. Gérez-le depuis votre espace facturation.",
+      "checkoutSessionFailed": "Impossible de créer la session de paiement",
+      "accessForbidden": "Seuls les propriétaires et administrateurs peuvent accéder à la facturation"
+    },
+    "storage": {
+      "keyRequired": "La clé du fichier est requise",
+      "keyTooLong": "La clé du fichier est trop longue (max {maxLength} caractères)",
+      "invalidKey": "La clé du fichier contient des caractères invalides",
+      "contentRequired": "Le contenu du fichier est requis",
+      "contentTypeRequired": "Le type de contenu est requis",
+      "serviceUnavailable": "Le service de stockage est temporairement indisponible",
+      "invalidExpiresIn": "La durée d'expiration doit être entre {min} et {max} secondes"
+    },
+    "image": {
+      "emptyFile": "Le fichier image est vide",
+      "unrecognizedFormat": "Format d'image non reconnu",
+      "unsupportedFormat": "Format d'image non supporté. Formats acceptés : JPEG, PNG, WebP",
+      "dimensionsUnreadable": "Impossible de lire les dimensions de l'image",
+      "tooLarge": "L'image est trop grande (max {maxWidth}x{maxHeight}px)",
+      "invalid": "Le fichier fourni n'est pas une image valide",
+      "optimizeFailed": "Échec de l'optimisation de l'image",
+      "avatarOptimizeFailed": "Échec de l'optimisation de l'avatar",
+      "bannerOptimizeFailed": "Échec de l'optimisation de la bannière",
+      "metadataUnreadable": "Impossible de lire les métadonnées de l'image"
+    }
+  },
+  "emails": {
+    "common": {
+      "securityFromName": "{appName} Sécurité",
+      "noreplyFromName": "{appName}"
+    },
+    "resetPassword": {
+      "subject": "Réinitialisez votre mot de passe {appName}",
+      "preview": "Réinitialisez votre mot de passe {appName}",
+      "heading": "Réinitialisation de mot de passe",
+      "greeting": "Bonjour {name},",
+      "body": "Vous avez demandé à réinitialiser votre mot de passe sur {appName}. Cliquez sur le bouton ci-dessous pour créer un nouveau mot de passe.",
+      "cta": "Réinitialiser mon mot de passe",
+      "expiry": "Ce lien expire dans 1 heure. Si vous n'avez pas demandé cette réinitialisation, vous pouvez ignorer cet email.",
+      "fallbackIntro": "Si le bouton ne fonctionne pas, copiez ce lien dans votre navigateur :"
+    },
+    "welcome": {
+      "subject": "Vérifiez votre adresse email {appName}",
+      "preview": "Bienvenue sur {appName} - Vérifiez votre adresse email",
+      "heading": "Bienvenue sur {appName} !",
+      "greeting": "Bonjour {name},",
+      "body": "Merci de vous être inscrit sur {appName}. Pour activer votre compte et accéder à toutes les fonctionnalités, veuillez confirmer votre adresse email en cliquant sur le bouton ci-dessous.",
+      "cta": "Vérifier mon adresse email",
+      "expiry": "Ce lien expire dans 24 heures. Si vous n'avez pas créé de compte sur {appName}, vous pouvez ignorer cet email.",
+      "fallbackIntro": "Si le bouton ne fonctionne pas, copiez ce lien dans votre navigateur :"
+    },
+    "passwordChanged": {
+      "subject": "Votre mot de passe {appName} a été modifié",
+      "preview": "Votre mot de passe {appName} a été modifié",
+      "heading": "Mot de passe modifié",
+      "greeting": "Bonjour {name},",
+      "body": "Nous vous confirmons que votre mot de passe {appName} a été modifié avec succès.",
+      "warningIntro": "Si vous n'êtes pas à l'origine de cette modification, veuillez immédiatement",
+      "resetPasswordLink": "réinitialiser votre mot de passe",
+      "and": "et",
+      "contactLink": "contacter notre équipe",
+      "footer": "Cet email a été envoyé automatiquement suite à une modification de votre mot de passe. Si vous avez des questions, n'hésitez pas à nous contacter."
+    },
+    "emailChangeNotification": {
+      "subject": "Modification d'adresse email demandée sur {appName}",
+      "preview": "Modification d'adresse email demandée sur {appName}",
+      "heading": "Modification d'adresse email demandée",
+      "greeting": "Bonjour {name},",
+      "body": "Une demande de modification de votre adresse email sur {appName} a été soumise. Cette modification ne sera effective qu'après vérification de la nouvelle adresse.",
+      "warningIntro": "Si vous n'êtes pas à l'origine de cette demande, veuillez immédiatement",
+      "resetPasswordLink": "réinitialiser votre mot de passe",
+      "and": "et",
+      "contactLink": "contacter notre équipe",
+      "footer": "Cet email a été envoyé automatiquement suite à une demande de modification d'adresse email. Si vous avez des questions, n'hésitez pas à nous contacter."
+    },
+    "organizationInvitation": {
+      "subject": "Invitation à rejoindre {organizationName} sur {appName}",
+      "preview": "{inviterName} vous invite à rejoindre {organizationName} sur {appName}",
+      "heading": "Vous avez été invité à rejoindre {organizationName}",
+      "greeting": "Bonjour,",
+      "body": "{inviterName} ({inviterEmail}) vous invite à rejoindre l'organisation {organizationName} sur {appName} en tant que {role}.",
+      "cta": "Accepter l'invitation",
+      "expiry": "Cliquez sur le bouton ci-dessous pour accepter l'invitation. Ce lien est valable 48 heures.",
+      "ignore": "Si vous n'attendiez pas cette invitation, vous pouvez ignorer cet email.",
+      "fallbackIntro": "Si le bouton ne fonctionne pas, copiez ce lien dans votre navigateur :"
+    },
+    "accountDeleted": {
+      "subject": "Votre compte {appName} a été supprimé",
+      "preview": "Votre compte {appName} a été supprimé",
+      "heading": "Compte supprimé",
+      "greeting": "Bonjour {name},",
+      "body": "Nous vous confirmons que votre compte {appName} a été supprimé avec succès. Toutes vos données associées ont été définitivement supprimées.",
+      "comeBack": "Si vous souhaitez un jour revenir sur {appName}, vous pouvez créer un nouveau compte à tout moment.",
+      "warningIntro": "Si vous n'êtes pas à l'origine de cette suppression ou si vous avez des questions, veuillez",
+      "contactLink": "contacter notre équipe",
+      "footer": "Cet email a été envoyé automatiquement suite à la suppression de votre compte. Si vous avez des questions, n'hésitez pas à nous contacter."
+    },
+    "contact": {
+      "subject": "Nouveau message de {name} : {subject}",
+      "preview": "Nouveau message de {name} : {subject}",
+      "heading": "Nouveau message de contact",
+      "nameLabel": "Nom",
+      "emailLabel": "Email",
+      "subjectLabel": "Sujet",
+      "messageLabel": "Message",
+      "footer": "Vous pouvez répondre directement à cet email pour contacter {name}."
+    }
+  }
+}

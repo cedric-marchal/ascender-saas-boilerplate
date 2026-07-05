@@ -1,29 +1,22 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
+/**
+ * Category copy (label, description) is locale-dependent and lives in the
+ * `cookieConsent.categories.*` message namespace instead — this store only
+ * keeps the `required` flag needed for the consent logic itself.
+ */
 const COOKIE_CATEGORIES = {
   essential: {
-    label: "Nécessaires",
-    description:
-      "Ces cookies sont indispensables au bon fonctionnement du site. Ils ne peuvent pas être désactivés.",
     required: true,
   },
   functional: {
-    label: "Fonctionnalités",
-    description:
-      "Ces cookies permettent de mémoriser vos préférences comme votre thème ou votre langue.",
     required: false,
   },
   analytics: {
-    label: "Analytiques",
-    description:
-      "Ces cookies nous aident à comprendre comment vous utilisez notre site pour l'améliorer.",
     required: false,
   },
   marketing: {
-    label: "Marketing",
-    description:
-      "Ces cookies sont utilisés pour vous proposer du contenu personnalisé et des publicités adaptées.",
     required: false,
   },
 } as const;

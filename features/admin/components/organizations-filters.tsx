@@ -4,6 +4,7 @@ import { useTransition, type ChangeEvent, type SubmitEvent } from "react";
 
 import { useForm } from "@tanstack/react-form";
 import { Filter, Search, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useQueryStates } from "nuqs";
 
 import { organizationsSearchParams } from "@/features/admin/constants/organizations-filters.constant";
@@ -13,6 +14,7 @@ import { Field, FieldError } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 
 function OrganizationsFilters() {
+  const t = useTranslations("admin.organizations.filters");
   const [isLoading, startTransition] = useTransition();
 
   const [urlFilters, setUrlFilters] = useQueryStates(
@@ -70,7 +72,7 @@ function OrganizationsFilters() {
                   />
                   <Input
                     type="search"
-                    placeholder="Rechercher par nom ou slug..."
+                    placeholder={t("searchPlaceholder")}
                     className="pl-10"
                     name={field.name}
                     value={field.state.value}
@@ -97,7 +99,7 @@ function OrganizationsFilters() {
               className="gap-2"
             >
               <Filter className="h-4 w-4" aria-hidden="true" />
-              {isLoading ? "Chargement..." : "Appliquer"}
+              {isLoading ? t("loadingButton") : t("applyButton")}
             </Button>
           )}
         </form.Subscribe>
@@ -110,7 +112,7 @@ function OrganizationsFilters() {
             className="gap-2"
           >
             <X className="h-4 w-4" aria-hidden="true" />
-            Effacer
+            {t("clearButton")}
           </Button>
         )}
       </form>

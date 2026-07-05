@@ -1,5 +1,7 @@
 import "server-only";
 
+import { getLocaleFromRequest } from "@/i18n/get-locale-from-request";
+import { getTranslator } from "@/i18n/get-translator";
 import { i18n } from "@better-auth/i18n";
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
@@ -92,32 +94,49 @@ const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: true,
-    sendResetPassword: async ({ user, url }) => {
+    sendResetPassword: async ({ user, url }, request) => {
+      const locale = getLocaleFromRequest(request);
+      const translate = getTranslator(locale);
+
       await sendEmailSafe({
-        from: `${APP_NAME} Sécurité <${env.RESEND_EMAIL_SECURITY}>`,
+        from: `${translate("emails.common.securityFromName", { appName: APP_NAME })} <${env.RESEND_EMAIL_SECURITY}>`,
         to: user.email,
-        subject: `Réinitialisez votre mot de passe ${APP_NAME}`,
-        react: ResetPasswordEmail({ name: user.name, resetLink: url }),
+        subject: translate("emails.resetPassword.subject", {
+          appName: APP_NAME,
+        }),
+        react: ResetPasswordEmail({ name: user.name, resetLink: url, locale }),
       });
     },
-    onPasswordReset: async ({ user }) => {
+    onPasswordReset: async ({ user }, request) => {
+      const locale = getLocaleFromRequest(request);
+      const translate = getTranslator(locale);
+
       await sendEmailSafe({
-        from: `${APP_NAME} Sécurité <${env.RESEND_EMAIL_SECURITY}>`,
+        from: `${translate("emails.common.securityFromName", { appName: APP_NAME })} <${env.RESEND_EMAIL_SECURITY}>`,
         to: user.email,
-        subject: `Votre mot de passe ${APP_NAME} a été modifié`,
-        react: PasswordChangedEmail({ name: user.name }),
+        subject: translate("emails.passwordChanged.subject", {
+          appName: APP_NAME,
+        }),
+        react: PasswordChangedEmail({ name: user.name, locale }),
       });
     },
   },
   emailVerification: {
     sendOnSignUp: true,
     autoSignInAfterVerification: true,
-    sendVerificationEmail: async ({ user, url }) => {
+    sendVerificationEmail: async ({ user, url }, request) => {
+      const locale = getLocaleFromRequest(request);
+      const translate = getTranslator(locale);
+
       await sendEmailSafe({
-        from: `${APP_NAME} <${env.RESEND_EMAIL_NOREPLY}>`,
+        from: `${translate("emails.common.noreplyFromName", { appName: APP_NAME })} <${env.RESEND_EMAIL_NOREPLY}>`,
         to: user.email,
-        subject: `Vérifiez votre adresse email ${APP_NAME}`,
-        react: WelcomeEmail({ name: user.name, verificationLink: url }),
+        subject: translate("emails.welcome.subject", { appName: APP_NAME }),
+        react: WelcomeEmail({
+          name: user.name,
+          verificationLink: url,
+          locale,
+        }),
       });
     },
     async afterEmailVerification() {},
@@ -142,22 +161,30 @@ const auth = betterAuth({
     },
     changeEmail: {
       enabled: true,
-      sendChangeEmailConfirmation: async ({ user, newEmail, url }) => {
+      sendChangeEmailConfirmation: async ({ user, newEmail, url }, request) => {
+        const locale = getLocaleFromRequest(request);
+        const translate = getTranslator(locale);
+
         await Promise.allSettled([
           sendEmailSafe({
-            from: `${APP_NAME} <${env.RESEND_EMAIL_NOREPLY}>`,
+            from: `${translate("emails.common.noreplyFromName", { appName: APP_NAME })} <${env.RESEND_EMAIL_NOREPLY}>`,
             to: newEmail,
-            subject: `Vérifiez votre nouvelle adresse email ${APP_NAME}`,
+            subject: translate("emails.welcome.subject", {
+              appName: APP_NAME,
+            }),
             react: WelcomeEmail({
               name: user.name,
               verificationLink: url,
+              locale,
             }),
           }),
           sendEmailSafe({
-            from: `${APP_NAME} Sécurité <${env.RESEND_EMAIL_SECURITY}>`,
+            from: `${translate("emails.common.securityFromName", { appName: APP_NAME })} <${env.RESEND_EMAIL_SECURITY}>`,
             to: user.email,
-            subject: `Modification d'adresse email demandée sur ${APP_NAME}`,
-            react: EmailChangeNotificationEmail({ name: user.name }),
+            subject: translate("emails.emailChangeNotification.subject", {
+              appName: APP_NAME,
+            }),
+            react: EmailChangeNotificationEmail({ name: user.name, locale }),
           }),
         ]);
       },
@@ -280,7 +307,7 @@ const auth = betterAuth({
 
         return planConfig?.seatsIncluded ?? FREE_PLAN_SEAT_CAP;
       },
-      sendInvitationEmail: async (data) => {
+      sendInvitationEmail: async (data, request) => {
         await sendInvitationEmail({
           invitationId: data.id,
           email: data.email,
@@ -288,6 +315,7 @@ const auth = betterAuth({
           inviterEmail: data.inviter.user.email,
           organizationName: data.organization.name,
           role: data.role,
+          locale: getLocaleFromRequest(request),
         });
       },
       organizationHooks: {
@@ -338,8 +366,65 @@ const auth = betterAuth({
       },
     }),
     i18n({
-      defaultLocale: "fr",
+      defaultLocale: "en",
+      detection: ["cookie"],
+      localeCookie: "NEXT_LOCALE",
       translations: {
+        en: {
+          USER_NOT_FOUND: "User not found",
+          FAILED_TO_CREATE_USER: "Failed to create user",
+          FAILED_TO_CREATE_SESSION: "Failed to create session",
+          FAILED_TO_UPDATE_USER: "Failed to update user",
+          FAILED_TO_GET_SESSION: "Failed to retrieve session",
+          INVALID_PASSWORD: "Invalid password",
+          INVALID_EMAIL: "Invalid email",
+          INVALID_EMAIL_OR_PASSWORD: "Invalid email or password",
+          INVALID_USER: "Invalid user",
+          SOCIAL_ACCOUNT_ALREADY_LINKED: "Social account already linked",
+          PROVIDER_NOT_FOUND: "Provider not found",
+          INVALID_TOKEN: "Invalid token",
+          TOKEN_EXPIRED: "Token expired",
+          ID_TOKEN_NOT_SUPPORTED: "id_token not supported",
+          FAILED_TO_GET_USER_INFO: "Failed to retrieve user information",
+          USER_EMAIL_NOT_FOUND: "User email not found",
+          EMAIL_NOT_VERIFIED: "Please verify your email address",
+          PASSWORD_TOO_SHORT: "Password is too short",
+          PASSWORD_TOO_LONG: "Password is too long",
+          USER_ALREADY_EXISTS:
+            "This user already exists. Use a different email.",
+          USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL:
+            "This user already exists. Use a different email.",
+          EMAIL_CAN_NOT_BE_UPDATED: "Email cannot be updated",
+          CREDENTIAL_ACCOUNT_NOT_FOUND: "Credential account not found",
+          SESSION_EXPIRED: "Your session has expired. Please sign in again.",
+          FAILED_TO_UNLINK_LAST_ACCOUNT: "You cannot unlink your last account",
+          ACCOUNT_NOT_FOUND: "Account not found",
+          USER_ALREADY_HAS_PASSWORD: "The user already has a password.",
+          CROSS_SITE_NAVIGATION_LOGIN_BLOCKED:
+            "Sign-in blocked. This request looks like a CSRF attack.",
+          VERIFICATION_EMAIL_NOT_ENABLED: "Email verification is not enabled",
+          EMAIL_ALREADY_VERIFIED: "Email already verified",
+          EMAIL_MISMATCH: "Email does not match",
+          SESSION_NOT_FRESH: "Session not fresh",
+          LINKED_ACCOUNT_ALREADY_EXISTS: "Linked account already exists",
+          INVALID_ORIGIN: "Invalid origin",
+          INVALID_CALLBACK_URL: "Invalid callback URL",
+          INVALID_REDIRECT_URL: "Invalid redirect URL",
+          INVALID_ERROR_CALLBACK_URL: "Invalid error callback URL",
+          INVALID_NEW_USER_CALLBACK_URL: "Invalid new user callback URL",
+          MISSING_OR_NULL_ORIGIN: "Missing or null origin",
+          CALLBACK_URL_REQUIRED: "callbackURL is required",
+          FAILED_TO_CREATE_VERIFICATION: "Failed to create verification",
+          FIELD_NOT_ALLOWED: "This field is not allowed",
+          ASYNC_VALIDATION_NOT_SUPPORTED:
+            "Asynchronous validation is not supported",
+          VALIDATION_ERROR: "Validation error",
+          MISSING_FIELD: "Missing required field",
+          METHOD_NOT_ALLOWED_DEFER_SESSION_REQUIRED:
+            "The POST method requires deferSessionRefresh to be enabled",
+          BODY_MUST_BE_AN_OBJECT: "The request body must be an object",
+          PASSWORD_ALREADY_SET: "The user already has a password set",
+        },
         fr: {
           USER_NOT_FOUND: "Utilisateur non trouvé",
           FAILED_TO_CREATE_USER: "Échec de la création de l'utilisateur",

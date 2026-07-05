@@ -247,7 +247,12 @@ describe("checkSeatCapacity — uses real member row count", () => {
     );
 
     expect(error).toBeInstanceOf(ForbiddenError);
-    expect((error as ForbiddenError).message).toContain(String(PRO_PLAN_CAP));
+    expect((error as ForbiddenError).message).toBe(
+      "errors.organizations.seatCapReached",
+    );
+    expect((error as ForbiddenError).params).toEqual({
+      seatCap: PRO_PLAN_CAP,
+    });
 
     // Confirm the count was read from member rows, not organization.seatsUsed
     expect(mockMemberCount).toHaveBeenCalledTimes(1);
@@ -261,7 +266,9 @@ describe("checkSeatCapacity — uses real member row count", () => {
     );
 
     expect(error).toBeInstanceOf(ForbiddenError);
-    expect((error as ForbiddenError).message).toContain(String(FREE_PLAN_CAP));
+    expect((error as ForbiddenError).params).toEqual({
+      seatCap: FREE_PLAN_CAP,
+    });
 
     // Confirm we counted real members
     expect(mockMemberCount).toHaveBeenCalledTimes(1);

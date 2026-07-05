@@ -1,5 +1,8 @@
 import { PricingCard } from "@/features/pricing/components/pricing-card";
-import { PLANS, type Plan } from "@/features/pricing/constants/pricing-plans";
+import {
+  getPricingPlans,
+  type Plan,
+} from "@/features/pricing/constants/pricing-plans";
 
 type PricingGridProps = {
   isAuthenticated: boolean;
@@ -7,14 +10,16 @@ type PricingGridProps = {
   isCustomer: boolean;
 };
 
-function PricingGrid({
+async function PricingGrid({
   isAuthenticated,
   isEmailVerified,
   isCustomer,
 }: PricingGridProps) {
+  const plans = await getPricingPlans();
+
   return (
     <div className="grid gap-6 md:grid-cols-3">
-      {PLANS.map((plan: Plan) => (
+      {plans.map((plan: Plan) => (
         <PricingCard
           key={plan.name}
           plan={plan}

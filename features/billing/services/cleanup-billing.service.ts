@@ -8,8 +8,8 @@ import { redis } from "@/lib/redis";
 import { stripe } from "@/lib/stripe";
 
 /**
- * Nettoie les ressources Stripe et le cache Redis billing pour une organisation supprimée.
- * Appelé après la suppression en base (best-effort, non-bloquant).
+ * Cleans up Stripe resources and billing Redis cache for a deleted organization.
+ * Called after the DB deletion (best-effort, non-blocking).
  */
 async function cleanupBillingForOrganization(
   stripeCustomerId: string | undefined,

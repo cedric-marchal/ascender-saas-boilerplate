@@ -1,7 +1,8 @@
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
+import { getLocale, getTranslations } from "next-intl/server";
 
 import { SignInForm } from "@/features/auth/components/forms/sign-in-form";
-import { getSignInSchema } from "@/features/auth/constants/auth-seo.constant";
+import { getAuthPageSchema } from "@/features/auth/constants/auth-seo.constant";
 
 import { Main } from "@/components/main";
 import {
@@ -12,8 +13,17 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-function SignInPage() {
-  const webPageSchema = getSignInSchema();
+async function SignInPage() {
+  const locale = await getLocale();
+  const t = await getTranslations("auth.signIn");
+  const tCommon = await getTranslations("common");
+
+  const webPageSchema = getAuthPageSchema(
+    "/sign-in",
+    locale,
+    `${t("title")} | ${tCommon("appName")}`,
+    t("seoDescription", { appName: tCommon("appName") }),
+  );
 
   return (
     <>
@@ -27,21 +37,19 @@ function SignInPage() {
       <Main className="flex items-center justify-center px-4 py-12">
         <Card className="w-full max-w-sm">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Connexion</CardTitle>
-            <CardDescription>
-              Entrez vos identifiants pour accéder à votre compte
-            </CardDescription>
+            <CardTitle className="text-2xl">{t("title")}</CardTitle>
+            <CardDescription>{t("description")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <SignInForm />
 
             <p className="text-muted-foreground text-center text-sm">
-              Vous n&apos;avez pas de compte ?{" "}
+              {t("noAccount")}{" "}
               <Link
-                href="/inscription"
+                href="/sign-up"
                 className="text-foreground hover:text-primary font-medium underline underline-offset-4"
               >
-                Créer un compte
+                {t("createAccount")}
               </Link>
             </p>
           </CardContent>

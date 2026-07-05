@@ -11,9 +11,7 @@ async function checkRatelimit(
   const { success } = await ratelimiter.limit(identifier);
 
   if (!success) {
-    throw new TooManyRequestsError(
-      "Trop de requêtes. Veuillez réessayer plus tard.",
-    );
+    throw new TooManyRequestsError("errors.common.tooManyRequests");
   }
 }
 

@@ -66,6 +66,10 @@ vi.mock("@/lib/env", () => ({
   },
 }));
 
+vi.mock("next-intl/server", () => ({
+  getLocale: vi.fn().mockResolvedValue("en"),
+}));
+
 // Import after mocks
 const { deleteAccount } =
   await import("@/features/account/services/delete-account.service");
@@ -253,7 +257,7 @@ describe("deleteAccount", () => {
     expect(mockSendEmail).toHaveBeenCalledWith({
       from: "TestApp <noreply@test.com>",
       to: "user@example.com",
-      subject: "Votre compte TestApp a été supprimé",
+      subject: "Your TestApp account has been deleted",
       react: expect.anything(),
     });
   });
@@ -292,7 +296,7 @@ describe("deleteAccount", () => {
         userName: "Test",
         confirmation: "test@example.com",
       }),
-    ).rejects.toThrow("Utilisateur introuvable");
+    ).rejects.toThrow("errors.account.userNotFound");
   });
 
   it("throws BadRequestError if confirmation does not match email", async () => {
@@ -316,7 +320,7 @@ describe("deleteAccount", () => {
         userName: "John",
         confirmation: "wrong@example.com",
       }),
-    ).rejects.toThrow("email de confirmation ne correspond pas");
+    ).rejects.toThrow("errors.account.confirmationEmailMismatch");
   });
 
   it("throws ForbiddenError if last admin", async () => {
@@ -341,7 +345,7 @@ describe("deleteAccount", () => {
         userName: "Admin",
         confirmation: "admin@example.com",
       }),
-    ).rejects.toThrow("seul administrateur");
+    ).rejects.toThrow("errors.account.onlyAdminCannotDelete");
   });
 
   it("does not cascade-delete org when user is not the sole owner", async () => {

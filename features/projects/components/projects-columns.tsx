@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 
+import { LOCALE_METADATA } from "@/i18n/locale-metadata.constant";
 import type { ColumnDef } from "@tanstack/react-table";
 import {
   ArrowDown,
@@ -11,6 +12,7 @@ import {
   Pencil,
   Trash2,
 } from "lucide-react";
+import { useLocale, useTranslations, type Locale } from "next-intl";
 import { useQueryStates } from "nuqs";
 
 import { DeleteProjectModal } from "@/features/projects/components/modals/delete-project-modal";
@@ -46,11 +48,13 @@ const statusBadgeVariant: Record<
 
 function SortableHeader({
   field,
-  label,
+  labelKey,
 }: {
   field: ProjectSortableField;
-  label: string;
+  labelKey: "nameHeader" | "statusHeader" | "createdAtHeader";
 }) {
+  const t = useTranslations("projects.columns");
+  const label = t(labelKey);
   const [isLoading, startTransition] = useTransition();
 
   const [filters, setFilters] = useQueryStates(projectsSearchParams, {
@@ -102,6 +106,7 @@ type ProjectActionsProps = {
 };
 
 function ProjectActions({ project }: ProjectActionsProps) {
+  const t = useTranslations("projects.columns");
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
@@ -111,20 +116,22 @@ function ProjectActions({ project }: ProjectActionsProps) {
         <DropdownMenuTrigger asChild>
           <Button type="button" variant="ghost" size="icon">
             <MoreHorizontal className="h-4 w-4" aria-hidden="true" />
-            <span className="sr-only">Actions pour {project.name}</span>
+            <span className="sr-only">
+              {t("actionsFor", { name: project.name })}
+            </span>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem onSelect={() => setIsEditOpen(true)}>
             <Pencil className="mr-2 h-4 w-4" aria-hidden="true" />
-            Modifier
+            {t("edit")}
           </DropdownMenuItem>
           <DropdownMenuItem
             onSelect={() => setIsDeleteOpen(true)}
             className="text-destructive focus:text-destructive"
           >
             <Trash2 className="mr-2 h-4 w-4" aria-hidden="true" />
-            Supprimer
+            {t("delete")}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -144,41 +151,63 @@ function ProjectActions({ project }: ProjectActionsProps) {
   );
 }
 
+function DescriptionHeader() {
+  const t = useTranslations("projects.columns");
+
+  return t("descriptionHeader");
+}
+
+function DescriptionCell({ description }: { description: string | null }) {
+  const t = useTranslations("projects.columns");
+
+  return description ? truncate(description, 60) : t("noDescription");
+}
+
+function StatusBadgeCell({ status }: { status: ProjectStatus }) {
+  const t = useTranslations("projects.statuses");
+
+  return (
+    <Badge variant={statusBadgeVariant[status]}>
+      {t(projectStatusLabels[status])}
+    </Badge>
+  );
+}
+
+function CreatedAtCell({ createdAt }: { createdAt: Date }) {
+  const locale = useLocale();
+  const bcp47 = LOCALE_METADATA[locale as Locale].bcp47;
+
+  return new Intl.DateTimeFormat(bcp47, {
+    dateStyle: "medium",
+  }).format(new Date(createdAt));
+}
+
 const projectsColumns: ColumnDef<ProjectItem>[] = [
   {
     accessorKey: "name",
-    header: () => <SortableHeader field="name" label="Nom" />,
+    header: () => <SortableHeader field="name" labelKey="nameHeader" />,
     cell: ({ row }) => (
       <span className="font-medium">{truncateName(row.original.name)}</span>
     ),
   },
   {
     accessorKey: "description",
-    header: "Description",
-    cell: ({ row }) =>
-      row.original.description ? truncate(row.original.description, 60) : "—",
+    header: () => <DescriptionHeader />,
+    cell: ({ row }) => (
+      <DescriptionCell description={row.original.description} />
+    ),
   },
   {
     accessorKey: "status",
-    header: () => <SortableHeader field="status" label="Statut" />,
-    cell: ({ row }) => {
-      const status = row.original.status;
-      return (
-        <Badge variant={statusBadgeVariant[status]}>
-          {projectStatusLabels[status]}
-        </Badge>
-      );
-    },
+    header: () => <SortableHeader field="status" labelKey="statusHeader" />,
+    cell: ({ row }) => <StatusBadgeCell status={row.original.status} />,
   },
   {
     accessorKey: "createdAt",
-    header: () => <SortableHeader field="createdAt" label="Créé le" />,
-    cell: ({ row }) => {
-      const date = new Date(row.original.createdAt);
-      return new Intl.DateTimeFormat("fr-FR", {
-        dateStyle: "medium",
-      }).format(date);
-    },
+    header: () => (
+      <SortableHeader field="createdAt" labelKey="createdAtHeader" />
+    ),
+    cell: ({ row }) => <CreatedAtCell createdAt={row.original.createdAt} />,
   },
   {
     id: "actions",

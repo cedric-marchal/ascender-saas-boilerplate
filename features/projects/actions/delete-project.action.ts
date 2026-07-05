@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidateLocalizedPath } from "@/i18n/revalidate-localized-path";
 
 import { DeleteProjectSchema } from "@/features/projects/schemas/project.schema";
 import { deleteProject } from "@/features/projects/services/delete-project.service";
@@ -16,7 +16,7 @@ const deleteProjectAction = orgActionClient
       projectId: parsedInput.projectId,
     });
 
-    revalidatePath("/dashboard/projets");
+    revalidateLocalizedPath("/dashboard/projects");
 
     return {
       success: true,

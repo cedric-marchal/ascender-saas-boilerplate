@@ -1,5 +1,7 @@
 import dynamic from "next/dynamic";
 
+import { useTranslations } from "next-intl";
+
 import { AvatarForm } from "@/features/account/components/forms/avatar-form";
 import { PasswordForm } from "@/features/account/components/forms/password-form";
 import { ProfileForm } from "@/features/account/components/forms/profile-form";
@@ -32,6 +34,8 @@ type SettingsPageProps = {
 };
 
 function SettingsPage({ user, showStripeWarning = false }: SettingsPageProps) {
+  const t = useTranslations("account.settings");
+
   return (
     <Main className="flex flex-col gap-6 p-6">
       <SettingsHeader />
@@ -42,10 +46,8 @@ function SettingsPage({ user, showStripeWarning = false }: SettingsPageProps) {
         <div className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Informations personnelles</CardTitle>
-              <CardDescription>
-                Mettez à jour votre nom et votre adresse email
-              </CardDescription>
+              <CardTitle>{t("personalInfo.title")}</CardTitle>
+              <CardDescription>{t("personalInfo.description")}</CardDescription>
             </CardHeader>
             <CardContent>
               <ProfileForm
@@ -58,10 +60,8 @@ function SettingsPage({ user, showStripeWarning = false }: SettingsPageProps) {
 
           <Card>
             <CardHeader>
-              <CardTitle>Sécurité</CardTitle>
-              <CardDescription>
-                Changez votre mot de passe pour sécuriser votre compte
-              </CardDescription>
+              <CardTitle>{t("security.title")}</CardTitle>
+              <CardDescription>{t("security.description")}</CardDescription>
             </CardHeader>
             <CardContent>
               <PasswordForm />
@@ -72,10 +72,8 @@ function SettingsPage({ user, showStripeWarning = false }: SettingsPageProps) {
         <div>
           <Card>
             <CardHeader>
-              <CardTitle>Photo de profil</CardTitle>
-              <CardDescription>
-                Personnalisez votre avatar visible par les autres utilisateurs
-              </CardDescription>
+              <CardTitle>{t("avatarCard.title")}</CardTitle>
+              <CardDescription>{t("avatarCard.description")}</CardDescription>
             </CardHeader>
             <CardContent>
               <AvatarForm name={user.name} image={user.image} />
@@ -86,11 +84,13 @@ function SettingsPage({ user, showStripeWarning = false }: SettingsPageProps) {
 
       <Card className="border-red-200 bg-red-50">
         <CardHeader>
-          <CardTitle className="text-red-700">Zone de danger</CardTitle>
+          <CardTitle className="text-red-700">
+            {t("dangerZone.title")}
+          </CardTitle>
           <CardDescription className="text-red-600">
             {showStripeWarning
-              ? "La suppression de votre compte est irréversible. Toutes vos données et votre abonnement seront définitivement supprimés."
-              : "La suppression de votre compte est irréversible. Toutes vos données seront définitivement supprimées."}
+              ? t("dangerZone.descriptionWithSubscription")
+              : t("dangerZone.description")}
           </CardDescription>
         </CardHeader>
         <CardContent>

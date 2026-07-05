@@ -1,4 +1,5 @@
 import { Building2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { organizationsColumns } from "@/features/admin/components/organizations-columns";
 import { OrganizationsFilters } from "@/features/admin/components/organizations-filters";
@@ -22,6 +23,8 @@ function OrganizationsPage({
   totalPages,
   currentPage,
 }: OrganizationsPageProps) {
+  const t = useTranslations("admin.organizations");
+
   return (
     <Main className="flex flex-col gap-6 p-6">
       <header className="flex items-center justify-between">
@@ -31,11 +34,10 @@ function OrganizationsPage({
           </div>
           <div>
             <h1 className="text-2xl font-semibold tracking-tight">
-              Organisations
+              {t("title")}
             </h1>
             <p className="text-muted-foreground text-sm">
-              {totalCount} organisation{totalCount > 1 ? "s" : ""} trouvée
-              {totalCount > 1 ? "s" : ""}
+              {t("count", { count: totalCount })}
             </p>
           </div>
         </div>

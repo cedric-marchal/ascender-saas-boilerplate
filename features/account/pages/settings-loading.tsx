@@ -1,13 +1,17 @@
+import { useTranslations } from "next-intl";
+
 import { Main } from "@/components/main";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 
 function SettingsLoading() {
+  const t = useTranslations("account.settings");
+
   return (
     <Main
       className="flex flex-col gap-6 p-6"
       aria-busy="true"
-      aria-label="Chargement des paramètres"
+      aria-label={t("loadingLabel")}
     >
       <header className="space-y-2">
         <div className="flex items-center gap-3">

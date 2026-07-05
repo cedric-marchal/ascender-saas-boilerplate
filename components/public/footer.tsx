@@ -1,11 +1,14 @@
-import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 
+import { Link } from "@/i18n/navigation";
 import { env } from "@/lib/env";
 
 import { CopyrightYear } from "@/components/public/copyright-year";
 import { Separator } from "@/components/ui/separator";
 
-function Footer() {
+async function Footer() {
+  const t = await getTranslations("common.footer");
+
   return (
     <footer className="border-t">
       <div className="container mx-auto max-w-6xl px-4 py-10 md:py-14">
@@ -20,21 +23,22 @@ function Footer() {
               </span>
             </Link>
             <p className="text-muted-foreground text-sm leading-relaxed">
-              Centralisez vos workflows, automatisez les tâches répétitives et
-              livrez plus vite grâce à {env.NEXT_PUBLIC_APP_NAME}.
+              {t("tagline", { appName: env.NEXT_PUBLIC_APP_NAME })}
             </p>
           </div>
 
           <div className="grid flex-1 gap-8 sm:grid-cols-2 md:grid-cols-3">
             <nav className="space-y-3">
-              <h3 className="text-sm font-semibold">Navigation</h3>
+              <h3 className="text-sm font-semibold">
+                {t("navigationTitle")}
+              </h3>
               <ul className="text-muted-foreground space-y-2.5 text-sm">
                 <li>
                   <Link
-                    href="/tarifs"
+                    href="/pricing"
                     className="hover:text-foreground transition-colors"
                   >
-                    Tarifs
+                    {t("pricing")}
                   </Link>
                 </li>
                 <li>
@@ -42,75 +46,75 @@ function Footer() {
                     href="/contact"
                     className="hover:text-foreground transition-colors"
                   >
-                    Contact
+                    {t("contact")}
                   </Link>
                 </li>
               </ul>
             </nav>
 
             <nav className="space-y-3">
-              <h3 className="text-sm font-semibold">Compte</h3>
+              <h3 className="text-sm font-semibold">{t("accountTitle")}</h3>
               <ul className="text-muted-foreground space-y-2.5 text-sm">
                 <li>
                   <Link
-                    href="/inscription"
+                    href="/sign-up"
                     className="hover:text-foreground transition-colors"
                   >
-                    Inscription
+                    {t("signUp")}
                   </Link>
                 </li>
                 <li>
                   <Link
-                    href="/connexion"
+                    href="/sign-in"
                     className="hover:text-foreground transition-colors"
                   >
-                    Connexion
+                    {t("signIn")}
                   </Link>
                 </li>
               </ul>
             </nav>
 
             <nav className="space-y-3">
-              <h3 className="text-sm font-semibold">Légal</h3>
+              <h3 className="text-sm font-semibold">{t("legalTitle")}</h3>
               <ul className="text-muted-foreground space-y-2.5 text-sm">
                 <li>
                   <Link
-                    href="/mentions-legales"
+                    href="/legal-notice"
                     className="hover:text-foreground transition-colors"
                   >
-                    Mentions légales
+                    {t("legalNotice")}
                   </Link>
                 </li>
                 <li>
                   <Link
-                    href="/politique-de-confidentialite"
+                    href="/privacy-policy"
                     className="hover:text-foreground transition-colors"
                   >
-                    Confidentialité
+                    {t("privacyPolicy")}
                   </Link>
                 </li>
                 <li>
                   <Link
-                    href="/politique-des-cookies"
+                    href="/cookie-policy"
                     className="hover:text-foreground transition-colors"
                   >
-                    Cookies
+                    {t("cookiePolicy")}
                   </Link>
                 </li>
                 <li>
                   <Link
-                    href="/conditions-d-utilisation"
+                    href="/terms-of-service"
                     className="hover:text-foreground transition-colors"
                   >
-                    Conditions d'utilisation
+                    {t("termsOfService")}
                   </Link>
                 </li>
                 <li>
                   <Link
-                    href="/conditions-de-vente"
+                    href="/terms-of-sale"
                     className="hover:text-foreground transition-colors"
                   >
-                    Conditions de vente
+                    {t("termsOfSale")}
                   </Link>
                 </li>
               </ul>
@@ -122,21 +126,21 @@ function Footer() {
 
         <div className="text-muted-foreground flex flex-col items-center justify-between gap-4 text-xs sm:flex-row">
           <p>
-            &copy; <CopyrightYear /> {env.NEXT_PUBLIC_APP_NAME}. Tous droits
-            réservés.
+            &copy; <CopyrightYear /> {env.NEXT_PUBLIC_APP_NAME}.{" "}
+            {t("copyright")}
           </p>
           <div className="flex gap-4">
             <Link
               href="/contact"
               className="hover:text-foreground transition-colors"
             >
-              Contact
+              {t("contact")}
             </Link>
             <Link
-              href="/plan-du-site"
+              href="/sitemap-page"
               className="hover:text-foreground transition-colors"
             >
-              Plan du site
+              {t("sitemap")}
             </Link>
           </div>
         </div>

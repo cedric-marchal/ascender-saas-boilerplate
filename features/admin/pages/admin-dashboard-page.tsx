@@ -1,5 +1,5 @@
-import Link from "next/link";
-
+import { LOCALE_METADATA } from "@/i18n/locale-metadata.constant";
+import { Link } from "@/i18n/navigation";
 import {
   Activity,
   ArrowRight,
@@ -9,6 +9,7 @@ import {
   TrendingUp,
   Users,
 } from "lucide-react";
+import { useLocale, useTranslations, type Locale } from "next-intl";
 
 import type {
   AdminDashboardMetrics,
@@ -45,6 +46,10 @@ function formatGrowth(current: number, previous: number): string {
 }
 
 function AdminDashboardPage({ metrics }: AdminDashboardPageProps) {
+  const t = useTranslations("admin.dashboard");
+  const locale = useLocale();
+  const bcp47 = LOCALE_METADATA[locale as Locale].bcp47;
+
   const userGrowth = formatGrowth(
     metrics.newUsersThisMonth,
     metrics.newUsersLastMonth,
@@ -53,12 +58,8 @@ function AdminDashboardPage({ metrics }: AdminDashboardPageProps) {
   return (
     <Main className="flex flex-col gap-6 p-6">
       <header>
-        <h1 className="text-2xl font-semibold tracking-tight">
-          Tableau de bord
-        </h1>
-        <p className="text-muted-foreground text-sm">
-          Vue d'ensemble de la plateforme et des statistiques
-        </p>
+        <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
+        <p className="text-muted-foreground text-sm">{t("subtitle")}</p>
       </header>
 
       <Separator />
@@ -67,7 +68,7 @@ function AdminDashboardPage({ metrics }: AdminDashboardPageProps) {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Utilisateurs totaux
+              {t("totalUsers")}
             </CardTitle>
             <div className="bg-primary/10 flex size-8 items-center justify-center rounded-md">
               <Users className="text-primary size-4" aria-hidden="true" />
@@ -76,7 +77,7 @@ function AdminDashboardPage({ metrics }: AdminDashboardPageProps) {
           <CardContent>
             <div className="text-2xl font-bold">{metrics.totalUsers}</div>
             <p className="text-muted-foreground text-xs">
-              {userGrowth} par rapport au mois dernier
+              {t("growthVsLastMonth", { growth: userGrowth })}
             </p>
           </CardContent>
         </Card>
@@ -84,7 +85,7 @@ function AdminDashboardPage({ metrics }: AdminDashboardPageProps) {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Abonnements actifs
+              {t("activeSubscriptions")}
             </CardTitle>
             <div className="flex size-8 items-center justify-center rounded-md bg-emerald-500/10">
               <CreditCard
@@ -98,7 +99,7 @@ function AdminDashboardPage({ metrics }: AdminDashboardPageProps) {
               {metrics.activeSubscriptions}
             </div>
             <p className="text-muted-foreground text-xs">
-              Abonnements en cours ou en essai
+              {t("activeSubscriptionsHint")}
             </p>
           </CardContent>
         </Card>
@@ -106,7 +107,7 @@ function AdminDashboardPage({ metrics }: AdminDashboardPageProps) {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Sessions actives
+              {t("activeSessions")}
             </CardTitle>
             <div className="flex size-8 items-center justify-center rounded-md bg-blue-500/10">
               <Activity className="size-4 text-blue-500" aria-hidden="true" />
@@ -115,7 +116,7 @@ function AdminDashboardPage({ metrics }: AdminDashboardPageProps) {
           <CardContent>
             <div className="text-2xl font-bold">{metrics.activeSessions}</div>
             <p className="text-muted-foreground text-xs">
-              Utilisateurs actuellement connectés
+              {t("activeSessionsHint")}
             </p>
           </CardContent>
         </Card>
@@ -123,7 +124,7 @@ function AdminDashboardPage({ metrics }: AdminDashboardPageProps) {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Croissance mensuelle
+              {t("monthlyGrowth")}
             </CardTitle>
             <div className="flex size-8 items-center justify-center rounded-md bg-orange-500/10">
               <TrendingUp
@@ -135,8 +136,7 @@ function AdminDashboardPage({ metrics }: AdminDashboardPageProps) {
           <CardContent>
             <div className="text-2xl font-bold">{userGrowth}</div>
             <p className="text-muted-foreground text-xs">
-              {metrics.newUsersThisMonth} nouveau
-              {metrics.newUsersThisMonth > 1 ? "x" : ""} ce mois
+              {t("newThisMonth", { count: metrics.newUsersThisMonth })}
             </p>
           </CardContent>
         </Card>
@@ -144,16 +144,16 @@ function AdminDashboardPage({ metrics }: AdminDashboardPageProps) {
 
       <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <Link
-          href="/admin/utilisateurs"
+          href="/admin/users"
           className="group hover:bg-muted/50 flex items-center gap-4 rounded-lg border p-4 transition-colors"
         >
           <div className="bg-primary/10 flex size-10 items-center justify-center rounded-lg">
             <Users className="text-primary size-5" aria-hidden="true" />
           </div>
           <div className="flex-1">
-            <p className="font-medium">Utilisateurs</p>
+            <p className="font-medium">{t("usersCard.title")}</p>
             <p className="text-muted-foreground text-sm">
-              Gérer les comptes utilisateurs
+              {t("usersCard.description")}
             </p>
           </div>
           <ArrowRight
@@ -163,16 +163,16 @@ function AdminDashboardPage({ metrics }: AdminDashboardPageProps) {
         </Link>
 
         <Link
-          href="/admin/organisations"
+          href="/admin/organizations"
           className="group hover:bg-muted/50 flex items-center gap-4 rounded-lg border p-4 transition-colors"
         >
           <div className="flex size-10 items-center justify-center rounded-lg bg-violet-500/10">
             <Building2 className="size-5 text-violet-500" aria-hidden="true" />
           </div>
           <div className="flex-1">
-            <p className="font-medium">Organisations</p>
+            <p className="font-medium">{t("orgsCard.title")}</p>
             <p className="text-muted-foreground text-sm">
-              Gérer les organisations
+              {t("orgsCard.description")}
             </p>
           </div>
           <ArrowRight
@@ -186,30 +186,31 @@ function AdminDashboardPage({ metrics }: AdminDashboardPageProps) {
         <Card className="lg:col-span-4">
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
-              <CardTitle>Derniers inscrits</CardTitle>
-              <CardDescription>
-                Les 5 derniers utilisateurs inscrits
-              </CardDescription>
+              <CardTitle>{t("recentUsers.title")}</CardTitle>
+              <CardDescription>{t("recentUsers.description")}</CardDescription>
             </div>
             <Link
-              href="/admin/utilisateurs"
+              href="/admin/users"
               className="text-muted-foreground hover:text-foreground flex items-center gap-1 text-sm transition-colors"
             >
-              Voir tout
+              {t("recentUsers.viewAll")}
               <ArrowRight className="size-3" aria-hidden="true" />
             </Link>
           </CardHeader>
           <CardContent>
             {metrics.recentUsers.length === 0 ? (
               <div className="text-muted-foreground flex h-48 items-center justify-center rounded-lg border border-dashed text-sm">
-                Aucun utilisateur inscrit
+                {t("recentUsers.empty")}
               </div>
             ) : (
               <ul className="divide-y">
                 {metrics.recentUsers.map((user: RecentUser) => (
                   <li key={user.id} className="py-3 first:pt-0 last:pb-0">
                     <Link
-                      href={`/admin/utilisateurs/${user.slug}`}
+                      href={{
+                        pathname: "/admin/users/[slug]",
+                        params: { slug: user.slug },
+                      }}
                       className="flex items-center justify-between gap-3 transition-opacity hover:opacity-80"
                     >
                       <div className="flex items-center gap-3">
@@ -235,7 +236,7 @@ function AdminDashboardPage({ metrics }: AdminDashboardPageProps) {
                         </div>
                       </div>
                       <span className="text-muted-foreground shrink-0 text-xs">
-                        {new Intl.DateTimeFormat("fr-FR", {
+                        {new Intl.DateTimeFormat(bcp47, {
                           day: "numeric",
                           month: "short",
                         }).format(new Date(user.createdAt))}
@@ -250,15 +251,17 @@ function AdminDashboardPage({ metrics }: AdminDashboardPageProps) {
 
         <Card className="lg:col-span-3">
           <CardHeader>
-            <CardTitle>Statistiques</CardTitle>
-            <CardDescription>Aperçu des métriques clés</CardDescription>
+            <CardTitle>{t("stats.title")}</CardTitle>
+            <CardDescription>{t("stats.description")}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="bg-primary/10 size-2 rounded-full" />
-                  <span className="text-sm font-medium">Nouveaux ce mois</span>
+                  <span className="text-sm font-medium">
+                    {t("stats.newThisMonth")}
+                  </span>
                 </div>
                 <span className="text-sm font-semibold">
                   {metrics.newUsersThisMonth}
@@ -269,7 +272,7 @@ function AdminDashboardPage({ metrics }: AdminDashboardPageProps) {
                 <div className="flex items-center gap-2">
                   <div className="size-2 rounded-full bg-emerald-500/20" />
                   <span className="text-sm font-medium">
-                    Abonnements actifs
+                    {t("stats.activeSubscriptions")}
                   </span>
                 </div>
                 <span className="text-sm font-semibold">
@@ -280,7 +283,9 @@ function AdminDashboardPage({ metrics }: AdminDashboardPageProps) {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="size-2 rounded-full bg-blue-500/20" />
-                  <span className="text-sm font-medium">Emails vérifiés</span>
+                  <span className="text-sm font-medium">
+                    {t("stats.verifiedEmails")}
+                  </span>
                 </div>
                 <span className="text-sm font-semibold">
                   <span className="flex items-center gap-1">

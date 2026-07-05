@@ -1,5 +1,8 @@
 import "server-only";
 
+import { getStaticPathname } from "@/i18n/get-static-pathname";
+import type { Locale } from "next-intl";
+
 import { ALLOWED_PRICE_IDS } from "@/features/billing/constants/plan.constant";
 
 import { env } from "@/lib/env";
@@ -17,6 +20,7 @@ type CreateCheckoutSessionInput = {
   organizationId: string;
   userId: string;
   priceId: string;
+  locale: Locale;
 };
 
 type CreateCheckoutSessionResult = {
@@ -32,9 +36,7 @@ async function syncStripeCustomerIfNeeded(
     const stripeCustomer = await stripe.customers.retrieve(stripeCustomerId);
 
     if (stripeCustomer.deleted) {
-      throw new BadRequestError(
-        "Votre compte Stripe a été supprimé. Veuillez contacter le support.",
-      );
+      throw new BadRequestError("errors.billing.stripeAccountDeleted");
     }
 
     if (stripeCustomer.name !== organizationName) {
@@ -135,7 +137,7 @@ async function createCheckoutSession(
   });
 
   if (!organization) {
-    throw new NotFoundError("Organisation introuvable");
+    throw new NotFoundError("errors.organizations.notFound");
   }
 
   const member = await prisma.member.findFirst({
@@ -152,13 +154,11 @@ async function createCheckoutSession(
   });
 
   if (!member) {
-    throw new ForbiddenError(
-      "Seuls les propriétaires et administrateurs peuvent gérer la facturation",
-    );
+    throw new ForbiddenError("errors.billing.manageForbidden");
   }
 
   if (!ALLOWED_PRICE_IDS.includes(input.priceId)) {
-    throw new BadRequestError("Prix invalide ou non autorisé");
+    throw new BadRequestError("errors.billing.invalidPrice");
   }
 
   const stripeCustomerId = await getOrCreateStripeCustomer({
@@ -173,10 +173,11 @@ async function createCheckoutSession(
   });
 
   if (existingSubscriptions.data.length > 0) {
-    throw new ConflictError(
-      "Cette organisation a déjà un abonnement actif. Gérez-le depuis votre espace facturation.",
-    );
+    throw new ConflictError("errors.billing.alreadySubscribed");
   }
+
+  const billingPathname = getStaticPathname("/dashboard/billing", input.locale);
+  const pricingPathname = getStaticPathname("/pricing", input.locale);
 
   const stripeSession = await stripe.checkout.sessions.create({
     customer: stripeCustomerId,
@@ -187,15 +188,15 @@ async function createCheckoutSession(
       },
     ],
     mode: "subscription",
-    success_url: `${env.NEXT_PUBLIC_BASE_URL}/dashboard/facturation?success=true`,
-    cancel_url: `${env.NEXT_PUBLIC_BASE_URL}/tarifs?canceled=true`,
+    success_url: `${env.NEXT_PUBLIC_BASE_URL}${billingPathname}?success=true`,
+    cancel_url: `${env.NEXT_PUBLIC_BASE_URL}${pricingPathname}?canceled=true`,
     metadata: {
       organizationId: organization.id,
     },
   });
 
   if (!stripeSession.url) {
-    throw new BadRequestError("Impossible de créer la session de paiement");
+    throw new BadRequestError("errors.billing.checkoutSessionFailed");
   }
 
   return {

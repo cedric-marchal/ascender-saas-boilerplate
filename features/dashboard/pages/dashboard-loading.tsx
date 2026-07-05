@@ -1,13 +1,17 @@
+import { useTranslations } from "next-intl";
+
 import { Main } from "@/components/main";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 
 function DashboardLoading() {
+  const t = useTranslations("dashboard.home");
+
   return (
     <Main
       className="flex flex-col gap-6 p-6"
       aria-busy="true"
-      aria-label="Chargement du tableau de bord"
+      aria-label={t("loadingLabel")}
     >
       <div className="space-y-1">
         <Skeleton className="h-7 w-48" />

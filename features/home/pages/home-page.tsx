@@ -1,3 +1,5 @@
+import { getLocale, getTranslations } from "next-intl/server";
+
 import {
   getHomeOrganizationSchema,
   getHomeWebsiteSchema,
@@ -5,8 +7,15 @@ import {
 
 import { Main } from "@/components/main";
 
-function HomePage() {
-  const websiteSchema = getHomeWebsiteSchema();
+async function HomePage() {
+  const locale = await getLocale();
+  const t = await getTranslations("home");
+  const tCommon = await getTranslations("common");
+
+  const websiteSchema = getHomeWebsiteSchema(
+    locale,
+    t("seoDescription", { appName: tCommon("appName") }),
+  );
   const organizationSchema = getHomeOrganizationSchema();
 
   return (
@@ -26,7 +35,7 @@ function HomePage() {
       />
 
       <Main className="flex items-center justify-center">
-        <h1 className="text-2xl font-bold">Hello World</h1>
+        <h1 className="text-2xl font-bold">{t("title")}</h1>
       </Main>
     </>
   );

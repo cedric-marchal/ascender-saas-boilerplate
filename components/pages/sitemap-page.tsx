@@ -1,5 +1,6 @@
-import Link from "next/link";
-
+import { LOCALE_METADATA } from "@/i18n/locale-metadata.constant";
+import { getPathname, Link } from "@/i18n/navigation";
+import { getLocale, getTranslations } from "next-intl/server";
 import type { WebPage, WithContext } from "schema-dts";
 
 import { env } from "@/lib/env";
@@ -7,72 +8,69 @@ import { env } from "@/lib/env";
 import { Main } from "@/components/main";
 
 type SitemapLink = {
-  label: string;
+  labelKey: string;
   href:
     | "/"
-    | "/tarifs"
+    | "/pricing"
     | "/contact"
-    | "/inscription"
-    | "/connexion"
-    | "/mentions-legales"
-    | "/politique-de-confidentialite"
-    | "/politique-des-cookies"
-    | "/conditions-d-utilisation"
-    | "/conditions-de-vente";
+    | "/sign-up"
+    | "/sign-in"
+    | "/legal-notice"
+    | "/privacy-policy"
+    | "/cookie-policy"
+    | "/terms-of-service"
+    | "/terms-of-sale";
 };
 
 type SitemapSection = {
-  title: string;
+  titleKey: string;
   links: SitemapLink[];
 };
 
 const APP_NAME = env.NEXT_PUBLIC_APP_NAME;
 const BASE_URL = env.NEXT_PUBLIC_BASE_URL;
-const DESCRIPTION = `Plan du site de ${APP_NAME}. Accédez rapidement à toutes les pages disponibles.`;
 
 const STATIC_SECTIONS: SitemapSection[] = [
   {
-    title: "Navigation",
+    titleKey: "navigation",
     links: [
-      { label: "Accueil", href: "/" },
-      { label: "Tarifs", href: "/tarifs" },
-      { label: "Contact", href: "/contact" },
+      { labelKey: "navigation.home", href: "/" },
+      { labelKey: "navigation.pricing", href: "/pricing" },
+      { labelKey: "navigation.contact", href: "/contact" },
     ],
   },
   {
-    title: "Compte",
+    titleKey: "account",
     links: [
-      { label: "Inscription", href: "/inscription" },
-      { label: "Connexion", href: "/connexion" },
+      { labelKey: "account.signUp", href: "/sign-up" },
+      { labelKey: "account.signIn", href: "/sign-in" },
     ],
   },
   {
-    title: "Légal",
+    titleKey: "legal",
     links: [
-      { label: "Mentions légales", href: "/mentions-legales" },
-      {
-        label: "Politique de confidentialité",
-        href: "/politique-de-confidentialite",
-      },
-      { label: "Politique des cookies", href: "/politique-des-cookies" },
-      {
-        label: "Conditions d'utilisation",
-        href: "/conditions-d-utilisation",
-      },
-      { label: "Conditions de vente", href: "/conditions-de-vente" },
+      { labelKey: "legal.legalNotice", href: "/legal-notice" },
+      { labelKey: "legal.privacyPolicy", href: "/privacy-policy" },
+      { labelKey: "legal.cookiePolicy", href: "/cookie-policy" },
+      { labelKey: "legal.termsOfService", href: "/terms-of-service" },
+      { labelKey: "legal.termsOfSale", href: "/terms-of-sale" },
     ],
   },
 ];
 
-function SitemapPage() {
+async function SitemapPage() {
+  const locale = await getLocale();
+  const t = await getTranslations("common.sitemapPage");
+  const pathname = getPathname({ href: "/sitemap-page", locale });
+
   const webPageSchema: WithContext<WebPage> = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    "@id": `${BASE_URL}/plan-du-site/#webpage`,
-    name: `Plan du site | ${APP_NAME}`,
-    description: DESCRIPTION,
-    url: `${BASE_URL}/plan-du-site`,
-    inLanguage: "fr-FR",
+    "@id": `${BASE_URL}${pathname}/#webpage`,
+    name: `${APP_NAME}`,
+    description: t("seoDescription", { appName: APP_NAME }),
+    url: `${BASE_URL}${pathname}`,
+    inLanguage: LOCALE_METADATA[locale].bcp47,
     isPartOf: { "@type": "WebSite", "@id": `${BASE_URL}/#website` },
   };
 
@@ -89,18 +87,18 @@ function SitemapPage() {
         <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6 md:py-16 lg:px-8 lg:py-20">
           <header className="mb-12 space-y-3">
             <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-              Plan du site
+              {t("title")}
             </h1>
             <p className="text-muted-foreground text-sm">
-              Accédez rapidement à toutes les pages disponibles sur {APP_NAME}.
+              {t("description", { appName: APP_NAME })}
             </p>
           </header>
 
           <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-3">
             {STATIC_SECTIONS.map((section: SitemapSection) => (
-              <section key={section.title}>
+              <section key={section.titleKey}>
                 <h2 className="mb-4 text-base font-semibold">
-                  {section.title}
+                  {t(`sections.${section.titleKey}.title`)}
                 </h2>
                 <ul className="space-y-2">
                   {section.links.map((link: SitemapLink) => (
@@ -109,7 +107,7 @@ function SitemapPage() {
                         href={link.href}
                         className="text-muted-foreground hover:text-foreground underline-offset-4 transition-colors hover:underline"
                       >
-                        {link.label}
+                        {t(`sections.${link.labelKey}`)}
                       </Link>
                     </li>
                   ))}

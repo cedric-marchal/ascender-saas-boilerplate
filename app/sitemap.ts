@@ -1,22 +1,37 @@
 import type { MetadataRoute } from "next";
 
+import { getLocaleAlternates } from "@/i18n/get-locale-alternates";
+import { getPathname } from "@/i18n/navigation";
+import { routing } from "@/i18n/routing";
+
 import { env } from "@/lib/env";
 
 /**
- * Échelle de priorité SEO standardisée
+ * Standardized SEO priority scale
  * @see https://www.sitemaps.org/protocol.html
  */
 const PRIORITY = {
-  CRITICAL: 1.0, // Page d'accueil uniquement
-  HIGH: 0.9, // Pages de conversion critiques (tarifs, features)
-  IMPORTANT: 0.8, // Pages importantes (contact, about)
-  MEDIUM: 0.7, // Contenu secondaire (blog, auth)
-  LOW: 0.6, // Contenu tertiaire
-  MINIMAL: 0.5, // Pages légales, archives
+  CRITICAL: 1.0, // Home page only
+  HIGH: 0.9, // Critical conversion pages (pricing, features)
+  IMPORTANT: 0.8, // Important pages (contact, about)
+  MEDIUM: 0.7, // Secondary content (blog, auth)
+  LOW: 0.6, // Tertiary content
+  MINIMAL: 0.5, // Legal pages, archives
 } as const;
 
-type SitemapEntry = {
-  path: string;
+type SitemapPage = {
+  href:
+    | "/"
+    | "/pricing"
+    | "/contact"
+    | "/sign-in"
+    | "/sign-up"
+    | "/legal-notice"
+    | "/privacy-policy"
+    | "/cookie-policy"
+    | "/terms-of-service"
+    | "/terms-of-sale"
+    | "/sitemap-page";
   changeFrequency: "yearly" | "monthly" | "weekly" | "daily";
   priority: (typeof PRIORITY)[keyof typeof PRIORITY];
 };
@@ -24,75 +39,79 @@ type SitemapEntry = {
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const BASE_URL = env.NEXT_PUBLIC_BASE_URL;
 
-  const staticPages: SitemapEntry[] = [
+  const staticPages: SitemapPage[] = [
     {
-      path: "",
+      href: "/",
       changeFrequency: "weekly",
       priority: PRIORITY.CRITICAL,
     },
     {
-      path: "/tarifs",
+      href: "/pricing",
       changeFrequency: "monthly",
       priority: PRIORITY.HIGH,
     },
     {
-      path: "/contact",
+      href: "/contact",
       changeFrequency: "monthly",
       priority: PRIORITY.IMPORTANT,
     },
     {
-      path: "/connexion",
+      href: "/sign-in",
       changeFrequency: "monthly",
       priority: PRIORITY.MEDIUM,
     },
     {
-      path: "/inscription",
+      href: "/sign-up",
       changeFrequency: "monthly",
       priority: PRIORITY.MEDIUM,
     },
     {
-      path: "/mentions-legales",
+      href: "/legal-notice",
       changeFrequency: "yearly",
       priority: PRIORITY.MINIMAL,
     },
     {
-      path: "/politique-de-confidentialite",
+      href: "/privacy-policy",
       changeFrequency: "yearly",
       priority: PRIORITY.MINIMAL,
     },
     {
-      path: "/politique-des-cookies",
+      href: "/cookie-policy",
       changeFrequency: "yearly",
       priority: PRIORITY.MINIMAL,
     },
     {
-      path: "/conditions-d-utilisation",
+      href: "/terms-of-service",
       changeFrequency: "yearly",
       priority: PRIORITY.MINIMAL,
     },
     {
-      path: "/conditions-de-vente",
+      href: "/terms-of-sale",
       changeFrequency: "yearly",
       priority: PRIORITY.MINIMAL,
     },
     {
-      path: "/plan-du-site",
+      href: "/sitemap-page",
       changeFrequency: "yearly",
       priority: PRIORITY.MINIMAL,
     },
   ];
 
-  const staticEntries: MetadataRoute.Sitemap = staticPages.map(
-    (page: SitemapEntry) => ({
-      url: `${BASE_URL}${page.path}`,
-      lastModified: new Date(),
-      changeFrequency: page.changeFrequency,
-      priority: page.priority,
-    }),
+  const staticEntries: MetadataRoute.Sitemap = routing.locales.flatMap(
+    (locale: (typeof routing.locales)[number]) =>
+      staticPages.map((page: SitemapPage) => ({
+        url: `${BASE_URL}${getPathname({ href: page.href, locale })}`,
+        lastModified: new Date(),
+        changeFrequency: page.changeFrequency,
+        priority: page.priority,
+        alternates: {
+          languages: getLocaleAlternates(page.href, locale).languages,
+        },
+      })),
   );
 
-  // 🚀 SECTION: Pages dynamiques (décommentez quand nécessaire)
-  // Exemple avec blog posts
+  // 🚀 SECTION: Dynamic pages (uncomment when needed)
+  // Example with blog posts
   // const blogPosts = await prisma.post.findMany({
   //   where: { published: true },
   //   select: { slug: true, updatedAt: true },
@@ -106,7 +125,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   //   priority: PRIORITY.MEDIUM,
   // }));
 
-  // 🚀 SECTION: Autres contenus dynamiques (projets, articles, etc.)
+  // 🚀 SECTION: Other dynamic content (projects, articles, etc.)
   // const projects = await prisma.project.findMany({
   //   where: { published: true },
   //   select: { slug: true, updatedAt: true },

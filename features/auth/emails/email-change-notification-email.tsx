@@ -1,3 +1,6 @@
+import { getStaticPathname } from "@/i18n/get-static-pathname";
+import { getTranslator } from "@/i18n/get-translator";
+import type { Locale } from "next-intl";
 import {
   Body,
   Container,
@@ -15,52 +18,58 @@ import { env } from "@/lib/env";
 
 type EmailChangeNotificationEmailProps = {
   name: string;
+  locale: Locale;
 };
 
 function EmailChangeNotificationEmail({
   name,
+  locale,
 }: EmailChangeNotificationEmailProps) {
   const APP_NAME = env.NEXT_PUBLIC_APP_NAME;
   const BASE_URL = env.NEXT_PUBLIC_BASE_URL;
+  const translate = getTranslator(locale);
+  const forgotPasswordLink = `${BASE_URL}${getStaticPathname("/forgot-password", locale)}`;
+  const contactLink = `${BASE_URL}${getStaticPathname("/contact", locale)}`;
 
   return (
     <Html>
       <Head />
       <Preview>
-        Modification d&apos;adresse email demandée sur {APP_NAME}
+        {translate("emails.emailChangeNotification.preview", {
+          appName: APP_NAME,
+        })}
       </Preview>
       <Tailwind>
         <Body className="bg-zinc-100 font-sans">
           <Container className="mx-auto my-10 max-w-xl rounded-md border border-zinc-200 bg-white p-8">
             <Heading className="m-0 mb-6 text-xl font-semibold text-zinc-900">
-              Modification d&apos;adresse email demandée
+              {translate("emails.emailChangeNotification.heading")}
             </Heading>
 
             <Text className="text-sm leading-relaxed text-zinc-700">
-              Bonjour {name},
+              {translate("emails.emailChangeNotification.greeting", { name })}
             </Text>
 
             <Text className="text-sm leading-relaxed text-zinc-700">
-              Une demande de modification de votre adresse email sur {APP_NAME}a
-              été soumise. Cette modification ne sera effective qu&apos;après
-              vérification de la nouvelle adresse.
+              {translate("emails.emailChangeNotification.body", {
+                appName: APP_NAME,
+              })}
             </Text>
 
             <Text className="text-sm leading-relaxed text-zinc-700">
-              Si vous n&apos;êtes pas à l&apos;origine de cette demande,
-              veuillez immédiatement{" "}
+              {translate("emails.emailChangeNotification.warningIntro")}{" "}
               <Link
-                href={`${BASE_URL}/mot-de-passe-oublie`}
+                href={forgotPasswordLink}
                 className="text-zinc-900 underline underline-offset-4"
               >
-                réinitialiser votre mot de passe
+                {translate("emails.emailChangeNotification.resetPasswordLink")}
               </Link>{" "}
-              et{" "}
+              {translate("emails.emailChangeNotification.and")}{" "}
               <Link
-                href={`${BASE_URL}/contact`}
+                href={contactLink}
                 className="text-zinc-900 underline underline-offset-4"
               >
-                contacter notre équipe
+                {translate("emails.emailChangeNotification.contactLink")}
               </Link>
               .
             </Text>
@@ -68,9 +77,7 @@ function EmailChangeNotificationEmail({
             <Hr className="my-6 border-zinc-200" />
 
             <Text className="m-0 text-xs text-zinc-500">
-              Cet email a été envoyé automatiquement suite à une demande de
-              modification d&apos;adresse email. Si vous avez des questions,
-              n&apos;hésitez pas à nous contacter.
+              {translate("emails.emailChangeNotification.footer")}
             </Text>
           </Container>
         </Body>

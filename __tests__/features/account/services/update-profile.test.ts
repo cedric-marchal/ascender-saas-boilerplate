@@ -7,7 +7,7 @@ const mockPrismaFindUnique = vi.fn();
 const mockAuthUpdateUser = vi.fn();
 const mockAuthChangeEmail = vi.fn();
 const mockHeaders = vi.fn();
-const mockRevalidatePath = vi.fn();
+const mockRevalidateLocalizedPath = vi.fn();
 
 vi.mock("@/lib/prisma", () => ({
   prisma: {
@@ -30,8 +30,8 @@ vi.mock("next/headers", () => ({
   headers: mockHeaders,
 }));
 
-vi.mock("next/cache", () => ({
-  revalidatePath: mockRevalidatePath,
+vi.mock("@/i18n/revalidate-localized-path", () => ({
+  revalidateLocalizedPath: mockRevalidateLocalizedPath,
 }));
 
 vi.mock("@/lib/env", () => ({
@@ -97,7 +97,9 @@ describe("updateProfile", () => {
       },
       headers: expect.any(Headers),
     });
-    expect(mockRevalidatePath).toHaveBeenCalledWith("/dashboard/parametres");
+    expect(mockRevalidateLocalizedPath).toHaveBeenCalledWith(
+      "/dashboard/settings",
+    );
     expect(result.emailChanged).toBe(false);
     expect(result.user.name).toBe("New Name");
   });
@@ -121,11 +123,13 @@ describe("updateProfile", () => {
     expect(mockAuthChangeEmail).toHaveBeenCalledWith({
       body: {
         newEmail: "new@example.com",
-        callbackURL: "https://test.example.com/dashboard/parametres",
+        callbackURL: "https://test.example.com/dashboard/settings",
       },
       headers: expect.any(Headers),
     });
-    expect(mockRevalidatePath).toHaveBeenCalledWith("/dashboard/parametres");
+    expect(mockRevalidateLocalizedPath).toHaveBeenCalledWith(
+      "/dashboard/settings",
+    );
     expect(result.emailChanged).toBe(true);
     expect(result.user.email).toBe("old@example.com");
   });
@@ -153,7 +157,7 @@ describe("updateProfile", () => {
     expect(mockAuthChangeEmail).toHaveBeenCalledWith({
       body: {
         newEmail: "new@example.com",
-        callbackURL: "https://test.example.com/dashboard/parametres",
+        callbackURL: "https://test.example.com/dashboard/settings",
       },
       headers: expect.any(Headers),
     });
@@ -177,7 +181,7 @@ describe("updateProfile", () => {
         name: "Test",
         email: "test@example.com",
       }),
-    ).rejects.toThrow("Utilisateur introuvable");
+    ).rejects.toThrow("errors.account.userNotFound");
   });
 
   it("throws ConflictError if email already used", async () => {
@@ -219,7 +223,7 @@ describe("updateProfile", () => {
         name: "John Doe",
         email: "taken@example.com",
       }),
-    ).rejects.toThrow("adresse email est déjà utilisée");
+    ).rejects.toThrow("errors.account.emailAlreadyUsed");
   });
 
   it("returns emailChanged true when email changes", async () => {

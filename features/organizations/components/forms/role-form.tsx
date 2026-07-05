@@ -4,6 +4,7 @@ import type { SubmitEvent } from "react";
 
 import { useForm } from "@tanstack/react-form";
 import { Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useAction } from "next-safe-action/hooks";
 import { toast } from "sonner";
 
@@ -27,10 +28,11 @@ import {
 
 import { getActionResult } from "@/utils/errors/get-action-result";
 import { getErrorMessage } from "@/utils/errors/get-error-message";
+import { translateFieldErrors } from "@/utils/errors/translate-field-errors";
 
 const changeableRoleLabels: Record<OrganizationChangeableRole, string> = {
-  admin: "Administrateur",
-  member: "Membre",
+  admin: "admin",
+  member: "member",
 };
 
 type RoleFormProps = {
@@ -40,6 +42,9 @@ type RoleFormProps = {
 };
 
 function RoleForm({ memberId, currentRole, onSuccess }: RoleFormProps) {
+  const t = useTranslations("organizations.roleForm");
+  const tRoles = useTranslations("organizations.roles");
+  const tValidation = useTranslations("validation");
   const { executeAsync, isExecuting } = useAction(changeMemberRoleAction);
 
   const defaultRole = ORGANIZATION_CHANGEABLE_ROLES.includes(
@@ -60,7 +65,7 @@ function RoleForm({ memberId, currentRole, onSuccess }: RoleFormProps) {
       try {
         getActionResult(await executeAsync(value));
 
-        toast.success("Rôle modifié avec succès !");
+        toast.success(t("successToast"));
 
         onSuccess();
       } catch (error: unknown) {
@@ -85,7 +90,7 @@ function RoleForm({ memberId, currentRole, onSuccess }: RoleFormProps) {
 
           return (
             <Field data-invalid={isInvalid}>
-              <FieldLabel htmlFor="role-select">Nouveau rôle</FieldLabel>
+              <FieldLabel htmlFor="role-select">{t("label")}</FieldLabel>
               <Select
                 value={field.state.value}
                 onValueChange={(value: string) =>
@@ -93,19 +98,26 @@ function RoleForm({ memberId, currentRole, onSuccess }: RoleFormProps) {
                 }
               >
                 <SelectTrigger id="role-select">
-                  <SelectValue placeholder="Sélectionnez un rôle" />
+                  <SelectValue placeholder={t("placeholder")} />
                 </SelectTrigger>
                 <SelectContent>
                   {ORGANIZATION_CHANGEABLE_ROLES.map(
                     (role: OrganizationChangeableRole) => (
                       <SelectItem key={role} value={role}>
-                        {changeableRoleLabels[role]}
+                        {tRoles(changeableRoleLabels[role])}
                       </SelectItem>
                     ),
                   )}
                 </SelectContent>
               </Select>
-              {isInvalid && <FieldError errors={field.state.meta.errors} />}
+              {isInvalid && (
+                <FieldError
+                  errors={translateFieldErrors(
+                    field.state.meta.errors,
+                    tValidation,
+                  )}
+                />
+              )}
             </Field>
           );
         }}
@@ -126,8 +138,8 @@ function RoleForm({ memberId, currentRole, onSuccess }: RoleFormProps) {
               />
             ) : null}
             {isExecuting || isSubmitting
-              ? "Modification en cours..."
-              : "Modifier le rôle"}
+              ? t("submittingLabel")
+              : t("submitLabel")}
           </Button>
         )}
       </form.Subscribe>

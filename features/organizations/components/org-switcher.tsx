@@ -2,7 +2,9 @@
 
 import { useRouter } from "next/navigation";
 
+import { Link } from "@/i18n/navigation";
 import { Building2, Check, ChevronsUpDown } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import type { UserOrganizationItem } from "@/features/organizations/services/get-user-organizations.service";
@@ -32,6 +34,7 @@ function OrgSwitcher({
   activeOrganizationId,
 }: OrgSwitcherProps) {
   const router = useRouter();
+  const t = useTranslations("organizations.orgSwitcher");
 
   if (organizations.length < 2) {
     return null;
@@ -47,10 +50,7 @@ function OrgSwitcher({
     });
 
     if (error) {
-      toast.error(
-        error.message ||
-          "Une erreur est survenue lors du changement d'organisation",
-      );
+      toast.error(error.message || t("switchErrorToast"));
       return;
     }
 
@@ -75,7 +75,7 @@ function OrgSwitcher({
             </AvatarFallback>
           </Avatar>
           <span className="flex-1 truncate text-left text-sm font-medium">
-            {activeOrg ? truncateName(activeOrg.name) : "Organisation"}
+            {activeOrg ? truncateName(activeOrg.name) : t("fallbackName")}
           </span>
           <ChevronsUpDown
             className="text-muted-foreground size-4 shrink-0"
@@ -103,10 +103,10 @@ function OrgSwitcher({
         ))}
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-          <a href="/dashboard/organisation" className="gap-2">
+          <Link href="/dashboard/organization" className="gap-2">
             <Building2 className="size-4" aria-hidden="true" />
-            <span>Mon organisation</span>
-          </a>
+            <span>{t("myOrganization")}</span>
+          </Link>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

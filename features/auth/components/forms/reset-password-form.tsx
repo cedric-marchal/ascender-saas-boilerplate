@@ -2,10 +2,10 @@
 
 import type { ChangeEvent, SubmitEvent } from "react";
 
-import { useRouter } from "next/navigation";
-
+import { useRouter } from "@/i18n/navigation";
 import { useForm } from "@tanstack/react-form";
 import { Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useAction } from "next-safe-action/hooks";
 import { toast } from "sonner";
 
@@ -21,6 +21,7 @@ import { PasswordInput } from "@/components/ui/password-input";
 
 import { getActionResult } from "@/utils/errors/get-action-result";
 import { getErrorMessage } from "@/utils/errors/get-error-message";
+import { translateFieldErrors } from "@/utils/errors/translate-field-errors";
 
 type ResetPasswordFormProps = {
   token: string;
@@ -28,6 +29,8 @@ type ResetPasswordFormProps = {
 
 function ResetPasswordForm({ token }: ResetPasswordFormProps) {
   const router = useRouter();
+  const t = useTranslations("auth.resetPassword");
+  const tValidation = useTranslations("validation");
   const { executeAsync, isExecuting } = useAction(resetPasswordAction);
 
   const form = useForm({
@@ -42,8 +45,8 @@ function ResetPasswordForm({ token }: ResetPasswordFormProps) {
     onSubmit: async ({ value }) => {
       try {
         getActionResult(await executeAsync(value));
-        toast.success("Mot de passe mis à jour avec succès");
-        router.push("/connexion");
+        toast.success(t("successToast"));
+        router.push("/sign-in");
       } catch (error: unknown) {
         toast.error(getErrorMessage(error));
       }
@@ -71,7 +74,7 @@ function ResetPasswordForm({ token }: ResetPasswordFormProps) {
           return (
             <Field data-invalid={isInvalid}>
               <FieldLabel htmlFor="reset-password-password">
-                Nouveau mot de passe
+                {t("passwordLabel")}
               </FieldLabel>
               <PasswordInput
                 id="reset-password-password"
@@ -83,7 +86,14 @@ function ResetPasswordForm({ token }: ResetPasswordFormProps) {
                 placeholder="••••••••••••"
                 autoComplete="new-password"
               />
-              {isInvalid && <FieldError errors={field.state.meta.errors} />}
+              {isInvalid && (
+                <FieldError
+                  errors={translateFieldErrors(
+                    field.state.meta.errors,
+                    tValidation,
+                  )}
+                />
+              )}
             </Field>
           );
         }}
@@ -102,7 +112,7 @@ function ResetPasswordForm({ token }: ResetPasswordFormProps) {
           return (
             <Field data-invalid={isInvalid}>
               <FieldLabel htmlFor="reset-password-confirm">
-                Confirmer le mot de passe
+                {t("confirmPasswordLabel")}
               </FieldLabel>
               <PasswordInput
                 id="reset-password-confirm"
@@ -114,7 +124,14 @@ function ResetPasswordForm({ token }: ResetPasswordFormProps) {
                 placeholder="••••••••••••"
                 autoComplete="new-password"
               />
-              {isInvalid && <FieldError errors={field.state.meta.errors} />}
+              {isInvalid && (
+                <FieldError
+                  errors={translateFieldErrors(
+                    field.state.meta.errors,
+                    tValidation,
+                  )}
+                />
+              )}
             </Field>
           );
         }}
@@ -136,8 +153,8 @@ function ResetPasswordForm({ token }: ResetPasswordFormProps) {
               />
             ) : null}
             {isExecuting || isSubmitting
-              ? "Mise à jour en cours..."
-              : "Mettre à jour le mot de passe"}
+              ? t("submittingLabel")
+              : t("submitLabel")}
           </Button>
         )}
       </form.Subscribe>

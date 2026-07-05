@@ -1,5 +1,7 @@
+import { getLocale, getTranslations } from "next-intl/server";
+
 import { ResetPasswordForm } from "@/features/auth/components/forms/reset-password-form";
-import { getResetPasswordSchema } from "@/features/auth/constants/auth-seo.constant";
+import { getAuthPageSchema } from "@/features/auth/constants/auth-seo.constant";
 
 import { Main } from "@/components/main";
 import {
@@ -14,8 +16,17 @@ type ResetPasswordPageProps = {
   token: string;
 };
 
-function ResetPasswordPage({ token }: ResetPasswordPageProps) {
-  const webPageSchema = getResetPasswordSchema();
+async function ResetPasswordPage({ token }: ResetPasswordPageProps) {
+  const locale = await getLocale();
+  const t = await getTranslations("auth.resetPassword");
+  const tCommon = await getTranslations("common");
+
+  const webPageSchema = getAuthPageSchema(
+    "/reset-password",
+    locale,
+    `${t("title")} | ${tCommon("appName")}`,
+    t("seoDescription", { appName: tCommon("appName") }),
+  );
 
   return (
     <>
@@ -29,10 +40,8 @@ function ResetPasswordPage({ token }: ResetPasswordPageProps) {
       <Main className="flex items-center justify-center px-4 py-12">
         <Card className="w-full max-w-sm">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Nouveau mot de passe</CardTitle>
-            <CardDescription>
-              Choisissez un nouveau mot de passe pour votre compte
-            </CardDescription>
+            <CardTitle className="text-2xl">{t("title")}</CardTitle>
+            <CardDescription>{t("description")}</CardDescription>
           </CardHeader>
           <CardContent>
             <ResetPasswordForm token={token} />

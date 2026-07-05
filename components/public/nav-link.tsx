@@ -2,13 +2,11 @@
 
 import type { ComponentPropsWithoutRef, ReactNode } from "react";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-
+import { Link, usePathname } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 
 type NavLinkProps = {
-  href: "/" | "/tarifs" | "/contact" | "/connexion" | "/inscription";
+  href: "/" | "/pricing" | "/contact" | "/sign-in" | "/sign-up";
   children: ReactNode;
   className?: string;
 } & Omit<ComponentPropsWithoutRef<typeof Link>, "href" | "children" | "className">;

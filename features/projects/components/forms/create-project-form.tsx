@@ -4,6 +4,7 @@ import type { ChangeEvent, SubmitEvent } from "react";
 
 import { useForm } from "@tanstack/react-form";
 import { Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useAction } from "next-safe-action/hooks";
 import { toast } from "sonner";
 
@@ -33,12 +34,16 @@ import { Textarea } from "@/components/ui/textarea";
 
 import { getActionResult } from "@/utils/errors/get-action-result";
 import { getErrorMessage } from "@/utils/errors/get-error-message";
+import { translateFieldErrors } from "@/utils/errors/translate-field-errors";
 
 type CreateProjectFormProps = {
   onSuccess: () => void;
 };
 
 function CreateProjectForm({ onSuccess }: CreateProjectFormProps) {
+  const t = useTranslations("projects.createForm");
+  const tStatuses = useTranslations("projects.statuses");
+  const tValidation = useTranslations("validation");
   const { executeAsync, isExecuting } = useAction(createProjectAction);
 
   const form = useForm({
@@ -54,7 +59,7 @@ function CreateProjectForm({ onSuccess }: CreateProjectFormProps) {
       try {
         getActionResult(await executeAsync(value));
 
-        toast.success("Projet créé avec succès !");
+        toast.success(t("successToast"));
 
         form.reset();
         onSuccess();
@@ -84,7 +89,9 @@ function CreateProjectForm({ onSuccess }: CreateProjectFormProps) {
 
           return (
             <Field data-invalid={isInvalid}>
-              <FieldLabel htmlFor="create-project-name">Nom</FieldLabel>
+              <FieldLabel htmlFor="create-project-name">
+                {t("nameLabel")}
+              </FieldLabel>
               <Input
                 id="create-project-name"
                 name={field.name}
@@ -92,9 +99,16 @@ function CreateProjectForm({ onSuccess }: CreateProjectFormProps) {
                 onBlur={field.handleBlur}
                 onChange={handleChange}
                 aria-invalid={isInvalid}
-                placeholder="Refonte du site marketing"
+                placeholder={t("namePlaceholder")}
               />
-              {isInvalid && <FieldError errors={field.state.meta.errors} />}
+              {isInvalid && (
+                <FieldError
+                  errors={translateFieldErrors(
+                    field.state.meta.errors,
+                    tValidation,
+                  )}
+                />
+              )}
             </Field>
           );
         }}
@@ -113,7 +127,7 @@ function CreateProjectForm({ onSuccess }: CreateProjectFormProps) {
           return (
             <Field data-invalid={isInvalid}>
               <FieldLabel htmlFor="create-project-description">
-                Description
+                {t("descriptionLabel")}
               </FieldLabel>
               <Textarea
                 id="create-project-description"
@@ -122,9 +136,16 @@ function CreateProjectForm({ onSuccess }: CreateProjectFormProps) {
                 onBlur={field.handleBlur}
                 onChange={handleChange}
                 aria-invalid={isInvalid}
-                placeholder="Décrivez l'objectif du projet"
+                placeholder={t("descriptionPlaceholder")}
               />
-              {isInvalid && <FieldError errors={field.state.meta.errors} />}
+              {isInvalid && (
+                <FieldError
+                  errors={translateFieldErrors(
+                    field.state.meta.errors,
+                    tValidation,
+                  )}
+                />
+              )}
             </Field>
           );
         }}
@@ -138,7 +159,9 @@ function CreateProjectForm({ onSuccess }: CreateProjectFormProps) {
 
           return (
             <Field data-invalid={isInvalid}>
-              <FieldLabel htmlFor="create-project-status">Statut</FieldLabel>
+              <FieldLabel htmlFor="create-project-status">
+                {t("statusLabel")}
+              </FieldLabel>
               <Select
                 value={field.state.value}
                 onValueChange={(value: string) =>
@@ -146,17 +169,24 @@ function CreateProjectForm({ onSuccess }: CreateProjectFormProps) {
                 }
               >
                 <SelectTrigger id="create-project-status">
-                  <SelectValue placeholder="Sélectionnez un statut" />
+                  <SelectValue placeholder={t("statusPlaceholder")} />
                 </SelectTrigger>
                 <SelectContent>
                   {projectStatuses.map((status: ProjectStatus) => (
                     <SelectItem key={status} value={status}>
-                      {projectStatusLabels[status]}
+                      {tStatuses(projectStatusLabels[status])}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-              {isInvalid && <FieldError errors={field.state.meta.errors} />}
+              {isInvalid && (
+                <FieldError
+                  errors={translateFieldErrors(
+                    field.state.meta.errors,
+                    tValidation,
+                  )}
+                />
+              )}
             </Field>
           );
         }}
@@ -176,7 +206,9 @@ function CreateProjectForm({ onSuccess }: CreateProjectFormProps) {
                 aria-hidden="true"
               />
             ) : null}
-            {isExecuting || isSubmitting ? "Création en cours..." : "Créer"}
+            {isExecuting || isSubmitting
+              ? t("submittingLabel")
+              : t("submitLabel")}
           </Button>
         )}
       </form.Subscribe>

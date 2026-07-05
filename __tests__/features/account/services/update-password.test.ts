@@ -28,6 +28,10 @@ vi.mock("@/lib/env", () => ({
   },
 }));
 
+vi.mock("next-intl/server", () => ({
+  getLocale: vi.fn().mockResolvedValue("en"),
+}));
+
 // Import after mocks
 const { updatePassword } =
   await import("@/features/account/services/update-password.service");
@@ -71,9 +75,9 @@ describe("updatePassword", () => {
     await updatePassword(input);
 
     expect(mockSendEmail).toHaveBeenCalledWith({
-      from: "TestApp Sécurité <security@test.com>",
+      from: "TestApp Security <security@test.com>",
       to: "jane@example.com",
-      subject: "Votre mot de passe TestApp a été modifié",
+      subject: "Your TestApp password has been changed",
       react: expect.anything(),
     });
   });

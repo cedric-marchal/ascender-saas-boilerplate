@@ -31,10 +31,10 @@ describe("usersSortableFields", () => {
 });
 
 describe("roleLabels", () => {
-  it("has French label for each role filter", () => {
-    expect(roleLabels.all).toBe("Tous les rôles");
-    expect(roleLabels.ADMIN).toBe("Administrateur");
-    expect(roleLabels.CUSTOMER).toBe("Client");
+  it("maps each role filter to its own translation key", () => {
+    expect(roleLabels.all).toBe("all");
+    expect(roleLabels.ADMIN).toBe("ADMIN");
+    expect(roleLabels.CUSTOMER).toBe("CUSTOMER");
   });
 
   it("has a label for every role filter", () => {
@@ -46,10 +46,10 @@ describe("roleLabels", () => {
 });
 
 describe("verificationLabels", () => {
-  it("has French label for each verification filter", () => {
-    expect(verificationLabels.all).toBe("Tous");
-    expect(verificationLabels.verified).toBe("Vérifiés");
-    expect(verificationLabels.unverified).toBe("Non vérifiés");
+  it("maps each verification filter to its own translation key", () => {
+    expect(verificationLabels.all).toBe("all");
+    expect(verificationLabels.verified).toBe("verified");
+    expect(verificationLabels.unverified).toBe("unverified");
   });
 
   it("has a label for every verification filter", () => {

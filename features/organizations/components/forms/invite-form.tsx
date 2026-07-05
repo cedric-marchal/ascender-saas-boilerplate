@@ -4,6 +4,7 @@ import type { ChangeEvent, SubmitEvent } from "react";
 
 import { useForm } from "@tanstack/react-form";
 import { Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useAction } from "next-safe-action/hooks";
 import { toast } from "sonner";
 
@@ -28,10 +29,11 @@ import {
 
 import { getActionResult } from "@/utils/errors/get-action-result";
 import { getErrorMessage } from "@/utils/errors/get-error-message";
+import { translateFieldErrors } from "@/utils/errors/translate-field-errors";
 
 const roleLabels: Record<OrganizationInvitationRole, string> = {
-  admin: "Administrateur",
-  member: "Membre",
+  admin: "admin",
+  member: "member",
 };
 
 type InviteFormProps = {
@@ -39,6 +41,9 @@ type InviteFormProps = {
 };
 
 function InviteForm({ onSuccess }: InviteFormProps) {
+  const t = useTranslations("organizations.inviteForm");
+  const tRoles = useTranslations("organizations.roles");
+  const tValidation = useTranslations("validation");
   const { executeAsync, isExecuting } = useAction(inviteMemberAction);
 
   const form = useForm({
@@ -53,7 +58,7 @@ function InviteForm({ onSuccess }: InviteFormProps) {
       try {
         getActionResult(await executeAsync(value));
 
-        toast.success("Invitation envoyée avec succès !");
+        toast.success(t("successToast"));
 
         form.reset();
         onSuccess();
@@ -83,7 +88,7 @@ function InviteForm({ onSuccess }: InviteFormProps) {
 
           return (
             <Field data-invalid={isInvalid}>
-              <FieldLabel htmlFor="invite-email">Adresse email</FieldLabel>
+              <FieldLabel htmlFor="invite-email">{t("emailLabel")}</FieldLabel>
               <Input
                 id="invite-email"
                 type="email"
@@ -92,9 +97,16 @@ function InviteForm({ onSuccess }: InviteFormProps) {
                 onBlur={field.handleBlur}
                 onChange={handleChange}
                 aria-invalid={isInvalid}
-                placeholder="membre@exemple.com"
+                placeholder={t("emailPlaceholder")}
               />
-              {isInvalid && <FieldError errors={field.state.meta.errors} />}
+              {isInvalid && (
+                <FieldError
+                  errors={translateFieldErrors(
+                    field.state.meta.errors,
+                    tValidation,
+                  )}
+                />
+              )}
             </Field>
           );
         }}
@@ -108,7 +120,7 @@ function InviteForm({ onSuccess }: InviteFormProps) {
 
           return (
             <Field data-invalid={isInvalid}>
-              <FieldLabel htmlFor="invite-role">Rôle</FieldLabel>
+              <FieldLabel htmlFor="invite-role">{t("roleLabel")}</FieldLabel>
               <Select
                 value={field.state.value}
                 onValueChange={(value: string) =>
@@ -116,19 +128,26 @@ function InviteForm({ onSuccess }: InviteFormProps) {
                 }
               >
                 <SelectTrigger id="invite-role">
-                  <SelectValue placeholder="Sélectionnez un rôle" />
+                  <SelectValue placeholder={t("rolePlaceholder")} />
                 </SelectTrigger>
                 <SelectContent>
                   {ORGANIZATION_INVITATION_ROLES.map(
                     (role: OrganizationInvitationRole) => (
                       <SelectItem key={role} value={role}>
-                        {roleLabels[role]}
+                        {tRoles(roleLabels[role])}
                       </SelectItem>
                     ),
                   )}
                 </SelectContent>
               </Select>
-              {isInvalid && <FieldError errors={field.state.meta.errors} />}
+              {isInvalid && (
+                <FieldError
+                  errors={translateFieldErrors(
+                    field.state.meta.errors,
+                    tValidation,
+                  )}
+                />
+              )}
             </Field>
           );
         }}
@@ -148,7 +167,9 @@ function InviteForm({ onSuccess }: InviteFormProps) {
                 aria-hidden="true"
               />
             ) : null}
-            {isExecuting || isSubmitting ? "Envoi en cours..." : "Inviter"}
+            {isExecuting || isSubmitting
+              ? t("submittingLabel")
+              : t("submitLabel")}
           </Button>
         )}
       </form.Subscribe>

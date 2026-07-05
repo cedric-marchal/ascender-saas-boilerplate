@@ -1,4 +1,6 @@
+import { LOCALE_METADATA } from "@/i18n/locale-metadata.constant";
 import { Calendar, CheckCircle2, XCircle } from "lucide-react";
+import { useLocale, useTranslations, type Locale } from "next-intl";
 
 import { getPlanLabel } from "@/features/billing/constants/plan.constant";
 import { subscriptionStatusLabels } from "@/features/billing/constants/subscription-status.constant";
@@ -69,22 +71,29 @@ function SubscriptionCard({
 }: {
   subscription: BillingSubscription;
 }) {
+  const t = useTranslations("billing");
+  const tStatuses = useTranslations("billing.subscriptionStatuses");
+  const locale = useLocale();
+  const bcp47 = LOCALE_METADATA[locale as Locale].bcp47;
+
   const config = STATUS_CONFIG[subscription.status] ?? STATUS_CONFIG.CANCELED;
   const StatusIcon = config.icon;
 
-  const planLabel = getPlanLabel(subscription.priceId);
+  const planLabel = getPlanLabel(subscription.priceId) ?? t("planUnknown");
 
   return (
     <Card>
       <CardHeader>
         <div className="flex items-start justify-between">
           <div className="space-y-1">
-            <CardTitle className="text-base">{`Abonnement ${planLabel}`}</CardTitle>
+            <CardTitle className="text-base">
+              {t("subscriptionCard.titlePrefix", { plan: planLabel })}
+            </CardTitle>
             <CardDescription>ID: {subscription.id}</CardDescription>
           </div>
           <Badge variant={config.variant} className="gap-1">
             <StatusIcon className="h-3 w-3" aria-hidden="true" />
-            {config.label}
+            {tStatuses(config.label)}
           </Badge>
         </div>
       </CardHeader>
@@ -94,36 +103,36 @@ function SubscriptionCard({
           <div className="space-y-1">
             <div className="text-muted-foreground flex items-center gap-2 text-sm">
               <Calendar className="h-4 w-4" aria-hidden="true" />
-              <span>Début de période</span>
+              <span>{t("subscriptionCard.periodStart")}</span>
             </div>
             <p className="text-sm font-medium">
               {subscription.currentPeriodStart
                 ? new Date(
                     subscription.currentPeriodStart * 1000,
-                  ).toLocaleDateString("fr-FR", {
+                  ).toLocaleDateString(bcp47, {
                     day: "numeric",
                     month: "long",
                     year: "numeric",
                   })
-                : "Date inconnue"}
+                : t("subscriptionCard.unknownDate")}
             </p>
           </div>
 
           <div className="space-y-1">
             <div className="text-muted-foreground flex items-center gap-2 text-sm">
               <Calendar className="h-4 w-4" aria-hidden="true" />
-              <span>Fin de période</span>
+              <span>{t("subscriptionCard.periodEnd")}</span>
             </div>
             <p className="text-sm font-medium">
               {subscription.currentPeriodEnd
                 ? new Date(
                     subscription.currentPeriodEnd * 1000,
-                  ).toLocaleDateString("fr-FR", {
+                  ).toLocaleDateString(bcp47, {
                     day: "numeric",
                     month: "long",
                     year: "numeric",
                   })
-                : "Date inconnue"}
+                : t("subscriptionCard.unknownDate")}
             </p>
           </div>
         </div>
@@ -132,11 +141,11 @@ function SubscriptionCard({
           <div className="space-y-1">
             <div className="text-muted-foreground flex items-center gap-2 text-sm">
               <XCircle className="h-4 w-4" aria-hidden="true" />
-              <span>Annulé le</span>
+              <span>{t("subscriptionCard.canceledOn")}</span>
             </div>
             <p className="text-sm font-medium">
               {new Date(subscription.canceledAt * 1000).toLocaleDateString(
-                "fr-FR",
+                bcp47,
                 {
                   day: "numeric",
                   month: "long",

@@ -31,27 +31,25 @@ const MAX_EXPIRES_IN = 604800;
 
 function validateKey(key: string): void {
   if (!key || key.trim().length === 0) {
-    throw new BadRequestError("La clé du fichier est requise");
+    throw new BadRequestError("errors.storage.keyRequired");
   }
 
   if (key.length > MAX_KEY_LENGTH) {
-    throw new BadRequestError(
-      `La clé du fichier est trop longue (max ${MAX_KEY_LENGTH} caractères)`,
-    );
+    throw new BadRequestError("errors.storage.keyTooLong", {
+      params: { maxLength: MAX_KEY_LENGTH },
+    });
   }
 
   if (key.includes("..") || key.startsWith("/")) {
-    throw new BadRequestError(
-      "La clé du fichier contient des caractères invalides",
-    );
+    throw new BadRequestError("errors.storage.invalidKey");
   }
 }
 
 function validateExpiresIn(expiresIn: number): void {
   if (expiresIn < MIN_EXPIRES_IN || expiresIn > MAX_EXPIRES_IN) {
-    throw new BadRequestError(
-      `La durée d'expiration doit être entre ${MIN_EXPIRES_IN} et ${MAX_EXPIRES_IN} secondes`,
-    );
+    throw new BadRequestError("errors.storage.invalidExpiresIn", {
+      params: { min: MIN_EXPIRES_IN, max: MAX_EXPIRES_IN },
+    });
   }
 }
 
@@ -71,11 +69,11 @@ async function uploadFile(
   validateKey(key);
 
   if (!body) {
-    throw new BadRequestError("Le contenu du fichier est requis");
+    throw new BadRequestError("errors.storage.contentRequired");
   }
 
   if (!contentType || contentType.trim().length === 0) {
-    throw new BadRequestError("Le type de contenu est requis");
+    throw new BadRequestError("errors.storage.contentTypeRequired");
   }
 
   try {
@@ -89,9 +87,7 @@ async function uploadFile(
     );
   } catch (error: unknown) {
     console.error("R2 upload error:", error);
-    throw new ServiceUnavailableError(
-      "Le service de stockage est temporairement indisponible",
-    );
+    throw new ServiceUnavailableError("errors.storage.serviceUnavailable");
   }
 }
 
@@ -107,9 +103,7 @@ async function deleteFile(key: string): Promise<void> {
     );
   } catch (error: unknown) {
     console.error("R2 delete error:", error);
-    throw new ServiceUnavailableError(
-      "Le service de stockage est temporairement indisponible",
-    );
+    throw new ServiceUnavailableError("errors.storage.serviceUnavailable");
   }
 }
 
@@ -149,9 +143,7 @@ async function getPrivateUrl(
     return url;
   } catch (error: unknown) {
     console.error("R2 signed URL error:", error);
-    throw new ServiceUnavailableError(
-      "Le service de stockage est temporairement indisponible",
-    );
+    throw new ServiceUnavailableError("errors.storage.serviceUnavailable");
   }
 }
 

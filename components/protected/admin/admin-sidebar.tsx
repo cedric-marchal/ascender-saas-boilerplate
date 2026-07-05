@@ -2,9 +2,7 @@
 
 import { useEffect, type ComponentType } from "react";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-
+import { Link, usePathname } from "@/i18n/navigation";
 import {
   ChevronsUpDown,
   LayoutDashboard,
@@ -14,6 +12,7 @@ import {
   User,
   Users,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { SignOutButton } from "@/features/auth/components/sign-out-button";
 
@@ -48,28 +47,28 @@ import { getInitials } from "@/utils/string/get-initials";
 import { truncateName } from "@/utils/string/truncate";
 
 type MenuItem = {
-  title: string;
-  url: "/admin" | "/admin/utilisateurs" | "/admin/parametres";
+  titleKey: "dashboard" | "users" | "settings";
+  url: "/admin" | "/admin/users" | "/admin/settings";
   icon: ComponentType<React.SVGProps<SVGSVGElement>>;
 };
 
 const navigationItems: MenuItem[] = [
   {
-    title: "Tableau de bord",
+    titleKey: "dashboard",
     url: "/admin",
     icon: LayoutDashboard,
   },
   {
-    title: "Utilisateurs",
-    url: "/admin/utilisateurs",
+    titleKey: "users",
+    url: "/admin/users",
     icon: Users,
   },
 ];
 
 const settingsItems: MenuItem[] = [
   {
-    title: "Paramètres",
-    url: "/admin/parametres",
+    titleKey: "settings",
+    url: "/admin/settings",
     icon: Settings,
   },
 ];
@@ -80,6 +79,7 @@ type AdminSidebarProps = {
 };
 
 function AdminSidebar({ image, name }: AdminSidebarProps) {
+  const t = useTranslations("common.adminSidebar");
   const pathname = usePathname();
   const { setOpenMobile } = useSidebar();
 
@@ -110,7 +110,7 @@ function AdminSidebar({ image, name }: AdminSidebarProps) {
                     {env.NEXT_PUBLIC_APP_NAME}
                   </span>
                   <span className="text-muted-foreground truncate text-xs">
-                    Administration
+                    {t("tagline")}
                   </span>
                 </div>
               </Link>
@@ -121,19 +121,19 @@ function AdminSidebar({ image, name }: AdminSidebarProps) {
       <SidebarSeparator />
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+          <SidebarGroupLabel>{t("navigationGroup")}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {navigationItems.map((item: MenuItem) => (
-                <SidebarMenuItem key={item.title}>
+                <SidebarMenuItem key={item.titleKey}>
                   <SidebarMenuButton
                     asChild
                     isActive={isActive(item.url)}
-                    tooltip={item.title}
+                    tooltip={t(item.titleKey)}
                   >
                     <Link href={item.url}>
                       <item.icon aria-hidden="true" />
-                      <span>{item.title}</span>
+                      <span>{t(item.titleKey)}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -142,19 +142,19 @@ function AdminSidebar({ image, name }: AdminSidebarProps) {
           </SidebarGroupContent>
         </SidebarGroup>
         <SidebarGroup>
-          <SidebarGroupLabel>Configuration</SidebarGroupLabel>
+          <SidebarGroupLabel>{t("configurationGroup")}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {settingsItems.map((item: MenuItem) => (
-                <SidebarMenuItem key={item.title}>
+                <SidebarMenuItem key={item.titleKey}>
                   <SidebarMenuButton
                     asChild
                     isActive={isActive(item.url)}
-                    tooltip={item.title}
+                    tooltip={t(item.titleKey)}
                   >
                     <Link href={item.url}>
                       <item.icon aria-hidden="true" />
-                      <span>{item.title}</span>
+                      <span>{t(item.titleKey)}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -189,7 +189,7 @@ function AdminSidebar({ image, name }: AdminSidebarProps) {
                       {truncateName(name)}
                     </span>
                     <span className="text-muted-foreground truncate text-xs">
-                      Administrateur
+                      {t("adminRole")}
                     </span>
                   </div>
                   <ChevronsUpDown
@@ -205,9 +205,9 @@ function AdminSidebar({ image, name }: AdminSidebarProps) {
                 sideOffset={4}
               >
                 <DropdownMenuItem asChild>
-                  <Link href="/admin/parametres">
+                  <Link href="/admin/settings">
                     <User className="size-4" aria-hidden="true" />
-                    <span>Mon compte</span>
+                    <span>{t("myAccount")}</span>
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />

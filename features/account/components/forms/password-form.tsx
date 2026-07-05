@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 
 import { useForm } from "@tanstack/react-form";
 import { Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useAction } from "next-safe-action/hooks";
 import { toast } from "sonner";
 
@@ -26,9 +27,12 @@ import { PasswordInput } from "@/components/ui/password-input";
 
 import { getActionResult } from "@/utils/errors/get-action-result";
 import { getErrorMessage } from "@/utils/errors/get-error-message";
+import { translateFieldErrors } from "@/utils/errors/translate-field-errors";
 
 function PasswordForm() {
   const router = useRouter();
+  const t = useTranslations("account.passwordForm");
+  const tValidation = useTranslations("validation");
   const { executeAsync, isExecuting } = useAction(updatePasswordAction);
 
   const form = useForm({
@@ -44,9 +48,7 @@ function PasswordForm() {
       try {
         getActionResult(await executeAsync(value));
 
-        toast.success(
-          "Mot de passe modifié avec succès. Un email de confirmation a été envoyé.",
-        );
+        toast.success(t("successToast"));
 
         form.reset();
         router.refresh();
@@ -77,7 +79,7 @@ function PasswordForm() {
           return (
             <Field data-invalid={isInvalid}>
               <FieldLabel htmlFor="settings-password-current">
-                Mot de passe actuel
+                {t("currentPasswordLabel")}
               </FieldLabel>
               <PasswordInput
                 id="settings-password-current"
@@ -88,7 +90,14 @@ function PasswordForm() {
                 aria-invalid={isInvalid}
                 placeholder="••••••••"
               />
-              {isInvalid && <FieldError errors={field.state.meta.errors} />}
+              {isInvalid && (
+                <FieldError
+                  errors={translateFieldErrors(
+                    field.state.meta.errors,
+                    tValidation,
+                  )}
+                />
+              )}
             </Field>
           );
         }}
@@ -107,7 +116,7 @@ function PasswordForm() {
           return (
             <Field data-invalid={isInvalid}>
               <FieldLabel htmlFor="settings-password-new">
-                Nouveau mot de passe
+                {t("newPasswordLabel")}
               </FieldLabel>
               <PasswordInput
                 id="settings-password-new"
@@ -118,10 +127,15 @@ function PasswordForm() {
                 aria-invalid={isInvalid}
                 placeholder="••••••••"
               />
-              <FieldDescription>
-                Minimum 12 caractères, différent de l&apos;ancien
-              </FieldDescription>
-              {isInvalid && <FieldError errors={field.state.meta.errors} />}
+              <FieldDescription>{t("newPasswordHint")}</FieldDescription>
+              {isInvalid && (
+                <FieldError
+                  errors={translateFieldErrors(
+                    field.state.meta.errors,
+                    tValidation,
+                  )}
+                />
+              )}
             </Field>
           );
         }}
@@ -140,7 +154,7 @@ function PasswordForm() {
           return (
             <Field data-invalid={isInvalid}>
               <FieldLabel htmlFor="settings-password-confirm">
-                Confirmer le nouveau mot de passe
+                {t("confirmPasswordLabel")}
               </FieldLabel>
               <PasswordInput
                 id="settings-password-confirm"
@@ -151,7 +165,14 @@ function PasswordForm() {
                 aria-invalid={isInvalid}
                 placeholder="••••••••"
               />
-              {isInvalid && <FieldError errors={field.state.meta.errors} />}
+              {isInvalid && (
+                <FieldError
+                  errors={translateFieldErrors(
+                    field.state.meta.errors,
+                    tValidation,
+                  )}
+                />
+              )}
             </Field>
           );
         }}
@@ -172,8 +193,8 @@ function PasswordForm() {
               />
             ) : null}
             {isExecuting || isSubmitting
-              ? "Modification..."
-              : "Modifier le mot de passe"}
+              ? t("submittingLabel")
+              : t("submitLabel")}
           </Button>
         )}
       </form.Subscribe>

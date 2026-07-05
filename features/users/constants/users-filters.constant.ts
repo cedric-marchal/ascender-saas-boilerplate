@@ -20,16 +20,25 @@ const usersSortableFields = ["name", "email", "createdAt"] as const;
 
 type UserSortableField = (typeof usersSortableFields)[number];
 
+/**
+ * Values are translation KEYS (resolved against the `admin.users.roles`
+ * message namespace via `useTranslations`), not literal labels.
+ */
 const roleLabels: Record<UserRoleFilter, string> = {
-  all: "Tous les rôles",
-  [UserRole.ADMIN]: "Administrateur",
-  [UserRole.CUSTOMER]: "Client",
+  all: "all",
+  [UserRole.ADMIN]: "ADMIN",
+  [UserRole.CUSTOMER]: "CUSTOMER",
 };
 
+/**
+ * Values are translation KEYS (resolved against the
+ * `admin.users.verification` message namespace via `useTranslations`), not
+ * literal labels.
+ */
 const verificationLabels: Record<VerificationFilter, string> = {
-  all: "Tous",
-  verified: "Vérifiés",
-  unverified: "Non vérifiés",
+  all: "all",
+  verified: "verified",
+  unverified: "unverified",
 };
 
 const usersSearchParams = {

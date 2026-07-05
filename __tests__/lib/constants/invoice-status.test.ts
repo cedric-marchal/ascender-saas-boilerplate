@@ -21,12 +21,12 @@ describe("invoiceStatusLabels", () => {
     }
   });
 
-  it("has French labels", () => {
-    expect(invoiceStatusLabels.draft).toBe("Brouillon");
-    expect(invoiceStatusLabels.open).toBe("Ouverte");
-    expect(invoiceStatusLabels.paid).toBe("Payée");
-    expect(invoiceStatusLabels.uncollectible).toBe("Irrécouvrable");
-    expect(invoiceStatusLabels.void).toBe("Annulée");
+  it("maps each status to its own translation key", () => {
+    expect(invoiceStatusLabels.draft).toBe("draft");
+    expect(invoiceStatusLabels.open).toBe("open");
+    expect(invoiceStatusLabels.paid).toBe("paid");
+    expect(invoiceStatusLabels.uncollectible).toBe("uncollectible");
+    expect(invoiceStatusLabels.void).toBe("void");
   });
 
   it("has exactly 5 entries", () => {

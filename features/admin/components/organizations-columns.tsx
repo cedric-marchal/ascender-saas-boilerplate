@@ -2,8 +2,10 @@
 
 import { useTransition } from "react";
 
+import { LOCALE_METADATA } from "@/i18n/locale-metadata.constant";
 import type { ColumnDef } from "@tanstack/react-table";
 import { ArrowDown, ArrowUp, ArrowUpDown, Building2 } from "lucide-react";
+import { useLocale, useTranslations, type Locale } from "next-intl";
 import { useQueryStates } from "nuqs";
 
 import {
@@ -19,11 +21,13 @@ import { truncate } from "@/utils/string/truncate";
 
 function SortableHeader({
   field,
-  label,
+  labelKey,
 }: {
   field: OrganizationSortableField;
-  label: string;
+  labelKey: "nameHeader" | "planHeader" | "createdAtHeader";
 }) {
+  const t = useTranslations("admin.organizations.columns");
+  const label = t(labelKey);
   const [isLoading, startTransition] = useTransition();
 
   const [filters, setFilters] = useQueryStates(organizationsSearchParams, {
@@ -71,10 +75,43 @@ function SortableHeader({
   );
 }
 
+function OwnerHeader() {
+  const t = useTranslations("admin.organizations.columns");
+
+  return t("ownerHeader");
+}
+
+function OwnerCell({ email }: { email: string | null }) {
+  const t = useTranslations("admin.organizations");
+
+  if (!email) {
+    return (
+      <span className="text-muted-foreground text-sm">{t("noOwner")}</span>
+    );
+  }
+
+  return truncate(email, 40);
+}
+
+function MembersHeader() {
+  const t = useTranslations("admin.organizations.columns");
+
+  return t("membersHeader");
+}
+
+function CreatedAtCell({ createdAt }: { createdAt: Date }) {
+  const locale = useLocale();
+  const bcp47 = LOCALE_METADATA[locale as Locale].bcp47;
+
+  return new Intl.DateTimeFormat(bcp47, {
+    dateStyle: "medium",
+  }).format(new Date(createdAt));
+}
+
 const organizationsColumns: ColumnDef<OrganizationRow>[] = [
   {
     accessorKey: "name",
-    header: () => <SortableHeader field="name" label="Nom" />,
+    header: () => <SortableHeader field="name" labelKey="nameHeader" />,
     cell: ({ row }) => {
       const organization = row.original;
 
@@ -93,27 +130,19 @@ const organizationsColumns: ColumnDef<OrganizationRow>[] = [
   },
   {
     accessorKey: "ownerEmail",
-    header: "Propriétaire",
-    cell: ({ row }) => {
-      const email = row.original.ownerEmail;
-
-      if (!email) {
-        return <span className="text-muted-foreground text-sm">—</span>;
-      }
-
-      return truncate(email, 40);
-    },
+    header: () => <OwnerHeader />,
+    cell: ({ row }) => <OwnerCell email={row.original.ownerEmail} />,
   },
   {
     accessorKey: "memberCount",
-    header: "Membres",
+    header: () => <MembersHeader />,
     cell: ({ row }) => (
       <span className="text-sm">{row.original.memberCount}</span>
     ),
   },
   {
     accessorKey: "plan",
-    header: () => <SortableHeader field="plan" label="Plan" />,
+    header: () => <SortableHeader field="plan" labelKey="planHeader" />,
     cell: ({ row }) => {
       const plan = row.original.plan;
 
@@ -126,14 +155,10 @@ const organizationsColumns: ColumnDef<OrganizationRow>[] = [
   },
   {
     accessorKey: "createdAt",
-    header: () => <SortableHeader field="createdAt" label="Date de création" />,
-    cell: ({ row }) => {
-      const date = new Date(row.original.createdAt);
-
-      return new Intl.DateTimeFormat("fr-FR", {
-        dateStyle: "medium",
-      }).format(date);
-    },
+    header: () => (
+      <SortableHeader field="createdAt" labelKey="createdAtHeader" />
+    ),
+    cell: ({ row }) => <CreatedAtCell createdAt={row.original.createdAt} />,
   },
 ];
 

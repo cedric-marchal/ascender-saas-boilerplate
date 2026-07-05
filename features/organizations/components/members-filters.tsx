@@ -4,6 +4,7 @@ import { useTransition, type ChangeEvent, type SubmitEvent } from "react";
 
 import { useForm } from "@tanstack/react-form";
 import { Filter, Search, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useQueryStates } from "nuqs";
 
 import {
@@ -25,6 +26,8 @@ import {
 } from "@/components/ui/select";
 
 function MembersFilters() {
+  const t = useTranslations("organizations.membersFilters");
+  const tRoles = useTranslations("organizations.roles");
   const [isLoading, startTransition] = useTransition();
 
   const [urlFilters, setUrlFilters] = useQueryStates(membersSearchParams, {
@@ -82,7 +85,7 @@ function MembersFilters() {
                   />
                   <Input
                     type="search"
-                    placeholder="Rechercher par nom ou email..."
+                    placeholder={t("searchPlaceholder")}
                     className="pl-10"
                     name={field.name}
                     value={field.state.value}
@@ -108,7 +111,7 @@ function MembersFilters() {
             return (
               <Field data-invalid={isInvalid} className="w-full sm:w-48">
                 <FieldLabel htmlFor="members-filter-role" className="sr-only">
-                  Rôle
+                  {t("roleLabel")}
                 </FieldLabel>
                 <Select
                   value={field.state.value}
@@ -117,12 +120,12 @@ function MembersFilters() {
                   }
                 >
                   <SelectTrigger id="members-filter-role">
-                    <SelectValue placeholder="Rôle" />
+                    <SelectValue placeholder={t("rolePlaceholder")} />
                   </SelectTrigger>
                   <SelectContent>
                     {memberRoleFilters.map((role: MemberRoleFilter) => (
                       <SelectItem key={role} value={role}>
-                        {memberRoleFilterLabels[role]}
+                        {tRoles(memberRoleFilterLabels[role])}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -143,7 +146,7 @@ function MembersFilters() {
               className="gap-2"
             >
               <Filter className="h-4 w-4" aria-hidden="true" />
-              {isLoading ? "Chargement..." : "Appliquer"}
+              {isLoading ? t("loadingButton") : t("applyButton")}
             </Button>
           )}
         </form.Subscribe>
@@ -156,7 +159,7 @@ function MembersFilters() {
             className="gap-2"
           >
             <X className="h-4 w-4" aria-hidden="true" />
-            Effacer
+            {t("clearButton")}
           </Button>
         )}
       </form>

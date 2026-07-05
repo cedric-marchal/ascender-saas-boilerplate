@@ -1,10 +1,11 @@
-import Link from "next/link";
-
 import { Menu } from "lucide-react";
+
+import { getTranslations } from "next-intl/server";
 
 import { SignOutButton } from "@/features/auth/components/sign-out-button";
 import { ROLE_DASHBOARD_URL } from "@/lib/navigation";
 
+import { Link } from "@/i18n/navigation";
 import { env } from "@/lib/env";
 import { type UserRole } from "@/lib/generated/prisma/client";
 import { getSession } from "@/lib/session";
@@ -25,6 +26,7 @@ const MOBILE_LINK_CLASS = "py-1.5 text-[13px]";
 
 async function Header() {
   const session = await getSession();
+  const t = await getTranslations("common.nav");
 
   const dashboardUrl = session
     ? ROLE_DASHBOARD_URL[session.user.role as UserRole]
@@ -43,25 +45,25 @@ async function Header() {
         </Link>
 
         <nav className="hidden items-center gap-1 md:flex">
-          <NavLink href="/tarifs">Tarifs</NavLink>
-          <NavLink href="/contact">Contact</NavLink>
+          <NavLink href="/pricing">{t("pricing")}</NavLink>
+          <NavLink href="/contact">{t("contact")}</NavLink>
         </nav>
 
         <div className="hidden items-center gap-2 md:flex">
           {session ? (
             <>
               <Button asChild variant="ghost" size="sm">
-                <Link href={dashboardUrl!}>Dashboard</Link>
+                <Link href={dashboardUrl!}>{t("dashboard")}</Link>
               </Button>
               <SignOutButton />
             </>
           ) : (
             <>
               <Button asChild variant="ghost" size="sm">
-                <Link href="/connexion">Connexion</Link>
+                <Link href="/sign-in">{t("signIn")}</Link>
               </Button>
               <Button asChild size="sm">
-                <Link href="/inscription">Créer un compte</Link>
+                <Link href="/sign-up">{t("createAccount")}</Link>
               </Button>
             </>
           )}
@@ -74,7 +76,7 @@ async function Header() {
                 type="button"
                 variant="ghost"
                 size="icon"
-                aria-label="Ouvrir le menu"
+                aria-label={t("openMenu")}
               >
                 <Menu className="size-5" aria-hidden="true" />
               </Button>
@@ -93,34 +95,34 @@ async function Header() {
                   </span>
                 </SheetTitle>
                 <SheetDescription className="sr-only">
-                  Menu de navigation du site
+                  {t("menuDescription")}
                 </SheetDescription>
               </SheetHeader>
 
               <nav className="mt-6 flex-1 space-y-6 overflow-y-auto px-0">
                 <div className="space-y-1">
                   <p className="text-muted-foreground mb-2 px-3 text-xs font-semibold uppercase tracking-wider">
-                    Navigation
+                    {t("navigationLabel")}
                   </p>
                   <ul className="space-y-0.5">
                     <li>
                       <SheetClose asChild>
                         <NavLink href="/" className={MOBILE_LINK_CLASS}>
-                          Accueil
+                          {t("home")}
                         </NavLink>
                       </SheetClose>
                     </li>
                     <li>
                       <SheetClose asChild>
-                        <NavLink href="/tarifs" className={MOBILE_LINK_CLASS}>
-                          Tarifs
+                        <NavLink href="/pricing" className={MOBILE_LINK_CLASS}>
+                          {t("pricing")}
                         </NavLink>
                       </SheetClose>
                     </li>
                     <li>
                       <SheetClose asChild>
                         <NavLink href="/contact" className={MOBILE_LINK_CLASS}>
-                          Contact
+                          {t("contact")}
                         </NavLink>
                       </SheetClose>
                     </li>
@@ -129,7 +131,7 @@ async function Header() {
 
                 <div className="space-y-1">
                   <p className="text-muted-foreground mb-2 px-3 text-xs font-semibold uppercase tracking-wider">
-                    Compte
+                    {t("accountLabel")}
                   </p>
                   {session ? (
                     <div className="space-y-2 px-3">
@@ -138,7 +140,7 @@ async function Header() {
                         variant="ghost"
                         className="w-full justify-start"
                       >
-                        <Link href={dashboardUrl!}>Dashboard</Link>
+                        <Link href={dashboardUrl!}>{t("dashboard")}</Link>
                       </Button>
                       <SignOutButton />
                     </div>
@@ -147,20 +149,20 @@ async function Header() {
                       <li>
                         <SheetClose asChild>
                           <NavLink
-                            href="/connexion"
+                            href="/sign-in"
                             className={MOBILE_LINK_CLASS}
                           >
-                            Connexion
+                            {t("signIn")}
                           </NavLink>
                         </SheetClose>
                       </li>
                       <li>
                         <SheetClose asChild>
                           <NavLink
-                            href="/inscription"
+                            href="/sign-up"
                             className={MOBILE_LINK_CLASS}
                           >
-                            Inscription
+                            {t("signUp")}
                           </NavLink>
                         </SheetClose>
                       </li>

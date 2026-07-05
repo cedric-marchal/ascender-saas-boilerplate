@@ -1,9 +1,13 @@
+import { useTranslations } from "next-intl";
+
 import { Main } from "@/components/main";
 import { Skeleton } from "@/components/ui/skeleton";
 
 function OrganizationBillingLoading() {
+  const t = useTranslations("billing");
+
   return (
-    <Main aria-busy="true" aria-label="Chargement...">
+    <Main aria-busy="true" aria-label={t("orgLoadingLabel")}>
       <div className="flex flex-col gap-6 p-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">

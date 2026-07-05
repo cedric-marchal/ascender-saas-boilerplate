@@ -34,16 +34,22 @@ const ALLOWED_PRICE_IDS: string[] = Object.values(PLAN_CONFIG).map(
   (plan) => plan.priceId,
 );
 
-function getPlanLabel(priceId: string | null): string {
+/**
+ * Returns the plan's display label (a proper noun, e.g. "Pro" — identical in
+ * every locale, no translation needed), or `null` when the price ID is
+ * unknown. Callers render the locale-aware fallback (e.g. `t("planUnknown")`)
+ * themselves.
+ */
+function getPlanLabel(priceId: string | null): string | null {
   if (!priceId) {
-    return "Inconnu";
+    return null;
   }
 
   const plan = Object.values(PLAN_CONFIG).find(
     (config) => config.priceId === priceId,
   );
 
-  return plan?.label ?? "Inconnu";
+  return plan?.label ?? null;
 }
 
 function getPriceIds(...plans: PlanKey[]): string[] {

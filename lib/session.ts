@@ -3,7 +3,10 @@ import "server-only";
 import { cache } from "react";
 
 import { headers } from "next/headers";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
+
+import { redirect } from "@/i18n/navigation";
+import { getLocale } from "next-intl/server";
 
 import { auth } from "@/lib/auth";
 import { UserRole } from "@/lib/generated/prisma/client";
@@ -23,15 +26,15 @@ type Session = Omit<RawSession, "user"> & {
 
 function parseUserRole(role: string): UserRole {
   if (!Object.values(UserRole).includes(role as UserRole)) {
-    throw new Error(`Role invalide dans la session: ${role}`);
+    throw new Error(`Invalid role in session: ${role}`);
   }
 
   return role as UserRole;
 }
 
 /**
- * Récupère la session (mémorisée pendant le rendu)
- * Retourne null si non connecté
+ * Retrieves the session (memoized during rendering)
+ * Returns null if not signed in
  */
 const getSession = cache(async (): Promise<Session | null> => {
   const session = await auth.api.getSession({
@@ -55,35 +58,39 @@ const getSession = cache(async (): Promise<Session | null> => {
 });
 
 /**
- * Vérifie que l'utilisateur n'est pas connecté (visiteur)
- * Redirige vers le dashboard approprié selon le rôle si connecté
- * À utiliser dans les pages publiques réservées aux visiteurs (connexion, inscription, etc.)
+ * Verifies the user is not signed in (guest)
+ * Redirects to the appropriate dashboard by role if signed in
+ * Use in public pages reserved for guests (sign-in, sign-up, etc.)
  */
 const requireGuest = async (): Promise<void> => {
   const session = await getSession();
 
   if (session) {
-    redirect(ROLE_DASHBOARD_URL[session.user.role]);
+    const locale = await getLocale();
+
+    redirect({ href: ROLE_DASHBOARD_URL[session.user.role], locale });
   }
 };
 
 /**
- * Récupère la session ou redirige vers connexion
- * À utiliser dans CHAQUE page protégée
+ * Retrieves the session or redirects to sign-in
+ * Use in EVERY protected page
  */
 const requireSession = async (): Promise<Session> => {
   const session = await getSession();
 
   if (!session) {
-    return redirect("/connexion");
+    const locale = await getLocale();
+
+    return redirect({ href: "/sign-in", locale });
   }
 
   return session;
 };
 
 /**
- * Récupère la session customer ou affiche 404
- * À utiliser dans les pages customer ne nécessitant pas d'email vérifié
+ * Retrieves the customer session or shows 404
+ * Use in customer pages that do not require a verified email
  */
 const requireCustomer = async (): Promise<Session> => {
   const session = await requireSession();
@@ -96,23 +103,25 @@ const requireCustomer = async (): Promise<Session> => {
 };
 
 /**
- * Récupère la session customer et vérifie que l'email est vérifié
- * Redirige vers /dashboard/parametres si l'email n'est pas vérifié
- * À utiliser dans les pages customer nécessitant un email vérifié
+ * Retrieves the customer session and verifies the email is verified
+ * Redirects to /dashboard/settings if the email is not verified
+ * Use in customer pages that require a verified email
  */
 const requireCustomerVerifiedEmail = async (): Promise<Session> => {
   const session = await requireCustomer();
 
   if (!session.user.emailVerified) {
-    return redirect("/dashboard/parametres");
+    const locale = await getLocale();
+
+    return redirect({ href: "/dashboard/settings", locale });
   }
 
   return session;
 };
 
 /**
- * Récupère la session admin ou affiche 404
- * À utiliser dans les pages admin ne nécessitant pas d'email vérifié
+ * Retrieves the admin session or shows 404
+ * Use in admin pages that do not require a verified email
  */
 const requireAdmin = async (): Promise<Session> => {
   const session = await requireSession();
@@ -125,23 +134,25 @@ const requireAdmin = async (): Promise<Session> => {
 };
 
 /**
- * Récupère la session admin et vérifie que l'email est vérifié
- * Affiche 404 si non admin ou si l'email n'est pas vérifié
- * À utiliser dans les pages admin nécessitant un email vérifié
+ * Retrieves the admin session and verifies the email is verified
+ * Shows 404 if not admin or if the email is not verified
+ * Use in admin pages that require a verified email
  */
 const requireAdminVerifiedEmail = async (): Promise<Session> => {
   const session = await requireAdmin();
 
   if (!session.user.emailVerified) {
-    return redirect("/admin/parametres");
+    const locale = await getLocale();
+
+    return redirect({ href: "/admin/settings", locale });
   }
 
   return session;
 };
 
 /**
- * Vérifie que l'utilisateur est membre de l'organisation donnée
- * Lance une ForbiddenError si non membre
+ * Verifies the user is a member of the given organization
+ * Throws a ForbiddenError if not a member
  */
 async function requireOrganizationMembership(
   userId: string,
@@ -158,7 +169,7 @@ async function requireOrganizationMembership(
   });
 
   if (!membership) {
-    throw new ForbiddenError("Vous n'êtes pas membre de cette organisation");
+    throw new ForbiddenError("errors.common.notOrganizationMember");
   }
 
   return membership.role;

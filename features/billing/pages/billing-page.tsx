@@ -1,6 +1,7 @@
-import Link from "next/link";
-
+import { LOCALE_METADATA } from "@/i18n/locale-metadata.constant";
+import { Link } from "@/i18n/navigation";
 import { AlertCircle, CreditCard } from "lucide-react";
+import { useLocale, useTranslations, type Locale } from "next-intl";
 
 import { BillingPortalButton } from "@/features/billing/components/billing-portal-button";
 import { InvoiceList } from "@/features/billing/components/invoice-list";
@@ -23,6 +24,9 @@ type BillingPageProps = {
 };
 
 function BillingPage({ billing }: BillingPageProps) {
+  const t = useTranslations("billing");
+  const locale = useLocale();
+  const bcp47 = LOCALE_METADATA[locale as Locale].bcp47;
   const { invoices, subscriptions } = billing;
 
   const activeSubscription = subscriptions.find(
@@ -47,11 +51,9 @@ function BillingPage({ billing }: BillingPageProps) {
           </div>
           <div>
             <h1 className="text-2xl font-semibold tracking-tight">
-              Facturation
+              {t("title")}
             </h1>
-            <p className="text-muted-foreground text-sm">
-              Gérez vos abonnements et vos informations de paiement
-            </p>
+            <p className="text-muted-foreground text-sm">{t("subtitle")}</p>
           </div>
         </div>
         {subscriptions.length > 0 && <BillingPortalButton />}
@@ -66,14 +68,14 @@ function BillingPage({ billing }: BillingPageProps) {
 
           {invoices.length > 0 && (
             <div className="space-y-4">
-              <h2 className="text-lg font-semibold">Historique des factures</h2>
+              <h2 className="text-lg font-semibold">{t("invoiceHistory")}</h2>
               <InvoiceList invoices={invoices} />
             </div>
           )}
 
           <div className="flex justify-center">
             <Button type="button" asChild>
-              <Link href="/tarifs">Découvrir nos offres</Link>
+              <Link href="/pricing">{t("discoverOffers")}</Link>
             </Button>
           </div>
         </div>
@@ -83,30 +85,31 @@ function BillingPage({ billing }: BillingPageProps) {
         <section className="space-y-6">
           <div className="grid gap-6 lg:grid-cols-2">
             <div className="space-y-4">
-              <h2 className="text-lg font-semibold">Statut</h2>
+              <h2 className="text-lg font-semibold">{t("status")}</h2>
               <SubscriptionStatusCard subscriptions={subscriptions} />
             </div>
 
             {activeSubscription && (
               <div className="space-y-4">
-                <h2 className="text-lg font-semibold">Abonnement actif</h2>
+                <h2 className="text-lg font-semibold">
+                  {t("activeSubscription")}
+                </h2>
                 <SubscriptionCard subscription={activeSubscription} />
 
                 {activeSubscription.cancelAtPeriodEnd && (
                   <Alert variant="destructive">
                     <AlertCircle className="size-4" aria-hidden="true" />
-                    <AlertTitle>Abonnement en cours d'annulation</AlertTitle>
+                    <AlertTitle>{t("cancelingTitle")}</AlertTitle>
                     <AlertDescription>
-                      Votre abonnement sera annulé le{" "}
-                      {new Date(
-                        activeSubscription.currentPeriodEnd * 1000,
-                      ).toLocaleDateString("fr-FR", {
-                        day: "numeric",
-                        month: "long",
-                        year: "numeric",
+                      {t("cancelingDescription", {
+                        date: new Date(
+                          activeSubscription.currentPeriodEnd * 1000,
+                        ).toLocaleDateString(bcp47, {
+                          day: "numeric",
+                          month: "long",
+                          year: "numeric",
+                        }),
                       })}
-                      . Vous pouvez réactiver votre abonnement via le portail de
-                      facturation.
                     </AlertDescription>
                   </Alert>
                 )}
@@ -115,13 +118,13 @@ function BillingPage({ billing }: BillingPageProps) {
           </div>
 
           <div className="space-y-4">
-            <h2 className="text-lg font-semibold">Historique des factures</h2>
+            <h2 className="text-lg font-semibold">{t("invoiceHistory")}</h2>
             <InvoiceList invoices={invoices} />
           </div>
 
           {inactiveSubscriptions.length > 0 && (
             <div className="space-y-4">
-              <h2 className="text-lg font-semibold">Anciens abonnements</h2>
+              <h2 className="text-lg font-semibold">{t("oldSubscriptions")}</h2>
 
               <div className="grid gap-4">
                 {inactiveSubscriptions.map(

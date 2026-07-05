@@ -1,13 +1,17 @@
+import { useTranslations } from "next-intl";
+
 import { Main } from "@/components/main";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 
 function UserDetailLoading() {
+  const t = useTranslations("admin.userDetail");
+
   return (
     <Main
       className="flex flex-col gap-6 p-6"
       aria-busy="true"
-      aria-label="Chargement du détail utilisateur"
+      aria-label={t("loadingLabel")}
     >
       <Skeleton className="h-8 w-48" />
 

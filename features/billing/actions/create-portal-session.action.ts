@@ -1,5 +1,7 @@
 "use server";
 
+import { getLocale } from "next-intl/server";
+
 import { createPortalSession } from "@/features/billing/services/stripe/create-portal-session.service";
 
 import { authenticatedRatelimit } from "@/lib/ratelimit";
@@ -16,14 +18,15 @@ const createPortalSessionAction = orgActionClient
   })
   .action(async ({ ctx }) => {
     if (ctx.memberRole !== "owner" && ctx.memberRole !== "admin") {
-      throw new ForbiddenError(
-        "Seuls les propriétaires et administrateurs peuvent accéder au portail de facturation",
-      );
+      throw new ForbiddenError("errors.billing.portalAccessForbidden");
     }
+
+    const locale = await getLocale();
 
     const result = await createPortalSession({
       organizationId: ctx.organizationId,
       userId: ctx.userId,
+      locale,
     });
 
     return result;

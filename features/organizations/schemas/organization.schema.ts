@@ -1,26 +1,30 @@
 import { z } from "zod";
 
+/**
+ * Messages are translation KEYS (resolved against the `validation` message
+ * namespace) — see `utils/errors/translate-field-errors.ts`.
+ */
 const CreateOrganizationSchema = z.object({
   name: z
     .string()
-    .min(1, "Le nom est requis")
-    .max(100, "Le nom doit contenir moins de 100 caractères")
+    .min(1, "validation.name.required")
+    .max(100, "validation.name.tooLong")
     .trim(),
 });
 
 const UpdateOrganizationSchema = z.object({
   organizationId: z
     .string()
-    .min(1, "L'identifiant de l'organisation est requis"),
+    .min(1, "validation.organizations.organizationIdRequired"),
   name: z
     .string()
-    .min(1, "Le nom est requis")
-    .max(100, "Le nom doit contenir moins de 100 caractères")
+    .min(1, "validation.name.required")
+    .max(100, "validation.name.tooLong")
     .trim()
     .optional(),
   logo: z
     .string()
-    .max(500, "L'URL du logo doit contenir moins de 500 caractères")
+    .max(500, "validation.organizations.logoUrlTooLong")
     .trim()
     .optional(),
 });
