@@ -1,0 +1,85 @@
+import { getTranslator } from "@/i18n/get-translator";
+import type { Locale } from "next-intl";
+import {
+  Body,
+  Button,
+  Container,
+  Head,
+  Heading,
+  Hr,
+  Html,
+  Preview,
+  Section,
+  Tailwind,
+  Text,
+} from "react-email";
+
+import { env } from "@/lib/env";
+
+type PaymentFailedEmailProps = {
+  organizationName: string;
+  billingLink: string;
+  locale: Locale;
+};
+
+function PaymentFailedEmail({
+  organizationName,
+  billingLink,
+  locale,
+}: PaymentFailedEmailProps) {
+  const APP_NAME = env.NEXT_PUBLIC_APP_NAME;
+  const translate = getTranslator(locale);
+
+  return (
+    <Html>
+      <Head />
+      <Preview>
+        {translate("emails.paymentFailed.preview", {
+          organizationName,
+          appName: APP_NAME,
+        })}
+      </Preview>
+      <Tailwind>
+        <Body className="bg-zinc-100 font-sans">
+          <Container className="mx-auto my-10 max-w-xl rounded-md border border-zinc-200 bg-white p-8">
+            <Heading className="m-0 mb-6 text-xl font-semibold text-zinc-900">
+              {translate("emails.paymentFailed.heading")}
+            </Heading>
+
+            <Text className="text-sm leading-relaxed text-zinc-700">
+              {translate("emails.paymentFailed.greeting")}
+            </Text>
+
+            <Text className="text-sm leading-relaxed text-zinc-700">
+              {translate("emails.paymentFailed.body", {
+                organizationName,
+                appName: APP_NAME,
+              })}
+            </Text>
+
+            <Section className="my-8 text-center">
+              <Button
+                href={billingLink}
+                className="rounded-md bg-zinc-900 px-6 py-3 text-sm font-medium text-white"
+              >
+                {translate("emails.paymentFailed.cta")}
+              </Button>
+            </Section>
+
+            <Hr className="my-6 border-zinc-200" />
+
+            <Text className="m-0 text-xs text-zinc-500">
+              {translate("emails.paymentFailed.fallbackIntro")}
+            </Text>
+            <Text className="m-0 text-xs break-all text-zinc-500">
+              {billingLink}
+            </Text>
+          </Container>
+        </Body>
+      </Tailwind>
+    </Html>
+  );
+}
+
+export { PaymentFailedEmail };
+export type { PaymentFailedEmailProps };

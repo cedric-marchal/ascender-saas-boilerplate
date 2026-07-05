@@ -36,6 +36,13 @@ const ACTIVE_SUBSCRIPTION_STATUSES: SubscriptionStatus[] = [
   SubscriptionStatus.PAST_DUE,
 ];
 
+// Statuses that mean a payment attempt failed and the customer must act
+// (update their payment method) to keep the subscription from being canceled.
+const PAST_DUE_SUBSCRIPTION_STATUSES: SubscriptionStatus[] = [
+  SubscriptionStatus.PAST_DUE,
+  SubscriptionStatus.UNPAID,
+];
+
 // Stripe's documented subscription status values (lowercase, as sent by the API).
 // Using a typed Record ensures exhaustive mapping: TypeScript errors if any key is missing.
 const STRIPE_SUBSCRIPTION_STATUSES = [
@@ -68,6 +75,7 @@ const STRIPE_TO_DB_SUBSCRIPTION_STATUS: Record<
 export {
   ACTIVE_SUBSCRIPTION_STATUSES,
   ALL_SUBSCRIPTION_STATUSES,
+  PAST_DUE_SUBSCRIPTION_STATUSES,
   STRIPE_TO_DB_SUBSCRIPTION_STATUS,
   STRIPE_SUBSCRIPTION_STATUSES,
   subscriptionStatusLabels,
