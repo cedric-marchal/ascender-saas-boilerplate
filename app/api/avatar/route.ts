@@ -15,7 +15,7 @@ async function POST(request: Request) {
     const session = await getSession();
 
     if (!session) {
-      throw new UnauthorizedError("Vous devez être connecté");
+      throw new UnauthorizedError("errors.common.unauthenticated");
     }
 
     await checkRatelimit(authenticatedRatelimit, session.user.id);

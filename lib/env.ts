@@ -12,7 +12,7 @@ const env = createEnv({
     DATABASE_URL: z
       .string()
       .min(1)
-      .pipe(z.url({ message: "URL de base de données invalide" })),
+      .pipe(z.url({ message: "Invalid database URL" })),
 
     R2_ACCOUNT_ID: z.string().min(1),
     R2_ACCESS_KEY_ID: z.string().min(1),
@@ -23,15 +23,15 @@ const env = createEnv({
     RESEND_EMAIL_NOREPLY: z
       .string()
       .min(1)
-      .pipe(z.email({ message: "Format d'email invalide pour noreply" })),
+      .pipe(z.email({ message: "Invalid email format for noreply" })),
     RESEND_EMAIL_CONTACT: z
       .string()
       .min(1)
-      .pipe(z.email({ message: "Format d'email invalide pour contact" })),
+      .pipe(z.email({ message: "Invalid email format for contact" })),
     RESEND_EMAIL_SECURITY: z
       .string()
       .min(1)
-      .pipe(z.email({ message: "Format d'email invalide pour security" })),
+      .pipe(z.email({ message: "Invalid email format for security" })),
 
     UPSTASH_REDIS_REST_URL: z.string().min(1),
     UPSTASH_REDIS_REST_TOKEN: z.string().min(1),
@@ -45,19 +45,17 @@ const env = createEnv({
     NEXT_PUBLIC_BASE_URL: z
       .string()
       .min(1)
-      .pipe(z.url({ message: "URL invalide" })),
+      .pipe(z.url({ message: "Invalid URL" })),
     NEXT_PUBLIC_R2_PUBLIC_URL: z
       .string()
       .min(1)
-      .pipe(z.url({ message: "URL R2 invalide" })),
+      .pipe(z.url({ message: "Invalid R2 URL" })),
     NEXT_PUBLIC_VERCEL_MAX_UPLOAD_SIZE: z.coerce
       .number({
-        message: "La taille maximale de fichier est de 4.5MB",
+        message: "Maximum file size is 4.5MB",
       })
       .default(4718592)
-      .pipe(
-        z.number({ message: "La taille maximale de fichier est de 4.5MB" }),
-      ),
+      .pipe(z.number({ message: "Maximum file size is 4.5MB" })),
   },
   runtimeEnv: {
     // Server

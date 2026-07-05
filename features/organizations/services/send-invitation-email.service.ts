@@ -1,5 +1,8 @@
 import "server-only";
 
+import { getTranslator } from "@/i18n/get-translator";
+import type { Locale } from "next-intl";
+
 import { OrganizationInvitationEmail } from "@/features/organizations/emails/organization-invitation-email";
 
 import { env } from "@/lib/env";
@@ -14,23 +17,29 @@ type SendInvitationEmailInput = {
   inviterEmail: string;
   organizationName: string;
   role: string;
+  locale: Locale;
 };
 
 async function sendInvitationEmail(
   input: SendInvitationEmailInput,
 ): Promise<void> {
   const acceptLink = `${env.NEXT_PUBLIC_BASE_URL}/accepter-invitation/${input.invitationId}`;
+  const translate = getTranslator(input.locale);
 
   await sendEmailSafe({
-    from: `${APP_NAME} <${env.RESEND_EMAIL_NOREPLY}>`,
+    from: `${translate("emails.common.noreplyFromName", { appName: APP_NAME })} <${env.RESEND_EMAIL_NOREPLY}>`,
     to: input.email,
-    subject: `Invitation à rejoindre ${input.organizationName} sur ${APP_NAME}`,
+    subject: translate("emails.organizationInvitation.subject", {
+      appName: APP_NAME,
+      organizationName: input.organizationName,
+    }),
     react: OrganizationInvitationEmail({
       inviterName: input.inviterName,
       inviterEmail: input.inviterEmail,
       organizationName: input.organizationName,
       role: input.role,
       acceptLink,
+      locale: input.locale,
     }),
   });
 }

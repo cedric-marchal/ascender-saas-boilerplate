@@ -1,3 +1,5 @@
+import { getTranslator } from "@/i18n/get-translator";
+import type { Locale } from "next-intl";
 import {
   Body,
   Container,
@@ -16,39 +18,48 @@ type ContactEmailProps = {
   email: string;
   subject: string;
   message: string;
+  locale: Locale;
 };
 
-function ContactEmail({ name, email, subject, message }: ContactEmailProps) {
+function ContactEmail({
+  name,
+  email,
+  subject,
+  message,
+  locale,
+}: ContactEmailProps) {
+  const translate = getTranslator(locale);
+
   return (
     <Html>
       <Head />
       <Preview>
-        Nouveau message de {name} : {subject}
+        {translate("emails.contact.preview", { name, subject })}
       </Preview>
       <Tailwind>
         <Body className="bg-zinc-100 font-sans">
           <Container className="mx-auto my-10 max-w-xl rounded-md border border-zinc-200 bg-white p-8">
             <Heading className="m-0 mb-6 text-xl font-semibold text-zinc-900">
-              Nouveau message de contact
+              {translate("emails.contact.heading")}
             </Heading>
 
             <Section className="mb-4">
               <Text className="m-0 mb-1 text-xs font-medium tracking-wide text-zinc-500 uppercase">
-                Nom
+                {translate("emails.contact.nameLabel")}
               </Text>
               <Text className="m-0 text-sm text-zinc-900">{name}</Text>
             </Section>
 
             <Section className="mb-4">
               <Text className="m-0 mb-1 text-xs font-medium tracking-wide text-zinc-500 uppercase">
-                Email
+                {translate("emails.contact.emailLabel")}
               </Text>
               <Text className="m-0 text-sm text-zinc-900">{email}</Text>
             </Section>
 
             <Section className="mb-4">
               <Text className="m-0 mb-1 text-xs font-medium tracking-wide text-zinc-500 uppercase">
-                Sujet
+                {translate("emails.contact.subjectLabel")}
               </Text>
               <Text className="m-0 text-sm text-zinc-900">{subject}</Text>
             </Section>
@@ -57,7 +68,7 @@ function ContactEmail({ name, email, subject, message }: ContactEmailProps) {
 
             <Section className="mb-4">
               <Text className="m-0 mb-1 text-xs font-medium tracking-wide text-zinc-500 uppercase">
-                Message
+                {translate("emails.contact.messageLabel")}
               </Text>
               <Text className="m-0 text-sm leading-relaxed whitespace-pre-wrap text-zinc-900">
                 {message}
@@ -67,8 +78,7 @@ function ContactEmail({ name, email, subject, message }: ContactEmailProps) {
             <Hr className="my-6 border-zinc-200" />
 
             <Text className="m-0 text-xs text-zinc-500">
-              Vous pouvez répondre directement à cet email pour contacter {name}
-              .
+              {translate("emails.contact.footer", { name })}
             </Text>
           </Container>
         </Body>

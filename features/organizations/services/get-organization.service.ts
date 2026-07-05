@@ -52,13 +52,13 @@ async function getOrganization(
   ]);
 
   if (!organization) {
-    throw new NotFoundError("Organisation introuvable");
+    throw new NotFoundError("errors.organizations.notFound");
   }
 
   const currentMember = organization.members[0];
 
   if (!currentMember) {
-    throw new ForbiddenError("Vous n'êtes pas membre de cette organisation");
+    throw new ForbiddenError("errors.common.notOrganizationMember");
   }
 
   return {

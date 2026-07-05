@@ -20,9 +20,7 @@ const createCheckoutAction = orgActionClient
   .inputSchema(CreateCheckoutSessionSchema)
   .action(async ({ parsedInput, ctx }) => {
     if (ctx.memberRole !== "owner" && ctx.memberRole !== "admin") {
-      throw new ForbiddenError(
-        "Seuls les propriétaires et administrateurs peuvent gérer la facturation",
-      );
+      throw new ForbiddenError("errors.billing.manageForbidden");
     }
 
     const result = await createCheckoutSession({

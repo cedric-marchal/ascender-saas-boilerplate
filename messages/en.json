@@ -318,7 +318,8 @@
       "eventCount": "{count, plural, one {# event} other {# events}}",
       "empty": "No activity recorded yet.",
       "loadingLabel": "Loading...",
-      "byUser": "By {name} ({email})"
+      "byUser": "By {name} ({email})",
+      "unknownUser": "Unknown user"
     },
     "featureLabels": {
       "advancedAnalytics": "Advanced analytics",
@@ -866,6 +867,157 @@
         "label": "Marketing",
         "description": "These cookies are used to show you personalized content and relevant ads."
       }
+    }
+  },
+  "errors": {
+    "common": {
+      "unauthenticated": "You must be signed in",
+      "notOrganizationMember": "You are not a member of this organization",
+      "noActiveOrganization": "No active organization. Please select an organization.",
+      "adminOnly": "Unauthorized access. You must be an administrator.",
+      "unexpectedServerError": "An unexpected error occurred. Please try again.",
+      "unexpectedApiError": "An unexpected error occurred",
+      "validationError": "A validation error occurred",
+      "tooManyRequests": "Too many requests. Please try again later."
+    },
+    "organizations": {
+      "notFound": "Organization not found",
+      "memberNotFound": "Member not found",
+      "invitationNotFound": "Invitation not found or already processed",
+      "currentMemberNotFound": "Your membership was not found in the organization",
+      "removeMembersForbidden": "Only owners and administrators can remove members",
+      "cannotRemoveLastOwner": "Cannot remove the last owner. Transfer ownership first.",
+      "updateForbidden": "Only owners and administrators can update the organization",
+      "inviteForbidden": "Only owners and administrators can invite members",
+      "transferOwnerOnly": "Only the owner can transfer organization ownership",
+      "alreadyOwner": "You are already the owner of this organization",
+      "auditLogForbidden": "Only owners and administrators can view the audit log",
+      "changeRoleForbidden": "Only owners and administrators can change roles",
+      "cannotDemoteLastOwner": "Cannot demote the last owner. Transfer ownership first.",
+      "seatCapReached": "Your plan does not allow adding more than {seatCap, plural, one {# member} other {# members}}. Upgrade to a higher plan to invite more members."
+    },
+    "projects": {
+      "notFound": "Project not found"
+    },
+    "account": {
+      "userNotFound": "User not found",
+      "emailAlreadyUsed": "This email address is already in use",
+      "onlyAdminCannotDelete": "You are the only administrator. You cannot delete your account.",
+      "confirmationEmailMismatch": "The confirmation email does not match your email address"
+    },
+    "billing": {
+      "manageForbidden": "Only owners and administrators can manage billing",
+      "portalAccessForbidden": "Only owners and administrators can access the billing portal",
+      "noStripeCustomer": "No Stripe customer found. You must subscribe to a plan first.",
+      "portalSessionFailed": "Unable to create the billing portal session",
+      "stripeAccountDeleted": "Your Stripe account has been deleted. Please contact support.",
+      "invalidPrice": "Invalid or unauthorized price",
+      "alreadySubscribed": "This organization already has an active subscription. Manage it from your billing dashboard.",
+      "checkoutSessionFailed": "Unable to create the checkout session",
+      "accessForbidden": "Only owners and administrators can access billing"
+    },
+    "storage": {
+      "keyRequired": "The file key is required",
+      "keyTooLong": "The file key is too long (max {maxLength} characters)",
+      "invalidKey": "The file key contains invalid characters",
+      "contentRequired": "The file content is required",
+      "contentTypeRequired": "The content type is required",
+      "serviceUnavailable": "The storage service is temporarily unavailable",
+      "invalidExpiresIn": "The expiration duration must be between {min} and {max} seconds"
+    },
+    "image": {
+      "emptyFile": "The image file is empty",
+      "unrecognizedFormat": "Unrecognized image format",
+      "unsupportedFormat": "Unsupported image format. Accepted formats: JPEG, PNG, WebP",
+      "dimensionsUnreadable": "Unable to read the image dimensions",
+      "tooLarge": "The image is too large (max {maxWidth}x{maxHeight}px)",
+      "invalid": "The provided file is not a valid image",
+      "optimizeFailed": "Failed to optimize the image",
+      "avatarOptimizeFailed": "Failed to optimize the avatar",
+      "bannerOptimizeFailed": "Failed to optimize the banner",
+      "metadataUnreadable": "Unable to read the image metadata"
+    }
+  },
+  "emails": {
+    "common": {
+      "securityFromName": "{appName} Security",
+      "noreplyFromName": "{appName}"
+    },
+    "resetPassword": {
+      "subject": "Reset your {appName} password",
+      "preview": "Reset your {appName} password",
+      "heading": "Password reset",
+      "greeting": "Hello {name},",
+      "body": "You requested to reset your password on {appName}. Click the button below to create a new password.",
+      "cta": "Reset my password",
+      "expiry": "This link expires in 1 hour. If you did not request this reset, you can ignore this email.",
+      "fallbackIntro": "If the button doesn't work, copy this link into your browser:"
+    },
+    "welcome": {
+      "subject": "Verify your {appName} email address",
+      "preview": "Welcome to {appName} - Verify your email address",
+      "heading": "Welcome to {appName}!",
+      "greeting": "Hello {name},",
+      "body": "Thanks for signing up on {appName}. To activate your account and access all features, please confirm your email address by clicking the button below.",
+      "cta": "Verify my email address",
+      "expiry": "This link expires in 24 hours. If you did not create an account on {appName}, you can ignore this email.",
+      "fallbackIntro": "If the button doesn't work, copy this link into your browser:"
+    },
+    "passwordChanged": {
+      "subject": "Your {appName} password has been changed",
+      "preview": "Your {appName} password has been changed",
+      "heading": "Password changed",
+      "greeting": "Hello {name},",
+      "body": "We confirm that your {appName} password has been changed successfully.",
+      "warningIntro": "If you did not make this change, please immediately",
+      "resetPasswordLink": "reset your password",
+      "and": "and",
+      "contactLink": "contact our team",
+      "footer": "This email was sent automatically following a change to your password. If you have any questions, feel free to contact us."
+    },
+    "emailChangeNotification": {
+      "subject": "Email address change requested on {appName}",
+      "preview": "Email address change requested on {appName}",
+      "heading": "Email address change requested",
+      "greeting": "Hello {name},",
+      "body": "A request to change your email address on {appName} has been submitted. This change will only take effect after the new address is verified.",
+      "warningIntro": "If you did not make this request, please immediately",
+      "resetPasswordLink": "reset your password",
+      "and": "and",
+      "contactLink": "contact our team",
+      "footer": "This email was sent automatically following an email address change request. If you have any questions, feel free to contact us."
+    },
+    "organizationInvitation": {
+      "subject": "Invitation to join {organizationName} on {appName}",
+      "preview": "{inviterName} invites you to join {organizationName} on {appName}",
+      "heading": "You have been invited to join {organizationName}",
+      "greeting": "Hello,",
+      "body": "{inviterName} ({inviterEmail}) invites you to join the organization {organizationName} on {appName} as {role}.",
+      "cta": "Accept the invitation",
+      "expiry": "Click the button below to accept the invitation. This link is valid for 48 hours.",
+      "ignore": "If you were not expecting this invitation, you can ignore this email.",
+      "fallbackIntro": "If the button doesn't work, copy this link into your browser:"
+    },
+    "accountDeleted": {
+      "subject": "Your {appName} account has been deleted",
+      "preview": "Your {appName} account has been deleted",
+      "heading": "Account deleted",
+      "greeting": "Hello {name},",
+      "body": "We confirm that your {appName} account has been deleted successfully. All your associated data has been permanently deleted.",
+      "comeBack": "If you ever want to come back to {appName}, you can create a new account at any time.",
+      "warningIntro": "If you did not request this deletion or have any questions, please",
+      "contactLink": "contact our team",
+      "footer": "This email was sent automatically following the deletion of your account. If you have any questions, feel free to contact us."
+    },
+    "contact": {
+      "subject": "New message from {name}: {subject}",
+      "preview": "New message from {name}: {subject}",
+      "heading": "New contact message",
+      "nameLabel": "Name",
+      "emailLabel": "Email",
+      "subjectLabel": "Subject",
+      "messageLabel": "Message",
+      "footer": "You can reply directly to this email to contact {name}."
     }
   }
 }

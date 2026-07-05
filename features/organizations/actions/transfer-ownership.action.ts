@@ -15,9 +15,7 @@ const transferOwnershipAction = orgActionClient
   .inputSchema(TransferOwnershipSchema)
   .action(async ({ parsedInput, ctx }) => {
     if (ctx.memberRole !== "owner") {
-      throw new ForbiddenError(
-        "Seul le propriétaire peut transférer la propriété de l'organisation",
-      );
+      throw new ForbiddenError("errors.organizations.transferOwnerOnly");
     }
 
     const targetMember = await prisma.member.findFirst({
@@ -33,13 +31,11 @@ const transferOwnershipAction = orgActionClient
     });
 
     if (!targetMember) {
-      throw new NotFoundError("Membre introuvable");
+      throw new NotFoundError("errors.organizations.memberNotFound");
     }
 
     if (targetMember.userId === ctx.userId) {
-      throw new ForbiddenError(
-        "Vous êtes déjà propriétaire de cette organisation",
-      );
+      throw new ForbiddenError("errors.organizations.alreadyOwner");
     }
 
     const currentOwnerMember = await prisma.member.findFirst({
@@ -54,7 +50,7 @@ const transferOwnershipAction = orgActionClient
     });
 
     if (!currentOwnerMember) {
-      throw new NotFoundError("Votre membre introuvable dans l'organisation");
+      throw new NotFoundError("errors.organizations.currentMemberNotFound");
     }
 
     await prisma.$transaction([

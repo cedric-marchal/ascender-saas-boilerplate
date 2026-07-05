@@ -82,7 +82,7 @@ describe("createPortalSession", () => {
       ForbiddenError,
     );
     await expect(createPortalSession(validInput)).rejects.toThrow(
-      "propriétaires et administrateurs",
+      "errors.billing.portalAccessForbidden",
     );
   });
 
@@ -95,7 +95,7 @@ describe("createPortalSession", () => {
       NotFoundError,
     );
     await expect(createPortalSession(validInput)).rejects.toThrow(
-      "Aucun client Stripe trouvé",
+      "errors.billing.noStripeCustomer",
     );
   });
 
@@ -114,7 +114,7 @@ describe("createPortalSession", () => {
       BadRequestError,
     );
     await expect(createPortalSession(validInput)).rejects.toThrow(
-      "Impossible de créer la session du portail",
+      "errors.billing.portalSessionFailed",
     );
   });
 

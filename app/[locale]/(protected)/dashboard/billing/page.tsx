@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { getTranslator } from "@/i18n/get-translator";
 import type { Locale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
@@ -72,9 +73,9 @@ export default async function DashboardBillingRoute({
   });
 
   if (!membership) {
-    throw new ForbiddenError(
-      "Seuls les propriétaires et administrateurs peuvent accéder à la facturation",
-    );
+    const translate = getTranslator(locale as Locale);
+
+    throw new ForbiddenError(translate("errors.billing.accessForbidden"));
   }
 
   const [billing, organization, memberCount] = await Promise.all([

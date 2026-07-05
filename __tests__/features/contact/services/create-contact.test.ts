@@ -15,6 +15,10 @@ vi.mock("@/lib/env", () => ({
   },
 }));
 
+vi.mock("next-intl/server", () => ({
+  getLocale: vi.fn().mockResolvedValue("en"),
+}));
+
 // Import after mocks
 const { createContact } =
   await import("@/features/contact/services/create-contact.service");

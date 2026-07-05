@@ -16,9 +16,7 @@ const createPortalSessionAction = orgActionClient
   })
   .action(async ({ ctx }) => {
     if (ctx.memberRole !== "owner" && ctx.memberRole !== "admin") {
-      throw new ForbiddenError(
-        "Seuls les propriétaires et administrateurs peuvent accéder au portail de facturation",
-      );
+      throw new ForbiddenError("errors.billing.portalAccessForbidden");
     }
 
     const result = await createPortalSession({

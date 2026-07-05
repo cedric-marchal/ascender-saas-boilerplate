@@ -181,7 +181,7 @@ describe("updateProfile", () => {
         name: "Test",
         email: "test@example.com",
       }),
-    ).rejects.toThrow("Utilisateur introuvable");
+    ).rejects.toThrow("errors.account.userNotFound");
   });
 
   it("throws ConflictError if email already used", async () => {
@@ -223,7 +223,7 @@ describe("updateProfile", () => {
         name: "John Doe",
         email: "taken@example.com",
       }),
-    ).rejects.toThrow("adresse email est déjà utilisée");
+    ).rejects.toThrow("errors.account.emailAlreadyUsed");
   });
 
   it("returns emailChanged true when email changes", async () => {

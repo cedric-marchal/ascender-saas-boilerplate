@@ -1,7 +1,6 @@
-import {
-  createSafeActionClient,
-  DEFAULT_SERVER_ERROR_MESSAGE,
-} from "next-safe-action";
+import { getTranslator } from "@/i18n/get-translator";
+import { getLocale } from "next-intl/server";
+import { createSafeActionClient } from "next-safe-action";
 
 import { auth } from "@/lib/auth";
 import { UserRole } from "@/lib/generated/prisma/client";
@@ -12,21 +11,24 @@ import {
   ForbiddenError,
   UnauthorizedError,
 } from "@/utils/errors/errors";
+import { translateAppError } from "@/utils/errors/translate-app-error";
 
 function parseUserRole(role: string): UserRole {
   if (!Object.values(UserRole).includes(role as UserRole)) {
-    throw new Error(`Role invalide dans la session: ${role}`);
+    throw new Error(`Invalid role in session: ${role}`);
   }
 
   return role as UserRole;
 }
 
 export const actionClient = createSafeActionClient({
-  handleServerError(error: Error) {
+  async handleServerError(error: Error) {
     console.error("Action error:", error.message);
 
+    const locale = await getLocale();
+
     if (error instanceof AppError) {
-      return error.message;
+      return translateAppError(error, locale);
     }
 
     console.error("Unexpected action error:", error);
@@ -35,7 +37,7 @@ export const actionClient = createSafeActionClient({
       return error.message;
     }
 
-    return DEFAULT_SERVER_ERROR_MESSAGE;
+    return getTranslator(locale)("errors.common.unexpectedServerError");
   },
 });
 
@@ -50,7 +52,7 @@ export const authActionClient = actionClient.use(async ({ next }) => {
   });
 
   if (!session?.user) {
-    throw new UnauthorizedError("Vous devez être connecté");
+    throw new UnauthorizedError("errors.common.unauthenticated");
   }
 
   const activeOrganizationId =
@@ -75,9 +77,7 @@ export const authActionClient = actionClient.use(async ({ next }) => {
  */
 export const adminActionClient = authActionClient.use(async ({ next, ctx }) => {
   if (ctx.userRole !== UserRole.ADMIN) {
-    throw new ForbiddenError(
-      "Accès non autorisé. Vous devez être administrateur.",
-    );
+    throw new ForbiddenError("errors.common.adminOnly");
   }
 
   return next({ ctx });
@@ -90,9 +90,7 @@ export const adminActionClient = authActionClient.use(async ({ next, ctx }) => {
  */
 export const orgActionClient = authActionClient.use(async ({ next, ctx }) => {
   if (!ctx.activeOrganizationId) {
-    throw new ForbiddenError(
-      "Aucune organisation active. Veuillez sélectionner une organisation.",
-    );
+    throw new ForbiddenError("errors.common.noActiveOrganization");
   }
 
   const membership = await prisma.member.findFirst({
@@ -106,7 +104,7 @@ export const orgActionClient = authActionClient.use(async ({ next, ctx }) => {
   });
 
   if (!membership) {
-    throw new ForbiddenError("Vous n'êtes pas membre de cette organisation");
+    throw new ForbiddenError("errors.common.notOrganizationMember");
   }
 
   return next({

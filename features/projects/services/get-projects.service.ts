@@ -51,7 +51,7 @@ async function getProjects(
   });
 
   if (!membership) {
-    throw new ForbiddenError("Vous n'êtes pas membre de cette organisation");
+    throw new ForbiddenError("errors.common.notOrganizationMember");
   }
 
   const searchFilter = input.search

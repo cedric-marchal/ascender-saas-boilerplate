@@ -1,5 +1,7 @@
 import "server-only";
 
+import { getLocale } from "next-intl/server";
+
 import { ContactEmail } from "@/features/contact/emails/contact-email";
 
 import { env } from "@/lib/env";
@@ -13,6 +15,8 @@ type CreateContactInput = {
 };
 
 async function createContact(input: CreateContactInput): Promise<void> {
+  const locale = await getLocale();
+
   await sendEmail({
     from: `${env.NEXT_PUBLIC_APP_NAME} <${env.RESEND_EMAIL_NOREPLY}>`,
     to: env.RESEND_EMAIL_CONTACT,
@@ -23,6 +27,7 @@ async function createContact(input: CreateContactInput): Promise<void> {
       email: input.email,
       subject: input.subject,
       message: input.message,
+      locale,
     }),
   });
 }

@@ -1,3 +1,6 @@
+import { getStaticPathname } from "@/i18n/get-static-pathname";
+import { getTranslator } from "@/i18n/get-translator";
+import type { Locale } from "next-intl";
 import {
   Body,
   Container,
@@ -15,47 +18,53 @@ import { env } from "@/lib/env";
 
 type PasswordChangedEmailProps = {
   name: string;
+  locale: Locale;
 };
 
-function PasswordChangedEmail({ name }: PasswordChangedEmailProps) {
+function PasswordChangedEmail({ name, locale }: PasswordChangedEmailProps) {
   const APP_NAME = env.NEXT_PUBLIC_APP_NAME;
   const BASE_URL = env.NEXT_PUBLIC_BASE_URL;
+  const translate = getTranslator(locale);
+  const forgotPasswordLink = `${BASE_URL}${getStaticPathname("/forgot-password", locale)}`;
+  const contactLink = `${BASE_URL}${getStaticPathname("/contact", locale)}`;
 
   return (
     <Html>
       <Head />
-      <Preview>Votre mot de passe {APP_NAME} a été modifié</Preview>
+      <Preview>
+        {translate("emails.passwordChanged.preview", { appName: APP_NAME })}
+      </Preview>
       <Tailwind>
         <Body className="bg-zinc-100 font-sans">
           <Container className="mx-auto my-10 max-w-xl rounded-md border border-zinc-200 bg-white p-8">
             <Heading className="m-0 mb-6 text-xl font-semibold text-zinc-900">
-              Mot de passe modifié
+              {translate("emails.passwordChanged.heading")}
             </Heading>
 
             <Text className="text-sm leading-relaxed text-zinc-700">
-              Bonjour {name},
+              {translate("emails.passwordChanged.greeting", { name })}
             </Text>
 
             <Text className="text-sm leading-relaxed text-zinc-700">
-              Nous vous confirmons que votre mot de passe {APP_NAME} a été
-              modifié avec succès.
+              {translate("emails.passwordChanged.body", {
+                appName: APP_NAME,
+              })}
             </Text>
 
             <Text className="text-sm leading-relaxed text-zinc-700">
-              Si vous n&apos;êtes pas à l&apos;origine de cette modification,
-              veuillez immédiatement{" "}
+              {translate("emails.passwordChanged.warningIntro")}{" "}
               <Link
-                href={`${BASE_URL}/forgot-password`}
+                href={forgotPasswordLink}
                 className="text-zinc-900 underline underline-offset-4"
               >
-                réinitialiser votre mot de passe
+                {translate("emails.passwordChanged.resetPasswordLink")}
               </Link>{" "}
-              et{" "}
+              {translate("emails.passwordChanged.and")}{" "}
               <Link
-                href={`${BASE_URL}/contact`}
+                href={contactLink}
                 className="text-zinc-900 underline underline-offset-4"
               >
-                contacter notre équipe
+                {translate("emails.passwordChanged.contactLink")}
               </Link>
               .
             </Text>
@@ -63,9 +72,7 @@ function PasswordChangedEmail({ name }: PasswordChangedEmailProps) {
             <Hr className="my-6 border-zinc-200" />
 
             <Text className="m-0 text-xs text-zinc-500">
-              Cet email a été envoyé automatiquement suite à une modification de
-              votre mot de passe. Si vous avez des questions, n&apos;hésitez pas
-              à nous contacter.
+              {translate("emails.passwordChanged.footer")}
             </Text>
           </Container>
         </Body>

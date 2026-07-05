@@ -17,6 +17,10 @@ vi.mock("@/utils/ratelimit/check-ratelimit", () => ({
   checkRatelimit: mockCheckRatelimit,
 }));
 
+vi.mock("next-intl/server", () => ({
+  getLocale: vi.fn().mockResolvedValue("en"),
+}));
+
 vi.mock("next/headers", () => ({
   headers: mockHeaders,
 }));

@@ -23,7 +23,7 @@ describe("validateImageBuffer (via optimizeImage)", () => {
 
     await expect(optimizeImage(emptyBuffer)).rejects.toThrow(BadRequestError);
     await expect(optimizeImage(emptyBuffer)).rejects.toThrow(
-      "Le fichier image est vide",
+      "errors.image.emptyFile",
     );
   });
 
@@ -41,7 +41,7 @@ describe("validateImageBuffer (via optimizeImage)", () => {
 
     await expect(optimizeImage(buffer)).rejects.toThrow(BadRequestError);
     await expect(optimizeImage(buffer)).rejects.toThrow(
-      "Format d'image non supporté",
+      "errors.image.unsupportedFormat",
     );
   });
 
@@ -58,7 +58,9 @@ describe("validateImageBuffer (via optimizeImage)", () => {
     const buffer = Buffer.from("fake-jpeg-data");
 
     await expect(optimizeImage(buffer)).rejects.toThrow(BadRequestError);
-    await expect(optimizeImage(buffer)).rejects.toThrow("trop grande");
+    await expect(optimizeImage(buffer)).rejects.toThrow(
+      "errors.image.tooLarge",
+    );
   });
 
   it("throws for non-image buffer", async () => {
@@ -70,7 +72,7 @@ describe("validateImageBuffer (via optimizeImage)", () => {
     const buffer = Buffer.from("not-an-image");
 
     await expect(optimizeImage(buffer)).rejects.toThrow(BadRequestError);
-    await expect(optimizeImage(buffer)).rejects.toThrow("pas une image valide");
+    await expect(optimizeImage(buffer)).rejects.toThrow("errors.image.invalid");
   });
 
   it("accepts valid jpeg", async () => {
@@ -155,7 +157,9 @@ describe("validateImageBuffer (via optimizeImage)", () => {
     const buffer = Buffer.from("no-format");
 
     await expect(optimizeImage(buffer)).rejects.toThrow(BadRequestError);
-    await expect(optimizeImage(buffer)).rejects.toThrow("non reconnu");
+    await expect(optimizeImage(buffer)).rejects.toThrow(
+      "errors.image.unrecognizedFormat",
+    );
   });
 
   it("throws when metadata has no dimensions", async () => {
@@ -170,7 +174,7 @@ describe("validateImageBuffer (via optimizeImage)", () => {
 
     await expect(optimizeImage(buffer)).rejects.toThrow(BadRequestError);
     await expect(optimizeImage(buffer)).rejects.toThrow(
-      "Impossible de lire les dimensions",
+      "errors.image.dimensionsUnreadable",
     );
   });
 });
@@ -289,7 +293,7 @@ describe("optimizeImage", () => {
 
     await expect(optimizeImage(input)).rejects.toThrow(BadRequestError);
     await expect(optimizeImage(input)).rejects.toThrow(
-      "Échec de l'optimisation",
+      "errors.image.optimizeFailed",
     );
   });
 });
@@ -362,7 +366,7 @@ describe("optimizeAvatar", () => {
 
     await expect(optimizeAvatar(input)).rejects.toThrow(BadRequestError);
     await expect(optimizeAvatar(input)).rejects.toThrow(
-      "Échec de l'optimisation de l'avatar",
+      "errors.image.avatarOptimizeFailed",
     );
   });
 });
@@ -424,7 +428,7 @@ describe("optimizeBanner", () => {
 
     await expect(optimizeBanner(input)).rejects.toThrow(BadRequestError);
     await expect(optimizeBanner(input)).rejects.toThrow(
-      "Échec de l'optimisation de la bannière",
+      "errors.image.bannerOptimizeFailed",
     );
   });
 });
@@ -499,7 +503,7 @@ describe("getImageMetadata", () => {
     // Validation fails first, so we get the validation error
     await expect(getImageMetadata(input)).rejects.toThrow(BadRequestError);
     await expect(getImageMetadata(input)).rejects.toThrow(
-      "pas une image valide",
+      "errors.image.invalid",
     );
   });
 });

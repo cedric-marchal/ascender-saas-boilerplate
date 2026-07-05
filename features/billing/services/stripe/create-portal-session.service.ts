@@ -36,9 +36,7 @@ async function createPortalSession(
   });
 
   if (!member) {
-    throw new ForbiddenError(
-      "Seuls les propriétaires et administrateurs peuvent accéder au portail de facturation",
-    );
+    throw new ForbiddenError("errors.billing.portalAccessForbidden");
   }
 
   const stripeCustomer = await prisma.stripeCustomer.findUnique({
@@ -51,9 +49,7 @@ async function createPortalSession(
   });
 
   if (!stripeCustomer) {
-    throw new NotFoundError(
-      "Aucun client Stripe trouvé. Vous devez d'abord souscrire à un abonnement.",
-    );
+    throw new NotFoundError("errors.billing.noStripeCustomer");
   }
 
   const portalSession = await stripe.billingPortal.sessions.create(
@@ -65,9 +61,7 @@ async function createPortalSession(
   );
 
   if (!portalSession.url) {
-    throw new BadRequestError(
-      "Impossible de créer la session du portail de facturation",
-    );
+    throw new BadRequestError("errors.billing.portalSessionFailed");
   }
 
   return {

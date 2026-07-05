@@ -15,9 +15,7 @@ const updateOrganizationAction = orgActionClient
   .inputSchema(UpdateOrganizationSchema)
   .action(async ({ parsedInput, ctx }) => {
     if (ctx.memberRole !== "owner" && ctx.memberRole !== "admin") {
-      throw new ForbiddenError(
-        "Seuls les propriétaires et administrateurs peuvent modifier l'organisation",
-      );
+      throw new ForbiddenError("errors.organizations.updateForbidden");
     }
 
     const organization = await prisma.organization.findUnique({
@@ -30,7 +28,7 @@ const updateOrganizationAction = orgActionClient
     });
 
     if (!organization) {
-      throw new NotFoundError("Organisation introuvable");
+      throw new NotFoundError("errors.organizations.notFound");
     }
 
     await prisma.organization.update({

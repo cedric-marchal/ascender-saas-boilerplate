@@ -15,7 +15,7 @@ import "./globals.css";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
-  display: "swap", // Évite le FOIT (Flash of Invisible Text)
+  display: "swap", // Avoids FOIT (Flash of Invisible Text)
 });
 
 const geistMono = Geist_Mono({
@@ -49,7 +49,7 @@ export const metadata: Metadata = {
     default: APP_NAME,
     template: `%s | ${APP_NAME}`,
   },
-  description: "[Description par défaut du site]",
+  description: "[Default site description]",
   applicationName: APP_NAME,
   authors: [{ name: APP_NAME, url: BASE_URL }],
   creator: APP_NAME,

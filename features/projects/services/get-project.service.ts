@@ -32,7 +32,7 @@ async function getProject(input: GetProjectInput): Promise<GetProjectResult> {
   });
 
   if (!membership) {
-    throw new ForbiddenError("Vous n'êtes pas membre de cette organisation");
+    throw new ForbiddenError("errors.common.notOrganizationMember");
   }
 
   const project = await prisma.project.findFirst({
@@ -51,7 +51,7 @@ async function getProject(input: GetProjectInput): Promise<GetProjectResult> {
   });
 
   if (!project) {
-    throw new NotFoundError("Projet introuvable");
+    throw new NotFoundError("errors.projects.notFound");
   }
 
   return project;

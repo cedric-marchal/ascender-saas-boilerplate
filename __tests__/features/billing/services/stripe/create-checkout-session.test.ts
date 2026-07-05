@@ -129,7 +129,7 @@ describe("createCheckoutSession", () => {
       NotFoundError,
     );
     await expect(createCheckoutSession(validInput)).rejects.toThrow(
-      "Organisation introuvable",
+      "errors.organizations.notFound",
     );
   });
 
@@ -145,7 +145,7 @@ describe("createCheckoutSession", () => {
       ForbiddenError,
     );
     await expect(createCheckoutSession(validInput)).rejects.toThrow(
-      "propriétaires et administrateurs",
+      "errors.billing.manageForbidden",
     );
   });
 
@@ -168,7 +168,7 @@ describe("createCheckoutSession", () => {
         ...validInput,
         priceId: "price_invalid",
       }),
-    ).rejects.toThrow("Prix invalide");
+    ).rejects.toThrow("errors.billing.invalidPrice");
   });
 
   it("throws ConflictError if active subscription exists", async () => {
@@ -197,7 +197,7 @@ describe("createCheckoutSession", () => {
       ConflictError,
     );
     await expect(createCheckoutSession(validInput)).rejects.toThrow(
-      "déjà un abonnement actif",
+      "errors.billing.alreadySubscribed",
     );
   });
 
@@ -280,7 +280,7 @@ describe("createCheckoutSession", () => {
       BadRequestError,
     );
     await expect(createCheckoutSession(validInput)).rejects.toThrow(
-      "Impossible de créer la session de paiement",
+      "errors.billing.checkoutSessionFailed",
     );
   });
 });

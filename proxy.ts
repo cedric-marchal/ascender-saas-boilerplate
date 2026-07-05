@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { getLocaleFromRequest } from "@/i18n/get-locale-from-request";
+import { getTranslator } from "@/i18n/get-translator";
 import { isLegacyFrenchPath } from "@/i18n/legacy-redirects";
 import { routing } from "@/i18n/routing";
 import { getSessionCookie } from "better-auth/cookies";
@@ -135,19 +137,21 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 
-  // API et assets — pas de négociation de langue, headers de sécurité + auth API
+  // API and assets — no locale negotiation, security headers + auth API
   if (isApi || isAsset) {
     const sessionCookie = isProtectedApiRoute(pathname)
       ? getSessionCookie(request)
       : null;
 
     if (isProtectedApiRoute(pathname) && !sessionCookie) {
+      const translate = getTranslator(getLocaleFromRequest(request));
+
       return applySecurityHeaders(
         NextResponse.json(
           {
             success: false,
             type: "UnauthorizedError",
-            message: "Vous devez être connecté",
+            message: translate("errors.common.unauthenticated"),
           },
           { status: 401 },
         ),
@@ -158,7 +162,7 @@ export async function proxy(request: NextRequest) {
     return applySecurityHeaders(NextResponse.next(), nonce);
   }
 
-  // Legacy — anciennes URLs françaises non préfixées → 301 vers /fr/...
+  // Legacy — unprefixed French URLs → 301 to /fr/...
   if (isLegacyFrenchPath(pathname)) {
     return applySecurityHeaders(
       NextResponse.redirect(new URL(`/fr${pathname}`, request.url), 301),
@@ -166,7 +170,7 @@ export async function proxy(request: NextRequest) {
     );
   }
 
-  // Négociation de langue next-intl (ajout du préfixe, réécriture des slugs localisés)
+  // next-intl locale negotiation (prefix + localized slug rewrite)
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-nonce", nonce);
 
@@ -176,19 +180,19 @@ export async function proxy(request: NextRequest) {
 
   const intlResponse = handleI18nRouting(requestWithNonce);
 
-  // La négociation a produit une redirection (ajout de préfixe, etc.) — on
-  // la laisse suivre son cours, l'auth sera vérifiée sur la requête suivante.
+  // Negotiation produced a redirect (prefix added, etc.) — let it proceed,
+  // auth will be checked on the following request.
   if (intlResponse.headers.get("location")) {
     return applySecurityHeaders(intlResponse, nonce);
   }
 
   const { locale, pathnameWithoutLocale } = splitLocaleFromPathname(pathname);
 
-  // Auth check — routes protégées sans cookie de session
+  // Auth check — protected routes without a session cookie
   const isProtected = isProtectedRoute(pathnameWithoutLocale);
   const sessionCookie = isProtected ? getSessionCookie(request) : null;
 
-  // Non authentifié — page protégée → redirection connexion localisée
+  // Unauthenticated — protected page → localized sign-in redirect
   if (isProtected && !sessionCookie) {
     const signInPath = routing.pathnames["/sign-in"][locale];
 

@@ -1,5 +1,8 @@
 import "server-only";
 
+import { getTranslator } from "@/i18n/get-translator";
+import { getLocale } from "next-intl/server";
+
 import { AccountDeletedEmail } from "@/features/account/emails/account-deleted-email";
 import { cleanupBillingForOrganization } from "@/features/billing/services/cleanup-billing.service";
 import { AUDIT_ACTION } from "@/features/organizations/constants/audit-actions.constant";
@@ -33,9 +36,7 @@ async function checkLastAdmin(role: UserRole): Promise<void> {
   });
 
   if (adminCount <= 1) {
-    throw new ForbiddenError(
-      "Vous êtes le seul administrateur. Vous ne pouvez pas supprimer votre compte.",
-    );
+    throw new ForbiddenError("errors.account.onlyAdminCannotDelete");
   }
 }
 
@@ -65,13 +66,11 @@ async function deleteAccount(input: DeleteAccountInput): Promise<void> {
   });
 
   if (!user) {
-    throw new BadRequestError("Utilisateur introuvable");
+    throw new BadRequestError("errors.account.userNotFound");
   }
 
   if (input.confirmation !== user.email) {
-    throw new BadRequestError(
-      "L'email de confirmation ne correspond pas à votre adresse email",
-    );
+    throw new BadRequestError("errors.account.confirmationEmailMismatch");
   }
 
   await checkLastAdmin(user.role);
@@ -172,12 +171,18 @@ async function deleteAccount(input: DeleteAccountInput): Promise<void> {
   await cleanupAvatar(user.image);
 
   try {
+    const locale = await getLocale();
+    const translate = getTranslator(locale);
+
     await sendEmail({
       from: `${env.NEXT_PUBLIC_APP_NAME} <${env.RESEND_EMAIL_NOREPLY}>`,
       to: user.email,
-      subject: `Votre compte ${env.NEXT_PUBLIC_APP_NAME} a été supprimé`,
+      subject: translate("emails.accountDeleted.subject", {
+        appName: env.NEXT_PUBLIC_APP_NAME,
+      }),
       react: AccountDeletedEmail({
         name: input.userName,
+        locale,
       }),
     });
   } catch (error: unknown) {

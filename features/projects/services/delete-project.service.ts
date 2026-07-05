@@ -22,7 +22,7 @@ async function deleteProject(input: DeleteProjectInput): Promise<void> {
   });
 
   if (!membership) {
-    throw new ForbiddenError("Vous n'êtes pas membre de cette organisation");
+    throw new ForbiddenError("errors.common.notOrganizationMember");
   }
 
   const existingProject = await prisma.project.findFirst({
@@ -36,7 +36,7 @@ async function deleteProject(input: DeleteProjectInput): Promise<void> {
   });
 
   if (!existingProject) {
-    throw new NotFoundError("Projet introuvable");
+    throw new NotFoundError("errors.projects.notFound");
   }
 
   await prisma.project.delete({

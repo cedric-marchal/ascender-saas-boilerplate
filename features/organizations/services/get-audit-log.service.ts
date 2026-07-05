@@ -1,5 +1,8 @@
 import "server-only";
 
+import { getTranslator } from "@/i18n/get-translator";
+import { getLocale } from "next-intl/server";
+
 import { PAGE_SIZE } from "@/lib/parsers/filters";
 import { prisma } from "@/lib/prisma";
 
@@ -48,9 +51,7 @@ async function getAuditLog(
     !membership ||
     (membership.role !== "owner" && membership.role !== "admin")
   ) {
-    throw new ForbiddenError(
-      "Seuls les propriétaires et administrateurs peuvent consulter le journal d'activité",
-    );
+    throw new ForbiddenError("errors.organizations.auditLogForbidden");
   }
 
   const whereClause = {
@@ -80,6 +81,9 @@ async function getAuditLog(
     }),
   ]);
 
+  const locale = await getLocale();
+  const translate = getTranslator(locale);
+
   const userIds = [...new Set(entries.map((entry) => entry.userId))];
 
   const users = await prisma.user.findMany({
@@ -108,7 +112,7 @@ async function getAuditLog(
       metadata: entry.metadata,
       createdAt: entry.createdAt,
       user: {
-        name: user?.name ?? "Utilisateur inconnu",
+        name: user?.name ?? translate("organizations.auditLog.unknownUser"),
         email: user?.email ?? "",
       },
     };

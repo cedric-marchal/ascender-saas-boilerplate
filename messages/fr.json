@@ -314,7 +314,8 @@
       "eventCount": "{count, plural, one {# événement} other {# événements}}",
       "empty": "Aucune activité enregistrée pour le moment.",
       "loadingLabel": "Chargement...",
-      "byUser": "Par {name} ({email})"
+      "byUser": "Par {name} ({email})",
+      "unknownUser": "Utilisateur inconnu"
     },
     "featureLabels": {
       "advancedAnalytics": "Analytiques avancées",
@@ -866,6 +867,157 @@
         "label": "Marketing",
         "description": "Ces cookies sont utilisés pour vous proposer du contenu personnalisé et des publicités adaptées."
       }
+    }
+  },
+  "errors": {
+    "common": {
+      "unauthenticated": "Vous devez être connecté",
+      "notOrganizationMember": "Vous n'êtes pas membre de cette organisation",
+      "noActiveOrganization": "Aucune organisation active. Veuillez sélectionner une organisation.",
+      "adminOnly": "Accès non autorisé. Vous devez être administrateur.",
+      "unexpectedServerError": "Une erreur inattendue s'est produite. Veuillez réessayer.",
+      "unexpectedApiError": "Une erreur inattendue s'est produite",
+      "validationError": "Une erreur de validation s'est produite",
+      "tooManyRequests": "Trop de requêtes. Veuillez réessayer plus tard."
+    },
+    "organizations": {
+      "notFound": "Organisation introuvable",
+      "memberNotFound": "Membre introuvable",
+      "invitationNotFound": "Invitation introuvable ou déjà traitée",
+      "currentMemberNotFound": "Votre membre introuvable dans l'organisation",
+      "removeMembersForbidden": "Seuls les propriétaires et administrateurs peuvent retirer des membres",
+      "cannotRemoveLastOwner": "Impossible de retirer le dernier propriétaire. Transférez d'abord la propriété.",
+      "updateForbidden": "Seuls les propriétaires et administrateurs peuvent modifier l'organisation",
+      "inviteForbidden": "Seuls les propriétaires et administrateurs peuvent inviter des membres",
+      "transferOwnerOnly": "Seul le propriétaire peut transférer la propriété de l'organisation",
+      "alreadyOwner": "Vous êtes déjà propriétaire de cette organisation",
+      "auditLogForbidden": "Seuls les propriétaires et administrateurs peuvent consulter le journal d'activité",
+      "changeRoleForbidden": "Seuls les propriétaires et administrateurs peuvent modifier les rôles",
+      "cannotDemoteLastOwner": "Impossible de rétrograder le dernier propriétaire. Transférez d'abord la propriété.",
+      "seatCapReached": "Votre plan ne permet pas d'ajouter plus de {seatCap, plural, one {# membre} other {# membres}}. Passez à un plan supérieur pour inviter davantage de membres."
+    },
+    "projects": {
+      "notFound": "Projet introuvable"
+    },
+    "account": {
+      "userNotFound": "Utilisateur introuvable",
+      "emailAlreadyUsed": "Cette adresse email est déjà utilisée",
+      "onlyAdminCannotDelete": "Vous êtes le seul administrateur. Vous ne pouvez pas supprimer votre compte.",
+      "confirmationEmailMismatch": "L'email de confirmation ne correspond pas à votre adresse email"
+    },
+    "billing": {
+      "manageForbidden": "Seuls les propriétaires et administrateurs peuvent gérer la facturation",
+      "portalAccessForbidden": "Seuls les propriétaires et administrateurs peuvent accéder au portail de facturation",
+      "noStripeCustomer": "Aucun client Stripe trouvé. Vous devez d'abord souscrire à un abonnement.",
+      "portalSessionFailed": "Impossible de créer la session du portail de facturation",
+      "stripeAccountDeleted": "Votre compte Stripe a été supprimé. Veuillez contacter le support.",
+      "invalidPrice": "Prix invalide ou non autorisé",
+      "alreadySubscribed": "Cette organisation a déjà un abonnement actif. Gérez-le depuis votre espace facturation.",
+      "checkoutSessionFailed": "Impossible de créer la session de paiement",
+      "accessForbidden": "Seuls les propriétaires et administrateurs peuvent accéder à la facturation"
+    },
+    "storage": {
+      "keyRequired": "La clé du fichier est requise",
+      "keyTooLong": "La clé du fichier est trop longue (max {maxLength} caractères)",
+      "invalidKey": "La clé du fichier contient des caractères invalides",
+      "contentRequired": "Le contenu du fichier est requis",
+      "contentTypeRequired": "Le type de contenu est requis",
+      "serviceUnavailable": "Le service de stockage est temporairement indisponible",
+      "invalidExpiresIn": "La durée d'expiration doit être entre {min} et {max} secondes"
+    },
+    "image": {
+      "emptyFile": "Le fichier image est vide",
+      "unrecognizedFormat": "Format d'image non reconnu",
+      "unsupportedFormat": "Format d'image non supporté. Formats acceptés : JPEG, PNG, WebP",
+      "dimensionsUnreadable": "Impossible de lire les dimensions de l'image",
+      "tooLarge": "L'image est trop grande (max {maxWidth}x{maxHeight}px)",
+      "invalid": "Le fichier fourni n'est pas une image valide",
+      "optimizeFailed": "Échec de l'optimisation de l'image",
+      "avatarOptimizeFailed": "Échec de l'optimisation de l'avatar",
+      "bannerOptimizeFailed": "Échec de l'optimisation de la bannière",
+      "metadataUnreadable": "Impossible de lire les métadonnées de l'image"
+    }
+  },
+  "emails": {
+    "common": {
+      "securityFromName": "{appName} Sécurité",
+      "noreplyFromName": "{appName}"
+    },
+    "resetPassword": {
+      "subject": "Réinitialisez votre mot de passe {appName}",
+      "preview": "Réinitialisez votre mot de passe {appName}",
+      "heading": "Réinitialisation de mot de passe",
+      "greeting": "Bonjour {name},",
+      "body": "Vous avez demandé à réinitialiser votre mot de passe sur {appName}. Cliquez sur le bouton ci-dessous pour créer un nouveau mot de passe.",
+      "cta": "Réinitialiser mon mot de passe",
+      "expiry": "Ce lien expire dans 1 heure. Si vous n'avez pas demandé cette réinitialisation, vous pouvez ignorer cet email.",
+      "fallbackIntro": "Si le bouton ne fonctionne pas, copiez ce lien dans votre navigateur :"
+    },
+    "welcome": {
+      "subject": "Vérifiez votre adresse email {appName}",
+      "preview": "Bienvenue sur {appName} - Vérifiez votre adresse email",
+      "heading": "Bienvenue sur {appName} !",
+      "greeting": "Bonjour {name},",
+      "body": "Merci de vous être inscrit sur {appName}. Pour activer votre compte et accéder à toutes les fonctionnalités, veuillez confirmer votre adresse email en cliquant sur le bouton ci-dessous.",
+      "cta": "Vérifier mon adresse email",
+      "expiry": "Ce lien expire dans 24 heures. Si vous n'avez pas créé de compte sur {appName}, vous pouvez ignorer cet email.",
+      "fallbackIntro": "Si le bouton ne fonctionne pas, copiez ce lien dans votre navigateur :"
+    },
+    "passwordChanged": {
+      "subject": "Votre mot de passe {appName} a été modifié",
+      "preview": "Votre mot de passe {appName} a été modifié",
+      "heading": "Mot de passe modifié",
+      "greeting": "Bonjour {name},",
+      "body": "Nous vous confirmons que votre mot de passe {appName} a été modifié avec succès.",
+      "warningIntro": "Si vous n'êtes pas à l'origine de cette modification, veuillez immédiatement",
+      "resetPasswordLink": "réinitialiser votre mot de passe",
+      "and": "et",
+      "contactLink": "contacter notre équipe",
+      "footer": "Cet email a été envoyé automatiquement suite à une modification de votre mot de passe. Si vous avez des questions, n'hésitez pas à nous contacter."
+    },
+    "emailChangeNotification": {
+      "subject": "Modification d'adresse email demandée sur {appName}",
+      "preview": "Modification d'adresse email demandée sur {appName}",
+      "heading": "Modification d'adresse email demandée",
+      "greeting": "Bonjour {name},",
+      "body": "Une demande de modification de votre adresse email sur {appName} a été soumise. Cette modification ne sera effective qu'après vérification de la nouvelle adresse.",
+      "warningIntro": "Si vous n'êtes pas à l'origine de cette demande, veuillez immédiatement",
+      "resetPasswordLink": "réinitialiser votre mot de passe",
+      "and": "et",
+      "contactLink": "contacter notre équipe",
+      "footer": "Cet email a été envoyé automatiquement suite à une demande de modification d'adresse email. Si vous avez des questions, n'hésitez pas à nous contacter."
+    },
+    "organizationInvitation": {
+      "subject": "Invitation à rejoindre {organizationName} sur {appName}",
+      "preview": "{inviterName} vous invite à rejoindre {organizationName} sur {appName}",
+      "heading": "Vous avez été invité à rejoindre {organizationName}",
+      "greeting": "Bonjour,",
+      "body": "{inviterName} ({inviterEmail}) vous invite à rejoindre l'organisation {organizationName} sur {appName} en tant que {role}.",
+      "cta": "Accepter l'invitation",
+      "expiry": "Cliquez sur le bouton ci-dessous pour accepter l'invitation. Ce lien est valable 48 heures.",
+      "ignore": "Si vous n'attendiez pas cette invitation, vous pouvez ignorer cet email.",
+      "fallbackIntro": "Si le bouton ne fonctionne pas, copiez ce lien dans votre navigateur :"
+    },
+    "accountDeleted": {
+      "subject": "Votre compte {appName} a été supprimé",
+      "preview": "Votre compte {appName} a été supprimé",
+      "heading": "Compte supprimé",
+      "greeting": "Bonjour {name},",
+      "body": "Nous vous confirmons que votre compte {appName} a été supprimé avec succès. Toutes vos données associées ont été définitivement supprimées.",
+      "comeBack": "Si vous souhaitez un jour revenir sur {appName}, vous pouvez créer un nouveau compte à tout moment.",
+      "warningIntro": "Si vous n'êtes pas à l'origine de cette suppression ou si vous avez des questions, veuillez",
+      "contactLink": "contacter notre équipe",
+      "footer": "Cet email a été envoyé automatiquement suite à la suppression de votre compte. Si vous avez des questions, n'hésitez pas à nous contacter."
+    },
+    "contact": {
+      "subject": "Nouveau message de {name} : {subject}",
+      "preview": "Nouveau message de {name} : {subject}",
+      "heading": "Nouveau message de contact",
+      "nameLabel": "Nom",
+      "emailLabel": "Email",
+      "subjectLabel": "Sujet",
+      "messageLabel": "Message",
+      "footer": "Vous pouvez répondre directement à cet email pour contacter {name}."
     }
   }
 }

@@ -42,7 +42,7 @@ async function updateProfile(
   });
 
   if (!currentUser) {
-    throw new BadRequestError("Utilisateur introuvable");
+    throw new BadRequestError("errors.account.userNotFound");
   }
 
   const emailChanged = currentUser.email !== input.email;
@@ -59,7 +59,7 @@ async function updateProfile(
     });
 
     if (existingUser) {
-      throw new ConflictError("Cette adresse email est déjà utilisée");
+      throw new ConflictError("errors.account.emailAlreadyUsed");
     }
   }
 

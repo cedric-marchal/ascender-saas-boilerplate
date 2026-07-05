@@ -99,7 +99,7 @@ describe("getSession", () => {
     mockGetSessionAuth.mockResolvedValue(makeSession({ role: "UNKNOWN_ROLE" }));
 
     await expect(getSession()).rejects.toThrow(
-      "Role invalide dans la session: UNKNOWN_ROLE",
+      "Invalid role in session: UNKNOWN_ROLE",
     );
   });
 });
