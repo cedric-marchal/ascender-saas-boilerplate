@@ -4,7 +4,7 @@ import type {
 } from "../../lib/generated/prisma/client";
 import { USERS, type UserSeed } from "./auth.seed";
 import { daysAgo, daysFromNow, SEED_FILTER, slugify } from "./helpers";
-import { orgIdForUser } from "./organization.seed";
+import { DEMO_ORG_A_ID, orgIdForUser } from "./organization.seed";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -19,6 +19,10 @@ function stripeCustomerIdForOrg(name: string, userIndex: number): string {
 // ---------------------------------------------------------------------------
 
 const STRIPE_PRICE_ID_PRO = "price_seed_pro_monthly";
+
+// Standalone Stripe customer id for the demo showcase org (not tied to a user's
+// personal org, so it is not covered by the per-user customer generation above).
+const DEMO_ORG_A_STRIPE_CUSTOMER_ID = "cus_seed_demo_org_a";
 
 type SubscriptionSeed = {
   userIndex: number;
@@ -252,6 +256,35 @@ async function seedBilling(prisma: PrismaClient): Promise<void> {
       },
     });
   }
+
+  // Demo Org A is the multi-member showcase org that owns the projects list.
+  // The "projects" feature is plan-gated (page guard + write actions both
+  // require an ACTIVE subscription), so the org needs a real pro subscription —
+  // otherwise the seeded projects are unreachable and cannot be mutated.
+  await prisma.stripeCustomer.create({
+    data: {
+      id: "seed-stripe-customer-demo-org-a",
+      organizationId: DEMO_ORG_A_ID,
+      stripeCustomerId: DEMO_ORG_A_STRIPE_CUSTOMER_ID,
+      createdAt: daysAgo(60),
+      updatedAt: daysAgo(60),
+    },
+  });
+
+  await prisma.subscription.create({
+    data: {
+      id: "seed-subscription-demo-org-a",
+      stripeSubscriptionId: "sub_seed_demo_org_a_active",
+      stripeCustomerId: DEMO_ORG_A_STRIPE_CUSTOMER_ID,
+      stripePriceId: STRIPE_PRICE_ID_PRO,
+      status: "ACTIVE",
+      currentPeriodStart: daysAgo(30),
+      currentPeriodEnd: daysFromNow(30),
+      cancelAtPeriodEnd: false,
+      createdAt: daysAgo(60),
+      updatedAt: daysAgo(60),
+    },
+  });
 
   // Subscriptions
   for (const subscription of SUBSCRIPTIONS) {
