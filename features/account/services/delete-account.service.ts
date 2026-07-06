@@ -9,7 +9,7 @@ import { AUDIT_ACTION } from "@/features/organizations/constants/audit-actions.c
 import { logEvent } from "@/features/organizations/services/audit-log.service";
 
 import { env } from "@/lib/env";
-import { UserRole } from "@/lib/generated/prisma/client";
+import { Prisma, UserRole } from "@/lib/generated/prisma/client";
 import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
 import { deleteFile } from "@/lib/r2";
@@ -24,22 +24,6 @@ type DeleteAccountInput = {
   userName: string;
   confirmation: string;
 };
-
-async function checkLastAdmin(role: UserRole): Promise<void> {
-  if (role !== UserRole.ADMIN) {
-    return;
-  }
-
-  const adminCount = await prisma.user.count({
-    where: {
-      role: UserRole.ADMIN,
-    },
-  });
-
-  if (adminCount <= 1) {
-    throw new ForbiddenError("errors.account.onlyAdminCannotDelete");
-  }
-}
 
 async function cleanupAvatar(image: string | null): Promise<void> {
   if (!image || !image.startsWith(AVATAR_FOLDER)) {
@@ -77,9 +61,7 @@ async function deleteAccount(input: DeleteAccountInput): Promise<void> {
     throw new BadRequestError("errors.account.confirmationEmailMismatch");
   }
 
-  await checkLastAdmin(user.role);
-
-  // Find all orgs where this user is a member
+  // Snapshot the user's memberships up front for post-deletion auditing.
   const userMemberships = await prisma.member.findMany({
     where: {
       userId: input.userId,
@@ -91,48 +73,110 @@ async function deleteAccount(input: DeleteAccountInput): Promise<void> {
     take: 50,
   });
 
-  // For each owned org, determine if this user is the sole owner
-  const orgIds = userMemberships
-    .filter((membership) => membership.role === "owner")
-    .map((membership) => membership.organizationId);
+  // Critical section: the last-admin guard, sole-owner classification, and the
+  // deletes all run in ONE Serializable transaction. Recounting inside the
+  // transaction (never on stale reads) closes two races:
+  //  - two of the last admins deleting concurrently, both passing the guard and
+  //    leaving zero platform admins;
+  //  - two co-owners deleting concurrently, both classifying the org as
+  //    non-sole-owned and skipping the Stripe cancellation, orphaning billing.
+  // External side effects (Stripe, Redis, R2, email) run AFTER commit.
+  const soleOwnedOrgs = await prisma.$transaction(
+    async (tx) => {
+      if (user.role === UserRole.ADMIN) {
+        const adminCount = await tx.user.count({
+          where: {
+            role: UserRole.ADMIN,
+          },
+        });
 
-  const soleOwnedOrgIds: string[] = [];
-  const nonSoleOwnedOrgIds: string[] = [];
+        if (adminCount <= 1) {
+          throw new ForbiddenError("errors.account.onlyAdminCannotDelete");
+        }
+      }
 
-  for (const orgId of orgIds) {
-    const ownerCount = await prisma.member.count({
-      where: {
-        organizationId: orgId,
-        role: "owner",
-      },
-    });
+      const ownedOrgIds = userMemberships
+        .filter((membership) => membership.role === "owner")
+        .map((membership) => membership.organizationId);
 
-    if (ownerCount <= 1) {
-      soleOwnedOrgIds.push(orgId);
-    } else {
-      nonSoleOwnedOrgIds.push(orgId);
-    }
-  }
+      const soleOwnedOrgIds: string[] = [];
 
-  // Gather Stripe customer IDs for sole-owned orgs before deletion
-  const soleOwnedOrgs = await prisma.organization.findMany({
-    where: {
-      id: {
-        in: soleOwnedOrgIds,
-      },
-    },
-    select: {
-      id: true,
-      stripeCustomer: {
-        select: {
-          stripeCustomerId: true,
+      for (const orgId of ownedOrgIds) {
+        const [ownerCount, memberCount] = await Promise.all([
+          tx.member.count({
+            where: {
+              organizationId: orgId,
+              role: "owner",
+            },
+          }),
+          tx.member.count({
+            where: {
+              organizationId: orgId,
+            },
+          }),
+        ]);
+
+        if (ownerCount > 1) {
+          continue;
+        }
+
+        // Sole owner. Deleting the account would cascade-delete the whole org.
+        // Refuse when other members would be silently locked out — they must be
+        // handed the org via transfer-ownership first.
+        if (memberCount > 1) {
+          throw new BadRequestError(
+            "errors.account.mustTransferOwnershipFirst",
+          );
+        }
+
+        soleOwnedOrgIds.push(orgId);
+      }
+
+      const orgsToDelete =
+        soleOwnedOrgIds.length > 0
+          ? await tx.organization.findMany({
+              where: {
+                id: {
+                  in: soleOwnedOrgIds,
+                },
+              },
+              select: {
+                id: true,
+                stripeCustomer: {
+                  select: {
+                    stripeCustomerId: true,
+                  },
+                },
+              },
+              take: 50,
+            })
+          : [];
+
+      // Delete the user (cascades sessions, accounts, member rows), then the
+      // sole-owned orgs (their remaining rows already gone via the user cascade).
+      await tx.user.delete({
+        where: {
+          id: user.id,
         },
-      },
-    },
-    take: 50,
-  });
+      });
 
-  // Audit account deletion for each org the user belongs to (best-effort, before deletion)
+      for (const org of orgsToDelete) {
+        await tx.organization.delete({
+          where: {
+            id: org.id,
+          },
+        });
+      }
+
+      return orgsToDelete;
+    },
+    {
+      isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+    },
+  );
+
+  // Audit account deletion (best-effort, after commit so blocked deletions are
+  // never logged). AuditLog has no FK to user/org, so rows survive the deletes.
   for (const membership of userMemberships) {
     await logEvent({
       organizationId: membership.organizationId,
@@ -143,35 +187,13 @@ async function deleteAccount(input: DeleteAccountInput): Promise<void> {
     });
   }
 
-  // Primary action: delete from DB (cascades to sessions, accounts, member records)
-  await prisma.user.delete({
-    where: {
-      id: user.id,
-    },
-  });
-
-  // Cascade-delete sole-owned orgs (their StripeCustomer FK cascades in DB, but
-  // we must also cancel Stripe subscription and clean Redis)
+  // Cancel Stripe subscriptions and clear Redis for the deleted sole-owned orgs.
   for (const org of soleOwnedOrgs) {
     if (org.stripeCustomer) {
       await cleanupBillingForOrganization(
         org.stripeCustomer.stripeCustomerId,
         org.id,
       );
-    }
-
-    // Delete the org itself (members already gone via user cascade)
-    try {
-      await prisma.organization.delete({
-        where: {
-          id: org.id,
-        },
-      });
-    } catch (error: unknown) {
-      logger.error("Failed to cascade-delete organization", {
-        organizationId: org.id,
-        error: error instanceof Error ? error.message : String(error),
-      });
     }
   }
 

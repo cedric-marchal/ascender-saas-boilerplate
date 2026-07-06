@@ -11,6 +11,7 @@ const mockPrismaMemberCount = vi.fn();
 const mockPrismaOrganizationFindMany = vi.fn();
 const mockPrismaOrganizationDelete = vi.fn();
 const mockPrismaAuditLogCreate = vi.fn();
+const mockPrismaTransaction = vi.fn();
 const mockStripeCustomersDel = vi.fn();
 const mockRedisDel = vi.fn();
 const mockDeleteFile = vi.fn();
@@ -34,6 +35,7 @@ vi.mock("@/lib/prisma", () => ({
     auditLog: {
       create: mockPrismaAuditLogCreate,
     },
+    $transaction: mockPrismaTransaction,
   },
 }));
 
@@ -82,6 +84,24 @@ describe("deleteAccount", () => {
     mockPrismaMemberCount.mockResolvedValue(0);
     mockPrismaOrganizationFindMany.mockResolvedValue([]);
     mockPrismaAuditLogCreate.mockResolvedValue({});
+    // Run the interactive transaction callback against the same mocked models,
+    // so existing assertions on user.delete / organization.delete still hold.
+    mockPrismaTransaction.mockImplementation(
+      async (callback: (tx: unknown) => unknown) =>
+        callback({
+          user: {
+            count: mockPrismaUserCount,
+            delete: mockPrismaUserDelete,
+          },
+          member: {
+            count: mockPrismaMemberCount,
+          },
+          organization: {
+            findMany: mockPrismaOrganizationFindMany,
+            delete: mockPrismaOrganizationDelete,
+          },
+        }),
+    );
   });
 
   it("deletes user from DB", async () => {
@@ -346,6 +366,36 @@ describe("deleteAccount", () => {
         confirmation: "admin@example.com",
       }),
     ).rejects.toThrow("errors.account.onlyAdminCannotDelete");
+  });
+
+  it("blocks deletion when sole owner of an org that has other members", async () => {
+    mockPrismaUserFindUnique.mockResolvedValue({
+      id: "user-123",
+      email: "user@example.com",
+      image: null,
+      role: "CUSTOMER",
+    });
+
+    mockPrismaMemberFindMany.mockResolvedValue([
+      { organizationId: "org-123", role: "owner" },
+    ]);
+
+    // Sole owner (ownerCount = 1) but the org has other members (memberCount = 2).
+    mockPrismaMemberCount
+      .mockResolvedValueOnce(1) // ownerCount
+      .mockResolvedValueOnce(2); // memberCount
+
+    await expect(
+      deleteAccount({
+        userId: "user-123",
+        userName: "John",
+        confirmation: "user@example.com",
+      }),
+    ).rejects.toThrow("errors.account.mustTransferOwnershipFirst");
+
+    expect(mockPrismaUserDelete).not.toHaveBeenCalled();
+    expect(mockPrismaOrganizationDelete).not.toHaveBeenCalled();
+    expect(mockStripeCustomersDel).not.toHaveBeenCalled();
   });
 
   it("does not cascade-delete org when user is not the sole owner", async () => {
