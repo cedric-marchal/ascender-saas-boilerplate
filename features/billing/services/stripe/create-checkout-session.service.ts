@@ -4,6 +4,7 @@ import { getStaticPathname } from "@/i18n/get-static-pathname";
 import type { Locale } from "next-intl";
 
 import { ALLOWED_PRICE_IDS } from "@/features/billing/constants/plan.constant";
+import { ACTIVE_SUBSCRIPTION_STATUSES } from "@/features/billing/constants/subscription-status.constant";
 
 import { env } from "@/lib/env";
 import { logger } from "@/lib/logger";
@@ -156,6 +157,30 @@ async function createCheckoutSession(
 
   if (!ALLOWED_PRICE_IDS.includes(input.priceId)) {
     throw new BadRequestError("errors.billing.invalidPrice");
+  }
+
+  // Defense-in-depth against double-subscribe: reject if our own DB already
+  // reflects an active subscription (webhook-synced), not just Stripe's list —
+  // Stripe's list can lag right after a subscription is created.
+  const existingDbSubscription = await prisma.subscription.findFirst({
+    where: {
+      stripeCustomer: {
+        organizationId: organization.id,
+      },
+      stripePriceId: {
+        in: ALLOWED_PRICE_IDS,
+      },
+      status: {
+        in: ACTIVE_SUBSCRIPTION_STATUSES,
+      },
+    },
+    select: {
+      id: true,
+    },
+  });
+
+  if (existingDbSubscription) {
+    throw new ConflictError("errors.billing.alreadySubscribed");
   }
 
   const stripeCustomerId = await getOrCreateStripeCustomer({

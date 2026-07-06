@@ -192,6 +192,28 @@ await requireCustomerPlan("business", "enterprise");
 - NEVER pass raw price ID strings — use `PlanKey` for type safety
 - Plan upgrades/downgrades go through Stripe Customer Portal, not new checkouts
 
+### Gate WRITES, not only the page (P0 — CRITICAL)
+
+`requireCustomerPlan()` redirects and is **page-only**. A page guard alone is bypassable: server actions are directly-invocable POST endpoints, so a plan-gated feature whose page is guarded but whose mutations are not can be exercised by any org member on the free plan.
+
+Every mutation (action/service) that backs a plan-gated feature MUST re-check the plan on the WRITE path with `requireOrganizationPlan()` from `features/billing/guards/require-organization-plan.ts` (throws `ForbiddenError("errors.billing.planRequired")` — the action-side counterpart to the page-only `requireCustomerPlan`).
+
+```tsx
+// features/projects/actions/create-project.action.ts
+const createProjectAction = orgActionClient
+  .inputSchema(CreateProjectSchema)
+  .action(async ({ parsedInput, ctx }) => {
+    await requireOrganizationPlan(ctx.organizationId, "pro"); // ← WRITE gate
+
+    const project = await createProject({ ... });
+    // ...
+  });
+```
+
+- Pass the SAME `PlanKey`(s) the page uses, so read and write gate on the same entitlement.
+- The gate belongs at the entry point (action), mirroring the rate-limit rule — NEVER only on the read page.
+- `orgActionClient` verifies membership + active org, NOT the plan. Membership ≠ entitlement.
+
 ## Rate Limiting (Entry Points Only)
 
 | Entry Point | Pattern                                                                   | Identifier        |

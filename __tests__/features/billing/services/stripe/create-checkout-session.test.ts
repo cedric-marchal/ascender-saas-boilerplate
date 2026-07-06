@@ -10,6 +10,7 @@ import {
 // Create mocks
 const mockPrismaOrganizationFindUnique = vi.fn();
 const mockPrismaMemberFindFirst = vi.fn();
+const mockPrismaSubscriptionFindFirst = vi.fn();
 const mockPrismaStripeCustomerFindUnique = vi.fn();
 const mockPrismaStripeCustomerCreate = vi.fn();
 const mockStripeCustomersRetrieve = vi.fn();
@@ -26,6 +27,9 @@ vi.mock("@/lib/prisma", () => ({
     },
     member: {
       findFirst: mockPrismaMemberFindFirst,
+    },
+    subscription: {
+      findFirst: mockPrismaSubscriptionFindFirst,
     },
     stripeCustomer: {
       findUnique: mockPrismaStripeCustomerFindUnique,
@@ -74,6 +78,8 @@ const validInput = {
 describe("createCheckoutSession", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // No pre-existing DB subscription by default (defense-in-depth check).
+    mockPrismaSubscriptionFindFirst.mockResolvedValue(null);
   });
 
   it("creates session and returns url", async () => {
