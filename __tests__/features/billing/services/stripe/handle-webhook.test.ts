@@ -321,6 +321,48 @@ describe("handleStripeWebhook", () => {
       expect(mockPrismaUpsert).toHaveBeenCalled();
     });
 
+    it("skips a stale updated event that arrives after the subscription was deleted", async () => {
+      const mockEvent = {
+        id: "evt_stale_update",
+        type: "customer.subscription.updated",
+        created: 1000, // older than the recorded deletion time
+        data: {
+          object: {
+            id: "sub_ooo",
+            customer: "cus_ooo",
+            status: "active",
+            items: {
+              data: [
+                {
+                  price: { id: "price_pro_test" },
+                  current_period_start: 1234567890,
+                  current_period_end: 1234577890,
+                },
+              ],
+            },
+            cancel_at_period_end: false,
+          },
+        },
+      };
+      mockConstructEvent.mockReturnValue(mockEvent);
+      mockPrismaFindUnique.mockResolvedValue({
+        organizationId: "org_ooo",
+        stripeCustomerId: "cus_ooo",
+      });
+      // 1st redis.get = idempotency (miss), 2nd = deletion tombstone at t=2000.
+      mockRedisGet.mockReset();
+      mockRedisGet.mockResolvedValueOnce(null).mockResolvedValueOnce(2000);
+
+      await handleStripeWebhook("body", "sig");
+
+      // The stale event must NOT re-create the subscription (no re-grant).
+      expect(mockPrismaUpsert).not.toHaveBeenCalled();
+      expect(mockLoggerWarn).toHaveBeenCalledWith(
+        "Skipping stale subscription event (already deleted)",
+        expect.objectContaining({ subscriptionId: "sub_ooo" }),
+      );
+    });
+
     it("logs warning if StripeCustomer not found", async () => {
       const mockEvent = {
         id: "evt_test_789",
@@ -474,6 +516,32 @@ describe("handleStripeWebhook", () => {
       expect(mockPrismaDeleteMany).toHaveBeenCalledWith({
         where: { stripeSubscriptionId: "sub_del" },
       });
+    });
+
+    it("tombstones the deletion in Redis so a later out-of-order event is rejected", async () => {
+      const mockEvent = {
+        id: "evt_test_del_tomb",
+        type: "customer.subscription.deleted",
+        created: 5000,
+        data: {
+          object: {
+            id: "sub_tomb",
+            customer: "cus_tomb",
+          },
+        },
+      };
+      mockConstructEvent.mockReturnValue(mockEvent);
+      mockPrismaFindUnique.mockResolvedValue({
+        organizationId: "org_tomb",
+      });
+
+      await handleStripeWebhook("body", "sig");
+
+      expect(mockRedisSet).toHaveBeenCalledWith(
+        "stripe:subscription-deleted:sub_tomb",
+        5000,
+        expect.objectContaining({ ex: expect.any(Number) }),
+      );
     });
 
     it("logs warning if customer not found", async () => {

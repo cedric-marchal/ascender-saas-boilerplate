@@ -13,6 +13,7 @@ import {
   billingSubscriptionsCacheKey,
   paymentFailedEmailCacheKey,
   stripeEventIdempotencyCacheKey,
+  stripeSubscriptionDeletedCacheKey,
 } from "@/lib/cache-keys";
 import { env } from "@/lib/env";
 import type { SubscriptionStatus } from "@/lib/generated/prisma/client";
@@ -33,6 +34,10 @@ function isTransientDbError(error: unknown): boolean {
 }
 
 const EVENT_TTL_SECONDS = 86400;
+
+// Must cover Stripe's out-of-order retry window (~3 days) so a delayed
+// "updated" arriving after a "deleted" is still recognised as stale.
+const SUBSCRIPTION_DELETED_TTL_SECONDS = 60 * 60 * 24 * 3;
 
 async function findOrganizationOwnerEmail(
   organizationId: string,
@@ -279,6 +284,28 @@ async function handleStripeWebhook(
           break;
         }
 
+        // Guard against out-of-order delivery: if this subscription was already
+        // removed by a newer "deleted" event, a delayed/older "created"/"updated"
+        // must NOT re-create the row and silently re-grant access. Stripe does
+        // not guarantee ordering and retries for up to ~3 days.
+        const deletedEventCreatedAt = await redis.get(
+          stripeSubscriptionDeletedCacheKey(subscription.id),
+        );
+
+        if (
+          deletedEventCreatedAt !== null &&
+          event.created <= Number(deletedEventCreatedAt)
+        ) {
+          logger.warn("Skipping stale subscription event (already deleted)", {
+            subscriptionId: subscription.id,
+            eventType: event.type,
+            eventCreated: event.created,
+            deletedEventCreatedAt: Number(deletedEventCreatedAt),
+          });
+
+          break;
+        }
+
         // Snapshot the seat cap BEFORE the write, only for "updated" — a
         // "created" event has no prior state to downgrade from.
         const previousSeatCapStatus =
@@ -368,6 +395,16 @@ async function handleStripeWebhook(
           },
         });
 
+        // Tombstone the deletion time so a later out-of-order "updated" for this
+        // subscription cannot re-create the row and re-grant access.
+        await redis.set(
+          stripeSubscriptionDeletedCacheKey(subscription.id),
+          event.created,
+          {
+            ex: SUBSCRIPTION_DELETED_TTL_SECONDS,
+          },
+        );
+
         await redis.del(
           billingSubscriptionsCacheKey(stripeCustomer.organizationId),
         );
@@ -425,6 +462,91 @@ async function handleStripeWebhook(
         if (event.type === "invoice.payment_failed") {
           await sendDunningEmailOnce(invoice.id, stripeCustomer.organizationId);
         }
+
+        break;
+      }
+
+      case "charge.dispute.created": {
+        const dispute = event.data.object as Stripe.Dispute;
+        const chargeId =
+          typeof dispute.charge === "string"
+            ? dispute.charge
+            : dispute.charge?.id;
+
+        if (!chargeId) {
+          logger.warn("No charge on dispute", { eventType: event.type });
+          break;
+        }
+
+        const charge = await stripe.charges.retrieve(chargeId);
+        const customerId =
+          typeof charge.customer === "string"
+            ? charge.customer
+            : charge.customer?.id;
+
+        if (!customerId) {
+          logger.warn("No customer on disputed charge", { chargeId });
+          break;
+        }
+
+        const stripeCustomer = await prisma.stripeCustomer.findUnique({
+          where: {
+            stripeCustomerId: customerId,
+          },
+          select: {
+            organizationId: true,
+          },
+        });
+
+        if (!stripeCustomer) {
+          logger.warn("StripeCustomer not found", {
+            customerId,
+            eventType: event.type,
+          });
+          break;
+        }
+
+        // A chargeback is an unambiguous signal to stop access. Cancel the live
+        // Stripe subscription(s); the resulting `subscription.deleted` events
+        // revoke entitlement through the normal (tombstoned) path.
+        const activeSubscriptions = await stripe.subscriptions.list({
+          customer: customerId,
+          status: "active",
+          limit: 100,
+        });
+
+        for (const activeSubscription of activeSubscriptions.data) {
+          await stripe.subscriptions.cancel(activeSubscription.id);
+        }
+
+        logger.warn("Subscription cancelled due to chargeback", {
+          organizationId: stripeCustomer.organizationId,
+          chargeId,
+          cancelledCount: activeSubscriptions.data.length,
+        });
+
+        break;
+      }
+
+      case "charge.refunded": {
+        const charge = event.data.object as Stripe.Charge;
+        const customerId =
+          typeof charge.customer === "string"
+            ? charge.customer
+            : charge.customer?.id;
+
+        // A refund does NOT cancel the subscription in Stripe, and a partial
+        // refund must not revoke access. Surface it for operator review rather
+        // than auto-revoking (which could cut off a legitimate subscriber).
+        logger.warn(
+          "Charge refunded — review whether the subscription must be canceled",
+          {
+            chargeId: charge.id,
+            customerId: customerId ?? null,
+            amountRefunded: charge.amount_refunded,
+            fullyRefunded: charge.refunded,
+          },
+        );
 
         break;
       }

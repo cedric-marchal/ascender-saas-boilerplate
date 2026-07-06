@@ -12,6 +12,14 @@ function stripeEventIdempotencyCacheKey(eventId: string): string {
   return `stripe:event:${eventId}`;
 }
 
+// Records the `event.created` timestamp of the `customer.subscription.deleted`
+// event for a subscription, so a delayed/out-of-order `subscription.updated`
+// (which Stripe may retry for up to 3 days) cannot re-create the row and
+// re-grant access after cancellation. TTL must cover Stripe's retry window.
+function stripeSubscriptionDeletedCacheKey(subscriptionId: string): string {
+  return `stripe:subscription-deleted:${subscriptionId}`;
+}
+
 function paymentFailedEmailCacheKey(invoiceId: string): string {
   return `stripe:payment-failed-email:${invoiceId}`;
 }
@@ -37,4 +45,5 @@ export {
   paymentFailedEmailCacheKey,
   seatLimitExceededEmailCacheKey,
   stripeEventIdempotencyCacheKey,
+  stripeSubscriptionDeletedCacheKey,
 };
