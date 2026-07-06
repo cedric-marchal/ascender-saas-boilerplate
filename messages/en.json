@@ -898,6 +898,7 @@
       "invitationNotFound": "Invitation not found or already processed",
       "currentMemberNotFound": "Your membership was not found in the organization",
       "removeMembersForbidden": "Only owners and administrators can remove members",
+      "removeOwnerForbidden": "Only an owner can remove another owner",
       "cannotRemoveLastOwner": "Cannot remove the last owner. Transfer ownership first.",
       "updateForbidden": "Only owners and administrators can update the organization",
       "inviteForbidden": "Only owners and administrators can invite members",
@@ -905,6 +906,7 @@
       "alreadyOwner": "You are already the owner of this organization",
       "auditLogForbidden": "Only owners and administrators can view the audit log",
       "changeRoleForbidden": "Only owners and administrators can change roles",
+      "changeOwnerRoleForbidden": "Only an owner can change another owner's role",
       "cannotDemoteLastOwner": "Cannot demote the last owner. Transfer ownership first.",
       "seatCapReached": "Your plan does not allow adding more than {seatCap, plural, one {# member} other {# members}}. Upgrade to a higher plan to invite more members."
     },
@@ -915,7 +917,8 @@
       "userNotFound": "User not found",
       "emailAlreadyUsed": "This email address is already in use",
       "onlyAdminCannotDelete": "You are the only administrator. You cannot delete your account.",
-      "confirmationEmailMismatch": "The confirmation email does not match your email address"
+      "confirmationEmailMismatch": "The confirmation email does not match your email address",
+      "mustTransferOwnershipFirst": "You are the sole owner of an organization that has other members. Transfer ownership before deleting your account."
     },
     "billing": {
       "manageForbidden": "Only owners and administrators can manage billing",
@@ -926,7 +929,8 @@
       "invalidPrice": "Invalid or unauthorized price",
       "alreadySubscribed": "This organization already has an active subscription. Manage it from your billing dashboard.",
       "checkoutSessionFailed": "Unable to create the checkout session",
-      "accessForbidden": "Only owners and administrators can access billing"
+      "accessForbidden": "Only owners and administrators can access billing",
+      "planRequired": "An active paid plan is required to use this feature."
     },
     "storage": {
       "keyRequired": "The file key is required",

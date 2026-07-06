@@ -5,6 +5,14 @@ import { vi } from "vitest";
 vi.mock("server-only", () => ({}));
 
 vi.mock("@/lib/generated/prisma/client", () => ({
+  Prisma: {
+    TransactionIsolationLevel: {
+      ReadUncommitted: "ReadUncommitted",
+      ReadCommitted: "ReadCommitted",
+      RepeatableRead: "RepeatableRead",
+      Serializable: "Serializable",
+    },
+  },
   UserRole: {
     ADMIN: "ADMIN",
     CUSTOMER: "CUSTOMER",

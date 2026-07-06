@@ -5,8 +5,8 @@ import { revalidateLocalizedPath } from "@/i18n/revalidate-localized-path";
 import { AUDIT_ACTION } from "@/features/organizations/constants/audit-actions.constant";
 import { ChangeMemberRoleSchema } from "@/features/organizations/schemas/member.schema";
 import { logEvent } from "@/features/organizations/services/audit-log.service";
-import { isLastOwner } from "@/features/organizations/services/is-last-owner.service";
 
+import { Prisma } from "@/lib/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { orgActionClient } from "@/lib/safe-action";
 
@@ -19,44 +19,69 @@ const changeMemberRoleAction = orgActionClient
       throw new ForbiddenError("errors.organizations.changeRoleForbidden");
     }
 
-    const member = await prisma.member.findFirst({
-      where: {
-        id: parsedInput.memberId,
-        organizationId: ctx.organizationId,
-      },
-      select: {
-        id: true,
-        userId: true,
-        role: true,
-      },
-    });
+    // The last-owner check and the role update run in a single Serializable
+    // transaction so two concurrent demotions of the org's owners cannot both
+    // pass the guard and leave the org with zero owners.
+    const previousRole = await prisma.$transaction(
+      async (tx) => {
+        const member = await tx.member.findFirst({
+          where: {
+            id: parsedInput.memberId,
+            organizationId: ctx.organizationId,
+          },
+          select: {
+            id: true,
+            userId: true,
+            role: true,
+          },
+        });
 
-    if (!member) {
-      throw new NotFoundError("errors.organizations.memberNotFound");
-    }
+        if (!member) {
+          throw new NotFoundError("errors.organizations.memberNotFound");
+        }
 
-    if (member.role === "owner") {
-      const lastOwner = await isLastOwner({
-        organizationId: ctx.organizationId,
-        userId: member.userId,
-      });
+        if (member.role === "owner") {
+          if (ctx.memberRole !== "owner") {
+            throw new ForbiddenError(
+              "errors.organizations.changeOwnerRoleForbidden",
+            );
+          }
 
-      if (lastOwner) {
-        throw new ForbiddenError("errors.organizations.cannotDemoteLastOwner");
-      }
-    }
+          const remainingOwners = await tx.member.count({
+            where: {
+              organizationId: ctx.organizationId,
+              role: "owner",
+              id: {
+                not: member.id,
+              },
+            },
+          });
 
-    await prisma.member.update({
-      where: {
-        id: parsedInput.memberId,
+          if (remainingOwners < 1) {
+            throw new ForbiddenError(
+              "errors.organizations.cannotDemoteLastOwner",
+            );
+          }
+        }
+
+        await tx.member.update({
+          where: {
+            id: member.id,
+          },
+          data: {
+            role: parsedInput.role,
+          },
+          select: {
+            id: true,
+          },
+        });
+
+        return member.role;
       },
-      data: {
-        role: parsedInput.role,
+      {
+        isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
       },
-      select: {
-        id: true,
-      },
-    });
+    );
 
     await logEvent({
       organizationId: ctx.organizationId,
@@ -65,9 +90,8 @@ const changeMemberRoleAction = orgActionClient
       entityType: "member",
       entityId: parsedInput.memberId,
       metadata: {
-        previousRole: member.role,
+        previousRole,
         newRole: parsedInput.role,
-        targetUserId: member.userId,
       },
     });
 

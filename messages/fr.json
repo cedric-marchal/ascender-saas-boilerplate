@@ -898,6 +898,7 @@
       "invitationNotFound": "Invitation introuvable ou déjà traitée",
       "currentMemberNotFound": "Votre membre introuvable dans l'organisation",
       "removeMembersForbidden": "Seuls les propriétaires et administrateurs peuvent retirer des membres",
+      "removeOwnerForbidden": "Seul un propriétaire peut retirer un autre propriétaire",
       "cannotRemoveLastOwner": "Impossible de retirer le dernier propriétaire. Transférez d'abord la propriété.",
       "updateForbidden": "Seuls les propriétaires et administrateurs peuvent modifier l'organisation",
       "inviteForbidden": "Seuls les propriétaires et administrateurs peuvent inviter des membres",
@@ -905,6 +906,7 @@
       "alreadyOwner": "Vous êtes déjà propriétaire de cette organisation",
       "auditLogForbidden": "Seuls les propriétaires et administrateurs peuvent consulter le journal d'activité",
       "changeRoleForbidden": "Seuls les propriétaires et administrateurs peuvent modifier les rôles",
+      "changeOwnerRoleForbidden": "Seul un propriétaire peut modifier le rôle d'un autre propriétaire",
       "cannotDemoteLastOwner": "Impossible de rétrograder le dernier propriétaire. Transférez d'abord la propriété.",
       "seatCapReached": "Votre plan ne permet pas d'ajouter plus de {seatCap, plural, one {# membre} other {# membres}}. Passez à un plan supérieur pour inviter davantage de membres."
     },
@@ -915,7 +917,8 @@
       "userNotFound": "Utilisateur introuvable",
       "emailAlreadyUsed": "Cette adresse email est déjà utilisée",
       "onlyAdminCannotDelete": "Vous êtes le seul administrateur. Vous ne pouvez pas supprimer votre compte.",
-      "confirmationEmailMismatch": "L'email de confirmation ne correspond pas à votre adresse email"
+      "confirmationEmailMismatch": "L'email de confirmation ne correspond pas à votre adresse email",
+      "mustTransferOwnershipFirst": "Vous êtes le seul propriétaire d'une organisation qui compte d'autres membres. Transférez la propriété avant de supprimer votre compte."
     },
     "billing": {
       "manageForbidden": "Seuls les propriétaires et administrateurs peuvent gérer la facturation",
@@ -926,7 +929,8 @@
       "invalidPrice": "Prix invalide ou non autorisé",
       "alreadySubscribed": "Cette organisation a déjà un abonnement actif. Gérez-le depuis votre espace facturation.",
       "checkoutSessionFailed": "Impossible de créer la session de paiement",
-      "accessForbidden": "Seuls les propriétaires et administrateurs peuvent accéder à la facturation"
+      "accessForbidden": "Seuls les propriétaires et administrateurs peuvent accéder à la facturation",
+      "planRequired": "Un abonnement payant actif est requis pour utiliser cette fonctionnalité."
     },
     "storage": {
       "keyRequired": "La clé du fichier est requise",
