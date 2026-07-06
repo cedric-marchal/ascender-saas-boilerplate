@@ -95,6 +95,11 @@ const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: true,
+    // Must match MIN/MAX_PASSWORD_LENGTH in features/auth/schemas/password.schema.ts
+    // (lib/ cannot import from features/) — enforces the policy server-side for
+    // clients that bypass the form and call the auth API directly.
+    minPasswordLength: 12,
+    maxPasswordLength: 128,
     sendResetPassword: async ({ user, url }, request) => {
       const locale = getLocaleFromRequest(request);
       const translate = getTranslator(locale);

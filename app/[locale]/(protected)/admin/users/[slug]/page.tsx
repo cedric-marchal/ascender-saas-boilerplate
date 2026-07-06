@@ -20,6 +20,9 @@ export async function generateMetadata({
   params,
 }: AdminUserDetailRouteProps): Promise<Metadata> {
   const { locale, slug } = await params;
+
+  await requireAdminVerifiedEmail();
+
   const user = await getUserBySlug(slug);
 
   if (user) {
