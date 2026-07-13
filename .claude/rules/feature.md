@@ -1,6 +1,6 @@
 ---
 paths:
-  - "features/**"
+  - "src/features/**"
 ---
 
 # Feature Module Rules
@@ -8,7 +8,7 @@ paths:
 ## Structure
 
 ```
-features/{feature}/
+src/features/{feature}/
 ├── actions/          # Server Actions → see action.md
 │   └── {verb}-{entity}.action.ts
 ├── components/
@@ -94,7 +94,7 @@ export type { CreateContactSchemaType };
 
 ## Email Rules
 
-Location: `features/{feature}/emails/{entity}-email.tsx`
+Location: `src/features/{feature}/emails/{entity}-email.tsx`
 
 Stack: `react-email` (Html, Head, Body, Container, Heading, Text)
 
@@ -107,7 +107,7 @@ Stack: `react-email` (Html, Head, Body, Container, Heading, Text)
 
 ## Plan Configuration (Billing)
 
-All paid plan definitions live in a single source of truth: `features/billing/constants/plan.constant.ts`.
+All paid plan definitions live in a single source of truth: `src/features/billing/constants/plan.constant.ts`.
 
 ```tsx
 const PLAN_CONFIG = {
@@ -128,16 +128,16 @@ Everything derives from `PLAN_CONFIG`:
 
 | Export                  | Purpose                              | Used by                                                    |
 | ----------------------- | ------------------------------------ | ---------------------------------------------------------- |
-| `PlanKey`               | Union type `"pro" \| ...` (typesafe) | `requireCustomerPlan()` in `features/billing/guards/`      |
+| `PlanKey`               | Union type `"pro" \| ...` (typesafe) | `requireCustomerPlan()` in `src/features/billing/guards/`  |
 | `ALLOWED_PRICE_IDS`     | All paid price IDs                   | Checkout validation (`create-checkout-session.service.ts`) |
 | `getPlanLabel(priceId)` | Price ID → display label             | Billing UI components                                      |
 | `getPriceIds(...plans)` | Plan keys → price IDs array          | `requireCustomerPlan()` internals                          |
 
 To add a new paid plan:
 
-1. Add env var in `lib/env.ts` (e.g. `STRIPE_PRICE_ID_BUSINESS`)
+1. Add env var in `src/lib/env.ts` (e.g. `STRIPE_PRICE_ID_BUSINESS`)
 2. Add entry in `PLAN_CONFIG`
-3. Add plan object in `features/pricing/constants/pricing-plans.ts`
+3. Add plan object in `src/features/pricing/constants/pricing-plans.ts`
 
 NEVER hardcode price IDs or plan labels outside `PLAN_CONFIG`.
 
@@ -145,22 +145,22 @@ NEVER hardcode price IDs or plan labels outside `PLAN_CONFIG`.
 
 A feature can import from another feature **only** through its public surface:
 
-| Allowed import targets        | Example                                                          |
-| ----------------------------- | ---------------------------------------------------------------- |
-| `features/{other}/actions/`   | `pricing → billing/actions/create-checkout.action`               |
-| `features/{other}/constants/` | `users → billing/constants/subscription-status.constant`         |
-| `features/{other}/emails/`    | `account → auth/emails/password-changed-email`                   |
-| `features/{other}/schemas/`   | `account → auth/schemas/password.schema` (shared validator only) |
-| `features/{other}/guards/`    | `app/ → billing/guards/require-customer-plan`                    |
+| Allowed import targets            | Example                                                          |
+| --------------------------------- | ---------------------------------------------------------------- |
+| `src/features/{other}/actions/`   | `pricing → billing/actions/create-checkout.action`               |
+| `src/features/{other}/constants/` | `users → billing/constants/subscription-status.constant`         |
+| `src/features/{other}/emails/`    | `account → auth/emails/password-changed-email`                   |
+| `src/features/{other}/schemas/`   | `account → auth/schemas/password.schema` (shared validator only) |
+| `src/features/{other}/guards/`    | `src/app/ → billing/guards/require-customer-plan`                |
 
 **NEVER** import another feature's `services/` directly — services contain security-scoped logic (`userId` filters) that must not leak across feature boundaries.
 
-`lib/` must NEVER import from `features/` (enforced by ESLint `no-restricted-imports` on `lib/**`).
+`src/lib/` must NEVER import from `src/features/` (enforced by ESLint `no-restricted-imports` on `src/lib/**`).
 
 ## Anti-Patterns
 
 ```
-Wrong file locations (schemas in lib/, actions in app/, emails in components/)
+Wrong file locations (schemas in src/lib/, actions in src/app/, emails in src/components/)
 Form and Modal in same file
 Missing "server-only" in services
 Missing "use server" in actions (or not on line 1)
@@ -168,6 +168,6 @@ Missing .trim() or wrong order (.trim() before .max())
 Default exports
 Inline schema in action (always import from schemas/)
 react-hook-form (always TanStack Form)
-Importing features/ from lib/ (dependency inversion)
+Importing src/features/ from src/lib/ (dependency inversion)
 Importing another feature's services/ directly (security boundary violation)
 ```

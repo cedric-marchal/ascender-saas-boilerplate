@@ -12,7 +12,7 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
     // Generated files — never lint these.
-    "lib/generated/**",
+    "src/lib/generated/**",
     // Coverage reports.
     "coverage/**",
   ]),
@@ -51,8 +51,8 @@ const eslintConfig = defineConfig([
   // This prevents dependency inversion (features depend on lib, never the inverse).
   // Exception: lib/auth.ts imports email templates (Better Auth callback constraint).
   {
-    files: ["lib/**"],
-    ignores: ["lib/auth.ts"],
+    files: ["src/lib/**"],
+    ignores: ["src/lib/auth.ts"],
     rules: {
       "no-restricted-imports": [
         "error",
@@ -76,7 +76,7 @@ const eslintConfig = defineConfig([
   // memoized by React Compiler. This is a known incompatibility — the warning
   // is a false positive since React Compiler is not enabled in this project.
   {
-    files: ["components/ui/data-table.tsx"],
+    files: ["src/components/ui/data-table.tsx"],
     rules: {
       "react-hooks/incompatible-library": "off",
     },
@@ -92,7 +92,7 @@ const eslintConfig = defineConfig([
   // lib/logger.ts is the single designated console transport (see
   // docs/OBSERVABILITY.md) — every other file must go through `logger.*`.
   {
-    files: ["lib/logger.ts"],
+    files: ["src/lib/logger.ts"],
     rules: {
       "no-console": "off",
     },

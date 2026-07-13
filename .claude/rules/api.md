@@ -1,6 +1,6 @@
 ---
 paths:
-  - "app/api/**"
+  - "src/app/api/**"
 ---
 
 # API Route Rules
@@ -11,7 +11,7 @@ HTTP route handlers in Next.js App Router (`route.ts` files).
 
 ## File Location (P0)
 
-`app/api/{resource}/route.ts`
+`src/app/api/{resource}/route.ts`
 
 ## Structure (P0)
 

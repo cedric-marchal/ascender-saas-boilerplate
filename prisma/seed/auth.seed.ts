@@ -1,4 +1,4 @@
-import type { PrismaClient } from "../../lib/generated/prisma/client";
+import type { PrismaClient } from "../../src/lib/generated/prisma/client";
 import {
   daysAgo,
   daysFromNow,

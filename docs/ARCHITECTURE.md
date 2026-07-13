@@ -2,17 +2,17 @@
 
 A map of how this codebase is organized and why — not a copy of the machine-enforced rules in `.claude/rules/*.md`. Read those for the letter of the law; read this for the shape of the forest.
 
-The worked example throughout is `features/projects` — a complete, real CRUD domain (not a stub) built specifically to be copied when adding a new domain.
+The worked example throughout is `src/features/projects` — a complete, real CRUD domain (not a stub) built specifically to be copied when adding a new domain.
 
 ## Layout
 
 ```
-app/                          # Routes only — thin shims, no business logic
+src/app/                      # Routes only — thin shims, no business logic
 ├── (public)/                 # Marketing, auth, legal pages
 ├── (protected)/              # Dashboard + Admin (guarded by entry-point checks)
 └── api/                      # Route handlers (Better Auth catch-all, avatar upload, Stripe webhooks)
 
-features/                     # ALL business logic lives here, one folder per domain
+src/features/                 # ALL business logic lives here, one folder per domain
 └── {feature}/
     ├── actions/               # Server Actions (next-safe-action)
     ├── components/            # UI — forms/ and modals/ as dedicated subfolders
@@ -22,13 +22,13 @@ features/                     # ALL business logic lives here, one folder per do
     ├── schemas/                   # Zod validation (Create → Update → Delete order)
     └── services/                   # Server-only logic, security-scoped
 
-lib/                          # Shared infrastructure: auth, prisma client, redis, env, r2, cache-keys
-components/                   # Shared UI: ui/ (Shadcn primitives), pages/, public/, protected/
-utils/                        # Pure utilities: errors/, date/, string/
-hooks/                        # Shared React hooks
+src/lib/                      # Shared infrastructure: auth, prisma client, redis, env, r2, cache-keys
+src/components/               # Shared UI: ui/ (Shadcn primitives), pages/, public/, protected/
+src/utils/                    # Pure utilities: errors/, date/, string/
+src/hooks/                    # Shared React hooks
 ```
 
-A route file under `app/` should almost always be a thin shim: parse `searchParams`/params, run entry-point guards (auth, rate limit, plan gate), call one service or action, and render a `{Feature}Page` from `features/{feature}/pages/`. If a route file is doing real logic, that logic is misplaced.
+A route file under `src/app/` should almost always be a thin shim: parse `searchParams`/params, run entry-point guards (auth, rate limit, plan gate), call one service or action, and render a `{Feature}Page` from `src/features/{feature}/pages/`. If a route file is doing real logic, that logic is misplaced.
 
 ## Source-of-truth hierarchy
 
@@ -36,20 +36,20 @@ Everything is derived, never duplicated, in this order:
 
 ```
 Prisma schema (enums ALWAYS UPPERCASE, e.g. ProjectStatus.ACTIVE)
-  → lib/generated/prisma/client   (server-only: services, actions, api/)
-    lib/generated/prisma/browser  (client-safe: constants/, components/)
-  → lib/parsers/filters.ts (pure constants) + lib/parsers/nuqs.ts (Nuqs parsers)
-  → features/*/constants/   (filter unions, searchParams objects, label maps)
-  → features/*/schemas/     (Zod, validates against the same constants — never redefines them)
-  → features/*/services/    (Prisma queries, security-scoped)
-  → features/*/actions/     (next-safe-action wrapping a service)
-  → features/*/components/  (forms, tables, modals)
-  → app/*/page.tsx           (thin shim wiring it all together)
+  → src/lib/generated/prisma/client   (server-only: services, actions, api/)
+    src/lib/generated/prisma/browser  (client-safe: constants/, components/)
+  → src/lib/parsers/filters.ts (pure constants) + src/lib/parsers/nuqs.ts (Nuqs parsers)
+  → src/features/*/constants/   (filter unions, searchParams objects, label maps)
+  → src/features/*/schemas/     (Zod, validates against the same constants — never redefines them)
+  → src/features/*/services/    (Prisma queries, security-scoped)
+  → src/features/*/actions/     (next-safe-action wrapping a service)
+  → src/features/*/components/  (forms, tables, modals)
+  → src/app/*/page.tsx           (thin shim wiring it all together)
 ```
 
-Concretely, for `features/projects`: `ProjectStatus` is defined once in `schema.prisma`, imported into `project-filters.constant.ts` from `prisma/browser`, referenced (not redefined) by `project.schema.ts`'s Zod enum, consumed by every service's `where` clause, exposed through the actions, and rendered via `projects-columns.tsx` / `projects-filters.tsx`. Change the enum in one place and every layer downstream is a type error until it's updated — that's the point.
+Concretely, for `src/features/projects`: `ProjectStatus` is defined once in `schema.prisma`, imported into `project-filters.constant.ts` from `prisma/browser`, referenced (not redefined) by `project.schema.ts`'s Zod enum, consumed by every service's `where` clause, exposed through the actions, and rendered via `projects-columns.tsx` / `projects-filters.tsx`. Change the enum in one place and every layer downstream is a type error until it's updated — that's the point.
 
-## Feature slice anatomy (worked example: `features/projects`)
+## Feature slice anatomy (worked example: `src/features/projects`)
 
 | Layer      | File                                                                                      | Responsibility                                                                                                                                                                       |
 | ---------- | ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -62,7 +62,7 @@ Concretely, for `features/projects`: `ProjectStatus` is defined once in `schema.
 | Components | `components/projects-columns.tsx`, `projects-filters.tsx`, `projects-empty.tsx`           | TanStack Table columns, Nuqs-driven filters, a distinct empty state for "no data" vs. "no results for current filters"                                                               |
 | Components | `components/forms/create-project-form.tsx` + `components/modals/create-project-modal.tsx` | Form and Modal are always separate files; the modal owns open/close state, the form calls `onSuccess` to close it                                                                    |
 | Page       | `pages/projects-page.tsx` + `pages/projects-loading.tsx`                                  | The actual list page and its `loading.tsx` counterpart                                                                                                                               |
-| Route      | `app/(protected)/dashboard/projets/page.tsx`                                              | Thin shim: `requireCustomerPlan("pro")` guard, Nuqs `createLoader`, `filterRatelimit` at the entry point, scopes the query to `session.activeOrganizationId`, renders `ProjectsPage` |
+| Route      | `src/app/(protected)/dashboard/projets/page.tsx`                                          | Thin shim: `requireCustomerPlan("pro")` guard, Nuqs `createLoader`, `filterRatelimit` at the entry point, scopes the query to `session.activeOrganizationId`, renders `ProjectsPage` |
 
 To build a new domain: copy this slice's file list, rename, and follow the same order (schema → constants → service → action → component → route).
 
@@ -70,7 +70,7 @@ To build a new domain: copy this slice's file list, rename, and follow the same 
 
 Three layers, each independently necessary:
 
-1. **Entry-point guards** — `app/*/page.tsx` and `actions/*.action.ts` are where auth, plan gating, and rate limiting happen. `orgActionClient` / `authActionClient` / `adminActionClient` inject `ctx.userId`, `ctx.organizationId`, etc. after verifying session and (for org actions) membership. Rate limiting (`filterRatelimit`, `authenticatedRatelimit`, `contactRatelimit` from `lib/ratelimit.ts`) is applied **only** here — never inside a service.
+1. **Entry-point guards** — `src/app/*/page.tsx` and `actions/*.action.ts` are where auth, plan gating, and rate limiting happen. `orgActionClient` / `authActionClient` / `adminActionClient` inject `ctx.userId`, `ctx.organizationId`, etc. after verifying session and (for org actions) membership. Rate limiting (`filterRatelimit`, `authenticatedRatelimit`, `contactRatelimit` from `src/lib/ratelimit.ts`) is applied **only** here — never inside a service.
 2. **Service-level membership enforcement** — every service re-verifies what it needs (e.g. `prisma.member.findFirst({ organizationId, userId })`) even though the action layer already checked. A service is never allowed to trust its caller; it must be safe to call directly. This is what makes `get-project.service.ts` throw `ForbiddenError` before running any project query for a non-member, and `NotFoundError` for a project outside the caller's org.
 3. **IDOR rules at the query level** — customer services always filter by the scoping key in the Prisma `where` clause (`userId` for user-owned data, `organizationId` for org-owned data) using `findFirst`/`findMany`, not `findUnique` on the id alone. Admin services live in a **separate** file with no scoping filter — access is guaranteed by the entry point (`requireAdmin()` / `adminActionClient`), and admin/customer logic is never mixed in one service.
 
@@ -80,13 +80,13 @@ Booleans are never used for permissions (`isAdmin: boolean` is banned) — role/
 
 ## Error handling
 
-Error classes live in `utils/errors/errors.ts` — a small `AppError` hierarchy mapped to HTTP status codes 400 → 429 (`BadRequestError`, `UnauthorizedError`, `ForbiddenError`, `NotFoundError`, `ConflictError`, `PayloadTooLargeError`, `UnsupportedMediaTypeError`, `UnprocessableEntityError`, and rate-limit's 429). Services throw these directly; nothing downstream swallows them silently.
+Error classes live in `src/utils/errors/errors.ts` — a small `AppError` hierarchy mapped to HTTP status codes 400 → 429 (`BadRequestError`, `UnauthorizedError`, `ForbiddenError`, `NotFoundError`, `ConflictError`, `PayloadTooLargeError`, `UnsupportedMediaTypeError`, `UnprocessableEntityError`, and rate-limit's 429). Services throw these directly; nothing downstream swallows them silently.
 
 | Layer             | Pattern                                                                                                                                                                                   |
 | ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Services          | Throw the appropriate `AppError` subclass directly — no try/catch                                                                                                                         |
-| Actions           | No try/catch either — `next-safe-action`'s `handleServerError` (in `lib/safe-action.ts`) catches whatever the service threw and serializes it to the client                               |
-| API routes        | `catch (error: unknown)` at the top level, passed to `handleApiError(error)` from `utils/errors/handle-api-error.ts`, which maps it to the right HTTP response                            |
+| Actions           | No try/catch either — `next-safe-action`'s `handleServerError` (in `src/lib/safe-action.ts`) catches whatever the service threw and serializes it to the client                           |
+| API routes        | `catch (error: unknown)` at the top level, passed to `handleApiError(error)` from `src/utils/errors/handle-api-error.ts`, which maps it to the right HTTP response                        |
 | Client components | `getActionResult(await executeAsync(value))` inside a try/catch, paired with `getErrorMessage(error)` for the toast message — this is the only place error handling happens on the client |
 
 ## Caching approach
@@ -97,15 +97,15 @@ Three layers you choose per case, plus two library-managed caches you only confi
 | ------------------------- | --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | React `cache()`           | Per-request dedup           | Same function called 2+ times in one render (e.g. `getSession()` used in a page, its layout, and a guard)                                                                                                                                                   |
 | Next.js `"use cache"`     | Cross-request, shared       | Expensive queries whose result is the same for every caller (e.g. an admin dashboard aggregate); always paired with an explicit `cacheLife()` and a `cacheTag()` for invalidation, and always kept alongside a non-cached pure function for real-time reads |
-| Redis                     | External-API data, per-user | Data fetched from Stripe etc. that's invalidated by webhooks; keys are centralized in `lib/cache-keys.ts` (never string literals)                                                                                                                           |
-| Better Auth `cookieCache` | Session in signed cookie    | Config-only (`maxAge` in `lib/auth.ts`), avoids a DB round-trip per request                                                                                                                                                                                 |
-| Upstash Ratelimit         | Request counters            | Config-only (`lib/ratelimit.ts`)                                                                                                                                                                                                                            |
+| Redis                     | External-API data, per-user | Data fetched from Stripe etc. that's invalidated by webhooks; keys are centralized in `src/lib/cache-keys.ts` (never string literals)                                                                                                                       |
+| Better Auth `cookieCache` | Session in signed cookie    | Config-only (`maxAge` in `src/lib/auth.ts`), avoids a DB round-trip per request                                                                                                                                                                             |
+| Upstash Ratelimit         | Request counters            | Config-only (`src/lib/ratelimit.ts`)                                                                                                                                                                                                                        |
 
 `"use cache"` is a function-level directive only — never on a page route — and is always the first statement in the function body, immediately followed by `cacheLife()` and `cacheTag()`. Functions using `headers()`/`cookies()`/`searchParams` can never carry `"use cache"`; that data belongs in a `<Suspense>` boundary instead (the PPR pattern: a static shell rendered at build time, with a dynamic hole for anything session- or request-scoped).
 
 ## Testing approach
 
-Tests live in `__tests__/`, mirroring the `features/` tree (`__tests__/features/{feature}/{schemas,services}/...`). The suite is Vitest, currently 560+ tests across 46 files, run with `pnpm test` (CI's `test` job) and gating the `build` job.
+Tests live in `__tests__/`, mirroring the `src/features/` tree (`__tests__/features/{feature}/{schemas,services}/...`). The suite is Vitest, currently 560+ tests across 46 files, run with `pnpm test` (CI's `test` job) and gating the `build` job.
 
 Conventions demonstrated by `__tests__/features/projects/`:
 

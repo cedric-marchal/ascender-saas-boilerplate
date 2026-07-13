@@ -1,7 +1,7 @@
 ---
 paths:
-  - "features/*/actions/**"
-  - "lib/safe-action*"
+  - "src/features/*/actions/**"
+  - "src/lib/safe-action*"
 ---
 
 # Server Action Rules (next-safe-action)
@@ -12,7 +12,7 @@ Type-safe asynchronous functions using `next-safe-action`. Run on server, called
 
 ## File Location (P0)
 
-**Path**: `features/{feature}/actions/{verb}-{entity}.action.ts`
+**Path**: `src/features/{feature}/actions/{verb}-{entity}.action.ts`
 
 One action per file.
 
@@ -135,7 +135,7 @@ return {
 
 - NO try/catch needed (next-safe-action handles it)
 - Throw custom errors directly: `throw new ConflictError("...")`
-- Errors caught by `handleServerError` in `lib/safe-action.ts`
+- Errors caught by `handleServerError` in `src/lib/safe-action.ts`
 
 ```tsx
 export const createContactAction = authActionClient
@@ -323,7 +323,7 @@ import { actionClient } from "@/lib/safe-action";
 "use server";
 
 // ❌ Wrong: File location
-lib/actions/create-contact.action.ts  // → features/contact/actions/
+src/lib/actions/create-contact.action.ts  // → src/features/contact/actions/
 
 // ❌ Wrong: Missing "Action" suffix
 export const createContact = ...

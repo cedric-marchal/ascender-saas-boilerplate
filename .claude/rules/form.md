@@ -1,14 +1,14 @@
 ---
 paths:
-  - "features/*/components/forms/**"
-  - "components/ui/field*"
+  - "src/features/*/components/forms/**"
+  - "src/components/ui/field*"
 ---
 
 # Form Rules
 
 ## File Location
 
-MUST be in `features/{feature}/components/forms/{entity}-form.tsx`
+MUST be in `src/features/{feature}/components/forms/{entity}-form.tsx`
 
 Forms MUST always be separate from modals. One form per file.
 
@@ -69,7 +69,7 @@ Rules:
 
 - ALWAYS `defaultValues` with `as SchemaType` assertion
 - ALWAYS `validators: { onSubmit: Schema }` (NEVER `zodResolver`)
-- NEVER inline schema definition — import from `features/*/schemas/`
+- NEVER inline schema definition — import from `src/features/*/schemas/`
 - NEVER react-hook-form
 
 ## Two Submission Patterns
@@ -230,7 +230,7 @@ Server Actions: combine `isExecuting` + `isSubmitting`. API Routes: only `isSubm
 
 File inputs MUST include drag & drop + preview + removal.
 
-See existing implementation pattern in `features/account/components/forms/` for the full drag & drop template with `handleDragOver`, `handleDrop`, `handleInputChange`.
+See existing implementation pattern in `src/features/account/components/forms/` for the full drag & drop template with `handleDragOver`, `handleDrop`, `handleInputChange`.
 
 Core requirements:
 
