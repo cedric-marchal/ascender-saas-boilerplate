@@ -13,6 +13,12 @@ datasource db {
   provider = "postgresql"
 }
 
+// Better Auth owns the identity + org tables below (User, Session, Account,
+// Verification, Organization, Member, Invitation): it generates their IDs and
+// writes role/status as free-form strings. Do NOT add @default() to their `id`,
+// and do NOT convert their String role/status fields to Prisma enums — either
+// change breaks auth. App-owned tables (StripeCustomer, Subscription, Project,
+// AuditLog) use @default(uuid(7)) and typed enums where the app is the writer.
 model User {
   id            String       @id
   name          String
@@ -88,7 +94,7 @@ model Verification {
 }
 
 model StripeCustomer {
-  id               String         @id @default(cuid())
+  id               String         @id @default(uuid(7))
   organizationId   String         @unique
   organization     Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   stripeCustomerId String         @unique
@@ -113,7 +119,7 @@ enum SubscriptionStatus {
 }
 
 model Subscription {
-  id                   String             @id @default(cuid())
+  id                   String             @id @default(uuid(7))
   stripeSubscriptionId String             @unique
   stripeCustomerId     String
   stripeCustomer       StripeCustomer     @relation(fields: [stripeCustomerId], references: [stripeCustomerId], onDelete: Cascade)
@@ -153,6 +159,7 @@ model Member {
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   userId         String
   user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// Better Auth-managed — free-form role (owner/admin/member + custom). Never an enum.
   role           String
   createdAt      DateTime     @default(now())
 
@@ -168,6 +175,7 @@ model Invitation {
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   email          String
   role           String?
+  /// Better Auth-managed — written as pending/accepted/rejected/canceled. Never an enum.
   status         String       @default("pending")
   inviterId      String
   inviter        User         @relation(fields: [inviterId], references: [id], onDelete: Cascade)
@@ -186,7 +194,7 @@ enum ProjectStatus {
 }
 
 model Project {
-  id             String        @id @default(cuid())
+  id             String        @id @default(uuid(7))
   name           String
   description    String?
   status         ProjectStatus @default(DRAFT)
@@ -202,7 +210,7 @@ model Project {
 }
 
 model AuditLog {
-  id             String   @id @default(cuid())
+  id             String   @id @default(uuid(7))
   organizationId String
   userId         String
   action         String
