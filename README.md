@@ -156,6 +156,15 @@ Prisma schema (enums ALWAYS UPPERCASE)
 
 `src/features/projects` is the reference implementation of every convention below — copy it as the starting point for a new domain. See **[docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md)** for the full write-up (feature anatomy, security model, error handling, caching strategy). The authoritative, machine-enforced rules live in `.claude/rules/*.md` and are loaded automatically by Claude Code based on the file being edited.
 
+## Documentation
+
+Deeper write-ups live in `docs/`:
+
+- **[docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md)** — the shape of the codebase: feature anatomy, security model, error handling, caching strategy.
+- **[docs/WHEN-TO-USE.md](./docs/WHEN-TO-USE.md)** — decide whether this base fits a given project: the tenancy (org/team) and billing (licensed vs metered) decision tree, with concrete examples and the cost of each path.
+- **[docs/RECIPE-AI-SDK.md](./docs/RECIPE-AI-SDK.md)** — opt-in, per-project recipe for adding AI (Vercel AI SDK + Claude), deliberately _not_ baked into the base, with the rate-limit + quota margin guard.
+- **[docs/OBSERVABILITY.md](./docs/OBSERVABILITY.md)** — the dependency-free seams for wiring Sentry (error tracking) and PostHog (analytics).
+
 ## Testing
 
 ```bash
@@ -185,6 +194,6 @@ Set every variable from the quickstart table above (with production values) in y
 - **Single "Pro" plan.** Billing supports exactly one paid plan (`PLAN_CONFIG` in `src/features/billing/constants/plan.constant.ts`) with seat caps; adding tiers is a config change, not a rewrite, but multi-tier pricing isn't wired up yet.
 - **No observability/analytics layer.** No error tracking, product analytics, or APM is integrated out of the box.
 - **No migration history.** The schema is applied via `pnpm db:push`; adopt `prisma migrate` before you have a production database you can't reset.
-- **No AI scaffolding yet.** An opt-in, plan-gated AI chat slice is planned — see `aidd_docs/tasks/2026_07/2026_07_05-audit-boilerplate-yc-part-6.md`.
+- **No AI scaffolding baked into the base — by design.** AI stays a per-project opt-in; a ready, up-to-date recipe (Vercel AI SDK + Claude, with a rate-limit + quota margin guard) lives in **[docs/RECIPE-AI-SDK.md](./docs/RECIPE-AI-SDK.md)**. A deeper plan-gated AI chat slice is tracked in `aidd_docs/tasks/2026_07/2026_07_05-audit-boilerplate-yc-part-6.md`.
 
 The full audit this roadmap comes from is in `aidd_docs/tasks/2026_07/2026_07_05-audit-boilerplate-yc-master.md`.
