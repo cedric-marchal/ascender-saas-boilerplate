@@ -14,21 +14,22 @@ datasource db {
 }
 
 model User {
-  id             String          @id
-  name           String
-  email          String
-  emailVerified  Boolean         @default(false)
-  image          String?
-  role           UserRole        @default(CUSTOMER)
-  slug           String          @unique
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
-  sessions       Session[]
-  accounts       Account[]
-  members        Member[]
-  invitations    Invitation[]
+  id            String       @id
+  name          String
+  email         String
+  emailVerified Boolean      @default(false)
+  image         String?
+  role          UserRole     @default(CUSTOMER)
+  slug          String       @unique
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  sessions      Session[]
+  accounts      Account[]
+  members       Member[]
+  invitations   Invitation[]
 
   @@unique([email])
+  @@index([createdAt])
   @@map("user")
 }
 
@@ -142,6 +143,7 @@ model Organization {
   stripeCustomer StripeCustomer?
   projects       Project[]
 
+  @@index([createdAt])
   @@map("organization")
 }
 
@@ -195,6 +197,7 @@ model Project {
 
   @@index([organizationId])
   @@index([organizationId, status])
+  @@index([organizationId, createdAt])
   @@map("project")
 }
 
@@ -209,6 +212,7 @@ model AuditLog {
   createdAt      DateTime @default(now())
 
   @@index([organizationId])
+  @@index([organizationId, createdAt])
   @@index([userId])
   @@map("auditLog")
 }
