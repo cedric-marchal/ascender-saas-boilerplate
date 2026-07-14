@@ -9,17 +9,17 @@ Full plan: `aidd_docs/tasks/2026_07/2026_07_05-audit-boilerplate-yc-part-3.md`.
 
 ## What exists now
 
-| Piece                    | File                                                                                                                                    | Status                                                           |
-| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
-| Structured logger        | `lib/logger.ts`                                                                                                                         | Active — the single logging surface, console transport only      |
-| Exception capture seam   | `lib/observability.ts` (`captureException`)                                                                                             | Active — logs via `logger.error`, no vendor call yet             |
-| Capture wiring           | `lib/safe-action.ts`, `utils/errors/handle-api-error.ts`                                                                                | Active — calls `captureException` for unexpected errors only     |
-| Analytics no-op tracker  | `lib/analytics.ts` (`trackEvent`)                                                                                                       | Active — `logger.debug` in dev, no-op in prod, typed event union |
-| Analytics exemplar sites | `features/auth/actions/sign-up.action.ts` (`user_signed_up`), `features/billing/actions/create-checkout.action.ts` (`checkout_started`) | Active — pattern demonstrated, not exhaustively instrumented     |
-| Env slots (inert)        | `lib/env.ts`, `.env.example`                                                                                                            | Optional vars, absent = disabled, app boots either way           |
+| Piece                    | File                                                                                                                                            | Status                                                           |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| Structured logger        | `src/lib/logger.ts`                                                                                                                             | Active — the single logging surface, console transport only      |
+| Exception capture seam   | `src/lib/observability.ts` (`captureException`)                                                                                                 | Active — logs via `logger.error`, no vendor call yet             |
+| Capture wiring           | `src/lib/safe-action.ts`, `src/utils/errors/handle-api-error.ts`                                                                                | Active — calls `captureException` for unexpected errors only     |
+| Analytics no-op tracker  | `src/lib/analytics.ts` (`trackEvent`)                                                                                                           | Active — `logger.debug` in dev, no-op in prod, typed event union |
+| Analytics exemplar sites | `src/features/auth/actions/sign-up.action.ts` (`user_signed_up`), `src/features/billing/actions/create-checkout.action.ts` (`checkout_started`) | Active — pattern demonstrated, not exhaustively instrumented     |
+| Env slots (inert)        | `src/lib/env.ts`, `.env.example`                                                                                                                | Optional vars, absent = disabled, app boots either way           |
 
-`console.error`/`console.warn` have been removed from `features/`, `lib/`,
-and `utils/` — every call site now goes through `logger.*`.
+`console.error`/`console.warn` have been removed from `src/features/`, `src/lib/`,
+and `src/utils/` — every call site now goes through `logger.*`.
 
 ## Remaining steps to activate Sentry
 
@@ -30,14 +30,14 @@ and `utils/` — every call site now goes through `logger.*`.
    do not code from memory.
 3. Wrap `next.config.ts` with `withSentryConfig` (source maps upload).
 4. Fill in the `Sentry.captureException(...)` call documented in the JSDoc of
-   `lib/observability.ts` — no other file changes, every call site
-   (`lib/safe-action.ts`, `utils/errors/handle-api-error.ts`) already calls
+   `src/lib/observability.ts` — no other file changes, every call site
+   (`src/lib/safe-action.ts`, `src/utils/errors/handle-api-error.ts`) already calls
    `captureException`.
-5. Report to Sentry from `app/global-error.tsx` and `app/error.tsx` as well
+5. Report to Sentry from `src/app/global-error.tsx` and `src/app/error.tsx` as well
    (render-time errors bypass `handleServerError`/`handleApiError`).
 6. Set `SENTRY_DSN` (server) and `NEXT_PUBLIC_SENTRY_DSN` (client) — both
-   already declared as optional vars in `lib/env.ts`.
-7. Extend the CSP in `proxy.ts` to allow the Sentry ingest domains:
+   already declared as optional vars in `src/lib/env.ts`.
+7. Extend the CSP in `src/proxy.ts` to allow the Sentry ingest domains:
    - `connect-src`: `https://*.ingest.sentry.io`, `https://*.ingest.us.sentry.io`
      (or your region's ingest host, per the DSN issued by Sentry)
 8. Verify: throw a test error in dev with a DSN configured, confirm it
@@ -47,17 +47,17 @@ and `utils/` — every call site now goes through `logger.*`.
 
 1. `pnpm add posthog-js posthog-node`
 2. Fill in the `posthogClient.capture(...)` call documented in the JSDoc of
-   `lib/analytics.ts` — no other file changes, `trackEvent` is already called
+   `src/lib/analytics.ts` — no other file changes, `trackEvent` is already called
    at the two exemplar sites and can be added to the rest of the funnel
    (`organization_created`, `subscription_activated`, `invitation_sent`,
    `project_created`) the same way.
-3. Add a `PostHogProvider` in `app/providers.tsx`, initialized client-side
+3. Add a `PostHogProvider` in `src/app/providers.tsx`, initialized client-side
    **only after** the user has accepted the `analytics` cookie-consent
-   category (see `features/cookie-consent/`) — opt the user out again if
+   category (see `src/features/cookie-consent/`) — opt the user out again if
    consent is revoked. No PostHog network call may fire before consent.
 4. Set `NEXT_PUBLIC_POSTHOG_KEY` and `NEXT_PUBLIC_POSTHOG_HOST` — both
-   already declared as optional vars in `lib/env.ts`.
-5. Extend the CSP in `proxy.ts` to allow the PostHog domains:
+   already declared as optional vars in `src/lib/env.ts`.
+5. Extend the CSP in `src/proxy.ts` to allow the PostHog domains:
    - `connect-src`: `https://*.posthog.com` (or your self-hosted PostHog host)
    - `script-src`: `https://*.posthog.com` if using the `posthog-js` snippet
      loader instead of the npm package
@@ -66,7 +66,7 @@ and `utils/` — every call site now goes through `logger.*`.
 
 ## Design notes
 
-- `lib/logger.ts` and `lib/observability.ts` are intentionally tiny — they
+- `src/lib/logger.ts` and `src/lib/observability.ts` are intentionally tiny — they
   are seams, not frameworks. Do not add batching, sampling, or transport
   abstractions until an actual vendor is wired in.
 - `captureException` is called for **unexpected** errors only. Expected

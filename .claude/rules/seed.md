@@ -37,7 +37,7 @@ prisma/
 Each `{domain}.seed.ts` follows this layout:
 
 ```ts
-import type { PrismaClient } from "../../lib/generated/prisma/client";
+import type { PrismaClient } from "../../src/lib/generated/prisma/client";
 import { /* helpers */ } from "./helpers";
 
 // Types
@@ -89,15 +89,15 @@ export { clean{Domain}, seed{Domain} };
 
 Available exports — use these, don't reinvent:
 
-| Helper                                              | Usage                                              |
-| --------------------------------------------------- | -------------------------------------------------- |
-| `seedId(prefix, index)`                             | `seed-{prefix}-{index padded to 3}`                |
-| `SEED_FILTER`                                       | `{ where: { id: { startsWith: "seed-" } } }`       |
-| `getHashedPassword()`                               | Returns Better Auth scrypt hash                    |
-| `SEED_PASSWORD`                                     | The raw password string                            |
-| `generateSlug(name, index)`                         | Deterministic slug for users                       |
-| `slugify(text)`                                     | Slug helper (matches app's `utils/string/slugify`) |
-| `daysAgo(n)` / `daysFromNow(n)` / `hoursFromNow(n)` | Date helpers                                       |
+| Helper                                              | Usage                                                  |
+| --------------------------------------------------- | ------------------------------------------------------ |
+| `seedId(prefix, index)`                             | `seed-{prefix}-{index padded to 3}`                    |
+| `SEED_FILTER`                                       | `{ where: { id: { startsWith: "seed-" } } }`           |
+| `getHashedPassword()`                               | Returns Better Auth scrypt hash                        |
+| `SEED_PASSWORD`                                     | The raw password string                                |
+| `generateSlug(name, index)`                         | Deterministic slug for users                           |
+| `slugify(text)`                                     | Slug helper (matches app's `src/utils/string/slugify`) |
+| `daysAgo(n)` / `daysFromNow(n)` / `hoursFromNow(n)` | Date helpers                                           |
 
 ## Production-Accurate Formats (P0)
 
@@ -207,7 +207,7 @@ If a seeder needs data from another domain (e.g., billing needs user list):
 
 ## ESLint (P1)
 
-Seed files are excluded from `no-restricted-imports` and `no-console` rules in `eslint.config.mjs`. Relative imports (`../../lib/generated/prisma/client`) are allowed because seed files run outside Next.js with `tsx`.
+Seed files are excluded from `no-restricted-imports` and `no-console` rules in `eslint.config.mjs`. Relative imports (`../../src/lib/generated/prisma/client`) are allowed because seed files run outside Next.js with `tsx`.
 
 ## Anti-Patterns
 

@@ -57,5 +57,5 @@ async function createOrganization(
   return organization;
 }
 
-export { createOrganization };
+export { createOrganization, generateUniqueOrgSlug };
 export type { CreateOrganizationResult };

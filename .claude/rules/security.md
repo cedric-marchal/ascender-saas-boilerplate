@@ -1,6 +1,6 @@
 ---
 paths:
-  - "features/*/services/**"
+  - "src/features/*/services/**"
 ---
 
 # Security Rules — IDOR Prevention & Authorization
@@ -25,7 +25,7 @@ Admin and customer logic MUST live in separate services. No conditional branchin
 
 ```tsx
 // ✅ CORRECT: two simple services
-// features/projects/services/get-project.service.ts → customer
+// src/features/projects/services/get-project.service.ts → customer
 async function getProject(input: { userId: string; projectId: string }) {
   where: {
     id: input.projectId,
@@ -33,7 +33,7 @@ async function getProject(input: { userId: string; projectId: string }) {
   }
 }
 
-// features/users/services/get-user-project.service.ts → admin
+// src/features/users/services/get-user-project.service.ts → admin
 async function getUserProject(input: { projectId: string }) {
   where: {
     id: input.projectId
@@ -177,7 +177,7 @@ The checkout service validates `priceId` against `ALLOWED_PRICE_IDS` (derived fr
 
 ### Subscription Access Guards
 
-Use `requireCustomerPlan()` from `features/billing/guards/require-customer-plan.ts` to gate pages by subscription:
+Use `requireCustomerPlan()` from `src/features/billing/guards/require-customer-plan.ts` to gate pages by subscription:
 
 ```tsx
 // Any paid plan
@@ -196,10 +196,10 @@ await requireCustomerPlan("business", "enterprise");
 
 `requireCustomerPlan()` redirects and is **page-only**. A page guard alone is bypassable: server actions are directly-invocable POST endpoints, so a plan-gated feature whose page is guarded but whose mutations are not can be exercised by any org member on the free plan.
 
-Every mutation (action/service) that backs a plan-gated feature MUST re-check the plan on the WRITE path with `requireOrganizationPlan()` from `features/billing/guards/require-organization-plan.ts` (throws `ForbiddenError("errors.billing.planRequired")` — the action-side counterpart to the page-only `requireCustomerPlan`).
+Every mutation (action/service) that backs a plan-gated feature MUST re-check the plan on the WRITE path with `requireOrganizationPlan()` from `src/features/billing/guards/require-organization-plan.ts` (throws `ForbiddenError("errors.billing.planRequired")` — the action-side counterpart to the page-only `requireCustomerPlan`).
 
 ```tsx
-// features/projects/actions/create-project.action.ts
+// src/features/projects/actions/create-project.action.ts
 const createProjectAction = orgActionClient
   .inputSchema(CreateProjectSchema)
   .action(async ({ parsedInput, ctx }) => {

@@ -58,6 +58,15 @@ const invitationRatelimit = new Ratelimit({
   analytics: true,
 });
 
+// Authenticated limiter for organization creation (each creation provisions a
+// Stripe customer via the afterCreateOrganization hook — cap the abuse vector).
+const organizationRatelimit = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(5, "1 h"),
+  prefix: "@upstash/ratelimit/organization",
+  analytics: true,
+});
+
 export {
   authenticatedRatelimit,
   authPasswordRatelimit,
@@ -66,4 +75,5 @@ export {
   contactRatelimit,
   filterRatelimit,
   invitationRatelimit,
+  organizationRatelimit,
 };

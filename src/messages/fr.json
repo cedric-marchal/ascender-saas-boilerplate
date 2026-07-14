@@ -317,7 +317,8 @@
     "orgSwitcher": {
       "fallbackName": "Organisation",
       "myOrganization": "Mon organisation",
-      "switchErrorToast": "Une erreur est survenue lors du changement d'organisation"
+      "switchErrorToast": "Une erreur est survenue lors du changement d'organisation",
+      "createOrganization": "Créer une organisation"
     },
     "auditLog": {
       "title": "Journal d'activité",
@@ -343,6 +344,18 @@
       "BILLING_CHECKOUT": "Paiement effectué",
       "BILLING_PLAN_CHANGED": "Plan modifié",
       "ACCOUNT_DELETED": "Compte supprimé"
+    },
+    "organizationModal": {
+      "title": "Créer une organisation",
+      "description": "Créez une organisation dédiée pour une équipe ou un espace de travail séparé. Elle a ses propres membres et sa propre facturation.",
+      "closeLabel": "Fermer"
+    },
+    "organizationForm": {
+      "nameLabel": "Nom de l'organisation",
+      "namePlaceholder": "Acme Inc.",
+      "submitLabel": "Créer",
+      "submittingLabel": "Création...",
+      "successToast": "Organisation créée avec succès !"
     }
   },
   "billing": {

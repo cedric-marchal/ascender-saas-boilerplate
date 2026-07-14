@@ -1,7 +1,7 @@
 import type {
   PrismaClient,
   ProjectStatus,
-} from "../../lib/generated/prisma/client";
+} from "../../src/lib/generated/prisma/client";
 import { daysAgo, SEED_FILTER, seedId } from "./helpers";
 import { DEMO_ORG_A_ID, orgIdForUser } from "./organization.seed";
 

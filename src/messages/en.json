@@ -321,7 +321,8 @@
     "orgSwitcher": {
       "fallbackName": "Organization",
       "myOrganization": "My organization",
-      "switchErrorToast": "An error occurred while switching organization"
+      "switchErrorToast": "An error occurred while switching organization",
+      "createOrganization": "Create an organization"
     },
     "auditLog": {
       "title": "Activity log",
@@ -347,6 +348,18 @@
       "BILLING_CHECKOUT": "Checkout completed",
       "BILLING_PLAN_CHANGED": "Plan changed",
       "ACCOUNT_DELETED": "Account deleted"
+    },
+    "organizationModal": {
+      "title": "Create an organization",
+      "description": "Create a dedicated organization for a team or a separate workspace. It gets its own members and billing.",
+      "closeLabel": "Close"
+    },
+    "organizationForm": {
+      "nameLabel": "Organization name",
+      "namePlaceholder": "Acme Inc.",
+      "submitLabel": "Create",
+      "submittingLabel": "Creating...",
+      "successToast": "Organization created successfully!"
     }
   },
   "billing": {

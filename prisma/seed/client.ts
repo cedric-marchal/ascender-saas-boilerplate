@@ -2,7 +2,7 @@ import "dotenv/config";
 
 import { PrismaNeon } from "@prisma/adapter-neon";
 
-import { PrismaClient } from "../../lib/generated/prisma/client";
+import { PrismaClient } from "../../src/lib/generated/prisma/client";
 
 if (process.env["NODE_ENV"] === "production") {
   throw new Error("Seed script must not run in production");

@@ -144,18 +144,13 @@ function DashboardSidebar({
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
-      {organizations.length >= 2 && (
-        <>
-          <div className="px-2 pb-1">
-            <OrgSwitcher
-              organizations={organizations}
-              activeOrganizationId={activeOrganizationId}
-            />
-          </div>
-          <SidebarSeparator />
-        </>
-      )}
-      {organizations.length < 2 && <SidebarSeparator />}
+      <div className="px-2 pb-1">
+        <OrgSwitcher
+          organizations={organizations}
+          activeOrganizationId={activeOrganizationId}
+        />
+      </div>
+      <SidebarSeparator />
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>{t("navigationGroup")}</SidebarGroupLabel>

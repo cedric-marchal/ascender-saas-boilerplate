@@ -1,12 +1,12 @@
 ---
 paths:
-  - "features/*/constants/*-filters*"
-  - "features/*/schemas/*-filter*"
-  - "features/*/components/*-filters*"
-  - "features/*/components/*-columns*"
-  - "lib/parsers/*"
-  - "components/pagination*"
-  - "components/page-size*"
+  - "src/features/*/constants/*-filters*"
+  - "src/features/*/schemas/*-filter*"
+  - "src/features/*/components/*-filters*"
+  - "src/features/*/components/*-columns*"
+  - "src/lib/parsers/*"
+  - "src/components/pagination*"
+  - "src/components/page-size*"
 ---
 
 # Filter, Search, Sort & Pagination Rules
@@ -15,10 +15,10 @@ paths:
 
 Two separate files for two separate concerns:
 
-| File                     | Contains                                                                                          | Who imports it                                                                       |
-| ------------------------ | ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
-| `lib/parsers/filters.ts` | Pure constants & types (`PAGE_SIZE.SMALL`, `SortOrder`, `MAX_SEARCH_LENGTH`, etc.)                | Services, schemas, tests — anything that needs pagination/filter values without Nuqs |
-| `lib/parsers/nuqs.ts`    | Nuqs parsers only (`parseAsPage`, `createEnumParser`, etc.) — imports constants from `filters.ts` | Constants files (searchParams config), components, pages                             |
+| File                         | Contains                                                                                          | Who imports it                                                                       |
+| ---------------------------- | ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| `src/lib/parsers/filters.ts` | Pure constants & types (`PAGE_SIZE.SMALL`, `SortOrder`, `MAX_SEARCH_LENGTH`, etc.)                | Services, schemas, tests — anything that needs pagination/filter values without Nuqs |
+| `src/lib/parsers/nuqs.ts`    | Nuqs parsers only (`parseAsPage`, `createEnumParser`, etc.) — imports constants from `filters.ts` | Constants files (searchParams config), components, pages                             |
 
 **NEVER import from `nuqs.ts` in services or schemas.** Services MUST import from `filters.ts` to stay decoupled from Nuqs.
 
@@ -36,16 +36,16 @@ Two separate files for two separate concerns:
 ## Architecture
 
 ```
-lib/parsers/filters.ts            ← pure constants & types (zero dependencies)
-lib/parsers/nuqs.ts               ← Nuqs parsers (imports from filters.ts)
-features/*/constants/              ← domain config (types, labels, searchParams)
-features/*/schemas/                ← Zod validation (imports limits from filters.ts)
-features/*/services/               ← server data fetch (imports from filters.ts)
-features/*/components/             ← client UI (imports parsers from nuqs.ts)
-app/*/page.tsx                     ← thin shim (createLoader from nuqs.ts OR manual object)
+src/lib/parsers/filters.ts        ← pure constants & types (zero dependencies)
+src/lib/parsers/nuqs.ts           ← Nuqs parsers (imports from filters.ts)
+src/features/*/constants/          ← domain config (types, labels, searchParams)
+src/features/*/schemas/            ← Zod validation (imports limits from filters.ts)
+src/features/*/services/           ← server data fetch (imports from filters.ts)
+src/features/*/components/         ← client UI (imports parsers from nuqs.ts)
+src/app/*/page.tsx                 ← thin shim (createLoader from nuqs.ts OR manual object)
 ```
 
-## lib/parsers/filters.ts — Pure Constants
+## src/lib/parsers/filters.ts — Pure Constants
 
 Zero dependencies. Importable anywhere.
 
@@ -56,7 +56,7 @@ Key exports:
 - `SORT_ORDERS`, types `SortOrder`, `PageSize`
 - `MAX_PAGE` (1000), `MAX_SEARCH_LENGTH` (100), `MAX_ARRAY_LENGTH` (50)
 
-## lib/parsers/nuqs.ts — Nuqs Parsers Only
+## src/lib/parsers/nuqs.ts — Nuqs Parsers Only
 
 Imports constants from `filters.ts`. Exports only Nuqs-specific parsers:
 
@@ -71,7 +71,7 @@ Rules:
 
 ## Domain Configuration
 
-`features/{feature}/constants/{entity}-filters.constant.ts`
+`src/features/{feature}/constants/{entity}-filters.constant.ts`
 
 ```tsx
 import { UserRole } from "@/lib/generated/prisma/browser";
@@ -115,7 +115,7 @@ Rules:
 
 ## Validation Schema
 
-`features/*/schemas/{entity}-filters.schema.ts`
+`src/features/*/schemas/{entity}-filters.schema.ts`
 
 - IMPORTS enum arrays from feature constants (never defines them)
 - IMPORTS limits from `@/lib/parsers/filters` (NOT nuqs)
@@ -200,7 +200,7 @@ export default async function DashboardRoute() {
 
 ### Filter Component
 
-Uses TanStack Form + Zod + `useQueryStates`. On submit, pushes filters to URL with `page: 1` reset. See existing implementations in `features/*/components/*-filters.tsx`.
+Uses TanStack Form + Zod + `useQueryStates`. On submit, pushes filters to URL with `page: 1` reset. See existing implementations in `src/features/*/components/*-filters.tsx`.
 
 Key rules:
 
@@ -221,7 +221,7 @@ ONLY `getCoreRowModel()` — NO `getSortedRowModel`, `getFilteredRowModel`, `get
 
 ### Pagination
 
-Uses `useQueryState("page", parseAsPage)`. Hides when `totalPages <= 1`. See `components/pagination.tsx`.
+Uses `useQueryState("page", parseAsPage)`. Hides when `totalPages <= 1`. See `src/components/pagination.tsx`.
 
 ## Nuqs Options (ALWAYS)
 
@@ -235,8 +235,8 @@ Uses `useQueryState("page", parseAsPage)`. Hides when `totalPages <= 1`. See `co
 ## Anti-Patterns
 
 ```
-Services importing from lib/parsers/nuqs.ts → MUST import from lib/parsers/filters.ts
-Parsers inline in page file → MUST be in lib/parsers/nuqs.ts
+Services importing from src/lib/parsers/nuqs.ts → MUST import from src/lib/parsers/filters.ts
+Parsers inline in page file → MUST be in src/lib/parsers/nuqs.ts
 Enums defined in schema → MUST be in constants
 parseAsSafeSearch rejecting → MUST truncate with .slice()
 Client-side sorting → getSortedRowModel(), getFilteredRowModel()

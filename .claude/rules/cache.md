@@ -1,11 +1,11 @@
 ---
 paths:
-  - "features/*/services/**"
-  - "features/*/pages/**"
-  - "features/*/components/**"
-  - "app/**/page.tsx"
-  - "lib/cache-keys.ts"
-  - "lib/redis.ts"
+  - "src/features/*/services/**"
+  - "src/features/*/pages/**"
+  - "src/features/*/components/**"
+  - "src/app/**/page.tsx"
+  - "src/lib/cache-keys.ts"
+  - "src/lib/redis.ts"
 ---
 
 # Cache Rules — `"use cache"`, Redis & PPR
@@ -24,10 +24,10 @@ paths:
 
 **Library-managed caches (configuration only, not your architecture):**
 
-| Library                   | What it caches                                 | Config                                |
-| ------------------------- | ---------------------------------------------- | ------------------------------------- |
-| Better Auth `cookieCache` | Session data in signed cookie (avoids DB call) | `maxAge: 60` in `lib/auth.ts`         |
-| Upstash Ratelimit         | Request counters per identifier                | `slidingWindow` in `lib/ratelimit.ts` |
+| Library                   | What it caches                                 | Config                                    |
+| ------------------------- | ---------------------------------------------- | ----------------------------------------- |
+| Better Auth `cookieCache` | Session data in signed cookie (avoids DB call) | `maxAge: 60` in `src/lib/auth.ts`         |
+| Upstash Ratelimit         | Request counters per identifier                | `slidingWindow` in `src/lib/ratelimit.ts` |
 
 ## `"use cache"` — Function-Level Only (P0)
 
@@ -130,7 +130,7 @@ For pages mixing static + dynamic content, use **Suspense** to create dynamic ho
 ### Pattern: Static Shell + Dynamic Hole
 
 ```tsx
-// app/(public)/tarifs/page.tsx — sync, NO "use cache"
+// src/app/(public)/tarifs/page.tsx — sync, NO "use cache"
 export default function PricingRoute() {
   return (
     <PricingPage>
@@ -158,7 +158,7 @@ export default function PricingRoute() {
 
 ## Redis Cache Keys (P0)
 
-ALL Redis cache keys MUST be centralized in `lib/cache-keys.ts`. NEVER use string literals.
+ALL Redis cache keys MUST be centralized in `src/lib/cache-keys.ts`. NEVER use string literals.
 
 ```tsx
 // ✅ Correct: centralized key
@@ -172,7 +172,7 @@ const cacheKey = `invoices:${userId}`;
 
 ### Adding a New Redis Cache Key
 
-1. Add the function in `lib/cache-keys.ts`
+1. Add the function in `src/lib/cache-keys.ts`
 2. Use it in both the **set** (service) and **del** (webhook/cleanup) locations
 3. Verify no string literal duplicates remain
 
@@ -220,12 +220,12 @@ export { getUserBySlug };
 
 ### Current usages
 
-| Function                  | File                         | Why                                                 |
-| ------------------------- | ---------------------------- | --------------------------------------------------- |
-| `getSession()`            | `lib/session.ts`             | Called in page + layout + guards within same render |
-| `getActiveSubscription()` | `features/billing/guards/`   | Called alongside session in same render             |
-| `getPricingUserStatus()`  | `features/pricing/services/` | Called in metadata + page                           |
-| `getUserBySlug()`         | `features/users/services/`   | Called in metadata + page                           |
+| Function                  | File                             | Why                                                 |
+| ------------------------- | -------------------------------- | --------------------------------------------------- |
+| `getSession()`            | `src/lib/session.ts`             | Called in page + layout + guards within same render |
+| `getActiveSubscription()` | `src/features/billing/guards/`   | Called alongside session in same render             |
+| `getPricingUserStatus()`  | `src/features/pricing/services/` | Called in metadata + page                           |
+| `getUserBySlug()`         | `src/features/users/services/`   | Called in metadata + page                           |
 
 ### Rules
 

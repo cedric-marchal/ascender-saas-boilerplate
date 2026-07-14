@@ -1,9 +1,9 @@
 ---
 paths:
-  - "app/**/page.tsx"
-  - "app/**/loading.tsx"
-  - "features/*/pages/**"
-  - "features/*/constants/*-seo*"
+  - "src/app/**/page.tsx"
+  - "src/app/**/loading.tsx"
+  - "src/features/*/pages/**"
+  - "src/features/*/constants/*-seo*"
 ---
 
 # Page & Loading Page Rules
@@ -14,7 +14,7 @@ Rules for `page.tsx`, `loading.tsx`, feature page components, and global page co
 
 ## Architecture: Thin Shim Pattern (P0)
 
-`app/` route files are **thin shims** — they only contain Next.js concerns:
+`src/app/` route files are **thin shims** — they only contain Next.js concerns:
 
 - `metadata` export
 - `export default function {Path}Route()`
@@ -25,9 +25,9 @@ Rules for `page.tsx`, `loading.tsx`, feature page components, and global page co
 All JSX, JSON-LD, and UI logic lives in feature page components.
 
 ```
-app/(public)/tarifs/page.tsx          ← thin shim (metadata + return)
-features/pricing/pages/pricing-page.tsx  ← all UI + JSON-LD
-features/pricing/constants/pricing-seo.constant.ts  ← SEO constants + schema functions
+src/app/(public)/tarifs/page.tsx                          ← thin shim (metadata + return)
+src/features/pricing/pages/pricing-page.tsx                ← all UI + JSON-LD
+src/features/pricing/constants/pricing-seo.constant.ts     ← SEO constants + schema functions
 ```
 
 ## Route Function Naming (P0)
@@ -36,27 +36,27 @@ Function: `{Path}Route` in **English** PascalCase.
 
 For French URLs, translate to English:
 
-| URL                                                 | Function                 |
-| --------------------------------------------------- | ------------------------ |
-| `app/(public)/page.tsx`                             | `HomeRoute`              |
-| `app/(public)/tarifs/page.tsx`                      | `PricingRoute`           |
-| `app/(public)/contact/page.tsx`                     | `ContactRoute`           |
-| `app/(public)/plan-du-site/page.tsx`                | `SitemapRoute`           |
-| `app/(public)/(auth)/connexion/page.tsx`            | `SignInRoute`            |
-| `app/(public)/(auth)/inscription/page.tsx`          | `SignUpRoute`            |
-| `app/(public)/(auth)/mot-de-passe-oublie/page.tsx`  | `ForgotPasswordRoute`    |
-| `app/(public)/(auth)/nouveau-mot-de-passe/page.tsx` | `ResetPasswordRoute`     |
-| `app/(public)/(legal)/mentions-legales/page.tsx`    | `LegalNoticeRoute`       |
-| `app/(public)/(legal)/conditions-de-vente/page.tsx` | `TermsOfSaleRoute`       |
-| `app/(protected)/dashboard/page.tsx`                | `DashboardRoute`         |
-| `app/(protected)/dashboard/parametres/page.tsx`     | `DashboardSettingsRoute` |
-| `app/(protected)/dashboard/facturation/page.tsx`    | `DashboardBillingRoute`  |
-| `app/(protected)/admin/page.tsx`                    | `AdminRoute`             |
-| `app/(protected)/admin/utilisateurs/page.tsx`       | `AdminUsersRoute`        |
+| URL                                                     | Function                 |
+| ------------------------------------------------------- | ------------------------ |
+| `src/app/(public)/page.tsx`                             | `HomeRoute`              |
+| `src/app/(public)/tarifs/page.tsx`                      | `PricingRoute`           |
+| `src/app/(public)/contact/page.tsx`                     | `ContactRoute`           |
+| `src/app/(public)/plan-du-site/page.tsx`                | `SitemapRoute`           |
+| `src/app/(public)/(auth)/connexion/page.tsx`            | `SignInRoute`            |
+| `src/app/(public)/(auth)/inscription/page.tsx`          | `SignUpRoute`            |
+| `src/app/(public)/(auth)/mot-de-passe-oublie/page.tsx`  | `ForgotPasswordRoute`    |
+| `src/app/(public)/(auth)/nouveau-mot-de-passe/page.tsx` | `ResetPasswordRoute`     |
+| `src/app/(public)/(legal)/mentions-legales/page.tsx`    | `LegalNoticeRoute`       |
+| `src/app/(public)/(legal)/conditions-de-vente/page.tsx` | `TermsOfSaleRoute`       |
+| `src/app/(protected)/dashboard/page.tsx`                | `DashboardRoute`         |
+| `src/app/(protected)/dashboard/parametres/page.tsx`     | `DashboardSettingsRoute` |
+| `src/app/(protected)/dashboard/facturation/page.tsx`    | `DashboardBillingRoute`  |
+| `src/app/(protected)/admin/page.tsx`                    | `AdminRoute`             |
+| `src/app/(protected)/admin/utilisateurs/page.tsx`       | `AdminUsersRoute`        |
 
 ## Feature Page Components (P0)
 
-Location: `features/{feature}/pages/{name}-page.tsx`
+Location: `src/features/{feature}/pages/{name}-page.tsx`
 
 Naming: `{Feature}Page` (e.g., `PricingPage`, `ContactPage`, `SignInPage`)
 
@@ -64,7 +64,7 @@ Contains:
 
 - JSON-LD `<script>` tags (public pages only)
 - `<Main>` with all UI content
-- Imports SEO schema functions from `features/{feature}/constants/{page}-seo.constant.ts`
+- Imports SEO schema functions from `src/features/{feature}/constants/{page}-seo.constant.ts`
 
 ```tsx
 import type { WebPage, WithContext } from "schema-dts";
@@ -95,12 +95,12 @@ export { PricingPage };
 
 ## Global Page Components (P0)
 
-Location: `components/pages/{name}-page.tsx`
+Location: `src/components/pages/{name}-page.tsx`
 
 For pages not tied to a feature: not-found, maintenance, error, sitemap.
 
 ```
-components/pages/
+src/components/pages/
 ├── not-found-page.tsx
 ├── maintenance-page.tsx
 ├── error-page.tsx          ← "use client" (useEffect, reset callback)
@@ -110,7 +110,7 @@ components/pages/
 
 ## SEO Constants (P0)
 
-Location: `features/{feature}/constants/{page}-seo.constant.ts`
+Location: `src/features/{feature}/constants/{page}-seo.constant.ts`
 
 Contains: DESCRIPTION, KEYWORDS, schema getter functions.
 
@@ -331,22 +331,22 @@ dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
 
 ## Auth Guards (P0)
 
-| Guard                            | Usage                                                                                      |
-| -------------------------------- | ------------------------------------------------------------------------------------------ |
-| `requireGuest()`                 | Visitor only — redirects authenticated by role                                             |
-| `requireSession()`               | Any authenticated user                                                                     |
-| `requireCustomer()`              | Customer role (404 for non-customer)                                                       |
-| `requireCustomerVerifiedEmail()` | Customer with verified email                                                               |
-| `requireCustomerPlan()`          | Customer with any active paid subscription (from `features/billing/guards/`)               |
-| `requireCustomerPlan("pro")`     | Customer with specific plan(s) — typesafe `PlanKey` args (from `features/billing/guards/`) |
-| `requireAdmin()`                 | Admin role (404 for non-admin)                                                             |
-| `requireAdminVerifiedEmail()`    | Admin with verified email                                                                  |
+| Guard                            | Usage                                                                                          |
+| -------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `requireGuest()`                 | Visitor only — redirects authenticated by role                                                 |
+| `requireSession()`               | Any authenticated user                                                                         |
+| `requireCustomer()`              | Customer role (404 for non-customer)                                                           |
+| `requireCustomerVerifiedEmail()` | Customer with verified email                                                                   |
+| `requireCustomerPlan()`          | Customer with any active paid subscription (from `src/features/billing/guards/`)               |
+| `requireCustomerPlan("pro")`     | Customer with specific plan(s) — typesafe `PlanKey` args (from `src/features/billing/guards/`) |
+| `requireAdmin()`                 | Admin role (404 for non-admin)                                                                 |
+| `requireAdminVerifiedEmail()`    | Admin with verified email                                                                      |
 
-Role-based redirect URLs are defined in `ROLE_DASHBOARD_URL` (`lib/navigation.ts`). Used by `requireGuest` and sign-in action to redirect to the correct dashboard per role.
+Role-based redirect URLs are defined in `ROLE_DASHBOARD_URL` (`src/lib/navigation.ts`). Used by `requireGuest` and sign-in action to redirect to the correct dashboard per role.
 
 ## Loading Pages (P0)
 
-### Loading Shim (`app/*/loading.tsx`)
+### Loading Shim (`src/app/*/loading.tsx`)
 
 ```tsx
 import { PricingLoading } from "@/features/pricing/pages/pricing-loading";
@@ -356,7 +356,7 @@ export default function PricingLoadingRoute() {
 }
 ```
 
-### Feature Loading Component (`features/{feature}/pages/{name}-loading.tsx`)
+### Feature Loading Component (`src/features/{feature}/pages/{name}-loading.tsx`)
 
 - Named: `{Feature}Loading`
 - Use `<Main aria-busy="true" aria-label="Chargement...">`

@@ -14,8 +14,8 @@ This is not a marketing-page template. It is an opinionated engineering foundati
 - **Transactional emails** — React Email templates sent via Resend (invitations, verification, security notices).
 - **File uploads** — Cloudflare R2 (S3-compatible), presigned URLs, used today for avatar uploads.
 - **Rate limiting** — Upstash Redis + `@upstash/ratelimit`, enforced at entry points only (pages/actions/API routes — never inside services).
-- **GDPR cookie consent** — `features/cookie-consent`, plus a full set of legal pages (terms, privacy policy, cookie policy, legal notice).
-- **Reference domain** — `features/projects` is a complete, working CRUD slice (schemas, org-scoped services, actions, table UI with filters/pagination, tests including a cross-org IDOR proof) meant to be copied for your own domains.
+- **GDPR cookie consent** — `src/features/cookie-consent`, plus a full set of legal pages (terms, privacy policy, cookie policy, legal notice).
+- **Reference domain** — `src/features/projects` is a complete, working CRUD slice (schemas, org-scoped services, actions, table UI with filters/pagination, tests including a cross-org IDOR proof) meant to be copied for your own domains.
 - **560+ tests** (Vitest) and a 4-stage CI pipeline (lint, typecheck, test, build) on every push/PR to `main`.
 
 ## Stack
@@ -58,7 +58,7 @@ pnpm install
 cp .env.example .env
 ```
 
-Fill in `.env`. Every variable is validated at boot by `lib/env.ts` (`@t3-oss/env-nextjs` + Zod) — the app refuses to start with a missing or malformed value. You need real values for:
+Fill in `.env`. Every variable is validated at boot by `src/lib/env.ts` (`@t3-oss/env-nextjs` + Zod) — the app refuses to start with a missing or malformed value. You need real values for:
 
 | Variable                                                                                                       | Where to get it                                                |
 | -------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
@@ -123,12 +123,12 @@ Open [http://localhost:3000](http://localhost:3000), sign in with the seeded acc
 ## Architecture
 
 ```
-app/                          # Routes only (thin shims — no business logic)
+src/app/                      # Routes only (thin shims — no business logic)
 ├── (public)/                 # Marketing, auth, legal pages
 ├── (protected)/              # Dashboard + Admin (guarded)
 └── api/                      # API route handlers (auth, avatar, Stripe webhooks)
 
-features/                     # ALL business logic, one folder per domain
+src/features/                 # ALL business logic, one folder per domain
 ├── {feature}/
 │   ├── actions/               # Server Actions (next-safe-action)
 │   ├── components/            # UI (forms/, modals/ subdirs)
@@ -138,23 +138,32 @@ features/                     # ALL business logic, one folder per domain
 │   ├── schemas/                # Zod validation
 │   └── services/               # Server-only logic (security-scoped)
 
-lib/                          # Shared infrastructure (auth, prisma, redis, env, r2)
-components/                   # Shared UI (ui/, pages/, public/, protected/)
-utils/                        # Pure utilities (errors/, date/, string/)
-hooks/                        # Shared hooks
+src/lib/                      # Shared infrastructure (auth, prisma, redis, env, r2)
+src/components/               # Shared UI (ui/, pages/, public/, protected/)
+src/utils/                    # Pure utilities (errors/, date/, string/)
+src/hooks/                    # Shared hooks
 ```
 
 Everything derives from one source-of-truth chain:
 
 ```
 Prisma schema (enums ALWAYS UPPERCASE)
-  → lib/generated/prisma/client (server) or prisma/browser (client-safe)
-  → lib/parsers/filters.ts + lib/parsers/nuqs.ts
-  → features/*/constants/ → schemas/ → services/ → actions/ → components/
-  → app/*/page.tsx
+  → src/lib/generated/prisma/client (server) or prisma/browser (client-safe)
+  → src/lib/parsers/filters.ts + src/lib/parsers/nuqs.ts
+  → src/features/*/constants/ → schemas/ → services/ → actions/ → components/
+  → src/app/*/page.tsx
 ```
 
-`features/projects` is the reference implementation of every convention below — copy it as the starting point for a new domain. See **[docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md)** for the full write-up (feature anatomy, security model, error handling, caching strategy). The authoritative, machine-enforced rules live in `.claude/rules/*.md` and are loaded automatically by Claude Code based on the file being edited.
+`src/features/projects` is the reference implementation of every convention below — copy it as the starting point for a new domain. See **[docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md)** for the full write-up (feature anatomy, security model, error handling, caching strategy). The authoritative, machine-enforced rules live in `.claude/rules/*.md` and are loaded automatically by Claude Code based on the file being edited.
+
+## Documentation
+
+Deeper write-ups live in `docs/`:
+
+- **[docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md)** — the shape of the codebase: feature anatomy, security model, error handling, caching strategy.
+- **[docs/WHEN-TO-USE.md](./docs/WHEN-TO-USE.md)** — decide whether this base fits a given project: the tenancy (org/team) and billing (licensed vs metered) decision tree, with concrete examples and the cost of each path.
+- **[docs/RECIPE-AI-SDK.md](./docs/RECIPE-AI-SDK.md)** — opt-in, per-project recipe for adding AI (Vercel AI SDK + Claude), deliberately _not_ baked into the base, with the rate-limit + quota margin guard.
+- **[docs/OBSERVABILITY.md](./docs/OBSERVABILITY.md)** — the dependency-free seams for wiring Sentry (error tracking) and PostHog (analytics).
 
 ## Testing
 
@@ -163,7 +172,7 @@ pnpm test          # 560+ tests, Vitest
 pnpm test:coverage # with coverage report
 ```
 
-Tests are colocated under `__tests__/` and mirror the `features/` tree. The reference domain (`__tests__/features/projects/`) includes a service-level cross-org isolation test proving IDOR safety — the pattern to follow for any new domain.
+Tests are colocated under `__tests__/` and mirror the `src/features/` tree. The reference domain (`__tests__/features/projects/`) includes a service-level cross-org isolation test proving IDOR safety — the pattern to follow for any new domain.
 
 CI (`.github/workflows/ci.yml`) runs four jobs on every push/PR to `main`: **lint**, **typecheck**, **test**, then **build** (gated on the first three passing), using placeholder env values for the build step.
 
@@ -182,9 +191,9 @@ Set every variable from the quickstart table above (with production values) in y
 ## Known limitations
 
 - **French-only UI today.** All user-facing strings, Zod messages, and emails are in French; the convention is documented in `.claude/CLAUDE.md`. An English/French i18n retrofit (next-intl, locale routing, string extraction) is planned — see `aidd_docs/tasks/2026_07/2026_07_05-audit-boilerplate-yc-part-2.md`.
-- **Single "Pro" plan.** Billing supports exactly one paid plan (`PLAN_CONFIG` in `features/billing/constants/plan.constant.ts`) with seat caps; adding tiers is a config change, not a rewrite, but multi-tier pricing isn't wired up yet.
+- **Single "Pro" plan.** Billing supports exactly one paid plan (`PLAN_CONFIG` in `src/features/billing/constants/plan.constant.ts`) with seat caps; adding tiers is a config change, not a rewrite, but multi-tier pricing isn't wired up yet.
 - **No observability/analytics layer.** No error tracking, product analytics, or APM is integrated out of the box.
 - **No migration history.** The schema is applied via `pnpm db:push`; adopt `prisma migrate` before you have a production database you can't reset.
-- **No AI scaffolding yet.** An opt-in, plan-gated AI chat slice is planned — see `aidd_docs/tasks/2026_07/2026_07_05-audit-boilerplate-yc-part-6.md`.
+- **No AI scaffolding baked into the base — by design.** AI stays a per-project opt-in; a ready, up-to-date recipe (Vercel AI SDK + Claude, with a rate-limit + quota margin guard) lives in **[docs/RECIPE-AI-SDK.md](./docs/RECIPE-AI-SDK.md)**. A deeper plan-gated AI chat slice is tracked in `aidd_docs/tasks/2026_07/2026_07_05-audit-boilerplate-yc-part-6.md`.
 
 The full audit this roadmap comes from is in `aidd_docs/tasks/2026_07/2026_07_05-audit-boilerplate-yc-master.md`.
