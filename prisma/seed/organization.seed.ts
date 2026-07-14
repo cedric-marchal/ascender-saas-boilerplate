@@ -9,7 +9,6 @@ import { daysAgo, SEED_FILTER, seedId, slugify } from "./helpers";
 type OrganizationSeed = {
   userIndex: number;
   name: string;
-  plan: string;
   createdAt: Date;
 };
 
@@ -39,13 +38,9 @@ const CUSTOMER_USERS: UserSeed[] = USERS.filter(
 
 function buildOrganizationSeeds(): OrganizationSeed[] {
   return CUSTOMER_USERS.map((user: UserSeed): OrganizationSeed => {
-    // Users with stripe customers get "pro" plan
-    const plan = user.hasStripeCustomer ? "pro" : "free";
-
     return {
       userIndex: user.index,
       name: `${user.name} (org)`,
-      plan,
       createdAt: user.createdAt,
     };
   });
@@ -80,7 +75,6 @@ async function seedOrganizations(prisma: PrismaClient): Promise<void> {
         id: orgIdForUser(org.userIndex),
         name: org.name,
         slug: orgSlugForUser(user.name, org.userIndex),
-        plan: org.plan,
         createdAt: org.createdAt,
         updatedAt: org.createdAt,
         members: {
@@ -101,7 +95,6 @@ async function seedOrganizations(prisma: PrismaClient): Promise<void> {
       id: DEMO_ORG_A_ID,
       name: "Démo Organisation A",
       slug: "demo-organisation-a",
-      plan: "pro",
       createdAt: daysAgo(60),
       updatedAt: daysAgo(60),
       members: {
@@ -135,7 +128,6 @@ async function seedOrganizations(prisma: PrismaClient): Promise<void> {
       id: DEMO_ORG_B_ID,
       name: "Démo Organisation B",
       slug: "demo-organisation-b",
-      plan: "free",
       createdAt: daysAgo(45),
       updatedAt: daysAgo(45),
       members: {

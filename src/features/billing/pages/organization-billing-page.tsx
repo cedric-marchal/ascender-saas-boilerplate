@@ -28,14 +28,12 @@ type OrganizationBillingPageProps = {
   billing: GetBillingResult;
   organizationName: string;
   memberCount: number;
-  plan: string;
 };
 
 function OrganizationBillingPage({
   billing,
   organizationName,
   memberCount,
-  plan,
 }: OrganizationBillingPageProps) {
   const t = useTranslations("billing");
   const locale = useLocale();
@@ -89,7 +87,7 @@ function OrganizationBillingPage({
             {t("memberCountInOrg", { count: memberCount })}
           </p>
         </div>
-        <Badge variant="secondary">{plan}</Badge>
+        <Badge variant="secondary">{planLabel}</Badge>
       </div>
 
       {subscriptions.length === 0 && (

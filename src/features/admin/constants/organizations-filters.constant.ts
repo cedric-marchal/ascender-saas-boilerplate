@@ -5,7 +5,7 @@ import {
   parseAsSafeSearch,
 } from "@/lib/parsers/nuqs";
 
-const organizationsSortableFields = ["name", "plan", "createdAt"] as const;
+const organizationsSortableFields = ["name", "createdAt"] as const;
 
 type OrganizationSortableField = (typeof organizationsSortableFields)[number];
 
