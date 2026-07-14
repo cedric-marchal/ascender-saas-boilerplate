@@ -1,10 +1,11 @@
+import dynamic from "next/dynamic";
+
 import { Link } from "@/i18n/navigation";
 import { AlertTriangle, Users } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { MembersFilters } from "@/features/organizations/components/members-filters";
 import { MembersTable } from "@/features/organizations/components/members-table";
-import { InviteModal } from "@/features/organizations/components/modals/invite-modal";
 import type { MemberItem } from "@/features/organizations/services/get-organization-members.service";
 
 import { Main } from "@/components/main";
@@ -12,6 +13,12 @@ import { Pagination } from "@/components/pagination";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+
+const InviteModal = dynamic(() =>
+  import("@/features/organizations/components/modals/invite-modal").then(
+    (module) => ({ default: module.InviteModal }),
+  ),
+);
 
 type MembersPageProps = {
   members: MemberItem[];
