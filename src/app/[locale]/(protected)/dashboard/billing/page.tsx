@@ -89,7 +89,6 @@ export default async function DashboardBillingRoute({
       },
       select: {
         name: true,
-        plan: true,
       },
     }),
     prisma.member.count({
@@ -108,7 +107,6 @@ export default async function DashboardBillingRoute({
       billing={billing}
       organizationName={organization.name}
       memberCount={memberCount}
-      plan={organization.plan}
     />
   );
 }

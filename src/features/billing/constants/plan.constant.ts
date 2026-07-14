@@ -68,9 +68,23 @@ function getPlanByPriceId(
   );
 }
 
+/**
+ * Resolves a Stripe price ID back to its plan key ("pro", ...), or `null` when
+ * the price is unknown. Used to derive an organization's current plan from its
+ * active subscription (the single source of truth) rather than a stored column.
+ */
+function getPlanKeyByPriceId(priceId: string): PlanKey | null {
+  const entry = Object.entries(PLAN_CONFIG).find(
+    ([, config]) => config.priceId === priceId,
+  );
+
+  return (entry?.[0] as PlanKey) ?? null;
+}
+
 export {
   ALLOWED_PRICE_IDS,
   getPlanByPriceId,
+  getPlanKeyByPriceId,
   getPlanLabel,
   getPriceIds,
   getSeatsIncluded,

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 
 import { Link } from "@/i18n/navigation";
@@ -9,7 +10,6 @@ import { Building2, Check, ChevronsUpDown, Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
-import { OrganizationModal } from "@/features/organizations/components/modals/organization-modal";
 import type { UserOrganizationItem } from "@/features/organizations/services/get-user-organizations.service";
 
 import { organizationAuthClient } from "@/lib/auth-client";
@@ -26,6 +26,12 @@ import {
 
 import { getInitials } from "@/utils/string/get-initials";
 import { truncateName } from "@/utils/string/truncate";
+
+const OrganizationModal = dynamic(() =>
+  import("@/features/organizations/components/modals/organization-modal").then(
+    (module) => ({ default: module.OrganizationModal }),
+  ),
+);
 
 type OrgSwitcherProps = {
   organizations: UserOrganizationItem[];

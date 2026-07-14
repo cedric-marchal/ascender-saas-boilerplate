@@ -2,6 +2,8 @@
 
 import { useState, useTransition } from "react";
 
+import dynamic from "next/dynamic";
+
 import { LOCALE_METADATA } from "@/i18n/locale-metadata.constant";
 import type { ColumnDef } from "@tanstack/react-table";
 import {
@@ -15,8 +17,6 @@ import {
 import { useLocale, useTranslations, type Locale } from "next-intl";
 import { useQueryStates } from "nuqs";
 
-import { DeleteProjectModal } from "@/features/projects/components/modals/delete-project-modal";
-import { EditProjectModal } from "@/features/projects/components/modals/edit-project-modal";
 import {
   projectsSearchParams,
   projectStatusLabels,
@@ -36,6 +36,18 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { truncate, truncateName } from "@/utils/string/truncate";
+
+const EditProjectModal = dynamic(() =>
+  import("@/features/projects/components/modals/edit-project-modal").then(
+    (module) => ({ default: module.EditProjectModal }),
+  ),
+);
+
+const DeleteProjectModal = dynamic(() =>
+  import("@/features/projects/components/modals/delete-project-modal").then(
+    (module) => ({ default: module.DeleteProjectModal }),
+  ),
+);
 
 const statusBadgeVariant: Record<
   ProjectStatus,

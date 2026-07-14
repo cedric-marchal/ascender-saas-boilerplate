@@ -1,7 +1,8 @@
+import dynamic from "next/dynamic";
+
 import { FolderKanban } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-import { CreateProjectModal } from "@/features/projects/components/modals/create-project-modal";
 import { projectsColumns } from "@/features/projects/components/projects-columns";
 import { ProjectsEmpty } from "@/features/projects/components/projects-empty";
 import { ProjectsFilters } from "@/features/projects/components/projects-filters";
@@ -11,6 +12,12 @@ import { Main } from "@/components/main";
 import { Pagination } from "@/components/pagination";
 import { DataTable } from "@/components/ui/data-table";
 import { Separator } from "@/components/ui/separator";
+
+const CreateProjectModal = dynamic(() =>
+  import("@/features/projects/components/modals/create-project-modal").then(
+    (module) => ({ default: module.CreateProjectModal }),
+  ),
+);
 
 type ProjectsPageProps = {
   projects: ProjectItem[];

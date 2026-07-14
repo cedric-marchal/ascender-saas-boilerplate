@@ -1,6 +1,8 @@
 import "server-only";
 
 import type { OrganizationSortableField } from "@/features/admin/constants/organizations-filters.constant";
+import { getPlanKeyByPriceId } from "@/features/billing/constants/plan.constant";
+import { ACTIVE_SUBSCRIPTION_STATUSES } from "@/features/billing/constants/subscription-status.constant";
 
 import type { Organization } from "@/lib/generated/prisma/client";
 import type { OrganizationWhereInput } from "@/lib/generated/prisma/models";
@@ -18,7 +20,7 @@ type OrganizationRow = {
   id: Organization["id"];
   name: Organization["name"];
   slug: Organization["slug"];
-  plan: Organization["plan"];
+  plan: string;
   createdAt: Organization["createdAt"];
   memberCount: number;
   ownerEmail: string | null;
@@ -50,7 +52,6 @@ async function getOrganizations(
         id: true,
         name: true,
         slug: true,
-        plan: true,
         createdAt: true,
         // Bounded owner lookup: at most 1 row, only owner role
         members: {
@@ -62,6 +63,26 @@ async function getOrganizations(
             user: {
               select: {
                 email: true,
+              },
+            },
+          },
+        },
+        // Current plan is derived from the active subscription (single source of
+        // truth), not a stored column — bounded to the latest active sub.
+        stripeCustomer: {
+          select: {
+            subscriptions: {
+              where: {
+                status: {
+                  in: ACTIVE_SUBSCRIPTION_STATUSES,
+                },
+              },
+              orderBy: {
+                currentPeriodEnd: "desc",
+              },
+              take: 1,
+              select: {
+                stripePriceId: true,
               },
             },
           },
@@ -87,12 +108,17 @@ async function getOrganizations(
   const organizations: OrganizationRow[] = rawOrganizations.map(
     (organization) => {
       const ownerMember = organization.members[0];
+      const activePriceId =
+        organization.stripeCustomer?.subscriptions[0]?.stripePriceId ?? null;
+      const plan = activePriceId
+        ? (getPlanKeyByPriceId(activePriceId) ?? "free")
+        : "free";
 
       return {
         id: organization.id,
         name: organization.name,
         slug: organization.slug,
-        plan: organization.plan,
+        plan,
         createdAt: organization.createdAt,
         memberCount: organization._count.members,
         ownerEmail: ownerMember?.user.email ?? null,

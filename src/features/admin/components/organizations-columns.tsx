@@ -24,7 +24,7 @@ function SortableHeader({
   labelKey,
 }: {
   field: OrganizationSortableField;
-  labelKey: "nameHeader" | "planHeader" | "createdAtHeader";
+  labelKey: "nameHeader" | "createdAtHeader";
 }) {
   const t = useTranslations("admin.organizations.columns");
   const label = t(labelKey);
@@ -79,6 +79,12 @@ function OwnerHeader() {
   const t = useTranslations("admin.organizations.columns");
 
   return t("ownerHeader");
+}
+
+function PlanHeader() {
+  const t = useTranslations("admin.organizations.columns");
+
+  return t("planHeader");
 }
 
 function OwnerCell({ email }: { email: string | null }) {
@@ -142,7 +148,7 @@ const organizationsColumns: ColumnDef<OrganizationRow>[] = [
   },
   {
     accessorKey: "plan",
-    header: () => <SortableHeader field="plan" labelKey="planHeader" />,
+    header: () => <PlanHeader />,
     cell: ({ row }) => {
       const plan = row.original.plan;
 
