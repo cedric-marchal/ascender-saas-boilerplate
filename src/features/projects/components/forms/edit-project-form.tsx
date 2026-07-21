@@ -45,7 +45,7 @@ type EditProjectFormProps = {
 function EditProjectForm({ project, onSuccess }: EditProjectFormProps) {
   const t = useTranslations("projects.editForm");
   const tStatuses = useTranslations("projects.statuses");
-  const tValidation = useTranslations("validation");
+  const tValidation = useTranslations();
   const { executeAsync, isExecuting } = useAction(updateProjectAction);
 
   const form = useForm({
@@ -164,7 +164,7 @@ function EditProjectForm({ project, onSuccess }: EditProjectFormProps) {
               </FieldLabel>
               <Select
                 value={field.state.value}
-                onValueChange={(value: string) =>
+                onValueChange={(value: string | null) =>
                   field.handleChange(value as ProjectStatus)
                 }
               >

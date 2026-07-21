@@ -30,7 +30,7 @@ type ResetPasswordFormProps = {
 function ResetPasswordForm({ token }: ResetPasswordFormProps) {
   const router = useRouter();
   const t = useTranslations("auth.resetPassword");
-  const tValidation = useTranslations("validation");
+  const tValidation = useTranslations();
   const { executeAsync, isExecuting } = useAction(resetPasswordAction);
 
   const form = useForm({

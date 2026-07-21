@@ -52,18 +52,18 @@ async function Header() {
         <div className="hidden items-center gap-2 md:flex">
           {session ? (
             <>
-              <Button asChild variant="ghost" size="sm">
-                <Link href={dashboardUrl!}>{t("dashboard")}</Link>
+              <Button render={<Link href={dashboardUrl!} />} variant="ghost" size="sm">
+                {t("dashboard")}
               </Button>
               <SignOutButton />
             </>
           ) : (
             <>
-              <Button asChild variant="ghost" size="sm">
-                <Link href="/sign-in">{t("signIn")}</Link>
+              <Button render={<Link href="/sign-in" />} variant="ghost" size="sm">
+                {t("signIn")}
               </Button>
-              <Button asChild size="sm">
-                <Link href="/sign-up">{t("createAccount")}</Link>
+              <Button render={<Link href="/sign-up" />} size="sm">
+                {t("createAccount")}
               </Button>
             </>
           )}
@@ -71,15 +71,17 @@ async function Header() {
 
         <div className="flex items-center md:hidden">
           <Sheet>
-            <SheetTrigger asChild>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                aria-label={t("openMenu")}
-              >
-                <Menu className="size-5" aria-hidden="true" />
-              </Button>
+            <SheetTrigger
+              render={
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  aria-label={t("openMenu")}
+                />
+              }
+            >
+              <Menu className="size-5" aria-hidden="true" />
             </SheetTrigger>
             <SheetContent
               side="right"
@@ -106,24 +108,36 @@ async function Header() {
                   </p>
                   <ul className="space-y-0.5">
                     <li>
-                      <SheetClose asChild>
-                        <NavLink href="/" className={MOBILE_LINK_CLASS}>
-                          {t("home")}
-                        </NavLink>
+                      <SheetClose
+                        render={
+                          <NavLink href="/" className={MOBILE_LINK_CLASS} />
+                        }
+                      >
+                        {t("home")}
                       </SheetClose>
                     </li>
                     <li>
-                      <SheetClose asChild>
-                        <NavLink href="/pricing" className={MOBILE_LINK_CLASS}>
-                          {t("pricing")}
-                        </NavLink>
+                      <SheetClose
+                        render={
+                          <NavLink
+                            href="/pricing"
+                            className={MOBILE_LINK_CLASS}
+                          />
+                        }
+                      >
+                        {t("pricing")}
                       </SheetClose>
                     </li>
                     <li>
-                      <SheetClose asChild>
-                        <NavLink href="/contact" className={MOBILE_LINK_CLASS}>
-                          {t("contact")}
-                        </NavLink>
+                      <SheetClose
+                        render={
+                          <NavLink
+                            href="/contact"
+                            className={MOBILE_LINK_CLASS}
+                          />
+                        }
+                      >
+                        {t("contact")}
                       </SheetClose>
                     </li>
                   </ul>
@@ -136,34 +150,38 @@ async function Header() {
                   {session ? (
                     <div className="space-y-2 px-3">
                       <Button
-                        asChild
+                        render={<Link href={dashboardUrl!} />}
                         variant="ghost"
                         className="w-full justify-start"
                       >
-                        <Link href={dashboardUrl!}>{t("dashboard")}</Link>
+                        {t("dashboard")}
                       </Button>
                       <SignOutButton />
                     </div>
                   ) : (
                     <ul className="space-y-0.5">
                       <li>
-                        <SheetClose asChild>
-                          <NavLink
-                            href="/sign-in"
-                            className={MOBILE_LINK_CLASS}
-                          >
-                            {t("signIn")}
-                          </NavLink>
+                        <SheetClose
+                          render={
+                            <NavLink
+                              href="/sign-in"
+                              className={MOBILE_LINK_CLASS}
+                            />
+                          }
+                        >
+                          {t("signIn")}
                         </SheetClose>
                       </li>
                       <li>
-                        <SheetClose asChild>
-                          <NavLink
-                            href="/sign-up"
-                            className={MOBILE_LINK_CLASS}
-                          >
-                            {t("signUp")}
-                          </NavLink>
+                        <SheetClose
+                          render={
+                            <NavLink
+                              href="/sign-up"
+                              className={MOBILE_LINK_CLASS}
+                            />
+                          }
+                        >
+                          {t("signUp")}
                         </SheetClose>
                       </li>
                     </ul>

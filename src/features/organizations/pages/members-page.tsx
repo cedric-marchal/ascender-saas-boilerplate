@@ -80,8 +80,13 @@ function MembersPage({
               })}
             </span>
             {canManage && (
-              <Button type="button" variant="outline" size="sm" asChild>
-                <Link href="/dashboard/billing">{t("seatCapExceededCta")}</Link>
+              <Button
+                render={<Link href="/dashboard/billing" />}
+                type="button"
+                variant="outline"
+                size="sm"
+              >
+                {t("seatCapExceededCta")}
               </Button>
             )}
           </AlertDescription>

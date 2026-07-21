@@ -1,7 +1,7 @@
 import { Suspense, type ReactNode } from "react";
 
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist_Mono, Inter } from "next/font/google";
 
 import { LOCALE_METADATA } from "@/i18n/locale-metadata.constant";
 import { routing } from "@/i18n/routing";
@@ -12,8 +12,10 @@ import { Providers } from "@/app/providers";
 
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+import { cn } from "@/lib/utils";
+
+const inter = Inter({
+  variable: "--font-sans",
   subsets: ["latin"],
   display: "swap", // Avoids FOIT (Flash of Invisible Text)
 });
@@ -86,10 +88,14 @@ type RootLayoutProps = {
 
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
-    <html lang={routing.defaultLocale} suppressHydrationWarning>
+    <html
+      lang={routing.defaultLocale}
+      suppressHydrationWarning
+      className={cn("font-sans", inter.variable)}
+    >
       <body
         suppressHydrationWarning
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${inter.variable} ${geistMono.variable} antialiased`}
       >
         <Suspense>
           <Providers>{children}</Providers>

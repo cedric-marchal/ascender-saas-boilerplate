@@ -38,7 +38,7 @@ type AvatarFormProps = {
 function AvatarForm({ name, image }: AvatarFormProps) {
   const router = useRouter();
   const t = useTranslations("account.avatarForm");
-  const tValidation = useTranslations("validation");
+  const tValidation = useTranslations();
 
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);

@@ -61,12 +61,16 @@ function ErrorPage({ error, reset }: ErrorPageProps) {
             {messages.retry}
           </Button>
 
-          <Button type="button" variant="outline" asChild>
+          <Button
+            type="button"
+            variant="outline"
+            render={<Link href={"/" as Route} />}
+          >
             {/* Plain next/link to the unlocalized root: the error boundary
                 may render outside the [locale] segment's
                 NextIntlClientProvider, so the i18n Link is avoided here.
                 proxy.ts negotiates the correct locale on the next request. */}
-            <Link href={"/" as Route}>{messages.backHome}</Link>
+            {messages.backHome}
           </Button>
         </div>
       </div>

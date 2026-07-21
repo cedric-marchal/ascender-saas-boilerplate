@@ -8,8 +8,13 @@ type PricingContactButtonProps = {
 
 function PricingContactButton({ children }: PricingContactButtonProps) {
   return (
-    <Button type="button" variant="outline" className="mt-4 w-full" asChild>
-      <Link href="/contact">{children}</Link>
+    <Button
+      render={<Link href="/contact" />}
+      type="button"
+      variant="outline"
+      className="mt-4 w-full"
+    >
+      {children}
     </Button>
   );
 }

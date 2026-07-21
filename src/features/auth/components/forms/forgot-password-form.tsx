@@ -24,7 +24,7 @@ import { translateFieldErrors } from "@/utils/errors/translate-field-errors";
 
 function ForgotPasswordForm() {
   const t = useTranslations("auth.forgotPassword");
-  const tValidation = useTranslations("validation");
+  const tValidation = useTranslations();
   const { executeAsync, isExecuting } = useAction(forgotPasswordAction);
 
   const [isSubmitted, setIsSubmitted] = useState(false);

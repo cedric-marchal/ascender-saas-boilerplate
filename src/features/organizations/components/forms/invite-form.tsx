@@ -43,7 +43,7 @@ type InviteFormProps = {
 function InviteForm({ onSuccess }: InviteFormProps) {
   const t = useTranslations("organizations.inviteForm");
   const tRoles = useTranslations("organizations.roles");
-  const tValidation = useTranslations("validation");
+  const tValidation = useTranslations();
   const { executeAsync, isExecuting } = useAction(inviteMemberAction);
 
   const form = useForm({
@@ -123,7 +123,7 @@ function InviteForm({ onSuccess }: InviteFormProps) {
               <FieldLabel htmlFor="invite-role">{t("roleLabel")}</FieldLabel>
               <Select
                 value={field.state.value}
-                onValueChange={(value: string) =>
+                onValueChange={(value: string | null) =>
                   field.handleChange(value as OrganizationInvitationRole)
                 }
               >

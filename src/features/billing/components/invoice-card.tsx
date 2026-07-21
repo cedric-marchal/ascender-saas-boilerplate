@@ -117,15 +117,20 @@ function InvoiceCard({ invoice }: { invoice: BillingInvoice }) {
           </div>
 
           {invoice.invoicePdfUrl && (
-            <Button type="button" variant="outline" size="sm" asChild>
-              <a
-                href={invoice.invoicePdfUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <Download className="mr-2 h-4 w-4" aria-hidden="true" />
-                {t("download")}
-              </a>
+            <Button
+              render={
+                <a
+                  href={invoice.invoicePdfUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                />
+              }
+              type="button"
+              variant="outline"
+              size="sm"
+            >
+              <Download className="mr-2 h-4 w-4" aria-hidden="true" />
+              {t("download")}
             </Button>
           )}
         </div>

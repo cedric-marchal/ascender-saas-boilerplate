@@ -49,11 +49,14 @@ function UserDetailPage({ user }: UserDetailPageProps) {
   return (
     <Main className="flex flex-col gap-6 p-6">
       <div>
-        <Button type="button" variant="ghost" size="sm" asChild>
-          <Link href="/admin/users">
-            <ArrowLeft className="mr-2 size-4" aria-hidden="true" />
-            {t("backButton")}
-          </Link>
+        <Button
+          render={<Link href="/admin/users" />}
+          type="button"
+          variant="ghost"
+          size="sm"
+        >
+          <ArrowLeft className="mr-2 size-4" aria-hidden="true" />
+          {t("backButton")}
         </Button>
       </div>
 

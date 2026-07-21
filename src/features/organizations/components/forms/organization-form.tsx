@@ -30,7 +30,7 @@ type OrganizationFormProps = {
 
 function OrganizationForm({ onSuccess }: OrganizationFormProps) {
   const t = useTranslations("organizations.organizationForm");
-  const tValidation = useTranslations("validation");
+  const tValidation = useTranslations();
   const router = useRouter();
   const { executeAsync, isExecuting } = useAction(createOrganizationAction);
 

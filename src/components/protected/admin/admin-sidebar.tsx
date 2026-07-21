@@ -100,20 +100,18 @@ function AdminSidebar({ image, name }: AdminSidebarProps) {
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild>
-              <Link href="/admin">
-                <div className="bg-primary text-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
-                  <Shield className="size-4" aria-hidden="true" />
-                </div>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">
-                    {env.NEXT_PUBLIC_APP_NAME}
-                  </span>
-                  <span className="text-muted-foreground truncate text-xs">
-                    {t("tagline")}
-                  </span>
-                </div>
-              </Link>
+            <SidebarMenuButton render={<Link href="/admin" />} size="lg">
+              <div className="bg-primary text-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
+                <Shield className="size-4" aria-hidden="true" />
+              </div>
+              <div className="grid flex-1 text-left text-sm leading-tight">
+                <span className="truncate font-semibold">
+                  {env.NEXT_PUBLIC_APP_NAME}
+                </span>
+                <span className="text-muted-foreground truncate text-xs">
+                  {t("tagline")}
+                </span>
+              </div>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
@@ -127,14 +125,12 @@ function AdminSidebar({ image, name }: AdminSidebarProps) {
               {navigationItems.map((item: MenuItem) => (
                 <SidebarMenuItem key={item.titleKey}>
                   <SidebarMenuButton
-                    asChild
+                    render={<Link href={item.url} />}
                     isActive={isActive(item.url)}
                     tooltip={t(item.titleKey)}
                   >
-                    <Link href={item.url}>
-                      <item.icon aria-hidden="true" />
-                      <span>{t(item.titleKey)}</span>
-                    </Link>
+                    <item.icon aria-hidden="true" />
+                    <span>{t(item.titleKey)}</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
@@ -148,14 +144,12 @@ function AdminSidebar({ image, name }: AdminSidebarProps) {
               {settingsItems.map((item: MenuItem) => (
                 <SidebarMenuItem key={item.titleKey}>
                   <SidebarMenuButton
-                    asChild
+                    render={<Link href={item.url} />}
                     isActive={isActive(item.url)}
                     tooltip={t(item.titleKey)}
                   >
-                    <Link href={item.url}>
-                      <item.icon aria-hidden="true" />
-                      <span>{t(item.titleKey)}</span>
-                    </Link>
+                    <item.icon aria-hidden="true" />
+                    <span>{t(item.titleKey)}</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
@@ -167,36 +161,35 @@ function AdminSidebar({ image, name }: AdminSidebarProps) {
         <SidebarMenu>
           <SidebarMenuItem>
             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <SidebarMenuButton
-                  size="lg"
-                  className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-                >
-                  <Avatar className="size-8 rounded-lg">
-                    {image ? (
-                      <AvatarImage
-                        src={getAvatarUrl(image)}
-                        alt={`${name} avatar`}
-                      />
-                    ) : (
-                      <AvatarFallback className="rounded-lg">
-                        {getInitials(name)}
-                      </AvatarFallback>
-                    )}
-                  </Avatar>
-                  <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-semibold">
-                      {truncateName(name)}
-                    </span>
-                    <span className="text-muted-foreground truncate text-xs">
-                      {t("adminRole")}
-                    </span>
-                  </div>
-                  <ChevronsUpDown
-                    className="ml-auto size-4"
-                    aria-hidden="true"
+              <DropdownMenuTrigger
+                render={
+                  <SidebarMenuButton
+                    size="lg"
+                    className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
                   />
-                </SidebarMenuButton>
+                }
+              >
+                <Avatar className="size-8 rounded-lg">
+                  {image ? (
+                    <AvatarImage
+                      src={getAvatarUrl(image)}
+                      alt={`${name} avatar`}
+                    />
+                  ) : (
+                    <AvatarFallback className="rounded-lg">
+                      {getInitials(name)}
+                    </AvatarFallback>
+                  )}
+                </Avatar>
+                <div className="grid flex-1 text-left text-sm leading-tight">
+                  <span className="truncate font-semibold">
+                    {truncateName(name)}
+                  </span>
+                  <span className="text-muted-foreground truncate text-xs">
+                    {t("adminRole")}
+                  </span>
+                </div>
+                <ChevronsUpDown className="ml-auto size-4" aria-hidden="true" />
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 className="w-[--radix-popper-anchor-width] min-w-56 rounded-lg"
@@ -204,11 +197,9 @@ function AdminSidebar({ image, name }: AdminSidebarProps) {
                 align="end"
                 sideOffset={4}
               >
-                <DropdownMenuItem asChild>
-                  <Link href="/admin/settings">
-                    <User className="size-4" aria-hidden="true" />
-                    <span>{t("myAccount")}</span>
-                  </Link>
+                <DropdownMenuItem render={<Link href="/admin/settings" />}>
+                  <User className="size-4" aria-hidden="true" />
+                  <span>{t("myAccount")}</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem>

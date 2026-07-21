@@ -8,8 +8,13 @@ type PricingFreeButtonProps = {
 
 function PricingFreeButton({ children }: PricingFreeButtonProps) {
   return (
-    <Button type="button" variant="outline" className="mt-4 w-full" asChild>
-      <Link href="/sign-up">{children}</Link>
+    <Button
+      render={<Link href="/sign-up" />}
+      type="button"
+      variant="outline"
+      className="mt-4 w-full"
+    >
+      {children}
     </Button>
   );
 }

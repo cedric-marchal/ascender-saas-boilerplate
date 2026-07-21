@@ -39,7 +39,7 @@ type ProfileFormProps = {
 function ProfileForm({ name, email, emailVerified }: ProfileFormProps) {
   const router = useRouter();
   const t = useTranslations("account.profileForm");
-  const tValidation = useTranslations("validation");
+  const tValidation = useTranslations();
   const { executeAsync, isExecuting } = useAction(updateProfileAction);
 
   const form = useForm({

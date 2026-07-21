@@ -115,7 +115,7 @@ function MembersFilters() {
                 </FieldLabel>
                 <Select
                   value={field.state.value}
-                  onValueChange={(value: string) =>
+                  onValueChange={(value: string | null) =>
                     field.handleChange(value as MemberRoleFilter)
                   }
                 >

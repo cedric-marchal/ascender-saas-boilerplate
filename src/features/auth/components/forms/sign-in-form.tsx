@@ -31,7 +31,7 @@ function SignInForm() {
   const router = useRouter();
   const t = useTranslations("auth.signIn");
   const tAuth = useTranslations("auth");
-  const tValidation = useTranslations("validation");
+  const tValidation = useTranslations();
   const { executeAsync, isExecuting } = useAction(signInAction);
 
   const form = useForm({

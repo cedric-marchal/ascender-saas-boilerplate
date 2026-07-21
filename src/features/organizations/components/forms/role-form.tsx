@@ -44,7 +44,7 @@ type RoleFormProps = {
 function RoleForm({ memberId, currentRole, onSuccess }: RoleFormProps) {
   const t = useTranslations("organizations.roleForm");
   const tRoles = useTranslations("organizations.roles");
-  const tValidation = useTranslations("validation");
+  const tValidation = useTranslations();
   const { executeAsync, isExecuting } = useAction(changeMemberRoleAction);
 
   const defaultRole = ORGANIZATION_CHANGEABLE_ROLES.includes(
@@ -93,7 +93,7 @@ function RoleForm({ memberId, currentRole, onSuccess }: RoleFormProps) {
               <FieldLabel htmlFor="role-select">{t("label")}</FieldLabel>
               <Select
                 value={field.state.value}
-                onValueChange={(value: string) =>
+                onValueChange={(value: string | null) =>
                   field.handleChange(value as OrganizationChangeableRole)
                 }
               >

@@ -35,7 +35,7 @@ type DeleteAccountFormProps = {
 
 function DeleteAccountForm({ email, onSuccess }: DeleteAccountFormProps) {
   const t = useTranslations("account.deleteAccountForm");
-  const tValidation = useTranslations("validation");
+  const tValidation = useTranslations();
   const { executeAsync, isExecuting } = useAction(deleteAccountAction);
 
   const form = useForm({

@@ -46,16 +46,21 @@ function UnauthorizedPage({ locale }: { locale: Locale }) {
         </p>
 
         <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
-          <Button type="button" asChild>
-            <Link href={getStaticPathname("/sign-in", locale) as Route}>
-              {translator("common.errorPages.unauthorized.signIn")}
-            </Link>
+          <Button
+            type="button"
+            render={
+              <Link href={getStaticPathname("/sign-in", locale) as Route} />
+            }
+          >
+            {translator("common.errorPages.unauthorized.signIn")}
           </Button>
 
-          <Button type="button" variant="outline" asChild>
-            <Link href={getStaticPathname("/", locale) as Route}>
-              {translator("common.errorPages.unauthorized.backHome")}
-            </Link>
+          <Button
+            type="button"
+            variant="outline"
+            render={<Link href={getStaticPathname("/", locale) as Route} />}
+          >
+            {translator("common.errorPages.unauthorized.backHome")}
           </Button>
         </div>
       </div>

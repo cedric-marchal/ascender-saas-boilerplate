@@ -35,7 +35,7 @@ function UsersFilters() {
   const t = useTranslations("admin.users.filters");
   const tRoles = useTranslations("admin.users.roles");
   const tVerification = useTranslations("admin.users.verification");
-  const tValidation = useTranslations("validation");
+  const tValidation = useTranslations();
   const [isLoading, startTransition] = useTransition();
 
   const [urlFilters, setUrlFilters] = useQueryStates(usersSearchParams, {
@@ -139,7 +139,7 @@ function UsersFilters() {
                 </FieldLabel>
                 <Select
                   value={field.state.value}
-                  onValueChange={(value: string) =>
+                  onValueChange={(value: string | null) =>
                     field.handleChange(value as UserRoleFilter)
                   }
                 >
@@ -180,7 +180,7 @@ function UsersFilters() {
                 </FieldLabel>
                 <Select
                   value={field.state.value}
-                  onValueChange={(value: string) =>
+                  onValueChange={(value: string | null) =>
                     field.handleChange(value as VerificationFilter)
                   }
                 >

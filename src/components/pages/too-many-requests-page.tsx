@@ -32,8 +32,8 @@ async function TooManyRequestsPage() {
 
         <p className="text-muted-foreground mb-8 text-sm">{t("description")}</p>
 
-        <Button type="button" asChild>
-          <Link href="/">{t("backHome")}</Link>
+        <Button type="button" render={<Link href="/" />}>
+          {t("backHome")}
         </Button>
       </div>
     </Main>

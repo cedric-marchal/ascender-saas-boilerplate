@@ -192,13 +192,13 @@ function MemberActions({
   return (
     <>
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button type="button" variant="ghost" size="icon">
-            <MoreHorizontal className="h-4 w-4" aria-hidden="true" />
-            <span className="sr-only">
-              {t("actionsFor", { name: member.user.name })}
-            </span>
-          </Button>
+        <DropdownMenuTrigger
+          render={<Button type="button" variant="ghost" size="icon" />}
+        >
+          <MoreHorizontal className="h-4 w-4" aria-hidden="true" />
+          <span className="sr-only">
+            {t("actionsFor", { name: member.user.name })}
+          </span>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           {!isTargetOwner && (

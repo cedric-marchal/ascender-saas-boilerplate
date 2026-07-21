@@ -70,29 +70,31 @@ function OrgSwitcher({
   return (
     <>
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            type="button"
-            variant="ghost"
-            className="h-auto w-full justify-start gap-2 px-2"
-          >
-            <Avatar className="size-6 rounded-md">
-              <AvatarFallback className="rounded-md text-xs">
-                {activeOrg ? (
-                  getInitials(activeOrg.name)
-                ) : (
-                  <Building2 className="size-3" aria-hidden="true" />
-                )}
-              </AvatarFallback>
-            </Avatar>
-            <span className="flex-1 truncate text-left text-sm font-medium">
-              {activeOrg ? truncateName(activeOrg.name) : t("fallbackName")}
-            </span>
-            <ChevronsUpDown
-              className="text-muted-foreground size-4 shrink-0"
-              aria-hidden="true"
+        <DropdownMenuTrigger
+          render={
+            <Button
+              type="button"
+              variant="ghost"
+              className="h-auto w-full justify-start gap-2 px-2"
             />
-          </Button>
+          }
+        >
+          <Avatar className="size-6 rounded-md">
+            <AvatarFallback className="rounded-md text-xs">
+              {activeOrg ? (
+                getInitials(activeOrg.name)
+              ) : (
+                <Building2 className="size-3" aria-hidden="true" />
+              )}
+            </AvatarFallback>
+          </Avatar>
+          <span className="flex-1 truncate text-left text-sm font-medium">
+            {activeOrg ? truncateName(activeOrg.name) : t("fallbackName")}
+          </span>
+          <ChevronsUpDown
+            className="text-muted-foreground size-4 shrink-0"
+            aria-hidden="true"
+          />
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-56" align="start" side="bottom">
           {organizations.map((org: UserOrganizationItem) => (
@@ -120,11 +122,11 @@ function OrgSwitcher({
             <Plus className="size-4" aria-hidden="true" />
             <span>{t("createOrganization")}</span>
           </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link href="/dashboard/organization" className="gap-2">
-              <Building2 className="size-4" aria-hidden="true" />
-              <span>{t("myOrganization")}</span>
-            </Link>
+          <DropdownMenuItem
+            render={<Link href="/dashboard/organization" className="gap-2" />}
+          >
+            <Building2 className="size-4" aria-hidden="true" />
+            <span>{t("myOrganization")}</span>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

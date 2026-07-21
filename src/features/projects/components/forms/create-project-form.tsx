@@ -43,7 +43,7 @@ type CreateProjectFormProps = {
 function CreateProjectForm({ onSuccess }: CreateProjectFormProps) {
   const t = useTranslations("projects.createForm");
   const tStatuses = useTranslations("projects.statuses");
-  const tValidation = useTranslations("validation");
+  const tValidation = useTranslations();
   const { executeAsync, isExecuting } = useAction(createProjectAction);
 
   const form = useForm({
@@ -164,7 +164,7 @@ function CreateProjectForm({ onSuccess }: CreateProjectFormProps) {
               </FieldLabel>
               <Select
                 value={field.state.value}
-                onValueChange={(value: string) =>
+                onValueChange={(value: string | null) =>
                   field.handleChange(value as ProjectStatus)
                 }
               >

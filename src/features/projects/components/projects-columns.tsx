@@ -125,13 +125,13 @@ function ProjectActions({ project }: ProjectActionsProps) {
   return (
     <>
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button type="button" variant="ghost" size="icon">
-            <MoreHorizontal className="h-4 w-4" aria-hidden="true" />
-            <span className="sr-only">
-              {t("actionsFor", { name: project.name })}
-            </span>
-          </Button>
+        <DropdownMenuTrigger
+          render={<Button type="button" variant="ghost" size="icon" />}
+        >
+          <MoreHorizontal className="h-4 w-4" aria-hidden="true" />
+          <span className="sr-only">
+            {t("actionsFor", { name: project.name })}
+          </span>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem onSelect={() => setIsEditOpen(true)}>

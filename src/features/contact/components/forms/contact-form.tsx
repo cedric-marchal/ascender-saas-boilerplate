@@ -25,7 +25,7 @@ import { translateFieldErrors } from "@/utils/errors/translate-field-errors";
 
 function ContactForm() {
   const t = useTranslations("contact.form");
-  const tValidation = useTranslations("validation");
+  const tValidation = useTranslations();
   const { executeAsync, isExecuting } = useAction(createContactAction);
 
   const form = useForm({

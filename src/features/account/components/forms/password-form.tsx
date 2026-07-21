@@ -32,7 +32,7 @@ import { translateFieldErrors } from "@/utils/errors/translate-field-errors";
 function PasswordForm() {
   const router = useRouter();
   const t = useTranslations("account.passwordForm");
-  const tValidation = useTranslations("validation");
+  const tValidation = useTranslations();
   const { executeAsync, isExecuting } = useAction(updatePasswordAction);
 
   const form = useForm({

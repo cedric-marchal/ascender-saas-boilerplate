@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 
 type NavLinkProps = {
   href: "/" | "/pricing" | "/contact" | "/sign-in" | "/sign-up";
-  children: ReactNode;
+  children?: ReactNode;
   className?: string;
 } & Omit<ComponentPropsWithoutRef<typeof Link>, "href" | "children" | "className">;
 

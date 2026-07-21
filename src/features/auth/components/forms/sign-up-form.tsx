@@ -30,7 +30,7 @@ function SignUpForm() {
   const router = useRouter();
   const t = useTranslations("auth.signUp");
   const tAuth = useTranslations("auth");
-  const tValidation = useTranslations("validation");
+  const tValidation = useTranslations();
   const { executeAsync, isExecuting } = useAction(signUpAction);
 
   const form = useForm({

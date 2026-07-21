@@ -34,8 +34,8 @@ function BillingEmptyPage() {
       </div>
 
       <div className="flex justify-center">
-        <Button type="button" asChild>
-          <Link href="/pricing">{t("discoverOffers")}</Link>
+        <Button render={<Link href="/pricing" />} type="button">
+          {t("discoverOffers")}
         </Button>
       </div>
     </Main>
